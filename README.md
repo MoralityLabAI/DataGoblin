@@ -84,7 +84,9 @@ datagoblin hrm-preflight --local-model-path D:/models/HRM-Text-1B \
 `--mock` validates the pipeline and is never evidence about HRM-Text. A real run requires the optional `hrm-text` extra,
 an explicit local path or explicitly opted-in Hugging Face ID, and acknowledgement that the process is already under an
 operator-provided hard resource-cap wrapper. Downloads are disabled unless `--allow-download` is passed. Full activations
-are not persisted by default; checkpoint-provided Python additionally requires `--trust-remote-code`. See
+are not persisted by default; checkpoint-provided Python additionally requires `--trust-remote-code`. `--device cpu` is
+the default, while CUDA must be selected explicitly. The repository's WSL launcher supplies a reproducible one-example
+hard-capped path; see [`docs/hrm_execution_safety.md`](docs/hrm_execution_safety.md) and
 [`docs/hrm_text_milestone.md`](docs/hrm_text_milestone.md).
 
 ## Example recipe

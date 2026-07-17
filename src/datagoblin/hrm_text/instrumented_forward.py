@@ -324,6 +324,7 @@ class TransformersHRMTextModel:
         allow_download: bool = False,
         trust_remote_code: bool = False,
         max_new_tokens: int = 96,
+        device: str = "cpu",
     ) -> TransformersHRMTextModel:
         from .availability import validate_model_reference
 
@@ -348,6 +349,14 @@ class TransformersHRMTextModel:
             torch_dtype="auto",
             trust_remote_code=trust_remote_code,
         )
+        if device not in {"cpu", "cuda", "auto"}:
+            raise ValueError("device must be cpu, cuda, or auto")
+        selected_device = ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
+        if selected_device == "cuda":
+            if not torch.cuda.is_available():
+                raise RuntimeError("CUDA was requested but is unavailable")
+            torch.cuda.set_per_process_memory_fraction(0.9)
+        model.to(selected_device)
         model.eval()
         torch.set_grad_enabled(False)
         try:
@@ -462,6 +471,8 @@ class TransformersHRMTextModel:
         import torch
 
         inputs = self._tokenizer(prompt, return_tensors="pt")
+        if getattr(self._model.config, "prefix_lm", False) and "token_type_ids" not in inputs:
+            inputs["token_type_ids"] = torch.ones_like(inputs["input_ids"])
         device = next(self._model.parameters()).device
         inputs = {key: value.to(device) for key, value in inputs.items()}
         with torch.inference_mode():

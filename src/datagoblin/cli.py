@@ -6,7 +6,7 @@ import shutil
 import sys
 from collections.abc import Sequence
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -118,6 +118,11 @@ def build_parser() -> argparse.ArgumentParser:
     trace.add_argument("--out", type=Path, required=True)
     trace.add_argument("--config", type=Path, default=repository_root() / "configs/hrm_text_trace.example.yaml")
     trace.add_argument("--preregistration", type=Path, default=_default_preregistration_path())
+    trace.add_argument(
+        "--maximum-examples",
+        type=int,
+        help="bounded smoke-run limit; omitted means trace every manifest row",
+    )
     _add_trace_model_arguments(trace)
     evaluate = sub.add_parser("evaluate-cycle-signal")
     evaluate.add_argument("--run-dir", type=Path, required=True)
@@ -175,6 +180,7 @@ def _add_trace_model_arguments(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="confirm this process is already under an operator-provided RAM/CPU/IO cap",
     )
+    parser.add_argument("--device", choices=("cpu", "cuda", "auto"), default="cpu")
     parser.add_argument("--condition", choices=ROLE_CONDITIONS, default="direct")
 
 
@@ -270,11 +276,17 @@ def _trace_model(args: argparse.Namespace) -> Any:
         allow_download=args.allow_download,
         trust_remote_code=args.trust_remote_code,
         max_new_tokens=int(load_structured(args.config)["model"]["max_new_tokens"]),
+        device=getattr(args, "device", "cpu"),
     )
 
 
 def _trace_verdict_dataset(args: argparse.Namespace) -> None:
     rows = read_dataset_rows(args.dataset_manifest)
+    maximum_examples = getattr(args, "maximum_examples", None)
+    if maximum_examples is not None:
+        if maximum_examples < 1:
+            raise ValueError("--maximum-examples must be positive")
+        rows = rows[:maximum_examples]
     args.out.mkdir(parents=True, exist_ok=True)
     run_manifest = load_structured(args.dataset_manifest)
     run_manifest["source_manifest_hash"] = sha256_file(args.dataset_manifest)
@@ -291,12 +303,14 @@ def _trace_verdict_dataset(args: argparse.Namespace) -> None:
     dump_structured(
         args.out / "execution_policy_receipt.json",
         {
-            "started_at": datetime.now(UTC).isoformat(),
+            "started_at": datetime.now(timezone.utc).isoformat(),
             "model_mode": "deterministic_mock" if args.mock else "optional_real_checkpoint",
             "external_hard_cap_wrapper_confirmed": bool(args.confirm_hard_cap_wrapper),
             "declared_limits": configured_execution,
             "download_opt_in": bool(args.allow_download),
             "checkpoint_code_opt_in": bool(getattr(args, "trust_remote_code", False)),
+            "device": getattr(args, "device", "cpu"),
+            "maximum_examples": maximum_examples,
             "boundary": "operator-provided wrapper; DataGoblin does not certify OS-level enforcement",
         },
     )

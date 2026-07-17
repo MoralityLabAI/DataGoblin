@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -95,7 +95,7 @@ def run_checkpoint_preflight(
 ) -> CheckpointAssessment:
     selected_caps = caps or HardCaps()
     out_dir.mkdir(parents=True, exist_ok=True)
-    started = datetime.now(UTC).isoformat()
+    started = datetime.now(timezone.utc).isoformat()
     plan = {
         "schema_version": "1.0",
         "run_id": run_id,
@@ -113,7 +113,7 @@ def run_checkpoint_preflight(
     events = [
         {"ts": started, "event": "start", "run_id": run_id, "caps": selected_caps.to_jsonable()},
         {
-            "ts": datetime.now(UTC).isoformat(),
+            "ts": datetime.now(timezone.utc).isoformat(),
             "event": "static_checkpoint_assessment",
             **assessment.to_jsonable(),
         },
@@ -123,7 +123,7 @@ def run_checkpoint_preflight(
     if abort_reason:
         events.append(
             {
-                "ts": datetime.now(UTC).isoformat(),
+                "ts": datetime.now(timezone.utc).isoformat(),
                 "event": "abort",
                 "reason": abort_reason,
                 "weights_loaded": False,

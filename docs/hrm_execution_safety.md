@@ -14,7 +14,17 @@ weight-loading child unless a future implementation supplies a verified cgroup/c
 not represented as a hard cap. The official API limitation is documented by Microsoft:
 `https://learn.microsoft.com/windows/win32/api/jobapi2/nf-jobapi2-setioratecontrolinformationjobobject`.
 
-WSL2 was considered, but a health check must establish a responsive cgroup-v2 environment before use. DataGoblin never
+`scripts/run_hrm_capped_wsl.sh` implements the WSL2 path. Invoke it through the WSL root system manager; it enables the
+runtime CPU/I/O subtree controllers when needed, starts a transient unit as the unprivileged owner of the staged model,
+and verifies `memory.max`, `memory.swap.max`, `cpu.max`, `io.max`, and the model's backing block device before Python can
+load weights. The model must be staged in WSL's block-backed ext4 filesystem: a checkpoint under `/mnt/c` or `/mnt/d` is
+DrvFS/9p and cannot be governed by the unit's block-I/O controller. The launcher caps one smoke example at 4096 MB RAM,
+zero swap, 50% CPU, 50 MB/s block reads/writes, and 1800 seconds. It emits JSONL resource samples, a summary, stdout and
+stderr receipts, and uses CUDA only through the explicit `--device cuda` CLI option.
+
+The released checkpoint currently requires a Transformers build from upstream `main`. Use an isolated environment and
+pin an exact upstream commit; do not replace the system install or silently follow a moving branch. The launcher uses the
+native, version-matched `hrm_text` implementation and does not opt into checkpoint-provided remote code. DataGoblin never
 edits the shared `.wslconfig`, shuts down an unrelated distribution, raises caps, or loads weights merely to test the
 wrapper. Post-run cleanup is PID-scoped and must record RAM, commit, cache/standby, GPU applications, and lingering owned
 processes.
