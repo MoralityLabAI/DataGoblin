@@ -21,3 +21,9 @@ Process-level isolation is not a security sandbox. Environment allowlists do not
 
 The constitution can detect declared and structurally visible violations; it cannot prove truthful declarations, model alignment, evaluator independence, or scientific validity.
 
+## Sealed verdict-label custody
+
+Public sealed-poison rows contain recipes and untrusted proposer hints but no decisions, violation masks, receipts, or
+correctness fields. A separate validator invocation writes labels outside the public dataset. Evaluation checks example
+and recipe hashes before merging. This prevents accidental prompt exposure but is not external organizational or human
+custody; access controls and independent stewardship remain deployment responsibilities.

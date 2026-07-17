@@ -7,7 +7,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from datagoblin.experiments.recipe_verdict_dataset import generate_verdict_dataset
+from datagoblin.experiments.recipe_verdict_dataset import generate_verdict_dataset, steward_sealed_labels
+from datagoblin.experiments.recurrent_baselines import DeterministicRecurrentBaseline
 from datagoblin.hrm_text import availability
 from datagoblin.hrm_text.calibration import fit_isotonic_calibration, fit_logistic_calibration
 from datagoblin.hrm_text.cycle_metrics import (
@@ -20,6 +21,7 @@ from datagoblin.hrm_text.instrumented_forward import (
     TraceOptions,
     run_instrumented_forward,
 )
+from datagoblin.hrm_text.preflight import HardCaps, run_checkpoint_preflight
 from datagoblin.hrm_text.trace_protocol import TRACE_ORDER
 
 
@@ -98,6 +100,7 @@ def test_dataset_is_deterministic_and_sealed_labels_are_isolated(tmp_path: Path)
     assert rows
     assert all("authoritative_label" not in row for row in rows)
     assert all("receipt_hash" not in row for row in rows)
+    assert {row["environment_family"] for row in rows} == {"budgeted_interventions_v1"}
     train_rows = [
         json.loads(line)
         for line in (tmp_path / "first" / "train.jsonl").read_text(encoding="utf-8").splitlines()
@@ -120,6 +123,51 @@ def test_dataset_is_deterministic_and_sealed_labels_are_isolated(tmp_path: Path)
             assert row["authoritative_label"]["decision"] == "ACCEPT"
         else:
             assert expected[row["category"]] in row["authoritative_label"]["violations"]
+
+
+def test_sealed_steward_material_is_path_isolated(tmp_path: Path) -> None:
+    recipe = Path(__file__).parents[2] / "examples" / "recipe.good.yaml"
+    public = tmp_path / "public"
+    private = tmp_path / "private-steward"
+    generate_verdict_dataset(recipe, public, seed=5)
+    steward_sealed_labels(public / "dataset_manifest.json", private)
+    public_sealed = (public / "sealed_poison.jsonl").read_text(encoding="utf-8")
+    private_labels = (private / "sealed_labels.jsonl").read_text(encoding="utf-8")
+    assert "authoritative_label" not in public_sealed
+    assert "authoritative_label" in private_labels
+    with pytest.raises(ValueError, match="outside the public dataset"):
+        steward_sealed_labels(public / "dataset_manifest.json", public / "steward")
+
+
+@pytest.mark.parametrize("kind", ("tied_single_state_rnn", "two_timescale_rnn"))
+def test_recurrence_matched_baselines_obey_trace_contract(kind: str) -> None:
+    summary = run_instrumented_forward(
+        DeterministicRecurrentBaseline(kind),
+        "baseline trace",
+        authoritative_decision=None,
+        schema_complexity=1.0,
+    )
+    assert summary.trace_order == TRACE_ORDER
+    assert summary.instrumented_logits_max_abs_error == 0.0
+
+
+def test_checkpoint_preflight_aborts_before_weight_load(tmp_path: Path) -> None:
+    model = tmp_path / "model"
+    model.mkdir()
+    (model / "config.json").write_text('{"model_type":"hrm_text"}', encoding="utf-8")
+    (model / "model.safetensors").write_bytes(b"not-loaded")
+    out = tmp_path / "preflight"
+    assessment = run_checkpoint_preflight(
+        model,
+        out,
+        run_id="unit-preflight",
+        caps=HardCaps(ram_mb=1, cpu_percent=50, io_mb_per_second=50, wall_clock_seconds=30),
+    )
+    assert not assessment.load_permitted
+    summary = json.loads((out / "summary.json").read_text(encoding="utf-8"))
+    assert summary["status"] == "aborted"
+    assert not summary["weights_loaded"]
+    assert assessment.weight_hash is None
 
 
 def test_availability_check_does_not_import_optional_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -23,4 +23,6 @@ data/generated/*
 *.onnx
 .huggingface/
 hf-cache/
+sealed_steward/
+sealed_labels.jsonl
 .env

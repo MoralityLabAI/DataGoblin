@@ -65,11 +65,20 @@ loading weights or touching the network:
 ```bash
 datagoblin hrm-status
 datagoblin make-verdict-dataset --seed 7 --out runs/hrm-v1/dataset
+datagoblin steward-sealed-labels --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
+  --out ../datagoblin-hrm-v1-steward
 datagoblin trace-hrm --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
   --out runs/hrm-v1/mock --mock
-datagoblin evaluate-cycle-signal --run-dir runs/hrm-v1/mock --calibration logistic
+datagoblin evaluate-cycle-signal --run-dir runs/hrm-v1/mock \
+  --sealed-labels ../datagoblin-hrm-v1-steward/sealed_labels.jsonl --calibration logistic
+datagoblin trace-recurrent-baselines --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
+  --sealed-labels ../datagoblin-hrm-v1-steward/sealed_labels.jsonl --out runs/hrm-v1/baselines
+datagoblin compare-recurrent-baselines --primary-run runs/hrm-v1/mock \
+  --baseline-root runs/hrm-v1/baselines --out runs/hrm-v1/recurrent_comparison.md
 datagoblin role-ablation --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
   --out runs/hrm-v1/roles --mock
+datagoblin hrm-preflight --local-model-path D:/models/HRM-Text-1B \
+  --out runs/hrm-v1/preflight --ram-mb 2048 --cpu-percent 50 --io-mb-s 50
 ```
 
 `--mock` validates the pipeline and is never evidence about HRM-Text. A real run requires the optional `hrm-text` extra,

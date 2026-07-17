@@ -10,7 +10,11 @@ The preregistration is `configs/preregistrations/cycle_uncertainty_v1.yaml`. Its
 relative H1-to-H2 update predicts a higher probability of an incorrect verdict after controlling for final-output
 entropy, prompt length, output length, and schema complexity. Ordinary test is the confirmatory split. OOD and
 sealed-poison are report-only. The sealed file contains no labels, receipts, expected decisions, or expected violations;
-labels are recomputed independently for analysis and are never included in the model prompt.
+tracing stores no sealed correctness field. A separate `steward-sealed-labels` process writes labels outside the public
+dataset, and evaluation fails closed without that file. This is process and path separation, not external human custody.
+
+The split families are causal switches for training, role symmetry for calibration, causal switches plus role symmetry
+for ordinary testing, temporal composition for OOD testing, and budgeted interventions for sealed-poison testing.
 
 The recurrent feature set is relative H1-to-H2 update, mean final-L update, maximum late token update, exponential
 update decay, H1/H2 Jensen-Shannon logit divergence, and residual growth. Baselines are verdict entropy, maximum verdict
@@ -24,6 +28,9 @@ Reports distinguish:
 
 Calibration parameters are fit only on the calibration split. Logistic and isotonic calibration are supported. The
 report includes bootstrap intervals and preserves null or negative results.
+
+`trace-recurrent-baselines` supplies tied single-state and two-timescale NumPy recurrent controls with the same verdict
+behavior and trace budget. They validate comparison plumbing but are not trained scientific baselines.
 
 ## Trace boundary
 
@@ -45,6 +52,10 @@ wrapper, and supply `--local-model-path ... --confirm-hard-cap-wrapper`. A Huggi
 explicitly; remote retrieval additionally requires `--allow-download`, and checkpoint-provided Python requires
 `--trust-remote-code`. Review that source before opting in. The adapter uses `shell=False` nowhere because it does not
 launch a shell or subprocess. DataGoblin does not claim that Python hooks constitute a security sandbox.
+
+`hrm-preflight` checks the static weight footprint before importing Torch or mapping weights. It emits a trainer plan,
+event log, and summary. If the checkpoint cannot fit the fixed cap, abort-before-load is the required successful safety
+outcome. See `docs/hrm_execution_safety.md` for the fail-closed host boundary.
 
 ## Role conditioning
 

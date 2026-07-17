@@ -8,6 +8,7 @@ from typing import Any
 
 import numpy as np
 
+from datagoblin.hashing import sha256_file
 from datagoblin.hrm_text.calibration import fit_isotonic_calibration, fit_logistic_calibration
 from datagoblin.serialization import dump_structured
 
@@ -257,12 +258,14 @@ def evaluate_cycle_signal(
     trace_path: Path,
     out_dir: Path,
     *,
+    sealed_labels_path: Path | None = None,
     calibration_method: str = "logistic",
     bootstrap_samples: int = 200,
     seed: int = 7,
 ) -> dict[str, Any]:
     with trace_path.open(encoding="utf-8") as handle:
         traces = [json.loads(line) for line in handle if line.strip()]
+    traces = _merge_sealed_labels(traces, sealed_labels_path)
     rows = [trace_to_analysis_row(row) for row in traces]
     calibration_rows = [row for row in rows if row["split"] == "calibration"]
     feature_names = BASELINE_FEATURES + RECURRENT_FEATURES
@@ -336,6 +339,11 @@ def evaluate_cycle_signal(
             "verdict after controlling for final-output entropy, prompt length, output length, and schema complexity."
         ),
         "calibration_fit_split": "calibration",
+        "sealed_label_source": (
+            {"sha256": sha256_file(sealed_labels_path), "custody": "separate_validator_invocation"}
+            if sealed_labels_path is not None
+            else None
+        ),
         "calibration_method": calibration_method,
         "ranking_quality": {
             key: {
@@ -377,6 +385,32 @@ def evaluate_cycle_signal(
     (out_dir / "cycle_signal_report.md").write_text(_render_report(report), encoding="utf-8")
     (out_dir / "claim_boundary.md").write_text(_claim_boundary(report), encoding="utf-8")
     return report
+
+
+def _merge_sealed_labels(
+    traces: list[dict[str, Any]], sealed_labels_path: Path | None
+) -> list[dict[str, Any]]:
+    unlabeled = [row for row in traces if row["split"] == "sealed_poison" and row.get("authoritative_decision") is None]
+    if not unlabeled:
+        return traces
+    if sealed_labels_path is None:
+        raise ValueError("sealed-poison evaluation requires an independently stewarded label file")
+    with sealed_labels_path.open(encoding="utf-8") as handle:
+        labels = {row["example_id"]: row for row in (json.loads(line) for line in handle if line.strip())}
+    for row in unlabeled:
+        stewarded = labels.get(row["example_id"])
+        if stewarded is None:
+            raise ValueError(f"missing stewarded label for {row['example_id']}")
+        if stewarded["recipe_hash"] not in row["artifact_hashes"]:
+            raise ValueError(f"stewarded recipe hash mismatch for {row['example_id']}")
+        label = stewarded["authoritative_label"]
+        row["authoritative_decision"] = label["decision"]
+        row["authoritative_violations"] = label["violations"]
+        row["correctness_label"] = (
+            row.get("parsed_decision") == label["decision"]
+            and set(row.get("parsed_violations", ())) == set(label["violations"])
+        )
+    return traces
 
 
 def _format(value: Any) -> str:

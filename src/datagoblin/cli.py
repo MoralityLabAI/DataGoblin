@@ -26,9 +26,14 @@ from datagoblin.domain.recipes import DataRecipe
 from datagoblin.domain.research_episode import ResearchEpisode
 from datagoblin.experiments.cycle_uncertainty import evaluate_cycle_signal
 from datagoblin.experiments.recipe_verdict_dataset import (
-    authoritative_label,
     generate_verdict_dataset,
     read_dataset_rows,
+    steward_sealed_labels,
+)
+from datagoblin.experiments.recurrent_baselines import (
+    compare_recurrent_reports,
+    evaluate_recurrent_baseline_suite,
+    trace_recurrent_baseline_suite,
 )
 from datagoblin.experiments.role_conditioning import run_role_conditioning_ablation
 from datagoblin.hashing import sha256_file
@@ -39,6 +44,7 @@ from datagoblin.hrm_text.instrumented_forward import (
     TransformersHRMTextModel,
     run_instrumented_forward,
 )
+from datagoblin.hrm_text.preflight import HardCaps, run_checkpoint_preflight
 from datagoblin.hrm_text.prompting import ROLE_CONDITIONS, build_verdict_prompt, schema_complexity
 from datagoblin.ledger.database import ExperimentLedger
 from datagoblin.reporting.markdown import experiment_markdown
@@ -104,6 +110,9 @@ def build_parser() -> argparse.ArgumentParser:
     verdict_dataset.add_argument("--recipe", type=Path, default=repository_root() / "examples/recipe.good.yaml")
     verdict_dataset.add_argument("--seed", type=int, default=7)
     verdict_dataset.add_argument("--out", type=Path, required=True)
+    steward = sub.add_parser("steward-sealed-labels")
+    steward.add_argument("--dataset-manifest", type=Path, required=True)
+    steward.add_argument("--out", type=Path, required=True)
     trace = sub.add_parser("trace-hrm")
     trace.add_argument("--dataset-manifest", type=Path, required=True)
     trace.add_argument("--out", type=Path, required=True)
@@ -112,6 +121,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_trace_model_arguments(trace)
     evaluate = sub.add_parser("evaluate-cycle-signal")
     evaluate.add_argument("--run-dir", type=Path, required=True)
+    evaluate.add_argument("--sealed-labels", type=Path, required=True)
     evaluate.add_argument("--calibration", choices=("logistic", "isotonic"), default="logistic")
     evaluate.add_argument("--bootstrap-samples", type=int, default=200)
     evaluate.add_argument("--seed", type=int, default=7)
@@ -121,6 +131,27 @@ def build_parser() -> argparse.ArgumentParser:
     roles.add_argument("--config", type=Path, default=repository_root() / "configs/hrm_text_trace.example.yaml")
     roles.add_argument("--maximum-examples", type=int, default=12)
     _add_trace_model_arguments(roles)
+    baselines = sub.add_parser("trace-recurrent-baselines")
+    baselines.add_argument("--dataset-manifest", type=Path, required=True)
+    baselines.add_argument("--out", type=Path, required=True)
+    baselines.add_argument("--config", type=Path, default=repository_root() / "configs/hrm_text_trace.example.yaml")
+    baselines.add_argument("--sealed-labels", type=Path, required=True)
+    baselines.add_argument("--condition", choices=ROLE_CONDITIONS, default="direct")
+    baselines.add_argument("--calibration", choices=("logistic", "isotonic"), default="logistic")
+    baselines.add_argument("--bootstrap-samples", type=int, default=200)
+    baselines.add_argument("--seed", type=int, default=7)
+    compare = sub.add_parser("compare-recurrent-baselines")
+    compare.add_argument("--primary-run", type=Path, required=True)
+    compare.add_argument("--baseline-root", type=Path, required=True)
+    compare.add_argument("--out", type=Path, required=True)
+    preflight = sub.add_parser("hrm-preflight")
+    preflight.add_argument("--local-model-path", type=Path, required=True)
+    preflight.add_argument("--out", type=Path, required=True)
+    preflight.add_argument("--run-id", default="hrm-text-cycle-preflight-v1")
+    preflight.add_argument("--ram-mb", type=int, default=2048)
+    preflight.add_argument("--cpu-percent", type=int, default=50)
+    preflight.add_argument("--io-mb-s", type=int, default=50)
+    preflight.add_argument("--wall-clock-seconds", type=int, default=1800)
     return parser
 
 
@@ -277,13 +308,13 @@ def _trace_verdict_dataset(args: argparse.Namespace) -> None:
             for row in rows:
                 recipe = DataRecipe.from_jsonable(row["recipe"])
                 prompt = build_verdict_prompt(recipe, condition=args.condition)
-                # The prompt contains only the public recipe. The validator label is never passed to the model.
-                label = authoritative_label(recipe)
+                # The prompt contains only the public recipe. Sealed labels do not enter this process.
+                label = row.get("authoritative_label")
                 summary = run_instrumented_forward(
                     model,
                     prompt,
-                    authoritative_decision=label["decision"],
-                    authoritative_violations=label["violations"],
+                    authoritative_decision=label["decision"] if label else None,
+                    authoritative_violations=label["violations"] if label else (),
                     schema_complexity=schema_complexity(recipe),
                     artifact_hashes=(str(row["recipe_hash"]),),
                     options=options,
@@ -366,6 +397,8 @@ def dispatch(args: argparse.Namespace) -> int:
     elif args.command == "make-verdict-dataset":
         manifest = generate_verdict_dataset(args.recipe, args.out, seed=args.seed)
         _write_json_stdout(manifest.to_jsonable())
+    elif args.command == "steward-sealed-labels":
+        _write_json_stdout(steward_sealed_labels(args.dataset_manifest, args.out))
     elif args.command == "trace-hrm":
         _trace_verdict_dataset(args)
         print(args.out / "trace_summary.jsonl")
@@ -373,6 +406,7 @@ def dispatch(args: argparse.Namespace) -> int:
         evaluate_cycle_signal(
             args.run_dir / "trace_summary.jsonl",
             args.run_dir,
+            sealed_labels_path=args.sealed_labels,
             calibration_method=args.calibration,
             bootstrap_samples=args.bootstrap_samples,
             seed=args.seed,
@@ -391,6 +425,33 @@ def dispatch(args: argparse.Namespace) -> int:
             )
         finally:
             dump_structured(args.out / "model_cleanup_receipt.json", model.close())
+    elif args.command == "trace-recurrent-baselines":
+        trace_recurrent_baseline_suite(
+            args.dataset_manifest,
+            args.out,
+            trace_options=_trace_options(args.config),
+            condition=args.condition,
+        )
+        evaluate_recurrent_baseline_suite(
+            args.out,
+            sealed_labels_path=args.sealed_labels,
+            calibration_method=args.calibration,
+            bootstrap_samples=args.bootstrap_samples,
+            seed=args.seed,
+        )
+        print(args.out / "baseline_manifest.json")
+    elif args.command == "compare-recurrent-baselines":
+        compare_recurrent_reports(args.primary_run, args.baseline_root, args.out)
+        print(args.out)
+    elif args.command == "hrm-preflight":
+        assessment = run_checkpoint_preflight(
+            args.local_model_path,
+            args.out,
+            run_id=args.run_id,
+            caps=HardCaps(args.ram_mb, args.cpu_percent, args.io_mb_s, args.wall_clock_seconds),
+        )
+        print(args.out / "summary.json")
+        return 0 if assessment.load_permitted else 3
     else:
         episodes = read_episodes(args.input)
         exporters = {

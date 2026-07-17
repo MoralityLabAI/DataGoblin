@@ -22,7 +22,7 @@ def run_role_conditioning_ablation(
     maximum_examples: int = 12,
     trace_options: TraceOptions | None = None,
 ) -> dict[str, Any]:
-    selected = list(dataset_rows)[:maximum_examples]
+    selected = [row for row in dataset_rows if row.get("split") != "sealed_poison"][:maximum_examples]
     by_condition: dict[str, list[bool]] = defaultdict(list)
     for condition in ROLE_CONDITIONS:
         for row in selected:
