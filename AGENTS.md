@@ -5,5 +5,6 @@
 - Keep lifecycle transitions monotone and evaluated records immutable.
 - Run `python -m pytest` and `ruff check .` before handoff.
 - Keep demos offline and deterministic. Never commit secrets, model weights, hidden evaluation seeds, or generated runs.
+- Keep HRM-Text optional: never auto-download weights, persist full activations by default, or run a real checkpoint
+  outside an operator-provided hard resource-cap wrapper.
 - Upstream repositories are read-only references. Do not copy unlicensed source or mutate upstream files.
-

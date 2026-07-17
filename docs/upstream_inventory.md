@@ -32,3 +32,20 @@ Inventory date: 2026-07-17. Both sources were inspected read-only. DataGoblin do
 ## Exclusions
 
 Adapters cover public artifact discovery, command construction, and typed translation. They do not inherit training code, private evaluator material, weights, checkpoints, storyworld mechanics, provider bindings, or safety claims. Upstream results are not evidence for `causal_switches_v1`, and toy findings are not evidence about HRM, TRM, LDT, or a future 1B specialist.
+
+## Optional HRM-Text milestone target
+
+- Official source: `https://github.com/sapientinc/HRM-Text`.
+- Released checkpoint: `https://huggingface.co/sapientinc/HRM-Text-1B`.
+- Local read-only generated source cache inspected:
+  `D:/hf-cache/hrm-text-1b/modules/transformers_modules/HRM_hyphen_Text_hyphen_1B/92110a91000941b5`.
+- Cached source revision directory: `92110a91000941b5`; an older configuration-only revision `47a984ac27f51d76`
+  was also present. These are recorded as Hugging Face dynamic-module revision identifiers, not asserted to be Git commits.
+- Relevant implementation: `HrmTextModel.forward` calls `L_module` three times followed by `H_module`, repeated across
+  two high cycles; `HrmTextAttention` exposes a sigmoid gate derived from the fourth GQKV projection slice.
+- Reused concepts: only structural call boundaries, configuration values, and optional Transformers loading conventions.
+  DataGoblin's trace protocol, streaming metrics, mock model, calibration, and reports are clean-room implementations.
+- Adapter: hooks `L_module` and `H_module` without modifying the source and refuses architectures other than two H cycles
+  with three L cycles. Checkpoint-provided Python requires a separate explicit opt-in.
+- License: the inspected generated files and official repositories identify Apache-2.0. DataGoblin does not redistribute
+  the source or weights.

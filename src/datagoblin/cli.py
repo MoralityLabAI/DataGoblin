@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from collections.abc import Sequence
 from dataclasses import replace
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,22 @@ from datagoblin.datasets.exports import (
 from datagoblin.domain.learner import LearnerSnapshot
 from datagoblin.domain.recipes import DataRecipe
 from datagoblin.domain.research_episode import ResearchEpisode
+from datagoblin.experiments.cycle_uncertainty import evaluate_cycle_signal
+from datagoblin.experiments.recipe_verdict_dataset import (
+    authoritative_label,
+    generate_verdict_dataset,
+    read_dataset_rows,
+)
+from datagoblin.experiments.role_conditioning import run_role_conditioning_ablation
+from datagoblin.hashing import sha256_file
+from datagoblin.hrm_text.availability import detect_hrm_availability
+from datagoblin.hrm_text.instrumented_forward import (
+    DeterministicMockRecurrentModel,
+    TraceOptions,
+    TransformersHRMTextModel,
+    run_instrumented_forward,
+)
+from datagoblin.hrm_text.prompting import ROLE_CONDITIONS, build_verdict_prompt, schema_complexity
 from datagoblin.ledger.database import ExperimentLedger
 from datagoblin.reporting.markdown import experiment_markdown
 from datagoblin.research.demo import run_demo
@@ -79,7 +97,54 @@ def build_parser() -> argparse.ArgumentParser:
         export = sub.add_parser(name)
         export.add_argument("--input", type=Path, required=True)
         export.add_argument("--out", type=Path, required=True)
+    status_hrm = sub.add_parser("hrm-status")
+    status_hrm.add_argument("--local-model-path", type=Path)
+    status_hrm.add_argument("--model-id")
+    verdict_dataset = sub.add_parser("make-verdict-dataset")
+    verdict_dataset.add_argument("--recipe", type=Path, default=repository_root() / "examples/recipe.good.yaml")
+    verdict_dataset.add_argument("--seed", type=int, default=7)
+    verdict_dataset.add_argument("--out", type=Path, required=True)
+    trace = sub.add_parser("trace-hrm")
+    trace.add_argument("--dataset-manifest", type=Path, required=True)
+    trace.add_argument("--out", type=Path, required=True)
+    trace.add_argument("--config", type=Path, default=repository_root() / "configs/hrm_text_trace.example.yaml")
+    trace.add_argument("--preregistration", type=Path, default=_default_preregistration_path())
+    _add_trace_model_arguments(trace)
+    evaluate = sub.add_parser("evaluate-cycle-signal")
+    evaluate.add_argument("--run-dir", type=Path, required=True)
+    evaluate.add_argument("--calibration", choices=("logistic", "isotonic"), default="logistic")
+    evaluate.add_argument("--bootstrap-samples", type=int, default=200)
+    evaluate.add_argument("--seed", type=int, default=7)
+    roles = sub.add_parser("role-ablation")
+    roles.add_argument("--dataset-manifest", type=Path, required=True)
+    roles.add_argument("--out", type=Path, required=True)
+    roles.add_argument("--config", type=Path, default=repository_root() / "configs/hrm_text_trace.example.yaml")
+    roles.add_argument("--maximum-examples", type=int, default=12)
+    _add_trace_model_arguments(roles)
     return parser
+
+
+def _default_preregistration_path() -> Path:
+    return repository_root() / "configs/preregistrations/cycle_uncertainty_v1.yaml"
+
+
+def _add_trace_model_arguments(parser: argparse.ArgumentParser) -> None:
+    model = parser.add_mutually_exclusive_group(required=True)
+    model.add_argument("--mock", action="store_true", help="use deterministic test model; not HRM evidence")
+    model.add_argument("--local-model-path", type=Path)
+    model.add_argument("--model-id")
+    parser.add_argument("--allow-download", action="store_true")
+    parser.add_argument(
+        "--trust-remote-code",
+        action="store_true",
+        help="explicitly permit checkpoint-provided Python code; review the source first",
+    )
+    parser.add_argument(
+        "--confirm-hard-cap-wrapper",
+        action="store_true",
+        help="confirm this process is already under an operator-provided RAM/CPU/IO cap",
+    )
+    parser.add_argument("--condition", choices=ROLE_CONDITIONS, default="direct")
 
 
 def _make_context(path: Path, include_external: bool) -> None:
@@ -149,6 +214,108 @@ def _synthetic_episodes(count: int, seed: int, path: Path) -> None:
             handle.write(json.dumps(episode.to_jsonable(), sort_keys=True, separators=(",", ":")) + "\n")
 
 
+def _trace_options(config_path: Path) -> TraceOptions:
+    value = load_structured(config_path)["trace"]
+    return TraceOptions(
+        selected_token_indices=tuple(int(item) for item in value["selected_token_indices"]),
+        logits_tolerance=float(value["logits_tolerance"]),
+        output_byte_budget=int(value["output_byte_budget"]),
+        store_sampled_activations=bool(value["store_sampled_activations"]),
+        activation_byte_budget=int(value["activation_byte_budget"]),
+    )
+
+
+def _trace_model(args: argparse.Namespace) -> Any:
+    if args.mock:
+        return DeterministicMockRecurrentModel()
+    if not args.confirm_hard_cap_wrapper:
+        raise ValueError(
+            "real HRM execution requires --confirm-hard-cap-wrapper; "
+            "DataGoblin does not create or certify an OS sandbox"
+        )
+    return TransformersHRMTextModel.load(
+        local_model_path=args.local_model_path,
+        model_id=args.model_id,
+        allow_download=args.allow_download,
+        trust_remote_code=args.trust_remote_code,
+        max_new_tokens=int(load_structured(args.config)["model"]["max_new_tokens"]),
+    )
+
+
+def _trace_verdict_dataset(args: argparse.Namespace) -> None:
+    rows = read_dataset_rows(args.dataset_manifest)
+    args.out.mkdir(parents=True, exist_ok=True)
+    run_manifest = load_structured(args.dataset_manifest)
+    run_manifest["source_manifest_hash"] = sha256_file(args.dataset_manifest)
+    run_dataset_dir = args.out / "dataset"
+    run_dataset_dir.mkdir(exist_ok=True)
+    for split in run_manifest["splits"].values():
+        source = args.dataset_manifest.parent / str(split["path"])
+        target = run_dataset_dir / source.name
+        shutil.copyfile(source, target)
+        split["path"] = f"dataset/{target.name}"
+    dump_structured(args.out / "dataset_manifest.json", run_manifest)
+    shutil.copyfile(args.preregistration, args.out / "preregistration.yaml")
+    configured_execution = load_structured(args.config)["execution"]
+    dump_structured(
+        args.out / "execution_policy_receipt.json",
+        {
+            "started_at": datetime.now(UTC).isoformat(),
+            "model_mode": "deterministic_mock" if args.mock else "optional_real_checkpoint",
+            "external_hard_cap_wrapper_confirmed": bool(args.confirm_hard_cap_wrapper),
+            "declared_limits": configured_execution,
+            "download_opt_in": bool(args.allow_download),
+            "checkpoint_code_opt_in": bool(getattr(args, "trust_remote_code", False)),
+            "boundary": "operator-provided wrapper; DataGoblin does not certify OS-level enforcement",
+        },
+    )
+    model = _trace_model(args)
+    trace_path = args.out / "trace_summary.jsonl"
+    options = _trace_options(args.config)
+    try:
+        with trace_path.open("w", encoding="utf-8", newline="\n") as handle:
+            for row in rows:
+                recipe = DataRecipe.from_jsonable(row["recipe"])
+                prompt = build_verdict_prompt(recipe, condition=args.condition)
+                # The prompt contains only the public recipe. The validator label is never passed to the model.
+                label = authoritative_label(recipe)
+                summary = run_instrumented_forward(
+                    model,
+                    prompt,
+                    authoritative_decision=label["decision"],
+                    authoritative_violations=label["violations"],
+                    schema_complexity=schema_complexity(recipe),
+                    artifact_hashes=(str(row["recipe_hash"]),),
+                    options=options,
+                ).to_jsonable()
+                summary.update(
+                    {
+                        "example_id": row["example_id"],
+                        "split": row["split"],
+                        "category": row["category"],
+                        "role_condition": args.condition,
+                        "label_authority": "datagoblin.constitution.ConstitutionalValidator",
+                    }
+                )
+                handle.write(json.dumps(summary, sort_keys=True, separators=(",", ":")) + "\n")
+    finally:
+        dump_structured(args.out / "model_cleanup_receipt.json", model.close())
+    claim_boundary = "\n".join(
+        (
+            "# Claim boundary",
+            "",
+            "- Convergence does not imply correctness.",
+            "- This experiment does not establish alignment.",
+            "- Recurrent signals may merely track prompt complexity.",
+            "- HRM-specific value requires comparison with recurrent baselines.",
+            "- A null result is valid.",
+            "- Mock-model traces are pipeline checks and are not evidence about HRM-Text.",
+            "",
+        )
+    )
+    (args.out / "claim_boundary.md").write_text(claim_boundary, encoding="utf-8")
+
+
 def dispatch(args: argparse.Namespace) -> int:
     if args.command == "discover-upstreams":
         _write_json_stdout([item.to_jsonable() for item in discover_upstreams(repository_root())])
@@ -192,6 +359,38 @@ def dispatch(args: argparse.Namespace) -> int:
         args.out.write_text(experiment_markdown(ExperimentRecord.from_jsonable(value)), encoding="utf-8")
     elif args.command == "synth-episodes":
         _synthetic_episodes(args.count, args.seed, args.out)
+    elif args.command == "hrm-status":
+        _write_json_stdout(
+            detect_hrm_availability(model_path=args.local_model_path, model_id=args.model_id).to_jsonable()
+        )
+    elif args.command == "make-verdict-dataset":
+        manifest = generate_verdict_dataset(args.recipe, args.out, seed=args.seed)
+        _write_json_stdout(manifest.to_jsonable())
+    elif args.command == "trace-hrm":
+        _trace_verdict_dataset(args)
+        print(args.out / "trace_summary.jsonl")
+    elif args.command == "evaluate-cycle-signal":
+        evaluate_cycle_signal(
+            args.run_dir / "trace_summary.jsonl",
+            args.run_dir,
+            calibration_method=args.calibration,
+            bootstrap_samples=args.bootstrap_samples,
+            seed=args.seed,
+        )
+        print(args.run_dir / "cycle_signal_report.md")
+    elif args.command == "role-ablation":
+        rows = read_dataset_rows(args.dataset_manifest)
+        model = _trace_model(args)
+        try:
+            run_role_conditioning_ablation(
+                model,
+                rows,
+                args.out,
+                maximum_examples=args.maximum_examples,
+                trace_options=_trace_options(args.config),
+            )
+        finally:
+            dump_structured(args.out / "model_cleanup_receipt.json", model.close())
     else:
         episodes = read_episodes(args.input)
         exporters = {

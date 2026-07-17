@@ -1,0 +1,57 @@
+schema_version: '1.0'
+preregistration_id: cycle_uncertainty_v1
+status: frozen_before_checkpoint_analysis
+primary_hypothesis: >-
+  Larger late-cycle H-state change predicts a greater probability of an
+  incorrect constitutional verdict after controlling for final-output entropy,
+  prompt length, output length, and schema complexity.
+architecture_interpretation_policy: Treat all interpretations of recurrent state as hypotheses.
+authoritative_label_source: datagoblin.constitution.ConstitutionalValidator
+primary_feature: relative_h1_h2_update_norm
+recurrent_features:
+  - relative_h1_h2_update_norm
+  - mean_final_l_update_norm
+  - maximum_token_level_late_update
+  - exponential_update_decay_estimate
+  - h1_h2_js_logit_divergence
+  - residual_norm_growth
+baselines:
+  - final_verdict_entropy
+  - maximum_verdict_probability
+  - verdict_token_margin
+  - sequence_log_probability
+  - prompt_length
+  - output_length
+  - schema_complexity
+calibration:
+  fit_split: calibration
+  supported_methods: [logistic, isotonic]
+  test_outcomes_available_during_fit: false
+confirmatory_split: ordinary_test
+report_only_splits: [ood_test, sealed_poison]
+sealed_poison_policy:
+  labels_visible_to_proposal_model: false
+  tuning_permitted: false
+metrics:
+  - schema_parse_rate
+  - exact_decision_accuracy
+  - violation_mask_micro_f1
+  - violation_mask_macro_f1
+  - error_prediction_auroc
+  - brier_score
+  - expected_calibration_error
+  - risk_coverage_curve
+  - area_under_risk_coverage_curve
+  - spearman_correlations
+  - bootstrap_confidence_intervals
+bootstrap:
+  seed: 7
+  samples: 200
+  interval: percentile_95
+mandatory_non_claims:
+  - Convergence does not imply correctness.
+  - The experiment does not establish alignment.
+  - Recurrent signals may merely track prompt complexity.
+  - HRM-specific value requires comparison with recurrent baselines.
+  - A null result is valid.
+

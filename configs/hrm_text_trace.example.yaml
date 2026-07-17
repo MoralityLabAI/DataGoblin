@@ -1,0 +1,22 @@
+schema_version: '1.0'
+model:
+  local_path: null
+  model_id: null
+  allow_download: false
+  trust_remote_code: false
+  max_new_tokens: 96
+trace:
+  logits_tolerance: 1.0e-5
+  output_byte_budget: 1000000
+  selected_token_indices: [0, -1]
+  store_sampled_activations: false
+  activation_byte_budget: 0
+  role_condition: direct
+execution:
+  # DataGoblin checks operator acknowledgement but does not claim OS-level sandboxing.
+  require_external_hard_cap_wrapper: true
+  ram_mb: 2048
+  cpu_percent: 50
+  io_mb_per_second: 50
+  wall_clock_seconds: 1800
+  network_allowed_for_model_download: false

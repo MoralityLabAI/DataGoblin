@@ -56,6 +56,28 @@ datagoblin export-preferences --input runs/demo/research_episode.json --out runs
 datagoblin upstream-status
 ```
 
+## Optional HRM-Text cycle milestone
+
+The optional milestone asks whether recurrent update summaries rank and calibrate constitutional-verdict errors. It does
+not train a model, and the DataGoblin validator remains the label authority. Check optional runtime availability without
+loading weights or touching the network:
+
+```bash
+datagoblin hrm-status
+datagoblin make-verdict-dataset --seed 7 --out runs/hrm-v1/dataset
+datagoblin trace-hrm --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
+  --out runs/hrm-v1/mock --mock
+datagoblin evaluate-cycle-signal --run-dir runs/hrm-v1/mock --calibration logistic
+datagoblin role-ablation --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
+  --out runs/hrm-v1/roles --mock
+```
+
+`--mock` validates the pipeline and is never evidence about HRM-Text. A real run requires the optional `hrm-text` extra,
+an explicit local path or explicitly opted-in Hugging Face ID, and acknowledgement that the process is already under an
+operator-provided hard resource-cap wrapper. Downloads are disabled unless `--allow-download` is passed. Full activations
+are not persisted by default; checkpoint-provided Python additionally requires `--trust-remote-code`. See
+[`docs/hrm_text_milestone.md`](docs/hrm_text_milestone.md).
+
 ## Example recipe
 
 The complete executable example is [`examples/recipe.good.yaml`](examples/recipe.good.yaml). Its essential split and authority boundary is:
