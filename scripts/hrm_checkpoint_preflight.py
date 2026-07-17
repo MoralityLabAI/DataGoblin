@@ -11,7 +11,7 @@ def main() -> int:
     parser.add_argument("--model-path", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--ram-mb", type=int, default=2048)
+    parser.add_argument("--ram-mb", type=int, default=4096)
     parser.add_argument("--cpu-percent", type=int, default=50)
     parser.add_argument("--io-mb-s", type=int, default=50)
     parser.add_argument("--wall-clock-seconds", type=int, default=1800)
@@ -28,4 +28,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

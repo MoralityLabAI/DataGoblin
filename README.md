@@ -78,7 +78,7 @@ datagoblin compare-recurrent-baselines --primary-run runs/hrm-v1/mock \
 datagoblin role-ablation --dataset-manifest runs/hrm-v1/dataset/dataset_manifest.json \
   --out runs/hrm-v1/roles --mock
 datagoblin hrm-preflight --local-model-path D:/models/HRM-Text-1B \
-  --out runs/hrm-v1/preflight --ram-mb 2048 --cpu-percent 50 --io-mb-s 50
+  --out runs/hrm-v1/preflight --ram-mb 4096 --cpu-percent 50 --io-mb-s 50
 ```
 
 `--mock` validates the pipeline and is never evidence about HRM-Text. A real run requires the optional `hrm-text` extra,

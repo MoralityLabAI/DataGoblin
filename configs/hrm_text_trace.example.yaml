@@ -15,7 +15,7 @@ trace:
 execution:
   # DataGoblin checks operator acknowledgement but does not claim OS-level sandboxing.
   require_external_hard_cap_wrapper: true
-  ram_mb: 2048
+  ram_mb: 4096
   cpu_percent: 50
   io_mb_per_second: 50
   wall_clock_seconds: 1800

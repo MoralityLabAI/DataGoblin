@@ -14,7 +14,7 @@ MIB = 1024 * 1024
 
 @dataclass(frozen=True)
 class HardCaps:
-    ram_mb: int = 2048
+    ram_mb: int = 4096
     cpu_percent: int = 50
     io_mb_per_second: int = 50
     wall_clock_seconds: int = 1800
@@ -150,7 +150,7 @@ def run_checkpoint_preflight(
         "events_sha256": sha256_file(events_path),
         "plan_hash": sha256_json(plan),
         "claim_boundary": (
-            "A static preflight abort is safety evidence only and says nothing about checkpoint verdict quality."
+            "A static preflight decision is safety evidence only and says nothing about checkpoint verdict quality."
         ),
     }
     dump_structured(out_dir / "summary.json", summary)

@@ -1,8 +1,8 @@
 # HRM checkpoint execution safety
 
-The default checkpoint task ID is `hrm-text-cycle-real-v1`. It processes one verdict example at a time, flushes every
-record, and checkpoints progress at least every 60 seconds. Fixed caps are 2048 MB RAM, 50% CPU, 50 MB/s I/O, and 1800
-seconds. Aborts are valid results.
+The default checkpoint task ID is `hrm-text-cycle-real-v1-ram4096`. It processes one verdict example at a time, flushes
+every record, and checkpoints progress at least every 60 seconds. Operator-authorized caps are 4096 MB RAM, 50% CPU,
+50 MB/s I/O, and 1800 seconds. Aborts are valid results.
 
 `datagoblin hrm-preflight` performs only metadata and small-config checks. It does not import Torch, map weight contents,
 or load a checkpoint. When the static footprint cannot fit, it writes `trainer_plan.json`, `events.jsonl`, and
