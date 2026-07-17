@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchEpisode v1",
+  "type": "object",
+  "required": ["episode_id", "learner_snapshot", "scout_findings", "hypothesis_set", "proposed_recipe", "rat_critique", "repaired_recipe", "constitutional_decision", "builder_tickets", "interpretation", "next_action"],
+  "additionalProperties": true
+}

@@ -1,0 +1,41 @@
+schema_version: "1.0"
+upstreams:
+  - logical_name: small_control_harness
+    local_root: C:/projects/SmallControlHarness
+    expected_branch: feat/hrm-text-gameplay-qlora
+    expected_commit: c938da0f3d4320201d4539ccf3c639891ff5b180
+    include_globs:
+      - README.md
+      - results/cards/*.md
+      - results/**/*.manifest.json
+      - results/**/*.receipt.json
+      - results/**/*.jsonl
+      - src/harness/**/*.py
+      - src/evals/**/*.py
+    exclude_globs: &default_excludes
+      - .git/**
+      - '**/__pycache__/**'
+      - '**/.env*'
+      - '**/*secret*'
+      - '**/*private*'
+      - '**/*.safetensors'
+      - '**/*.ckpt'
+      - '**/*.pt'
+      - '**/checkpoints/**'
+      - '**/wandb/**'
+    adapter_type: small_control_harness
+    read_only: true
+  - logical_name: hybrid_trm_ldt
+    local_root: C:/projects/HybridTRMLDT
+    expected_branch: master
+    expected_commit: 978c4929b872edbc3c1e3a5f0201ff89fd1c87fb
+    include_globs:
+      - README.md
+      - docs/hybrid_contract.md
+      - research_gym/core/*.py
+      - data/sft/*.jsonl
+      - reports/*.md
+    exclude_globs: *default_excludes
+    adapter_type: hybrid_trm_ldt
+    read_only: true
+

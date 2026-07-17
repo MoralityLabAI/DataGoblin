@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExperimentRecord v1",
+  "type": "object",
+  "required": ["experiment_id", "snapshot_hash", "recipe_hash", "constitution_hash", "actual_metrics", "run_status", "evidence_type", "claim_boundary", "timestamps"],
+  "additionalProperties": true
+}
+

@@ -1,0 +1,11 @@
+schema_version: "1.0"
+capabilities:
+  delayed_causality:
+    description: Track interventions whose observable effects are delayed.
+  role_invariance:
+    description: Infer functional roles despite superficial identity permutations.
+  counterfactual_consistency:
+    description: Predict paired outcomes under controlled interventions.
+  calibration:
+    description: Match uncertainty to held-out error frequency.
+

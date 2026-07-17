@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BuilderTicket v1",
+  "type": "object",
+  "required": ["ticket_id", "experiment_id", "component_type", "required_inputs", "declared_outputs", "allowed_filesystem_roots", "forbidden_filesystem_roots", "network_permission", "subprocess_permission", "resource_budget", "evaluator_separation_requirements"],
+  "additionalProperties": true
+}
+

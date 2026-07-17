@@ -1,0 +1,84 @@
+recipe_id: recipe_example_good
+schema_version: '1.0'
+title: Balanced causal switches example
+hypothesis_ids: [hyp_color_shortcut]
+target_capabilities: [delayed_causality, role_invariance]
+environment_specification:
+  name: causal_switches_v1
+  task_kind: executable
+generator_specification:
+  component: causal_switches_generator
+  role_permutation: true
+trajectory_source_mixture:
+  - source: role_permuted
+    share: 0.7
+    label_provenance: ENVIRONMENT_VERIFIED
+  - source: counterfactual_pairs
+    share: 0.3
+    label_provenance: ENVIRONMENT_VERIFIED
+supervision_objectives:
+  - name: delayed_effect_binary
+    weight: 1.0
+    label_provenance: exact_solver
+curriculum_controller:
+  kind: stratified
+  unique_fraction: 1.0
+split_contract:
+  train_seed_namespace: causal-switches/train/example
+  evaluation_seed_namespace: causal-switches/eval/example
+  train_generator_family: causal_train_example
+  evaluation_generator_family: causal_eval_example
+  held_out: true
+  metric: heldout_accuracy
+  metric_frozen: true
+  builder_exposed_fields: [public_split_contract]
+  evaluation_seeds_exposed: false
+  exclude_failed_seeds: false
+counterfactual_and_symmetry_transforms: [role_color_permutation]
+reference_solver_requirements:
+  required: true
+  component: causal_switches_exact_solver
+independent_verifier_requirements:
+  required: true
+  component: causal_switches_independent_verifier
+builder_permissions:
+  component: template_builder
+  network: false
+  subprocess: false
+  may_modify_ledger: false
+  may_modify_evaluator: false
+resource_budget:
+  cpu_seconds: 120
+  memory_mb: 512
+  storage_mb: 128
+  wall_clock_seconds: 120
+  process_count: 1
+ablations:
+  - name: remove_role_permutation
+    changed_variables: [role_permutation]
+controls:
+  - name: biased_baseline
+    compute_matched: true
+success_criteria: [Held-out accuracy delta is at least 0.05.]
+falsification_criteria: [No held-out gain or shortcut reduction under matched compute.]
+predicted_outcomes:
+  - metric: heldout_accuracy_delta
+    lower: 0.0
+    upper: 0.3
+    confidence: 0.5
+    evidence_type: MODEL_INFERRED
+    evidence_refs: [artifact:prior-toy-eval]
+uncertainty:
+  epistemic: high
+provenance:
+  evidence_type: MODEL_INFERRED
+  source_component: example_author
+  artifact_refs: [artifact:prior-toy-eval]
+  asserted_by: example_author
+  verified_by: null
+  note: example only
+constitution_version: 0.1.0
+claim_boundary: Toy smoke recipe only.
+metadata:
+  negative_result_interpretation: A null result weakens the shortcut hypothesis.
+

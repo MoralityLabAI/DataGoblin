@@ -1,0 +1,46 @@
+schema_version: "1.0"
+constitution_version: "0.1.0"
+name: DataGoblin research-integrity policy
+defaults:
+  network_allowed: false
+  builder_subprocess_allowed: false
+  trajectory_share_tolerance: 0.000001
+  maximum_budget:
+    cpu_seconds: 3600
+    memory_mb: 4096
+    storage_mb: 2048
+    wall_clock_seconds: 3600
+    process_count: 4
+hard_rules:
+  - no_evaluation_leakage
+  - disjoint_seed_namespaces
+  - builder_evaluator_separation
+  - no_self_certification
+  - task_certification
+  - label_provenance
+  - bounded_resources
+  - network_denied_by_default
+  - subprocess_denied_by_default
+  - frozen_metrics_and_splits
+  - no_silent_failed_seed_exclusion
+  - held_out_gain_required
+  - architecture_conclusion_requires_controls
+  - hypothesis_falsifier_required
+  - control_or_ablation_required
+  - unsupported_estimates_abstain
+  - artifact_hashes_required
+  - fail_closed
+  - safe_mechanics_only
+  - constitution_regression_required
+soft_objectives:
+  - held_out_capability_gain
+  - transfer
+  - information_gain
+  - sample_efficiency
+  - mechanism_coverage
+  - behavioral_diversity
+  - calibration_improvement
+  - reusability
+  - build_simplicity
+  - compute_efficiency
+

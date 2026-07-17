@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/learner_snapshot.schema.json",
+  "title": "LearnerSnapshot v1",
+  "type": "object",
+  "required": ["snapshot_id", "schema_version", "learner_id", "architecture_family", "parameter_count", "capability_observations", "failure_clusters", "provenance", "created_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "parameter_count": {"type": "integer", "minimum": 0},
+    "capability_observations": {"type": "array"},
+    "failure_clusters": {"type": "array"}
+  },
+  "additionalProperties": true
+}
+

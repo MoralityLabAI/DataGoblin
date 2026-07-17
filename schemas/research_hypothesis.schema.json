@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchHypothesis v1",
+  "type": "object",
+  "required": ["hypothesis_id", "statement", "mechanism", "predicted_signatures", "falsification_conditions", "evidence_type", "status"],
+  "properties": {"falsification_conditions": {"type": "array", "minItems": 1}},
+  "additionalProperties": true
+}
+

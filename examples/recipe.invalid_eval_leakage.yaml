@@ -1,0 +1,52 @@
+recipe_id: recipe_example_invalid_leakage
+schema_version: '1.0'
+title: Invalid recipe exposing evaluation seeds
+hypothesis_ids: [hyp_color_shortcut]
+target_capabilities: [delayed_causality]
+environment_specification: {name: causal_switches_v1, task_kind: executable}
+generator_specification: {component: causal_switches_generator}
+trajectory_source_mixture:
+  - {source: generated, share: 1.0, label_provenance: ENVIRONMENT_VERIFIED}
+supervision_objectives:
+  - {name: delayed_effect_binary, weight: 1.0, label_provenance: exact_solver}
+curriculum_controller: {kind: stratified, unique_fraction: 1.0}
+split_contract:
+  train_seed_namespace: causal-switches/train/invalid
+  evaluation_seed_namespace: causal-switches/eval/invalid
+  train_generator_family: causal_train_invalid
+  evaluation_generator_family: causal_eval_invalid
+  held_out: true
+  metric: heldout_accuracy
+  metric_frozen: true
+  builder_exposed_fields: [hidden_evaluation_seed]
+  evaluation_seeds_exposed: true
+  exclude_failed_seeds: false
+counterfactual_and_symmetry_transforms: [role_color_permutation]
+reference_solver_requirements: {required: true, component: causal_switches_exact_solver}
+independent_verifier_requirements: {required: true, component: causal_switches_independent_verifier}
+builder_permissions:
+  component: template_builder
+  network: false
+  subprocess: false
+  may_modify_ledger: false
+  may_modify_evaluator: false
+resource_budget: {cpu_seconds: 120, memory_mb: 512, storage_mb: 128, wall_clock_seconds: 120, process_count: 1}
+ablations:
+  - {name: remove_permutation, changed_variables: [role_permutation]}
+controls: [{name: baseline}]
+success_criteria: [Held-out gain.]
+falsification_criteria: [No held-out gain.]
+predicted_outcomes:
+  - {metric: heldout_accuracy_delta, lower: 0.0, upper: 0.3, confidence: 0.5, evidence_type: MODEL_INFERRED, evidence_refs: [artifact:prior]}
+uncertainty: {epistemic: high}
+provenance:
+  evidence_type: MODEL_INFERRED
+  source_component: invalid_example
+  artifact_refs: [artifact:prior]
+  asserted_by: invalid_example
+  verified_by: null
+  note: deliberately invalid
+constitution_version: 0.1.0
+claim_boundary: Deliberately invalid test fixture.
+metadata: {}
+
