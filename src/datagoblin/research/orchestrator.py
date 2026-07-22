@@ -5,6 +5,7 @@ from typing import Any
 
 from datagoblin.constitution.validator import ConstitutionalDecision, ConstitutionalValidator
 from datagoblin.domain.builders import BuilderTicket, ResourceBudget
+from datagoblin.domain.evidence import EvidenceClaim, EvidenceType
 from datagoblin.domain.experiments import LifecycleStatus
 from datagoblin.domain.hypotheses import ResearchHypothesis
 from datagoblin.domain.learner import LearnerSnapshot
@@ -13,9 +14,10 @@ from datagoblin.hashing import sha256_json
 from datagoblin.ids import content_id
 
 from .backend import GoblinBackend
+from .membrane import MembraneDecision, ProposalAction, ResearchMembrane, ResearchProposal
 from .rat import Rat, RatCritique
 from .scout import ScoutFindings
-from .state import ResearchState
+from .state import ResearchState, TransitionAuthority
 
 
 @dataclass(frozen=True)
@@ -28,6 +30,8 @@ class OrchestrationResult:
     repaired_recipe: DataRecipe
     constitutional_decision: ConstitutionalDecision
     tickets: tuple[BuilderTicket, ...]
+    research_state: ResearchState
+    membrane_decisions: tuple[MembraneDecision, ...]
 
 
 class ResearchOrchestrator:
@@ -35,6 +39,7 @@ class ResearchOrchestrator:
         self.backend = backend
         self.validator = validator or ConstitutionalValidator()
         self.rat = Rat()
+        self.membrane = ResearchMembrane()
 
     def propose(self, snapshot: LearnerSnapshot) -> OrchestrationResult:
         state = ResearchState(
@@ -46,9 +51,51 @@ class ResearchOrchestrator:
         )
         proposal = self.backend.propose(state)
         critique, repaired = self.rat.critique_and_repair(proposal.recipe)
+        decisions: list[MembraneDecision] = []
+        state = self._advance(
+            state,
+            ResearchProposal(
+                ProposalAction.NARROW_HYPOTHESES,
+                {
+                    "hypothesis_ids": [item.hypothesis_id for item in proposal.hypotheses],
+                    "rat_critique_hash": sha256_json(critique),
+                    "repaired_recipe_hash": sha256_json(repaired),
+                },
+                EvidenceClaim(EvidenceType.MODEL_INFERRED, "rat", asserted_by="orchestrator"),
+                LifecycleStatus.CRITIQUED,
+            ),
+            TransitionAuthority.ORCHESTRATOR,
+            decisions,
+        )
         experiment_id = content_id("experiment", {"snapshot": snapshot.snapshot_id, "recipe": repaired.to_jsonable()})
         tickets = emit_builder_tickets(experiment_id, repaired)
         decision = self.validator.validate(repaired, proposal.hypotheses, tickets)
+        if decision.execution_permitted:
+            state = self._advance(
+                state,
+                ResearchProposal(
+                    ProposalAction.REQUEST_EXPERIMENT,
+                    {
+                        "constitutional_decision_receipt": decision.decision_receipt_hash,
+                        "frozen_evaluation_hash": sha256_json(repaired.split_contract),
+                    },
+                    EvidenceClaim(EvidenceType.SIMULATED, "constitutional_validator", asserted_by="orchestrator"),
+                    LifecycleStatus.VALIDATED,
+                ),
+                TransitionAuthority.ORCHESTRATOR,
+                decisions,
+            )
+            state = self._advance(
+                state,
+                ResearchProposal(
+                    ProposalAction.REQUEST_EXPERIMENT,
+                    {"builder_ticket_ids": [ticket.ticket_id for ticket in tickets]},
+                    EvidenceClaim(EvidenceType.SIMULATED, "ticket_writer", asserted_by="orchestrator"),
+                    LifecycleStatus.TICKETED,
+                ),
+                TransitionAuthority.ORCHESTRATOR,
+                decisions,
+            )
         return OrchestrationResult(
             experiment_id,
             proposal.scout_findings,
@@ -58,7 +105,22 @@ class ResearchOrchestrator:
             repaired,
             decision,
             tickets,
+            state,
+            tuple(decisions),
         )
+
+    def _advance(
+        self,
+        state: ResearchState,
+        proposal: ResearchProposal,
+        authority: TransitionAuthority,
+        decisions: list[MembraneDecision],
+    ) -> ResearchState:
+        decision = self.membrane.apply(state, proposal, authority=authority)
+        decisions.append(decision)
+        if not decision.accepted:
+            raise RuntimeError(decision.reason)
+        return decision.after
 
 
 def emit_builder_tickets(experiment_id: str, recipe: DataRecipe) -> tuple[BuilderTicket, ...]:

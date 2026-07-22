@@ -13,7 +13,12 @@ from datagoblin.domain.hypotheses import ResearchHypothesis
 from datagoblin.domain.learner import LearnerSnapshot
 from datagoblin.domain.recipes import DataRecipe
 from datagoblin.hashing import sha256_json
-from datagoblin.research.membrane import ProposalAction, ResearchMembrane, ResearchProposal
+from datagoblin.research.membrane import (
+    EvidenceVerification,
+    ProposalAction,
+    ResearchMembrane,
+    ResearchProposal,
+)
 from datagoblin.research.state import ResearchState, transition_status
 from datagoblin.serialization import dump_structured, load_structured
 
@@ -37,6 +42,12 @@ def test_yaml_and_json_loaders_agree(tmp_path: Path, good_recipe: DataRecipe) ->
     dump_structured(json_path, good_recipe.to_jsonable())
     dump_structured(yaml_path, good_recipe.to_jsonable())
     assert load_structured(json_path) == load_structured(yaml_path)
+
+
+def test_json_loader_accepts_windows_utf8_bom_receipt(tmp_path: Path) -> None:
+    path = tmp_path / "powershell-receipt.json"
+    path.write_bytes(b"\xef\xbb\xbf" + json.dumps({"status": "completed"}).encode("utf-8"))
+    assert load_structured(path) == {"status": "completed"}
 
 
 def test_unknown_enum_fails(snapshot: LearnerSnapshot) -> None:
@@ -77,6 +88,112 @@ def test_model_evidence_is_soft_and_cannot_promote(snapshot: LearnerSnapshot) ->
     assert decision.after == state
 
 
+def test_public_research_state_is_deeply_immutable() -> None:
+    state = ResearchState(
+        "state",
+        LifecycleStatus.DRAFT,
+        (),
+        None,
+        {"accepted_proposals": [], "nested": {"values": [1]}},
+    )
+    proposal = ResearchProposal(
+        ProposalAction.PROPOSE_HYPOTHESIS,
+        {"id": "hyp"},
+        EvidenceClaim(EvidenceType.MODEL_INFERRED, "model"),
+    )
+    decision = ResearchMembrane().apply(state, proposal)
+    assert decision.accepted
+    assert state.public_payload["accepted_proposals"] == ()
+    assert len(decision.after.public_payload["accepted_proposals"]) == 1
+    assert state.public_payload["nested"]["values"] == (1,)
+    with pytest.raises(TypeError):
+        state.public_payload["new"] = "mutation"  # type: ignore[index]
+
+
+def test_promotion_requires_verification_bound_to_state_and_proposal() -> None:
+    state = ResearchState("state", LifecycleStatus.EVALUATED, (), "eval-hash", {})
+    proposal = ResearchProposal(
+        ProposalAction.REQUEST_EXPERIMENT,
+        {},
+        EvidenceClaim(EvidenceType.MODEL_INFERRED, "model"),
+        LifecycleStatus.PROMOTED,
+    )
+    unverified = ResearchMembrane().apply(state, proposal, authority="orchestrator")
+    assert not unverified.accepted
+    verification = EvidenceVerification.issue(
+        state,
+        proposal,
+        evidence_type=EvidenceType.INDEPENDENT_HARNESS,
+        verifier_id="independent-verifier",
+        artifact_refs=("sha256:receipt",),
+    )
+    untrusted_verifier = ResearchMembrane().apply(
+        state,
+        proposal,
+        verification=verification,
+        authority="orchestrator",
+    )
+    assert not untrusted_verifier.accepted
+    assert "not trusted" in untrusted_verifier.reason
+    membrane = ResearchMembrane(
+        {"independent-verifier": frozenset({EvidenceType.INDEPENDENT_HARNESS})}
+    )
+    promoted = membrane.apply(
+        state,
+        proposal,
+        verification=verification,
+        authority="orchestrator",
+    )
+    assert promoted.accepted
+    assert promoted.after.lifecycle_status == LifecycleStatus.PROMOTED
+    assert promoted.verification_receipt_hash == verification.receipt_hash
+
+
+def test_evaluation_requires_independent_verification() -> None:
+    state = ResearchState("state", LifecycleStatus.EXECUTED, (), "eval-hash", {})
+    proposal = ResearchProposal(
+        ProposalAction.REQUEST_EXPERIMENT,
+        {},
+        EvidenceClaim(EvidenceType.SIMULATED, "harness"),
+        LifecycleStatus.EVALUATED,
+    )
+    decision = ResearchMembrane().apply(state, proposal, authority="harness")
+    assert not decision.accepted
+    assert "require a bound independent verification" in decision.reason
+
+
+def test_verification_receipt_cannot_be_replayed_for_another_proposal() -> None:
+    state = ResearchState("state", LifecycleStatus.EVALUATED, (), "eval-hash", {})
+    issued_for = ResearchProposal(
+        ProposalAction.REQUEST_EXPERIMENT,
+        {},
+        EvidenceClaim(EvidenceType.MODEL_INFERRED, "model"),
+        LifecycleStatus.PROMOTED,
+    )
+    verification = EvidenceVerification.issue(
+        state,
+        issued_for,
+        evidence_type=EvidenceType.ENVIRONMENT_VERIFIED,
+        verifier_id="environment",
+        artifact_refs=("sha256:environment-receipt",),
+    )
+    different = ResearchProposal(
+        ProposalAction.RECOMMEND_ABSTENTION,
+        {},
+        EvidenceClaim(EvidenceType.MODEL_INFERRED, "model"),
+        LifecycleStatus.PROMOTED,
+    )
+    membrane = ResearchMembrane({"environment": frozenset({EvidenceType.ENVIRONMENT_VERIFIED})})
+    decision = membrane.apply(
+        state,
+        different,
+        verification=verification,
+        authority="orchestrator",
+    )
+    assert not decision.accepted
+    assert "not bound" in decision.reason
+
+
 def test_status_transitions_are_monotone() -> None:
     assert (
         transition_status(LifecycleStatus.DRAFT, LifecycleStatus.CRITIQUED, authority="model")
@@ -84,8 +201,10 @@ def test_status_transitions_are_monotone() -> None:
     )
     with pytest.raises(ValueError, match="monotone"):
         transition_status(LifecycleStatus.BUILT, LifecycleStatus.DRAFT, authority="harness")
-    with pytest.raises(ValueError, match="cannot mark"):
+    with pytest.raises(ValueError, match="adjacent"):
         transition_status(LifecycleStatus.DRAFT, LifecycleStatus.EVALUATED, authority="model")
+    with pytest.raises(ValueError, match="unknown transition authority"):
+        transition_status(LifecycleStatus.DRAFT, LifecycleStatus.CRITIQUED, authority="claimed-harness")
 
 
 def test_json_is_strict_about_nonfinite() -> None:

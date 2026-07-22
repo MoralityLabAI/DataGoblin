@@ -47,3 +47,25 @@ def test_separation_seed_budget_and_network_rules(good_recipe) -> None:
         corrupted, _ = apply_mutation(good_recipe, operator, 3)
         rules = {item.rule_id for item in ConstitutionalValidator().validate(corrupted).triggered_rules}
         assert rule in rules
+
+
+def test_decision_receipt_is_bound_to_exact_inputs(good_recipe) -> None:
+    changed = good_recipe.to_jsonable()
+    changed["recipe_id"] = "different-valid-recipe"
+    changed["title"] = "Different valid recipe"
+    first = ConstitutionalValidator().validate(good_recipe)
+    second = ConstitutionalValidator().validate(DataRecipe.from_jsonable(changed))
+    assert first.decision == second.decision == DecisionKind.ACCEPT
+    assert first.recipe_hash != second.recipe_hash
+    assert first.subject_hash != second.subject_hash
+    assert first.decision_receipt_hash != second.decision_receipt_hash
+
+
+def test_recipe_and_constitution_versions_fail_closed(good_recipe) -> None:
+    changed = good_recipe.to_jsonable()
+    changed["schema_version"] = "999"
+    changed["constitution_version"] = "999"
+    decision = ConstitutionalValidator().validate(DataRecipe.from_jsonable(changed))
+    rules = {item.rule_id for item in decision.triggered_rules}
+    assert decision.decision == DecisionKind.REJECT
+    assert {"unsupported_recipe_schema_version", "constitution_version_mismatch"} <= rules

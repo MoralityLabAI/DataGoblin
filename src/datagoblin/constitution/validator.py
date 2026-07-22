@@ -29,6 +29,11 @@ class DecisionKind(str, Enum):
 class ConstitutionalDecision:
     decision: DecisionKind
     constitution_version: str
+    constitution_hash: str
+    recipe_hash: str
+    hypothesis_hashes: tuple[str, ...]
+    ticket_hashes: tuple[str, ...]
+    subject_hash: str
     triggered_rules: tuple[RuleViolation, ...]
     violation_severity: Severity | None
     evidence_references: tuple[str, ...]
@@ -53,8 +58,10 @@ class ConstitutionalValidator:
         hypotheses: Iterable[ResearchHypothesis] = (),
         tickets: Iterable[BuilderTicket] = (),
     ) -> ConstitutionalDecision:
-        issues = list(self._recipe_issues(recipe, tuple(hypotheses)))
-        issues.extend(self._ticket_issues(tuple(tickets)))
+        hypothesis_records = tuple(hypotheses)
+        ticket_records = tuple(tickets)
+        issues = list(self._recipe_issues(recipe, hypothesis_records))
+        issues.extend(self._ticket_issues(ticket_records))
         severity = self._maximum_severity(issues)
         if any(item.severity == Severity.CRITICAL for item in issues):
             kind = DecisionKind.REJECT
@@ -62,24 +69,58 @@ class ConstitutionalValidator:
             kind = DecisionKind.REVISE
         else:
             kind = DecisionKind.ACCEPT
+        recipe_hash = sha256_json(recipe)
+        hypothesis_hashes = tuple(sha256_json(item) for item in hypothesis_records)
+        ticket_hashes = tuple(sha256_json(item) for item in ticket_records)
+        subject = {
+            "recipe_hash": recipe_hash,
+            "hypothesis_hashes": hypothesis_hashes,
+            "ticket_hashes": ticket_hashes,
+        }
+        subject_hash = sha256_json(subject)
+        evidence_references = tuple(dict.fromkeys(ref for item in issues for ref in item.evidence_references))
+        minimal_repairs = tuple(dict.fromkeys(item.minimal_repair for item in issues))
         payload = {
             "decision": kind.value,
             "constitution_version": self.charter.version,
-            "triggered_rules": [item.to_jsonable() for item in issues],
             "constitution_hash": self.charter.hash,
+            "subject_hash": subject_hash,
+            **subject,
+            "triggered_rules": [item.to_jsonable() for item in issues],
+            "evidence_references": evidence_references,
+            "minimal_repairs": minimal_repairs,
+            "execution_permitted": kind == DecisionKind.ACCEPT,
         }
         return ConstitutionalDecision(
             decision=kind,
             constitution_version=self.charter.version,
+            constitution_hash=self.charter.hash,
+            recipe_hash=recipe_hash,
+            hypothesis_hashes=hypothesis_hashes,
+            ticket_hashes=ticket_hashes,
+            subject_hash=subject_hash,
             triggered_rules=tuple(issues),
             violation_severity=severity,
-            evidence_references=tuple(dict.fromkeys(ref for item in issues for ref in item.evidence_references)),
-            minimal_repairs=tuple(dict.fromkeys(item.minimal_repair for item in issues)),
+            evidence_references=evidence_references,
+            minimal_repairs=minimal_repairs,
             execution_permitted=kind == DecisionKind.ACCEPT,
             decision_receipt_hash=sha256_json(payload),
         )
 
     def _recipe_issues(self, recipe: DataRecipe, hypotheses: tuple[ResearchHypothesis, ...]) -> Iterable[RuleViolation]:
+        expected_schema_version = str(self.charter.data["schema_version"])
+        if recipe.schema_version != expected_schema_version:
+            yield violation(
+                "unsupported_recipe_schema_version",
+                f"Use recipe schema version {expected_schema_version}.",
+                severity=Severity.CRITICAL,
+            )
+        if recipe.constitution_version != self.charter.version:
+            yield violation(
+                "constitution_version_mismatch",
+                f"Revalidate the recipe against constitution version {self.charter.version}.",
+                severity=Severity.CRITICAL,
+            )
         split = recipe.split_contract
         train_ns = str(split.get("train_seed_namespace", ""))
         eval_ns = str(split.get("evaluation_seed_namespace", ""))

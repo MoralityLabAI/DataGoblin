@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidenceVerification v1",
+  "type": "object",
+  "required": [
+    "state_hash",
+    "proposal_hash",
+    "evidence_type",
+    "verifier_id",
+    "artifact_refs",
+    "receipt_hash"
+  ],
+  "properties": {
+    "state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "proposal_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "evidence_type": {"enum": ["ENVIRONMENT_VERIFIED", "INDEPENDENT_HARNESS"]},
+    "verifier_id": {"type": "string", "minLength": 1},
+    "artifact_refs": {"type": "array", "minItems": 1},
+    "receipt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

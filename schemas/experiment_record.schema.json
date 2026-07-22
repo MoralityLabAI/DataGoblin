@@ -3,6 +3,9 @@
   "title": "ExperimentRecord v1",
   "type": "object",
   "required": ["experiment_id", "snapshot_hash", "recipe_hash", "constitution_hash", "actual_metrics", "run_status", "evidence_type", "claim_boundary", "timestamps"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_status": {"enum": ["DRAFT", "CRITIQUED", "VALIDATED", "TICKETED", "BUILT", "EXECUTED", "EVALUATED", "PROMOTED", "REJECTED"]}
+  },
   "additionalProperties": true
 }
-

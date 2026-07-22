@@ -12,6 +12,8 @@ defaults:
     wall_clock_seconds: 3600
     process_count: 4
 hard_rules:
+  - supported_recipe_schema_version
+  - matching_constitution_version
   - no_evaluation_leakage
   - disjoint_seed_namespaces
   - builder_evaluator_separation
@@ -43,4 +45,3 @@ soft_objectives:
   - reusability
   - build_simplicity
   - compute_efficiency
-

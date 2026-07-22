@@ -27,6 +27,8 @@ class RuleViolation:
 
 
 RULE_MESSAGES = {
+    "unsupported_recipe_schema_version": "The recipe declares an unsupported schema version.",
+    "constitution_version_mismatch": "The recipe targets a different constitution version.",
     "evaluation_leakage": "Evaluation-only fields or seeds are exposed to the proposer or builder.",
     "seed_namespace_overlap": "Training and evaluation seed namespaces or generator families overlap.",
     "missing_independent_verifier": "No independent verifier is declared.",

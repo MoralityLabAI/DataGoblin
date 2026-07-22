@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConstitutionalDecision v1",
+  "type": "object",
+  "required": [
+    "decision",
+    "constitution_version",
+    "constitution_hash",
+    "recipe_hash",
+    "hypothesis_hashes",
+    "ticket_hashes",
+    "subject_hash",
+    "triggered_rules",
+    "execution_permitted",
+    "decision_receipt_hash"
+  ],
+  "properties": {
+    "constitution_version": {"const": "0.1.0"},
+    "constitution_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "recipe_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "subject_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "decision_receipt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": true
+}

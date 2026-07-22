@@ -7,7 +7,7 @@ from datagoblin.builders.template_builder import TemplateBuilder
 from datagoblin.builders.ticket_writer import write_tickets
 from datagoblin.constitution.charter import Charter
 from datagoblin.constitution.validator import DecisionKind
-from datagoblin.domain.evidence import EvidenceType
+from datagoblin.domain.evidence import EvidenceClaim, EvidenceType
 from datagoblin.domain.experiments import ExperimentRecord, LifecycleStatus
 from datagoblin.domain.learner import LearnerSnapshot
 from datagoblin.domain.research_episode import ResearchEpisode
@@ -20,7 +20,9 @@ from datagoblin.reporting.markdown import experiment_markdown
 from datagoblin.serialization import dump_structured
 
 from .heuristic_backend import HeuristicGoblinBackend
+from .membrane import EvidenceVerification, MembraneDecision, ProposalAction, ResearchMembrane, ResearchProposal
 from .orchestrator import ResearchOrchestrator
+from .state import ResearchState, TransitionAuthority
 
 
 def run_demo(snapshot: LearnerSnapshot, seed: int, output_root: Path) -> ResearchEpisode:
@@ -53,6 +55,24 @@ def run_demo(snapshot: LearnerSnapshot, seed: int, output_root: Path) -> Researc
     }
     aggregate_build_receipt["receipt_hash"] = sha256_json(aggregate_build_receipt)
     dump_structured(output_root / "build_receipt.json", aggregate_build_receipt)
+    if not aggregate_build_receipt["all_accepted"]:
+        raise RuntimeError("trusted builder did not accept every ticket")
+
+    membrane = ResearchMembrane()
+    state = result.research_state
+    membrane_decisions = list(result.membrane_decisions)
+    state = _advance(
+        membrane,
+        state,
+        ResearchProposal(
+            ProposalAction.REQUEST_EXPERIMENT,
+            {"build_receipt_hash": aggregate_build_receipt["receipt_hash"]},
+            EvidenceClaim(EvidenceType.SIMULATED, "template_builder", asserted_by="builder"),
+            LifecycleStatus.BUILT,
+        ),
+        TransitionAuthority.BUILDER,
+        membrane_decisions,
+    )
 
     harness = run_toy_harness(seed)
     dump_structured(output_root / "train_split_manifest.json", harness.train_manifest)
@@ -60,6 +80,49 @@ def run_demo(snapshot: LearnerSnapshot, seed: int, output_root: Path) -> Researc
     dump_structured(
         output_root / "verification_receipts.json",
         [item.to_jsonable() for item in harness.verification_receipts],
+    )
+    state = _advance(
+        membrane,
+        state,
+        ResearchProposal(
+            ProposalAction.REQUEST_EXPERIMENT,
+            {"harness": "causal_switches_v1", "execution_completed": True},
+            EvidenceClaim(EvidenceType.SIMULATED, "toy_harness", asserted_by="harness"),
+            LifecycleStatus.EXECUTED,
+        ),
+        TransitionAuthority.HARNESS,
+        membrane_decisions,
+    )
+    evaluation_proposal = ResearchProposal(
+        ProposalAction.REQUEST_EXPERIMENT,
+        {"actual_metrics": harness.actual_metrics, "evaluation_manifest": harness.evaluation_public_manifest},
+        EvidenceClaim(
+            EvidenceType.INDEPENDENT_HARNESS,
+            "causal_switches_independent_verifier",
+            tuple(item.receipt_hash for item in harness.verification_receipts),
+            asserted_by="harness",
+            verified_by="causal_switches_independent_verifier",
+        ),
+        LifecycleStatus.EVALUATED,
+    )
+    verification = EvidenceVerification.issue(
+        state,
+        evaluation_proposal,
+        evidence_type=EvidenceType.INDEPENDENT_HARNESS,
+        verifier_id="causal_switches_independent_verifier",
+        artifact_refs=tuple(item.receipt_hash for item in harness.verification_receipts),
+    )
+    state = _advance(
+        membrane,
+        state,
+        evaluation_proposal,
+        TransitionAuthority.HARNESS,
+        membrane_decisions,
+        verification,
+    )
+    dump_structured(
+        output_root / "lifecycle.json",
+        {"final_state": state, "membrane_decisions": membrane_decisions},
     )
     now = utc_now()
     charter = Charter.load()
@@ -86,7 +149,7 @@ def run_demo(snapshot: LearnerSnapshot, seed: int, output_root: Path) -> Researc
             "baseline_accuracy": harness.baseline_metrics["accuracy"],
             "improved_accuracy": harness.improved_metrics["accuracy"],
         },
-        run_status=LifecycleStatus.EVALUATED,
+        run_status=state.lifecycle_status,
         violations=(),
         resource_use={"cpu_seconds": 0.0, "memory_mb_peak": 0.0, "storage_bytes": 0.0},
         seeds={"public_demo_seed": (seed,), "private_evaluation_seeds": ()},
@@ -171,6 +234,23 @@ def run_demo(snapshot: LearnerSnapshot, seed: int, output_root: Path) -> Researc
         ledger.insert("builds", aggregate_build_receipt["receipt_hash"], aggregate_build_receipt)
         ledger.insert("experiments", record.experiment_id, record.to_jsonable())
         ledger.insert("research_episodes", episode.episode_id, episode.to_jsonable())
+        for membrane_decision in membrane_decisions:
+            ledger.insert("membrane_decisions", sha256_json(membrane_decision), membrane_decision.to_jsonable())
         for name, reference in artifact_entries.items():
             ledger.insert("artifacts", reference["sha256"], {"name": name, **reference})
     return episode
+
+
+def _advance(
+    membrane: ResearchMembrane,
+    state: ResearchState,
+    proposal: ResearchProposal,
+    authority: TransitionAuthority,
+    decisions: list[MembraneDecision],
+    verification: EvidenceVerification | None = None,
+) -> ResearchState:
+    decision = membrane.apply(state, proposal, verification=verification, authority=authority)
+    decisions.append(decision)
+    if not decision.accepted:
+        raise RuntimeError(decision.reason)
+    return decision.after

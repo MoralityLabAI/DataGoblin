@@ -21,6 +21,7 @@ REQUIRED = {
     "train_split_manifest.json",
     "evaluation_split_manifest.public.json",
     "experiment_record.json",
+    "lifecycle.json",
     "report.md",
     "ledger.sqlite",
 }
@@ -44,6 +45,18 @@ def test_demo_completes_offline_and_hides_evaluation_seed(tmp_path: Path, snapsh
     record = ExperimentRecord.from_jsonable(load_structured(output / "experiment_record.json"))
     assert record.run_status.value == "EVALUATED"
     assert record.claim_boundary.startswith("Toy smoke evidence")
+    lifecycle = load_structured(output / "lifecycle.json")
+    assert lifecycle["final_state"]["lifecycle_status"] == "EVALUATED"
+    assert lifecycle["final_state"]["frozen_evaluation_hash"]
+    assert [item["after"]["lifecycle_status"] for item in lifecycle["membrane_decisions"]] == [
+        "CRITIQUED",
+        "VALIDATED",
+        "TICKETED",
+        "BUILT",
+        "EXECUTED",
+        "EVALUATED",
+    ]
+    assert lifecycle["membrane_decisions"][-1]["verification_receipt_hash"]
     assert ResearchEpisode.from_jsonable(episode.to_jsonable()) == episode
     manifest = json.loads((output / "run_manifest.json").read_text(encoding="utf-8"))
     assert manifest["artifacts"]["report.md"]["sha256"]

@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from dataclasses import fields, is_dataclass
 from enum import Enum
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import yaml
@@ -27,6 +28,19 @@ def to_jsonable(value: Any) -> Any:
     raise TypeError(f"unsupported serialization type: {type(value).__name__}")
 
 
+def freeze_jsonable(value: Any) -> Any:
+    """Return a deeply immutable, canonical JSON-compatible value."""
+    return _freeze_jsonable(to_jsonable(value))
+
+
+def _freeze_jsonable(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType({str(key): _freeze_jsonable(item) for key, item in sorted(value.items())})
+    if isinstance(value, list):
+        return tuple(_freeze_jsonable(item) for item in value)
+    return value
+
+
 def canonical_json(value: Any) -> str:
     return json.dumps(
         to_jsonable(value),
@@ -42,7 +56,9 @@ def pretty_json(value: Any) -> str:
 
 
 def load_structured(path: Path) -> dict[str, Any]:
-    text = path.read_text(encoding="utf-8")
+    # PowerShell 5 emits a UTF-8 BOM for generated JSON receipts; utf-8-sig
+    # accepts those while remaining identical for normal BOM-less UTF-8.
+    text = path.read_text(encoding="utf-8-sig")
     if path.suffix.lower() == ".json":
         value = json.loads(text)
     elif path.suffix.lower() in {".yaml", ".yml"}:
