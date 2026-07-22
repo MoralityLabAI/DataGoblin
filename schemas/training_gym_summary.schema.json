@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrainingGymSummary v1",
+  "type": "object",
+  "required": ["schema_version", "run_id", "status", "weights_loaded", "steps_completed", "peak_ram_mb", "avg_ram_mb", "peak_io_mb_s", "cpu_pct", "cleanup_passed"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["completed", "aborted", "cleanup_failed", "mock_evaluation_completed"]},
+    "weights_loaded": {
+      "oneOf": [
+        {"type": "boolean"},
+        {"const": "unknown_requires_candidate_cleanup_receipt"}
+      ]
+    },
+    "steps_completed": {"type": "integer", "minimum": 0},
+    "peak_ram_mb": {"type": "number", "minimum": 0},
+    "avg_ram_mb": {"type": "number", "minimum": 0},
+    "peak_io_mb_s": {"type": "number", "minimum": 0},
+    "cpu_pct": {"type": "number", "minimum": 0},
+    "cleanup_passed": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

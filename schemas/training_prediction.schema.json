@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrainingPredictionEnvelope v1",
+  "type": "object",
+  "required": ["example_id", "parsed", "abstained", "halted", "loop_trace"],
+  "properties": {
+    "example_id": {"type": "string", "minLength": 1},
+    "parsed": {"type": "boolean"},
+    "decision": {"type": ["string", "null"], "enum": ["ACCEPT", "REVISE", "AUDIT", "ABSTAIN", "REJECT", null]},
+    "violations": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "abstained": {"type": "boolean"},
+    "halted": {"type": "boolean"},
+    "loop_trace": {"type": "array"}
+  },
+  "additionalProperties": true
+}

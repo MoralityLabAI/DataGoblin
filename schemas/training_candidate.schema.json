@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrainingCandidate v1",
+  "type": "object",
+  "required": ["schema_version", "candidate_id", "architecture_family", "mock", "weights_loaded", "training_splits", "training_split_hashes", "dataset_manifest_sha256", "maximum_loops", "resource_summary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "architecture_family": {"type": "string", "minLength": 1},
+    "mock": {"type": "boolean"},
+    "weights_loaded": {"type": "boolean"},
+    "training_splits": {"type": "array", "items": {"enum": ["train", "calibration"]}},
+    "training_split_hashes": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "dataset_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "maximum_loops": {"type": "integer", "minimum": 1},
+    "resource_summary": {"type": "object"}
+  },
+  "additionalProperties": true
+}

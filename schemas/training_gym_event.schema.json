@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrainingGymEvent v1",
+  "type": "object",
+  "required": ["ts", "event"],
+  "properties": {
+    "ts": {"type": "string"},
+    "event": {"enum": ["start", "caps_verified", "resource_sample", "checkpoint", "complete", "abort", "cleanup"]},
+    "run_id": {"type": "string"},
+    "step": {"type": "integer", "minimum": 0},
+    "reason": {"type": "string"}
+  },
+  "additionalProperties": true
+}
