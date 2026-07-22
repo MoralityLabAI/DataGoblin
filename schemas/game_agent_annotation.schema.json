@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/game_agent_annotation.schema.json",
+  "title": "Blind game-agent semantic annotation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "blind_item_id",
+    "reviewer_id",
+    "stage",
+    "reviewed_packet_sha256",
+    "assessment",
+    "scores",
+    "disposition",
+    "evidence_authority",
+    "failure_modes",
+    "rationale_codes"
+  ],
+  "properties": {
+    "schema_version": {"const": "game-agent-annotation.v1"},
+    "blind_item_id": {"type": "string", "pattern": "^blind-[0-9a-f]{24}$"},
+    "reviewer_id": {"enum": ["reviewer_a", "reviewer_b"]},
+    "stage": {"const": "PROVISIONAL"},
+    "reviewed_packet_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "assessment": {"enum": ["PASS", "FAIL", "UNCERTAIN"]},
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_validity",
+        "rule_compliance",
+        "state_grounding",
+        "strategic_coherence",
+        "social_reasoning",
+        "uncertainty_calibration"
+      ],
+      "properties": {
+        "outcome_validity": {"$ref": "#/$defs/score"},
+        "rule_compliance": {"$ref": "#/$defs/score"},
+        "state_grounding": {"$ref": "#/$defs/score"},
+        "strategic_coherence": {"$ref": "#/$defs/score"},
+        "social_reasoning": {"$ref": "#/$defs/score"},
+        "uncertainty_calibration": {"$ref": "#/$defs/score"}
+      }
+    },
+    "disposition": {"enum": ["REJECT", "QUARANTINE", "DISCOVERY_ONLY", "EVALUATION_ONLY"]},
+    "evidence_authority": {"const": "HUMAN_REVIEWED"},
+    "failure_modes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "illegal_action",
+          "invalid_response",
+          "state_hallucination",
+          "unsupported_claim",
+          "strategy_incoherence",
+          "negotiation_contradiction",
+          "commitment_break",
+          "tool_failure",
+          "fallback_used",
+          "split_contamination",
+          "private_data",
+          "duplicate",
+          "unknown"
+        ]
+      }
+    },
+    "rationale_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "insufficient_outcome_evidence",
+          "insufficient_state_evidence",
+          "internally_consistent",
+          "malformed_safe_field",
+          "observable_only",
+          "relationship_not_observable",
+          "untrusted_payload_detected"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "score": {
+      "oneOf": [
+        {"type": "integer", "minimum": 0, "maximum": 4},
+        {"type": "null"}
+      ]
+    }
+  }
+}

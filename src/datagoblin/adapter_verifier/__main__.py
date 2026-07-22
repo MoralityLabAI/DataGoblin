@@ -12,6 +12,7 @@ from .environment import (
     run_mock_setups_on_dataset,
     run_verifier_demo,
 )
+from .semantic_review import build_semantic_review_queue, finalize_semantic_review
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -70,6 +71,31 @@ def build_parser() -> argparse.ArgumentParser:
     compare = subparsers.add_parser("compare", help="compare two or more adapter evaluation reports")
     compare.add_argument("--report", type=Path, action="append", required=True)
     compare.add_argument("--out", type=Path, required=True)
+
+    review = subparsers.add_parser(
+        "build-semantic-review",
+        help="build a bounded two-reviewer semantic gate from a safe-field projection",
+    )
+    review.add_argument("--config", type=Path, default=Path("configs/semantic_review.yaml"))
+    review.add_argument("--dataset-manifest", type=Path, required=True)
+    review.add_argument("--derivation-ledger", type=Path, required=True)
+    review.add_argument("--approved-root", type=Path, action="append", required=True)
+    review.add_argument("--out", type=Path, required=True)
+    review.add_argument("--seed", type=int, default=73)
+    review.add_argument("--max-items", type=int, default=24)
+    review.add_argument("--max-audit-items", type=int, default=512)
+    review.add_argument("--max-per-source-file", type=int, default=2)
+    review.add_argument("--max-record-bytes", type=int, default=1_000_000)
+
+    finalize = subparsers.add_parser(
+        "finalize-semantic-review",
+        help="validate two blind annotations and emit a content-free agreement report",
+    )
+    finalize.add_argument("--review-manifest", type=Path, required=True)
+    finalize.add_argument("--review-map", type=Path, required=True)
+    finalize.add_argument("--annotations", type=Path, action="append", required=True)
+    finalize.add_argument("--near-duplicate-audit", type=Path, required=True)
+    finalize.add_argument("--out", type=Path, required=True)
     return parser
 
 
@@ -128,9 +154,32 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(args.out / "evaluation_report.json")
             return 0 if report["promotion_assessment"]["eligible"] else 3
-        else:
+        elif args.command == "compare":
             compare_adapter_reports(args.report, args.out)
             print(args.out / "comparison.md")
+        elif args.command == "build-semantic-review":
+            build_semantic_review_queue(
+                args.config,
+                args.dataset_manifest,
+                args.derivation_ledger,
+                args.approved_root,
+                args.out,
+                seed=args.seed,
+                max_items=args.max_items,
+                max_audit_items=args.max_audit_items,
+                max_per_source_file=args.max_per_source_file,
+                max_record_bytes=args.max_record_bytes,
+            )
+            print(args.out / "public_review" / "review_manifest.json")
+        else:
+            finalize_semantic_review(
+                args.review_manifest,
+                args.review_map,
+                args.annotations,
+                args.near_duplicate_audit,
+                args.out,
+            )
+            print(args.out / "review_report.json")
     except (KeyError, ValueError, OSError) as exc:
         print(f"adapter-verifier: {exc}", file=sys.stderr)
         return 2

@@ -13,9 +13,11 @@ from datagoblin.hashing import sha256_bytes, sha256_file, sha256_json, sha256_te
 from datagoblin.serialization import dump_structured, load_structured
 
 from .environment import GAME_CONTRACTS, GAMES, SPLITS, _load_config, _write_jsonl
+from .semantic_fingerprint import jaccard, semantic_fingerprint
 
 MODEL_FAMILIES = ("gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna")
 REASONING_EFFORTS = ("medium", "high", "xhigh")
+SEMANTIC_NEAR_DUPLICATE_THRESHOLD = 0.9
 GAME_ALIASES = {
     "centauri": "centauri",
     "court": "court",
@@ -537,10 +539,16 @@ def _subtree_tokens(value: Any) -> set[str]:
     return tokens
 
 
-def _extract_safe_field_receipts(game: str, value: Mapping[str, Any]) -> dict[str, list[dict[str, str]]]:
+def extract_safe_field_values(game: str, value: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Return path-allowlisted values for private, bounded semantic review.
+
+    The caller owns custody of the returned values. Public projections must continue
+    to use :func:`_extract_safe_field_receipts`, which strips values and exposes only
+    hashes and type information.
+    """
     safe_fields = set(GAME_CONTRACTS[game]["safe_fields"])
     unsafe_tokens = HIDDEN_REASONING_TOKENS | PRIVATE_TOKENS
-    receipts: dict[str, list[dict[str, str]]] = defaultdict(list)
+    extracted: list[dict[str, Any]] = []
     stack: list[tuple[tuple[str, ...], Any]] = [((), value)]
     while stack:
         path, current = stack.pop()
@@ -560,11 +568,13 @@ def _extract_safe_field_receipts(game: str, value: Mapping[str, Any]) -> dict[st
                         value_sha256 = sha256_json(nested)
                     except ValueError:
                         continue
-                    receipts[normalized].append(
+                    extracted.append(
                         {
+                            "field": normalized,
                             "path_sha256": sha256_json(child_path),
                             "value_sha256": value_sha256,
                             "value_type": _value_kind(nested),
+                            "value": nested,
                         }
                     )
                     continue
@@ -574,6 +584,22 @@ def _extract_safe_field_receipts(game: str, value: Mapping[str, Any]) -> dict[st
             for index, nested in enumerate(current[:128]):
                 if isinstance(nested, (Mapping, list)):
                     stack.append(((*path, f"item_{index}"), nested))
+    return sorted(
+        extracted,
+        key=lambda item: (item["field"], item["path_sha256"], item["value_sha256"]),
+    )
+
+
+def _extract_safe_field_receipts(game: str, value: Mapping[str, Any]) -> dict[str, list[dict[str, str]]]:
+    receipts: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for item in extract_safe_field_values(game, value):
+        receipts[str(item["field"])].append(
+            {
+                "path_sha256": str(item["path_sha256"]),
+                "value_sha256": str(item["value_sha256"]),
+                "value_type": str(item["value_type"]),
+            }
+        )
     return {
         field: sorted(items, key=lambda item: (item["path_sha256"], item["value_sha256"]))
         for field, items in sorted(receipts.items())
@@ -612,6 +638,10 @@ def _safe_public_row(
     field_receipts = _extract_safe_field_receipts(game, value)
     if not field_receipts:
         return None
+    semantic_content_sha256, semantic_shingle_sha256s = semantic_fingerprint(
+        game,
+        extract_safe_field_values(game, value),
+    )
     source_content_sha256 = sha256_bytes(raw)
     lineage_group_sha256 = _lineage_group_sha256(value, source_path, game, policy_version)
     derivation_sha256 = sha256_json(
@@ -675,6 +705,8 @@ def _safe_public_row(
         "model_family": model,
         "reasoning_effort": effort,
         "safe_field_receipts": field_receipts,
+        "semantic_content_sha256": semantic_content_sha256,
+        "semantic_shingle_sha256s": list(semantic_shingle_sha256s),
         "raw_values_emitted": False,
     }
     return public_input, _safe_expected(game, safe_fields), ledger
@@ -723,18 +755,34 @@ def _assign_grouped_splits(
 
     by_lineage: dict[str, int] = {}
     by_content: dict[str, int] = {}
+    by_semantic_content: dict[str, int] = {}
     for index, (_, _, ledger) in enumerate(selected):
         for value, lookup in (
             (str(ledger["lineage_group_sha256"]), by_lineage),
             (str(ledger["source_content_sha256"]), by_content),
+            (str(ledger["semantic_content_sha256"]), by_semantic_content),
         ):
             prior = lookup.setdefault(value, index)
             union(index, prior)
+    semantic_near_pairs = 0
+    for left_index, (_, _, left) in enumerate(selected):
+        for right_index in range(left_index + 1, len(selected)):
+            right = selected[right_index][2]
+            if left["game"] != right["game"]:
+                continue
+            similarity = jaccard(
+                left["semantic_shingle_sha256s"],
+                right["semantic_shingle_sha256s"],
+            )
+            if similarity >= SEMANTIC_NEAR_DUPLICATE_THRESHOLD:
+                semantic_near_pairs += 1
+                union(left_index, right_index)
     components: dict[int, list[int]] = defaultdict(list)
     for index in range(len(selected)):
         components[find(index)].append(index)
     split_counts: Counter[str] = Counter()
     component_receipts: list[dict[str, Any]] = []
+    component_members: dict[str, list[int]] = {}
     for members in components.values():
         derivations = sorted(str(selected[index][2]["derivation_sha256"]) for index in members)
         split_group_sha256 = sha256_json(derivations)
@@ -744,6 +792,7 @@ def _assign_grouped_splits(
             row, _, ledger = selected[index]
             row["split"] = split
             ledger["split_group_sha256"] = split_group_sha256
+            ledger["semantic_group_sha256"] = split_group_sha256
             ledger["assigned_split"] = split
             split_counts[split] += 1
         component_receipts.append(
@@ -753,13 +802,33 @@ def _assign_grouped_splits(
                 "records": len(members),
             }
         )
-    if not {"ordinary_test", "ood_test"} <= set(split_counts):
+        component_members[split_group_sha256] = members
+    missing_splits = {"ordinary_test", "ood_test"} - set(split_counts)
+    if missing_splits and len(component_receipts) < 2:
         raise ValueError("lineage-grouped safe projection needs ordinary and OOD components")
+    for missing_split in sorted(missing_splits):
+        donor_split = "ood_test" if missing_split == "ordinary_test" else "ordinary_test"
+        donor = min(
+            (receipt for receipt in component_receipts if receipt["split"] == donor_split),
+            key=lambda receipt: (receipt["records"], receipt["split_group_sha256"]),
+        )
+        donor["split"] = missing_split
+        for index in component_members[str(donor["split_group_sha256"])]:
+            row, _, ledger = selected[index]
+            row["split"] = missing_split
+            ledger["assigned_split"] = missing_split
+        split_counts[donor_split] -= int(donor["records"])
+        split_counts[missing_split] += int(donor["records"])
     exact_duplicate_records = len(selected) - len(by_content)
+    exact_semantic_duplicate_records = len(selected) - len(by_semantic_content)
     return {
         "lineage_groups": len(by_lineage),
         "split_components": len(components),
         "exact_duplicate_records": exact_duplicate_records,
+        "semantic_content_groups": len(by_semantic_content),
+        "exact_semantic_duplicate_records": exact_semantic_duplicate_records,
+        "semantic_near_duplicate_pairs": semantic_near_pairs,
+        "semantic_near_duplicate_threshold": SEMANTIC_NEAR_DUPLICATE_THRESHOLD,
         "split_counts": dict(sorted(split_counts.items())),
         "components": sorted(component_receipts, key=lambda item: item["split_group_sha256"]),
     }
@@ -791,9 +860,11 @@ def _verify_safe_derivations(
     seen: set[str] = set()
     split_by_lineage: dict[str, str] = {}
     split_by_content: dict[str, str] = {}
+    split_by_semantic: dict[str, str] = {}
     split_by_group: dict[str, str] = {}
     roots = [root.resolve() for root in approved_roots]
-    for entry in _read_jsonl_private(ledger_path):
+    ledger_entries = _read_jsonl_private(ledger_path)
+    for entry in ledger_entries:
         item_id = str(entry.get("item_id", ""))
         if not item_id or item_id in seen or item_id not in row_by_id:
             raise ValueError(f"invalid safe derivation ledger item: {item_id}")
@@ -810,6 +881,15 @@ def _verify_safe_derivations(
         receipts = _extract_safe_field_receipts(game, value)
         if receipts != entry["safe_field_receipts"]:
             raise ValueError(f"safe derivation field receipt mismatch: {item_id}")
+        semantic_content_sha256, semantic_shingle_sha256s = semantic_fingerprint(
+            game,
+            extract_safe_field_values(game, value),
+        )
+        if (
+            semantic_content_sha256 != entry.get("semantic_content_sha256")
+            or list(semantic_shingle_sha256s) != entry.get("semantic_shingle_sha256s")
+        ):
+            raise ValueError(f"safe derivation semantic fingerprint mismatch: {item_id}")
         derivation_sha256 = sha256_json(
             {
                 "policy_version": entry["policy_version"],
@@ -830,6 +910,7 @@ def _verify_safe_derivations(
         for group, lookup in (
             (str(entry["lineage_group_sha256"]), split_by_lineage),
             (str(entry["source_content_sha256"]), split_by_content),
+            (str(entry["semantic_content_sha256"]), split_by_semantic),
             (str(entry["split_group_sha256"]), split_by_group),
         ):
             prior_split = lookup.setdefault(group, assigned_split)
@@ -840,6 +921,20 @@ def _verify_safe_derivations(
         if sorted(receipts) != row["source_shape"]["keys"]:
             raise ValueError(f"safe derivation public field mismatch: {item_id}")
         verified += 1
+    for left_index, left in enumerate(ledger_entries):
+        for right in ledger_entries[left_index + 1 :]:
+            if left["game"] != right["game"]:
+                continue
+            similarity = jaccard(
+                left["semantic_shingle_sha256s"],
+                right["semantic_shingle_sha256s"],
+            )
+            if similarity < SEMANTIC_NEAR_DUPLICATE_THRESHOLD:
+                continue
+            if left["assigned_split"] != right["assigned_split"]:
+                raise ValueError(
+                    f"safe derivation semantic near-duplicate split contamination: {left['item_id']}"
+                )
     if seen != set(row_by_id):
         raise ValueError("safe derivation ledger does not cover all real public rows")
     receipt = {
@@ -848,6 +943,7 @@ def _verify_safe_derivations(
         "verification_passed": True,
         "verified_records": verified,
         "verified_lineage_groups": len(split_by_lineage),
+        "verified_semantic_content_groups": len(split_by_semantic),
         "verified_split_groups": len(split_by_group),
         "split_contamination_detected": False,
         "ledger_sha256": sha256_file(ledger_path),
@@ -981,6 +1077,7 @@ def build_safe_field_projection(
             "hidden_reasoning_tokens": sorted(HIDDEN_REASONING_TOKENS),
             "private_tokens": sorted(PRIVATE_TOKENS),
             "safe_derivation_paths": SAFE_DERIVATION_PATHS,
+            "semantic_near_duplicate_threshold": SEMANTIC_NEAR_DUPLICATE_THRESHOLD,
         }
     )
     policy_version = f"safe-field-derivation.v1:{policy_sha256}"
@@ -1113,7 +1210,9 @@ def build_safe_field_projection(
             "environment-owned derivation fidelity verified; source gameplay claims remain model-inferred"
         ),
         "projection_mode": "safe_field_derivation",
-        "split_grouping": "episode/game lineage plus exact-content connected components",
+        "split_grouping": (
+            "episode/game lineage, exact source content, and exact/near safe-value semantic connected components"
+        ),
         "split_group_receipt_sha256": sha256_file(split_group_path),
         "derivation_verification_sha256": sha256_file(verification_path),
     }
@@ -1157,6 +1256,10 @@ def build_safe_field_projection(
             "lineage_groups": split_group_receipt["lineage_groups"],
             "split_components": split_group_receipt["split_components"],
             "exact_duplicate_records": split_group_receipt["exact_duplicate_records"],
+            "semantic_content_groups": split_group_receipt["semantic_content_groups"],
+            "exact_semantic_duplicate_records": split_group_receipt["exact_semantic_duplicate_records"],
+            "semantic_near_duplicate_pairs": split_group_receipt["semantic_near_duplicate_pairs"],
+            "semantic_near_duplicate_threshold": split_group_receipt["semantic_near_duplicate_threshold"],
             "split_contamination_detected": False,
             "derivation_verification_sha256": sha256_file(verification_path),
             "raw_values_emitted": False,

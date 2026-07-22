@@ -1,0 +1,18 @@
+schema_version: '1.0'
+review_policy_id: datagoblin-safe-field-semantic-review-v1
+reviewers:
+  - reviewer_a
+  - reviewer_b
+review_limits:
+  max_packet_bytes: 65536
+near_duplicate:
+  jaccard_threshold: 0.9
+  max_reported_pairs: 2048
+authority:
+  annotation: HUMAN_REVIEWED
+  hard_promotion_permitted: false
+  required_for_verified_train: INDEPENDENT_OR_ENVIRONMENT_OWNED
+mandatory_non_claims:
+  - Safe-field semantic review does not establish gameplay quality.
+  - Reviewer agreement does not independently verify source-model outcomes.
+  - Annotation-driven records remain ineligible for VERIFIED_TRAIN without independent environment evidence.

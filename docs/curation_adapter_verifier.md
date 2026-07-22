@@ -83,11 +83,45 @@ name such as `target`, `phase`, or `orders` from being selected out of a private
 otherwise unrelated container.
 
 Before assigning ordinary/OOD splits, the projector hashes episode or game lineage without exposing the
-identifier, unions records that share lineage or exact source content, and assigns each connected component
-as a whole. The verification pass independently fails if a lineage, exact duplicate, or split-group hash
-appears in both splits.
+identifier, unions records that share lineage, exact source content, exact safe-value content, or a
+high-similarity safe-value shingle fingerprint, and assigns each connected component as a whole. The
+verification pass independently recomputes those fingerprints and fails if a lineage, duplicate,
+near-duplicate, or split-group family appears in both splits.
 
 Candidates still receive no values or paths: only safe field names, value type classes, cohort
 metadata, flags, and derivation hashes. Faithful extraction does not verify the source model's game
 claims, so real rows remain `DISCOVERY_ONLY` with `MODEL_INFERRED` authority. This lane creates
 legitimate mapping opportunities for adapter evaluation without making a training-release claim.
+
+## Blind semantic-review gate
+
+`build-semantic-review` selects a deterministic, four-game-stratified sample from a frozen safe-field
+projection. It re-verifies every selected value against the immutable derivation ledger, places raw safe
+values only in two separate private reviewer workspaces, and emits a content-free public queue. Reviewers
+use different blind identifiers and may write only typed scores, enumerated failure/rationale codes, and a
+`HUMAN_REVIEWED` disposition. Unsupported axes must be `null`; free-text rationale and `VERIFIED_TRAIN`
+are rejected.
+
+The same pass computes private semantic fingerprints for the bounded full projection and emits only hashes,
+item identifiers, and similarity scores in the near-duplicate audit. `finalize-semantic-review` validates both
+blind annotation files and reports agreement by game/model/effort slice. Any disagreement requires a third
+content-bound adjudication pass. Even unanimous review never authorizes training: independent or
+environment-owned outcome evidence remains a separate gate.
+
+```powershell
+$env:PYTHONPATH = "src"
+python -m datagoblin.adapter_verifier build-semantic-review `
+  --config configs/semantic_review.yaml `
+  --dataset-manifest path\to\public_dataset\dataset_manifest.json `
+  --derivation-ledger path\to\private_projection\derivation_ledger.jsonl `
+  --approved-root D:\approved-corpus-root `
+  --out D:\Temp\semantic-review
+
+python -m datagoblin.adapter_verifier finalize-semantic-review `
+  --review-manifest D:\Temp\semantic-review\public_review\review_manifest.json `
+  --review-map D:\Temp\semantic-review\private_steward\review_map.jsonl `
+  --annotations D:\Temp\semantic-review\reviewer_a\annotations.jsonl `
+  --annotations D:\Temp\semantic-review\reviewer_b\annotations.jsonl `
+  --near-duplicate-audit D:\Temp\semantic-review\private_steward\near_duplicate_audit.json `
+  --out D:\Temp\semantic-review-final
+```

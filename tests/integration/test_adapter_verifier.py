@@ -9,7 +9,9 @@ import pytest
 from datagoblin.adapter_verifier import (
     build_corpus_projection,
     build_safe_field_projection,
+    build_semantic_review_queue,
     evaluate_adapter_setup,
+    finalize_semantic_review,
     run_mock_setups_on_dataset,
     run_verifier_demo,
 )
@@ -232,8 +234,40 @@ def test_content_free_projection_preserves_cohorts_without_values_or_paths(tmp_p
     assert not verification["split_contamination_detected"]
     safe_manifest = load_structured(safe_out / "public_dataset/dataset_manifest.json")
     assert safe_manifest["split_grouping"] == (
-        "episode/game lineage plus exact-content connected components"
+        "episode/game lineage, exact source content, and exact/near safe-value semantic connected components"
     )
+
+    review_out = tmp_path / "semantic-review"
+    review_manifest = build_semantic_review_queue(
+        root / "configs/semantic_review.yaml",
+        safe_out / "public_dataset/dataset_manifest.json",
+        safe_out / "private_projection/derivation_ledger.jsonl",
+        [decisions, diplomacy],
+        review_out,
+        max_items=4,
+        max_per_source_file=4,
+    )
+    assert review_manifest["selected_items"] == 4
+    assert not review_manifest["public_values_emitted"]
+    assert "DO-NOT-EMIT" not in (review_out / "public_review/review_queue.jsonl").read_text(
+        encoding="utf-8"
+    )
+    assert "DO-NOT-EMIT" in (review_out / "reviewer_a/review_packets.jsonl").read_text(
+        encoding="utf-8"
+    )
+    review_report = finalize_semantic_review(
+        review_out / "public_review/review_manifest.json",
+        review_out / "private_steward/review_map.jsonl",
+        [
+            review_out / "reviewer_a/annotations.jsonl",
+            review_out / "reviewer_b/annotations.jsonl",
+        ],
+        review_out / "private_steward/near_duplicate_audit.json",
+        tmp_path / "semantic-review-final",
+    )
+    assert review_report["review_gate_complete"]
+    assert not review_report["training_release_authorized"]
+    assert "independent_environment_outcome_evidence_missing" in review_report["promotion_blockers"]
 
     run_mock_setups_on_dataset(
         root / "configs/curation_adapter_verifier.yaml",
