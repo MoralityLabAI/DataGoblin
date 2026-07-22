@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/game_adapter_evaluation.schema.json",
+  "title": "Game adapter verifier evaluation",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "setup_id",
+    "adapter_family",
+    "adapter_version",
+    "evidence_status",
+    "overall",
+    "split_results",
+    "game_results",
+    "source_model_results",
+    "reasoning_effort_results",
+    "source_agent_results",
+    "benchmark_diagnostics",
+    "promotion_assessment",
+    "reproducibility",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "game-adapter-evaluation.v1"},
+    "setup_id": {"type": "string", "minLength": 1},
+    "adapter_family": {"type": "string", "minLength": 1},
+    "adapter_version": {"type": "string", "minLength": 1},
+    "evidence_status": {"type": "string"},
+    "overall": {"type": "object"},
+    "split_results": {"type": "object"},
+    "game_results": {"type": "object"},
+    "source_model_results": {"type": "object"},
+    "reasoning_effort_results": {"type": "object"},
+    "source_agent_results": {"type": "object"},
+    "benchmark_diagnostics": {"type": "object"},
+    "promotion_assessment": {"type": "object"},
+    "reproducibility": {"type": "object"},
+    "claim_boundary": {"type": "string"}
+  }
+}

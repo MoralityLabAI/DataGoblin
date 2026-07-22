@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/game_adapter_candidate.schema.json",
+  "title": "Game adapter candidate manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "setup_id",
+    "adapter_family",
+    "adapter_version",
+    "dataset_manifest_sha256",
+    "mock",
+    "authoritative_label_access",
+    "input_contract"
+  ],
+  "properties": {
+    "schema_version": {"const": "game-adapter-candidate.v1"},
+    "setup_id": {"type": "string", "minLength": 1},
+    "adapter_family": {"type": "string", "minLength": 1},
+    "adapter_version": {"type": "string", "minLength": 1},
+    "dataset_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mock": {"type": "boolean"},
+    "authoritative_label_access": {"const": false},
+    "input_contract": {"const": "public_shape_only"}
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/game_adapter_prediction.schema.json",
+  "title": "Game adapter prediction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "item_id",
+    "record_hash",
+    "setup_id",
+    "parsed",
+    "game",
+    "unit_type",
+    "mapped_fields",
+    "disposition",
+    "evidence_authority",
+    "failure_modes",
+    "abstained",
+    "confidence",
+    "authority"
+  ],
+  "properties": {
+    "schema_version": {"const": "game-adapter-prediction.v1"},
+    "item_id": {"type": "string", "minLength": 1},
+    "record_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "setup_id": {"type": "string", "minLength": 1},
+    "parsed": {"type": "boolean"},
+    "game": {"enum": ["centauri", "they_sing", "court", "diplomacy"]},
+    "unit_type": {"enum": ["episode", "game", "message", "negotiation", "turn", "decision"]},
+    "mapped_fields": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "disposition": {
+      "enum": [
+        "REJECT",
+        "QUARANTINE",
+        "DISCOVERY_ONLY",
+        "VERIFIED_TRAIN",
+        "EVALUATION_ONLY",
+        "SEALED_EVALUATION"
+      ]
+    },
+    "evidence_authority": {
+      "enum": [
+        "ENVIRONMENT_VERIFIED",
+        "HUMAN_REVIEWED",
+        "INDEPENDENT_HARNESS",
+        "MODEL_INFERRED",
+        "SIMULATED",
+        "UNKNOWN"
+      ]
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "commitment_break",
+          "duplicate",
+          "fallback_used",
+          "hidden_reasoning",
+          "illegal_action",
+          "invalid_response",
+          "negotiation_contradiction",
+          "private_data",
+          "split_contamination",
+          "state_hallucination",
+          "strategy_incoherence",
+          "tool_failure",
+          "unknown",
+          "unsupported_claim"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "abstained": {"type": "boolean"},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "authority": {"const": "MODEL_RECOMMENDATION_ONLY"}
+  }
+}
