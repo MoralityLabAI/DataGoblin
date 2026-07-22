@@ -54,7 +54,18 @@ datagoblin synth-episodes --count 32 --seed 7 --out runs/synthetic.jsonl
 datagoblin export-sft --input runs/demo/research_episode.json --out runs/sft.jsonl
 datagoblin export-preferences --input runs/demo/research_episode.json --out runs/preferences.jsonl
 datagoblin upstream-status
+datagoblin gym-demo --seed 7 --out runs/training-gym-demo
+datagoblin etiquette-demo --seed 7 --out runs/etiquette-demo
+datagoblin etiquette-build-training-dataset --seed 17 --out runs/ldt-fit/dataset
 ```
+
+The architecture-neutral training gym evaluates LoRA, HRM-Text, and bounded looping-transformer candidates through a
+frozen split and metric firewall. The default command runs mock controls only and never loads weights; see
+[`docs/training_gym.md`](docs/training_gym.md).
+
+The collection-etiquette pipeline classifies public metadata envelopes into reject, quarantine, discovery, verified,
+and evaluation custody lanes. Its LDT is currently a deterministic plumbing control and has no authority to release
+training data. See [`docs/data_collection_etiquette.md`](docs/data_collection_etiquette.md).
 
 ## Optional HRM-Text cycle milestone
 

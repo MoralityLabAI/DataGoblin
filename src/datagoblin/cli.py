@@ -14,6 +14,12 @@ from datagoblin.adapters.upstream_registry import UpstreamRegistry, discover_ups
 from datagoblin.builders.ticket_writer import write_tickets
 from datagoblin.config import repository_root
 from datagoblin.constitution.validator import ConstitutionalValidator, DecisionKind
+from datagoblin.data_etiquette import (
+    audit_sorter_candidate,
+    build_etiquette_training_dataset,
+    evaluate_sorter_predictions,
+    run_etiquette_demo,
+)
 from datagoblin.datasets.exports import (
     export_outcome_prediction_jsonl,
     export_preference_jsonl,
@@ -52,6 +58,7 @@ from datagoblin.research.demo import run_demo
 from datagoblin.research.heuristic_backend import HeuristicGoblinBackend
 from datagoblin.research.orchestrator import ResearchOrchestrator, emit_builder_tickets
 from datagoblin.serialization import dump_structured, load_structured
+from datagoblin.training_gym import compare_candidates, evaluate_candidate, run_training_gym_demo
 
 
 def _default_snapshot_path() -> Path:
@@ -157,6 +164,57 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--cpu-percent", type=int, default=50)
     preflight.add_argument("--io-mb-s", type=int, default=50)
     preflight.add_argument("--wall-clock-seconds", type=int, default=1800)
+    gym_demo = sub.add_parser("gym-demo")
+    gym_demo.add_argument(
+        "--contract",
+        type=Path,
+        default=repository_root() / "configs/preregistrations/training_gym_v1.yaml",
+    )
+    gym_demo.add_argument("--recipe", type=Path, default=repository_root() / "examples/recipe.good.yaml")
+    gym_demo.add_argument("--seed", type=int, default=7)
+    gym_demo.add_argument("--out", type=Path, default=Path("runs/training-gym-demo"))
+    gym_evaluate = sub.add_parser("gym-evaluate")
+    gym_evaluate.add_argument("--contract", type=Path, required=True)
+    gym_evaluate.add_argument("--dataset-manifest", type=Path, required=True)
+    gym_evaluate.add_argument("--candidate-manifest", type=Path, required=True)
+    gym_evaluate.add_argument("--predictions", type=Path, required=True)
+    gym_evaluate.add_argument("--sealed-labels", type=Path)
+    gym_evaluate.add_argument("--out", type=Path, required=True)
+    gym_compare = sub.add_parser("gym-compare")
+    gym_compare.add_argument("--contract", type=Path, required=True)
+    gym_compare.add_argument("--report", type=Path, action="append", required=True)
+    gym_compare.add_argument("--baseline-candidate-id", required=True)
+    gym_compare.add_argument("--out", type=Path, required=True)
+    etiquette_demo = sub.add_parser("etiquette-demo")
+    etiquette_demo.add_argument(
+        "--policy",
+        type=Path,
+        default=repository_root() / "configs/data_etiquette.yaml",
+    )
+    etiquette_demo.add_argument("--seed", type=int, default=7)
+    etiquette_demo.add_argument("--out", type=Path, default=Path("runs/etiquette-demo"))
+    etiquette_evaluate = sub.add_parser("etiquette-evaluate")
+    etiquette_evaluate.add_argument("--dataset-manifest", type=Path, required=True)
+    etiquette_evaluate.add_argument("--predictions", type=Path, required=True)
+    etiquette_evaluate.add_argument("--sealed-labels", type=Path, required=True)
+    etiquette_evaluate.add_argument("--out", type=Path, required=True)
+    etiquette_build = sub.add_parser("etiquette-build-training-dataset")
+    etiquette_build.add_argument(
+        "--policy",
+        type=Path,
+        default=repository_root() / "configs/data_etiquette.yaml",
+    )
+    etiquette_build.add_argument("--seed", type=int, default=7)
+    etiquette_build.add_argument("--out", type=Path, required=True)
+    etiquette_audit = sub.add_parser("etiquette-audit-candidate")
+    etiquette_audit.add_argument("--evaluation-report", type=Path, required=True)
+    etiquette_audit.add_argument("--run-receipt", type=Path, required=True)
+    etiquette_audit.add_argument(
+        "--policy",
+        type=Path,
+        default=repository_root() / "configs/data_etiquette.yaml",
+    )
+    etiquette_audit.add_argument("--out", type=Path, required=True)
     return parser
 
 
@@ -466,6 +524,45 @@ def dispatch(args: argparse.Namespace) -> int:
         )
         print(args.out / "summary.json")
         return 0 if assessment.load_permitted else 3
+    elif args.command == "gym-demo":
+        run_training_gym_demo(args.contract, args.recipe, args.out, seed=args.seed)
+        print(args.out / "comparison.md")
+    elif args.command == "gym-evaluate":
+        evaluate_candidate(
+            args.contract,
+            args.dataset_manifest,
+            args.candidate_manifest,
+            args.predictions,
+            args.out,
+            sealed_labels_path=args.sealed_labels,
+        )
+        print(args.out / "evaluation_report.md")
+    elif args.command == "gym-compare":
+        compare_candidates(args.contract, args.report, args.baseline_candidate_id, args.out)
+        print(args.out / "comparison.md")
+    elif args.command == "etiquette-demo":
+        run_etiquette_demo(args.policy, args.out, seed=args.seed)
+        print(args.out / "sorter_evaluation.json")
+    elif args.command == "etiquette-evaluate":
+        evaluate_sorter_predictions(
+            args.dataset_manifest,
+            args.predictions,
+            args.sealed_labels,
+            args.out,
+        )
+        print(args.out / "trained_sorter_evaluation.json")
+    elif args.command == "etiquette-build-training-dataset":
+        build_etiquette_training_dataset(args.policy, args.out, seed=args.seed)
+        print(args.out / "dataset_manifest.json")
+    elif args.command == "etiquette-audit-candidate":
+        decision = audit_sorter_candidate(
+            args.evaluation_report,
+            args.run_receipt,
+            args.policy,
+            args.out,
+        )
+        print(args.out)
+        return 0 if decision["promotion_eligible"] else 3
     else:
         episodes = read_episodes(args.input)
         exporters = {
