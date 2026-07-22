@@ -1,0 +1,130 @@
+schema_version: '1.0'
+policy_version: '0.1.0'
+name: DataGoblin collection and corpus etiquette
+principles:
+  - purpose_limitation
+  - consent_and_license
+  - data_minimization
+  - provenance_and_hashing
+  - privacy_and_secret_exclusion
+  - evaluation_custody
+  - duplicate_and_contamination_control
+  - retention_and_deletion_propagation
+  - independent_label_authority
+  - reversible_quarantine
+public_envelope_policy:
+  raw_content_permitted: false
+  filesystem_paths_permitted: false
+  content_hash_required: true
+  provenance_reference_required: true
+  hidden_reasoning_permitted: false
+  model_weights_or_checkpoints_permitted: false
+dispositions:
+  - REJECT
+  - QUARANTINE
+  - DISCOVERY_ONLY
+  - VERIFIED_TRAIN
+  - EVALUATION_ONLY
+  - SEALED_EVALUATION
+hard_rules:
+  deletion_requested: REJECT
+  secret_or_credential: REJECT
+  hidden_reasoning: REJECT
+  model_weight_or_checkpoint: REJECT
+  consent_denied: REJECT
+  consent_unknown: QUARANTINE
+  license_restricted: REJECT
+  license_unknown: QUARANTINE
+  unredacted_personal_data: QUARANTINE
+  missing_purpose_or_lawful_basis: QUARANTINE
+  missing_provenance: QUARANTINE
+  missing_independent_verification_receipt: QUARANTINE
+  evaluation_material: EVALUATION_ONLY
+  sealed_evaluation_material: SEALED_EVALUATION
+  model_or_simulation_evidence: DISCOVERY_ONLY
+  independently_verified_clean_material: VERIFIED_TRAIN
+authority:
+  sorter_may_recommend: true
+  sorter_may_authorize_training: false
+  hard_train_authorities: [ENVIRONMENT_VERIFIED, INDEPENDENT_HARNESS]
+  hard_train_custody: [ENVIRONMENT_OWNED, INDEPENDENT]
+  human_review_alone_is_not_environment_verification: true
+corpus_lanes:
+  verified_supervision:
+    dispositions: [VERIFIED_TRAIN]
+    target_weight: 1.0
+    permitted_targets: [verdict, violation_mask, repair, outcome, next_action]
+  soft_discovery:
+    dispositions: [DISCOVERY_ONLY]
+    target_weight: 0.25
+    permitted_targets: [proposal, hypothesis, critique]
+    forbidden_targets: [authoritative_verdict, environment_label]
+  evaluation:
+    dispositions: [EVALUATION_ONLY, SEALED_EVALUATION]
+    target_weight: 0.0
+    training_permitted: false
+retention:
+  default_days: 365
+  quarantine_days: 30
+  deletion_receipt_required: true
+  ledger_after_deletion: tombstone_and_hash_only
+roles:
+  collector: creates private intake and public envelope; cannot authorize labels
+  sorter: recommends disposition and flags; cannot hard-promote
+  steward: verifies receipts, resolves disagreements, and releases corpus lanes
+  trainer: consumes released manifests only
+  evaluator: owns ordinary, OOD, and sealed splits
+  auditor: checks deletion, contamination, retention, and lineage
+enterprise_receipts:
+  required_fields:
+    - purpose_id
+    - lawful_basis
+    - allowed_uses
+    - data_residency_region
+    - sensitivity_class
+    - verification_subject_sha256
+    - verification_custody
+  purpose_change_requires_readjudication: true
+  cross_region_materialization_requires_operator_approval: true
+sorter_training:
+  training_task_id: ldt-etiquette-sorter-v1-smoke
+  architecture_contract:
+    family: upstream-compatible LDT classifier; exact implementation must be operator-selected
+    inputs: public envelope tokens and typed metadata only
+    outputs: disposition logits, multi-label violation logits, calibrated abstention
+    forbidden_inputs: [raw_private_content, sealed_labels, filesystem_paths]
+    objective: class-weighted disposition loss plus violation loss and calibration penalty
+    maximum_context_tokens: 2048
+  features: public_envelope_only
+  labels: deterministic_policy_or_independent_steward
+  splits: [train, calibration, ordinary_test, ood_test, sealed_poison]
+  selection_metrics: [critical_false_release_rate, flag_micro_f1, brier_score]
+  evidence_metrics: [disposition_accuracy, ood_disposition_accuracy, sealed_critical_false_release_rate]
+  promotion_gates:
+    training_evaluation_contamination_count: 0
+    sealed_critical_false_release_rate: 0.0
+    sorter_is_label_authority: false
+    independent_steward_signoff: true
+  caps:
+    ram_mb: 2048
+    cpu_percent: 50
+    io_mb_per_second: 50
+    wall_clock_seconds: 900
+    swap_bytes: 0
+  chunk_strategy: at most 32 public envelopes per batch; flush predictions and metrics after each batch
+  checkpoint_interval: {steps: 100, seconds: 300}
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  real_training_permitted: false
+larger_model_handoff:
+  require_policy_receipts: true
+  require_content_hashes: true
+  require_split_hashes: true
+  require_dedup_audit: true
+  require_deletion_tombstone_check: true
+  require_ldt_disagreement_report: true
+  sorter_output_is_feature_not_label_authority: true
+  verified_lane_weight: 1.0
+  discovery_lane_max_weight: 0.25
+  discovery_lane_may_supply_authoritative_targets: false
+  evaluation_lane_weight: 0.0
+  real_training_requires_separate_approved_caps: true

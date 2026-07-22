@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EtiquetteDecision v1",
+  "type": "object",
+  "required": [
+    "item_id",
+    "record_hash",
+    "disposition",
+    "violations",
+    "required_actions",
+    "evidence_authority",
+    "policy_version",
+    "policy_hash",
+    "decision_receipt_hash"
+  ],
+  "properties": {
+    "item_id": {"type": "string", "minLength": 1},
+    "record_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "disposition": {
+      "enum": ["REJECT", "QUARANTINE", "DISCOVERY_ONLY", "VERIFIED_TRAIN", "EVALUATION_ONLY", "SEALED_EVALUATION"]
+    },
+    "violations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "required_actions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "evidence_authority": {"type": "string", "minLength": 1},
+    "policy_version": {"type": "string", "minLength": 1},
+    "policy_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "decision_receipt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

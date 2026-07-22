@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DataCorpusHandoff v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "handoff_id",
+    "policy_version",
+    "policy_hash",
+    "source_dataset_manifest_sha256",
+    "sorter_output_is_authority",
+    "released_lanes",
+    "evaluation_item_count",
+    "evaluation_commitment_hash",
+    "evaluation_items_exported_to_training",
+    "raw_content_in_manifest",
+    "larger_model_training_permitted",
+    "next_gate"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "handoff_id": {"type": "string", "minLength": 1},
+    "policy_version": {"type": "string", "minLength": 1},
+    "policy_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_dataset_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sorter_evaluation_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sorter_output_is_authority": {"const": false},
+    "released_lanes": {"type": "object"},
+    "evaluation_item_count": {"type": "integer", "minimum": 0},
+    "evaluation_commitment_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "evaluation_items_exported_to_training": {"const": false},
+    "raw_content_in_manifest": {"const": false},
+    "dedup_audit": {"type": "string"},
+    "deletion_audit": {"type": "string"},
+    "larger_model_training_permitted": {"const": false},
+    "next_gate": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": true
+}
