@@ -6,10 +6,15 @@ from pathlib import Path
 
 import pytest
 
-from datagoblin.data_etiquette import CollectionDisposition, DataCollectionRecord, EtiquettePolicy
+from datagoblin.data_etiquette import (
+    CollectionDisposition,
+    DataCollectionRecord,
+    EtiquettePolicy,
+    EvidenceReceiptStore,
+)
 from datagoblin.data_etiquette.pipeline import _score, build_etiquette_training_dataset, run_etiquette_demo
 from datagoblin.domain.evidence import EvidenceType
-from datagoblin.serialization import load_structured
+from datagoblin.serialization import dump_structured, load_structured
 
 
 def _jsonl(path: Path) -> list[dict[str, object]]:
@@ -86,8 +91,17 @@ def test_only_receipted_independent_evidence_can_enter_verified_lane(tmp_path: P
         if row["category"] == "clean_verified"
     )
     record = DataCollectionRecord.from_jsonable(train_row["record"])
-    policy = EtiquettePolicy(root / "configs/data_etiquette.yaml")
+    evidence_store = EvidenceReceiptStore.from_jsonl(
+        out / "private_steward/frozen_evidence_verifiers.yaml",
+        out / "private_steward/evidence_receipts.jsonl",
+    )
+    policy = EtiquettePolicy(root / "configs/data_etiquette.yaml", evidence_store=evidence_store)
     assert policy.decide(record).disposition == CollectionDisposition.VERIFIED_TRAIN
+
+    no_store = EtiquettePolicy(root / "configs/data_etiquette.yaml")
+    no_store_decision = no_store.decide(record)
+    assert no_store_decision.disposition == CollectionDisposition.QUARANTINE
+    assert "missing_independent_verification_receipt" in no_store_decision.violations
 
     unreceipted = replace(
         record,
@@ -106,6 +120,20 @@ def test_only_receipted_independent_evidence_can_enter_verified_lane(tmp_path: P
     wrong_subject = replace(record, verification_subject_sha256="0" * 64)
     assert policy.decide(wrong_subject).disposition == CollectionDisposition.QUARANTINE
 
+    replayed_receipt = replace(
+        record,
+        content_sha256="1" * 64,
+        verification_subject_sha256="1" * 64,
+    )
+    replayed_decision = policy.decide(replayed_receipt)
+    assert replayed_decision.disposition == CollectionDisposition.QUARANTINE
+    assert "invalid_independent_verification_receipt" in replayed_decision.violations
+
+    forged_verifier = replace(record, verified_by="proposer-selected-verifier")
+    forged_decision = policy.decide(forged_verifier)
+    assert forged_decision.disposition == CollectionDisposition.QUARANTINE
+    assert "invalid_independent_verification_receipt" in forged_decision.violations
+
     wrong_use = replace(record, allowed_uses=("EVALUATION",))
     assert policy.decide(wrong_use).disposition == CollectionDisposition.QUARANTINE
 
@@ -121,6 +149,29 @@ def test_only_receipted_independent_evidence_can_enter_verified_lane(tmp_path: P
 
     with pytest.raises(ValueError, match="filesystem paths"):
         replace(record, provenance_refs=(r"C:\private\source.txt",))
+
+    receipt_rows = _jsonl(out / "private_steward/evidence_receipts.jsonl")
+    receipt_rows[0]["verdict"] = "FAIL"
+    tampered_path = tmp_path / "tampered-receipts.jsonl"
+    tampered_path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in receipt_rows) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="receipt hash mismatch"):
+        EvidenceReceiptStore.from_jsonl(
+            out / "private_steward/frozen_evidence_verifiers.yaml",
+            tampered_path,
+        )
+
+    drifted_registry = load_structured(out / "private_steward/frozen_evidence_verifiers.yaml")
+    drifted_registry["registry_id"] = "changed-after-receipt-issuance"
+    drifted_registry_path = tmp_path / "drifted-registry.yaml"
+    dump_structured(drifted_registry_path, drifted_registry)
+    with pytest.raises(ValueError, match="active verifier registry"):
+        EvidenceReceiptStore.from_jsonl(
+            drifted_registry_path,
+            out / "private_steward/evidence_receipts.jsonl",
+        )
 
 
 def test_training_dataset_separates_ml_partition_from_enterprise_use(tmp_path: Path) -> None:

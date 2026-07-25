@@ -5,6 +5,8 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from datagoblin.data_etiquette.evidence_receipts import EvidenceReceiptStore
+
 from .corpus_projection import build_corpus_projection, build_safe_field_projection
 from .environment import (
     compare_adapter_reports,
@@ -95,6 +97,8 @@ def build_parser() -> argparse.ArgumentParser:
     finalize.add_argument("--review-map", type=Path, required=True)
     finalize.add_argument("--annotations", type=Path, action="append", required=True)
     finalize.add_argument("--near-duplicate-audit", type=Path, required=True)
+    finalize.add_argument("--evidence-registry", type=Path)
+    finalize.add_argument("--evidence-receipts", type=Path)
     finalize.add_argument("--out", type=Path, required=True)
     return parser
 
@@ -172,12 +176,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(args.out / "public_review" / "review_manifest.json")
         else:
+            if (args.evidence_registry is None) != (args.evidence_receipts is None):
+                raise ValueError("evidence registry and receipt store must be supplied together")
+            evidence_store = (
+                EvidenceReceiptStore.from_jsonl(args.evidence_registry, args.evidence_receipts)
+                if args.evidence_registry is not None
+                else None
+            )
             finalize_semantic_review(
                 args.review_manifest,
                 args.review_map,
                 args.annotations,
                 args.near_duplicate_audit,
                 args.out,
+                evidence_store=evidence_store,
             )
             print(args.out / "review_report.json")
     except (KeyError, ValueError, OSError) as exc:

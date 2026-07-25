@@ -107,6 +107,21 @@ Critical false release counts only non-abstained `VERIFIED_TRAIN` recommendation
 queue and reduce coverage. Thresholds chosen after seeing results are diagnostic only and cannot promote a candidate;
 promotion requires a preregistered held-out confirmation and independent steward signoff.
 
+## Evidence receipt registry
+
+A collection record cannot authorize itself by copying `verified_by`, custody, and a receipt-looking hash into its public
+envelope. Hard evidence is accepted only when the exact receipt is present in a separately supplied steward store and
+validates against the frozen `configs/evidence_verifiers.yaml` registry. The v2 receipt commits to the content subject,
+evidence type, verifier, custody, proposer, verdict, challenge, observation, replay specification, and replay artifacts;
+its canonical hash must equal the hash carried by the collection record. Registry drift, unknown methods,
+self-verification, non-passing verdicts, missing artifacts, or cross-subject receipt replay fail closed to `QUARANTINE`.
+Receipts also declare claim types, and a policy requests the exact claims it needs. A receipt for content integrity,
+for example, cannot silently stand in for policy eligibility or environment outcome validity.
+
+The registry/store boundary is local operator authority, not a distributed signature system. A filesystem administrator
+can replace both, so release receipts should retain the frozen registry hash and private steward custody. Public corpora
+receive hashes and decisions only, never private replay artifacts or local paths.
+
 Key outputs are `public_dataset/dataset_manifest.json`, `sorter_predictions.jsonl`, `sorter_evaluation.json`,
 `adjudication_queue.jsonl`, and `larger_model_handoff/corpus_handoff_manifest.json`. The `private_steward` directory is a
 demonstration of the custody boundary and must be outside the trainer workspace in a real run. Generated runs, hidden

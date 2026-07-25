@@ -12,6 +12,8 @@
 - Curriculum collapse: unique-fraction and diversity declarations are checked and reported.
 - Solver bugs: independent verifier replay and property tests reduce risk, but do not prove solver correctness.
 - False provenance: evidence authority and verifier identity are typed; self-authored environment evidence is rejected.
+- Receipt substitution: hard promotion reopens the exact receipt from private steward custody, validates its canonical
+  hash against a frozen verifier registry, and binds subject, proposer, claim types, verdict, method, and replay artifacts.
 - Ledger tampering: canonical hashes and immutable IDs make accidental mutation visible, while administrators can still alter local storage.
 - Accidental secret ingestion: denylist patterns exclude secrets, private trees, weights, checkpoints, caches, and common generated directories.
 
@@ -20,6 +22,10 @@
 Process-level isolation is not a security sandbox. Environment allowlists do not prevent all OS-level behavior, and v0 does not provide containers, VM isolation, syscall filtering, network namespaces, or hostile-code execution guarantees. `CommandBuilderBackend` is therefore opt-in and inappropriate for arbitrary untrusted code. The trusted template builder is the only builder used by the default demo.
 
 The constitution can detect declared and structurally visible violations; it cannot prove truthful declarations, model alignment, evaluator independence, or scientific validity.
+
+The verifier registry and receipt store are local trust anchors, not cryptographic attestations. An administrator who can
+replace both can forge local authority. Production custody therefore requires independent access control or signatures
+outside this repository; registry declarations alone never prove that a replay occurred.
 
 ## Sealed verdict-label custody
 

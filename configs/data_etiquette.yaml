@@ -39,6 +39,7 @@ hard_rules:
   missing_purpose_or_lawful_basis: QUARANTINE
   missing_provenance: QUARANTINE
   missing_independent_verification_receipt: QUARANTINE
+  invalid_independent_verification_receipt: QUARANTINE
   evaluation_material: EVALUATION_ONLY
   sealed_evaluation_material: SEALED_EVALUATION
   model_or_simulation_evidence: DISCOVERY_ONLY

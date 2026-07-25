@@ -1,0 +1,15 @@
+schema_version: '1.0'
+registry_id: datagoblin-evidence-verifiers-v1
+verifiers:
+  - verifier_id: independent-etiquette-policy-steward-v2
+    custody: INDEPENDENT
+    evidence_types: [INDEPENDENT_HARNESS]
+    methods:
+      - method_id: synthetic-metadata-exact-verifier-v1
+        replay_spec_sha256: 18c55dc41fc2cefdb46c2dcf80ee2ee25f36630665c310c728bb197fc8d66031
+        allowed_claim_types: [CONTENT_INTEGRITY, POLICY_ELIGIBILITY]
+trust_boundary:
+  registry_owner: environment_operator
+  receipt_store_custody: private_steward
+  proposer_strings_are_authority: false
+  filesystem_admin_out_of_scope: false

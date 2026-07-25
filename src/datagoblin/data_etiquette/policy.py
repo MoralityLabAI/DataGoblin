@@ -7,17 +7,19 @@ from datagoblin.domain.evidence import EvidenceType
 from datagoblin.hashing import sha256_file, sha256_json
 from datagoblin.serialization import load_structured
 
+from .evidence_receipts import EvidenceReceiptStore
 from .records import CollectionDisposition, DataCollectionRecord, EtiquetteDecision
 
 
 class EtiquettePolicy:
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, *, evidence_store: EvidenceReceiptStore | None = None) -> None:
         self.path = path
         self.config = load_structured(path)
         if self.config.get("schema_version") != "1.0":
             raise ValueError("unsupported etiquette policy schema version")
         self.version = str(self.config["policy_version"])
         self.hash = sha256_file(path)
+        self.evidence_store = evidence_store
 
     def decide(self, record: DataCollectionRecord) -> EtiquetteDecision:
         if record.schema_version != "1.0":
@@ -152,15 +154,30 @@ class EtiquettePolicy:
             actions.append("set_a_finite_retention_period")
         if violations:
             return CollectionDisposition.QUARANTINE
-        if record.evidence_type.may_hard_promote and (
-            not record.verified_by
-            or not record.verification_receipt_sha256
-            or record.verification_subject_sha256 != record.content_sha256
-            or record.verification_custody not in {"ENVIRONMENT_OWNED", "INDEPENDENT"}
-        ):
-            violations.append("missing_independent_verification_receipt")
-            actions.append("attach_content_bound_environment_or_independent_verification_receipt")
-            return CollectionDisposition.QUARANTINE
+        if record.evidence_type.may_hard_promote:
+            if (
+                not record.verified_by
+                or not record.verification_receipt_sha256
+                or record.verification_subject_sha256 != record.content_sha256
+                or record.verification_custody not in {"ENVIRONMENT_OWNED", "INDEPENDENT"}
+                or self.evidence_store is None
+            ):
+                violations.append("missing_independent_verification_receipt")
+                actions.append("attach_content_bound_environment_or_independent_verification_receipt")
+                return CollectionDisposition.QUARANTINE
+            verified, reason = self.evidence_store.verify_binding(
+                receipt_sha256=record.verification_receipt_sha256,
+                subject_sha256=record.content_sha256,
+                evidence_type=record.evidence_type,
+                verified_by=record.verified_by,
+                custody=record.verification_custody,
+                asserted_by=record.asserted_by,
+                required_claim_types=("CONTENT_INTEGRITY", "POLICY_ELIGIBILITY"),
+            )
+            if not verified:
+                violations.append("invalid_independent_verification_receipt")
+                actions.append(f"repair_or_replace_verification_receipt:{reason}")
+                return CollectionDisposition.QUARANTINE
         soft_evidence = {
             EvidenceType.HUMAN_REVIEWED,
             EvidenceType.MODEL_INFERRED,

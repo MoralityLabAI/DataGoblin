@@ -6,6 +6,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from datagoblin.data_etiquette.evidence_receipts import EvidenceReceiptStore
 from datagoblin.hashing import sha256_bytes, sha256_file, sha256_json, sha256_text
 from datagoblin.serialization import canonical_json, dump_structured, load_structured
 
@@ -25,6 +26,12 @@ ANNOTATION_AXES = (
     "social_reasoning",
     "uncertainty_calibration",
 )
+GAME_EVIDENCE_METHODS = {
+    "centauri": ("centauri-environment-replay-v1", "centauri-state-transition-replay-v1"),
+    "they_sing": ("they-sing-environment-replay-v1", "they-sing-state-transition-replay-v1"),
+    "court": ("court-environment-replay-v1", "court-state-transition-replay-v1"),
+    "diplomacy": ("diplomacy-adjudication-replay-v1", "diplomacy-adjudication-replay-v1"),
+}
 FAILURE_MODES = {
     "commitment_break",
     "duplicate",
@@ -520,6 +527,8 @@ def finalize_semantic_review(
     annotations_paths: Sequence[Path],
     near_duplicate_audit_path: Path,
     out_dir: Path,
+    *,
+    evidence_store: EvidenceReceiptStore | None = None,
 ) -> dict[str, Any]:
     """Validate two blind reviews and emit an immutable, value-free agreement report."""
     if out_dir.exists():
@@ -540,6 +549,8 @@ def finalize_semantic_review(
             by_item[item_id][reviewer_id] = annotation
 
     agreement_rows: list[dict[str, Any]] = []
+    evidence_challenges: list[dict[str, Any]] = []
+    evidence_slices: dict[str, Counter[str]] = defaultdict(Counter)
     slices: dict[tuple[str, str, str], Counter[str]] = defaultdict(Counter)
     disagreements = 0
     for item_id, reviews in sorted(by_item.items()):
@@ -549,6 +560,36 @@ def finalize_semantic_review(
         agreed = left_view == right_view
         disagreements += int(not agreed)
         map_row = next(row for row in review_map if row["item_id"] == item_id)
+        game = str(map_row["game"])
+        asserted_by = str(map_row["model_family"])
+        passing_receipts = (
+            evidence_store.passing_receipts_for(
+                subject_sha256=str(map_row["record_hash"]),
+                asserted_by=asserted_by,
+                required_claim_types=("OUTCOME_VALIDITY",),
+            )
+            if evidence_store is not None
+            else ()
+        )
+        outcome_verified = bool(passing_receipts)
+        evidence_slices[game]["items"] += 1
+        evidence_slices[game]["outcome_verified"] += int(outcome_verified)
+        if not outcome_verified:
+            verifier_id, method_id = GAME_EVIDENCE_METHODS[game]
+            evidence_challenges.append(
+                {
+                    "schema_version": "game-evidence-challenge.v1",
+                    "item_id": item_id,
+                    "subject_sha256": map_row["record_hash"],
+                    "game": game,
+                    "asserted_by": asserted_by,
+                    "required_claim_types": ["OUTCOME_VALIDITY"],
+                    "required_verifier_id": verifier_id,
+                    "required_method_id": method_id,
+                    "replay_artifacts_in_public_challenge": False,
+                    "training_eligible": False,
+                }
+            )
         key = (str(map_row["game"]), str(map_row["model_family"]), str(map_row["reasoning_effort"]))
         slices[key]["items"] += 1
         slices[key]["exact_agreements"] += int(agreed)
@@ -566,6 +607,10 @@ def finalize_semantic_review(
                     }
                 ),
                 "evidence_authority": "HUMAN_REVIEWED",
+                "outcome_evidence_verified": outcome_verified,
+                "outcome_evidence_receipt_sha256s": sorted(
+                    receipt.receipt_sha256 for receipt in passing_receipts
+                ),
                 "training_eligible": False,
             }
         )
@@ -574,6 +619,9 @@ def finalize_semantic_review(
     out_dir.mkdir(parents=True)
     agreement_path = out_dir / "agreement_records.jsonl"
     _write_jsonl(agreement_path, agreement_rows)
+    challenge_path = out_dir / "evidence_challenges.jsonl"
+    _write_jsonl(challenge_path, evidence_challenges)
+    verified_outcomes = sum(counts["outcome_verified"] for counts in evidence_slices.values())
     report = {
         "schema_version": "semantic-review-report.v1",
         "review_manifest_sha256": sha256_file(review_manifest_path),
@@ -595,11 +643,33 @@ def finalize_semantic_review(
         "split_contamination_detected": bool(audit["split_contamination_detected"]),
         "review_gate_complete": disagreements == 0,
         "semantic_split_gate_passed": not audit["split_contamination_detected"],
+        "environment_evidence": {
+            "registry_sha256": evidence_store.registry.sha256 if evidence_store is not None else None,
+            "required_claim_types": ["OUTCOME_VALIDITY"],
+            "verified_items": verified_outcomes,
+            "missing_items": len(agreement_rows) - verified_outcomes,
+            "coverage": verified_outcomes / len(agreement_rows),
+            "by_game": {
+                game: {
+                    "items": counts["items"],
+                    "verified_items": counts["outcome_verified"],
+                    "coverage": counts["outcome_verified"] / counts["items"],
+                }
+                for game, counts in sorted(evidence_slices.items())
+            },
+            "challenge_manifest_sha256": sha256_file(challenge_path),
+            "challenge_count": len(evidence_challenges),
+        },
         "training_release_authorized": False,
         "promotion_blockers": [
             *(["annotation_disagreements_require_content_bound_adjudication"] if disagreements else []),
             *(["semantic_near_duplicate_split_contamination"] if audit["split_contamination_detected"] else []),
-            "independent_environment_outcome_evidence_missing",
+            *(
+                ["independent_environment_outcome_evidence_missing"]
+                if verified_outcomes < len(agreement_rows)
+                else []
+            ),
+            "review_sample_evidence_cannot_authorize_corpus_release",
         ],
         "agreement_records_sha256": sha256_file(agreement_path),
     }

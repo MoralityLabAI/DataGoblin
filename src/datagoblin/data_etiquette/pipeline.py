@@ -13,6 +13,12 @@ from datagoblin.domain.evidence import EvidenceType
 from datagoblin.hashing import sha256_file, sha256_json
 from datagoblin.serialization import dump_structured, load_structured
 
+from .evidence_receipts import (
+    EvidenceReceiptStore,
+    EvidenceVerificationReceipt,
+    EvidenceVerifierRegistry,
+    issue_evidence_receipt,
+)
 from .policy import EtiquettePolicy
 from .records import CollectionDisposition, DataCollectionRecord, EtiquetteDecision
 from .sorter import DeterministicMockLDTSorter
@@ -37,13 +43,19 @@ SPLITS = ("train", "calibration", "ordinary_test", "ood_test", "sealed_poison")
 
 
 def run_etiquette_demo(policy_path: Path, out_dir: Path, *, seed: int = 7) -> dict[str, Any]:
-    policy = EtiquettePolicy(policy_path)
     out_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(policy_path, out_dir / "frozen_policy.yaml")
-    records = tuple(
+    registry_path = policy_path.parent / "evidence_verifiers.yaml"
+    registry = EvidenceVerifierRegistry(registry_path)
+    provisional_records = tuple(
         _make_record(category, split, seed, index)
         for index, (split, category) in enumerate((split, category) for split in SPLITS for category in CATEGORIES)
     )
+    records, receipts = _bind_demo_evidence(provisional_records, registry)
+    policy = EtiquettePolicy(policy_path, evidence_store=EvidenceReceiptStore(registry, receipts))
+    shutil.copyfile(policy_path, out_dir / "frozen_policy.yaml")
+    steward_dir = out_dir / "private_steward"
+    steward_dir.mkdir()
+    _write_evidence_receipts(steward_dir, registry_path, receipts)
     decisions = policy.decide_batch(records)
     dataset_dir = out_dir / "public_dataset"
     dataset_dir.mkdir()
@@ -91,8 +103,6 @@ def run_etiquette_demo(policy_path: Path, out_dir: Path, *, seed: int = 7) -> di
     with predictions_path.open("w", encoding="utf-8", newline="\n") as handle:
         for record in records:
             handle.write(json.dumps(sorter.sort(record), sort_keys=True, separators=(",", ":")) + "\n")
-    steward_dir = out_dir / "private_steward"
-    steward_dir.mkdir()
     sealed_labels_path = steward_dir / "sealed_labels.jsonl"
     with sealed_labels_path.open("w", encoding="utf-8", newline="\n") as handle:
         for record, decision in zip(records, decisions, strict=True):
@@ -118,7 +128,6 @@ def run_etiquette_demo(policy_path: Path, out_dir: Path, *, seed: int = 7) -> di
 
 def build_etiquette_training_dataset(policy_path: Path, out_dir: Path, *, seed: int = 7) -> dict[str, Any]:
     """Build ML partitions independently from each item's enterprise-use disposition."""
-    policy = EtiquettePolicy(policy_path)
     out_dir.mkdir(parents=True, exist_ok=True)
     indexed_records: list[tuple[str, DataCollectionRecord]] = []
     index = 0
@@ -148,7 +157,17 @@ def build_etiquette_training_dataset(policy_path: Path, out_dir: Path, *, seed: 
             )
             indexed_records.append((outer_split, record))
             index += 1
-    records = tuple(record for _, record in indexed_records)
+    registry_path = policy_path.parent / "evidence_verifiers.yaml"
+    registry = EvidenceVerifierRegistry(registry_path)
+    records, receipts = _bind_demo_evidence(
+        tuple(record for _, record in indexed_records),
+        registry,
+    )
+    indexed_records = [
+        (outer_split, record)
+        for (outer_split, _), record in zip(indexed_records, records, strict=True)
+    ]
+    policy = EtiquettePolicy(policy_path, evidence_store=EvidenceReceiptStore(registry, receipts))
     decisions = policy.decide_batch(
         records,
         dataset_partitions=tuple(outer_split for outer_split, _ in indexed_records),
@@ -195,6 +214,7 @@ def build_etiquette_training_dataset(policy_path: Path, out_dir: Path, *, seed: 
     dump_structured(manifest_path, manifest)
     steward_dir = out_dir.parent / "private_steward"
     steward_dir.mkdir()
+    _write_evidence_receipts(steward_dir, registry_path, receipts)
     sealed_path = steward_dir / "sealed_labels.jsonl"
     with sealed_path.open("w", encoding="utf-8", newline="\n") as handle:
         for (outer_split, record), decision in zip(indexed_records, decisions, strict=True):
@@ -465,12 +485,10 @@ def _make_record(category: str, split: str, seed: int, index: int) -> DataCollec
         "generator_id": None,
         "evidence_type": EvidenceType.INDEPENDENT_HARNESS,
         "asserted_by": "synthetic-etiquette-fixture-v1",
-        "verified_by": "independent-etiquette-policy-steward-v1",
-        "verification_receipt_sha256": sha256_json(
-            {"content_sha256": content_sha256, "verifier": "independent-etiquette-policy-steward-v1"}
-        ),
-        "verification_subject_sha256": content_sha256,
-        "verification_custody": "INDEPENDENT",
+        "verified_by": None,
+        "verification_receipt_sha256": None,
+        "verification_subject_sha256": None,
+        "verification_custody": "NONE",
         "provenance_refs": (f"synthetic://etiquette/{seed}/{index}",),
         "dedup_group": f"dedup-{seed}-{split}-{index}",
         "intended_split": split,
@@ -505,6 +523,80 @@ def _make_record(category: str, split: str, seed: int, index: int) -> DataCollec
     elif category == "cross_split_duplicate":
         values["dedup_group"] = f"cross-split-{seed}"
     return DataCollectionRecord(**values)
+
+
+def _bind_demo_evidence(
+    records: tuple[DataCollectionRecord, ...],
+    registry: EvidenceVerifierRegistry,
+) -> tuple[tuple[DataCollectionRecord, ...], tuple[EvidenceVerificationReceipt, ...]]:
+    bound: list[DataCollectionRecord] = []
+    receipts: list[EvidenceVerificationReceipt] = []
+    for record in records:
+        if not record.evidence_type.may_hard_promote:
+            bound.append(record)
+            continue
+        category = str(record.public_metadata["category"])
+        claim_types = (
+            ("CONTENT_INTEGRITY", "POLICY_ELIGIBILITY")
+            if category in {"clean_verified", "cross_split_duplicate"}
+            else ("CONTENT_INTEGRITY",)
+        )
+        receipt = issue_evidence_receipt(
+            registry,
+            subject_sha256=record.content_sha256,
+            evidence_type=record.evidence_type,
+            verifier_id="independent-etiquette-policy-steward-v2",
+            method_id="synthetic-metadata-exact-verifier-v1",
+            asserted_by=record.asserted_by,
+            verdict="PASS",
+            challenge_sha256=sha256_json(
+                {
+                    "registry_sha256": registry.sha256,
+                    "item_id": record.item_id,
+                    "purpose_id": record.purpose_id,
+                }
+            ),
+            observation_sha256=sha256_json(
+                {
+                    "subject_sha256": record.content_sha256,
+                    "category": record.public_metadata["category"],
+                    "synthetic_metadata_only": True,
+                }
+            ),
+            claim_types=claim_types,
+            artifact_sha256s=(
+                sha256_json(
+                    {
+                        "fixture_item_id": record.item_id,
+                        "subject_sha256": record.content_sha256,
+                        "method": "synthetic-metadata-exact-verifier-v1",
+                    }
+                ),
+            ),
+        )
+        receipts.append(receipt)
+        bound.append(
+            replace(
+                record,
+                verified_by=receipt.verifier_id,
+                verification_receipt_sha256=receipt.receipt_sha256,
+                verification_subject_sha256=receipt.subject_sha256,
+                verification_custody=receipt.custody,
+            )
+        )
+    return tuple(bound), tuple(receipts)
+
+
+def _write_evidence_receipts(
+    steward_dir: Path,
+    registry_path: Path,
+    receipts: tuple[EvidenceVerificationReceipt, ...],
+) -> None:
+    shutil.copyfile(registry_path, steward_dir / "frozen_evidence_verifiers.yaml")
+    path = steward_dir / "evidence_receipts.jsonl"
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        for receipt in sorted(receipts, key=lambda value: value.receipt_sha256):
+            handle.write(json.dumps(receipt.to_jsonable(), sort_keys=True, separators=(",", ":")) + "\n")
 
 
 def _evaluate(

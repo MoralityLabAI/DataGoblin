@@ -1,5 +1,11 @@
 """Provenance-first collection etiquette and corpus sorting."""
 
+from .evidence_receipts import (
+    EvidenceReceiptStore,
+    EvidenceVerificationReceipt,
+    EvidenceVerifierRegistry,
+    issue_evidence_receipt,
+)
 from .pipeline import (
     audit_sorter_candidate,
     build_etiquette_training_dataset,
@@ -14,8 +20,12 @@ __all__ = [
     "DataCollectionRecord",
     "EtiquetteDecision",
     "EtiquettePolicy",
+    "EvidenceReceiptStore",
+    "EvidenceVerificationReceipt",
+    "EvidenceVerifierRegistry",
     "audit_sorter_candidate",
     "build_etiquette_training_dataset",
     "evaluate_sorter_predictions",
+    "issue_evidence_receipt",
     "run_etiquette_demo",
 ]

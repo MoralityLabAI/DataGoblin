@@ -108,6 +108,13 @@ blind annotation files and reports agreement by game/model/effort slice. Any dis
 content-bound adjudication pass. Even unanimous review never authorizes training: independent or
 environment-owned outcome evidence remains a separate gate.
 
+When `finalize-semantic-review` receives both `--evidence-registry` and `--evidence-receipts`, it reopens every
+receipt through the trusted store and requires an exact record-hash subject, proposer binding, passing verdict, and
+the claim type `OUTCOME_VALIDITY`. Unknown verifier strings, registry drift, receipt replay against another item,
+or receipts that certify only rule compliance cannot satisfy the outcome gate. Missing items are emitted as a
+content-free `evidence_challenges.jsonl` queue naming the required per-game replay contract. Even complete evidence
+for the bounded review sample cannot authorize a corpus-wide training release.
+
 ```powershell
 $env:PYTHONPATH = "src"
 python -m datagoblin.adapter_verifier build-semantic-review `
@@ -123,5 +130,7 @@ python -m datagoblin.adapter_verifier finalize-semantic-review `
   --annotations D:\Temp\semantic-review\reviewer_a\annotations.jsonl `
   --annotations D:\Temp\semantic-review\reviewer_b\annotations.jsonl `
   --near-duplicate-audit D:\Temp\semantic-review\private_steward\near_duplicate_audit.json `
+  --evidence-registry configs\game_evidence_verifiers.yaml `
+  --evidence-receipts D:\Temp\semantic-review\private_steward\game_evidence_receipts.jsonl `
   --out D:\Temp\semantic-review-final
 ```

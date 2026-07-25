@@ -1,0 +1,40 @@
+schema_version: '1.0'
+registry_id: datagoblin-game-environment-verifiers-v1
+verifiers:
+  - verifier_id: centauri-environment-replay-v1
+    custody: ENVIRONMENT_OWNED
+    evidence_types: [ENVIRONMENT_VERIFIED]
+    methods:
+      - method_id: centauri-state-transition-replay-v1
+        replay_spec_sha256: 11b338edf5506612a5cdf826a6974eb9cd3f5103d7b2f8df42c3f5e3c69bfaa6
+        allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+  - verifier_id: they-sing-environment-replay-v1
+    custody: ENVIRONMENT_OWNED
+    evidence_types: [ENVIRONMENT_VERIFIED]
+    methods:
+      - method_id: they-sing-state-transition-replay-v1
+        replay_spec_sha256: d8db1d3b47d08ebddfa4718995e9e048f8dce88b4812f54a5ea20df2b35e8632
+        allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+  - verifier_id: court-environment-replay-v1
+    custody: ENVIRONMENT_OWNED
+    evidence_types: [ENVIRONMENT_VERIFIED]
+    methods:
+      - method_id: court-state-transition-replay-v1
+        replay_spec_sha256: e80962efcda86156d2e0d3cf7496f58d650399aca96909b50237aee5b8f0e0fc
+        allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+  - verifier_id: diplomacy-adjudication-replay-v1
+    custody: INDEPENDENT
+    evidence_types: [INDEPENDENT_HARNESS]
+    methods:
+      - method_id: diplomacy-adjudication-replay-v1
+        replay_spec_sha256: 8469389ba0da4e6e960c8e31d8295761094d73d989976eeaa1d5729091c5f005
+        allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+trust_boundary:
+  registry_owner: environment_operator
+  receipt_store_custody: private_steward
+  proposer_strings_are_authority: false
+  filesystem_admin_out_of_scope: false
+mandatory_non_claims:
+  - Registry entries specify trusted replay contracts; they are not evidence that a replay occurred.
+  - A passing receipt must bind the exact public record hash and private replay artifact commitments.
+  - Partial review-sample evidence cannot authorize a corpus-wide training release.

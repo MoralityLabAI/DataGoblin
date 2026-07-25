@@ -15,7 +15,13 @@ from datagoblin.adapter_verifier import (
     run_mock_setups_on_dataset,
     run_verifier_demo,
 )
-from datagoblin.hashing import sha256_file
+from datagoblin.data_etiquette import (
+    EvidenceReceiptStore,
+    EvidenceVerifierRegistry,
+    issue_evidence_receipt,
+)
+from datagoblin.domain.evidence import EvidenceType
+from datagoblin.hashing import sha256_file, sha256_json
 from datagoblin.serialization import dump_structured, load_structured
 
 
@@ -268,6 +274,102 @@ def test_content_free_projection_preserves_cohorts_without_values_or_paths(tmp_p
     assert review_report["review_gate_complete"]
     assert not review_report["training_release_authorized"]
     assert "independent_environment_outcome_evidence_missing" in review_report["promotion_blockers"]
+    assert review_report["environment_evidence"]["coverage"] == 0.0
+    assert review_report["environment_evidence"]["challenge_count"] == 4
+
+    registry = EvidenceVerifierRegistry(root / "configs/game_evidence_verifiers.yaml")
+    methods = {
+        "centauri": (
+            "centauri-environment-replay-v1",
+            "centauri-state-transition-replay-v1",
+            EvidenceType.ENVIRONMENT_VERIFIED,
+        ),
+        "they_sing": (
+            "they-sing-environment-replay-v1",
+            "they-sing-state-transition-replay-v1",
+            EvidenceType.ENVIRONMENT_VERIFIED,
+        ),
+        "court": (
+            "court-environment-replay-v1",
+            "court-state-transition-replay-v1",
+            EvidenceType.ENVIRONMENT_VERIFIED,
+        ),
+        "diplomacy": (
+            "diplomacy-adjudication-replay-v1",
+            "diplomacy-adjudication-replay-v1",
+            EvidenceType.INDEPENDENT_HARNESS,
+        ),
+    }
+    review_map = [
+        json.loads(line)
+        for line in (review_out / "private_steward/review_map.jsonl").read_text(encoding="utf-8").splitlines()
+        if line
+    ]
+    unique_items = {row["item_id"]: row for row in review_map}.values()
+    receipts = []
+    for row in unique_items:
+        verifier_id, method_id, evidence_type = methods[row["game"]]
+        receipts.append(
+            issue_evidence_receipt(
+                registry,
+                subject_sha256=row["record_hash"],
+                evidence_type=evidence_type,
+                verifier_id=verifier_id,
+                method_id=method_id,
+                asserted_by=row["model_family"],
+                verdict="PASS",
+                challenge_sha256=sha256_json({"item_id": row["item_id"], "kind": "challenge"}),
+                observation_sha256=sha256_json({"item_id": row["item_id"], "kind": "observation"}),
+                claim_types=("OUTCOME_VALIDITY",),
+                artifact_sha256s=(sha256_json({"item_id": row["item_id"], "kind": "replay"}),),
+            )
+        )
+    first_row = next(iter({row["item_id"]: row for row in review_map}.values()))
+    first_verifier, first_method, first_evidence_type = methods[first_row["game"]]
+    rule_only_receipt = issue_evidence_receipt(
+        registry,
+        subject_sha256=first_row["record_hash"],
+        evidence_type=first_evidence_type,
+        verifier_id=first_verifier,
+        method_id=first_method,
+        asserted_by=first_row["model_family"],
+        verdict="PASS",
+        challenge_sha256=sha256_json({"item_id": first_row["item_id"], "kind": "rule-challenge"}),
+        observation_sha256=sha256_json({"item_id": first_row["item_id"], "kind": "rule-observation"}),
+        claim_types=("RULE_COMPLIANCE",),
+        artifact_sha256s=(sha256_json({"item_id": first_row["item_id"], "kind": "rule-replay"}),),
+    )
+    wrong_claim_report = finalize_semantic_review(
+        review_out / "public_review/review_manifest.json",
+        review_out / "private_steward/review_map.jsonl",
+        [
+            review_out / "reviewer_a/annotations.jsonl",
+            review_out / "reviewer_b/annotations.jsonl",
+        ],
+        review_out / "private_steward/near_duplicate_audit.json",
+        tmp_path / "semantic-review-wrong-claim",
+        evidence_store=EvidenceReceiptStore(registry, [rule_only_receipt, *receipts[1:]]),
+    )
+    assert wrong_claim_report["environment_evidence"]["coverage"] == 0.75
+    assert wrong_claim_report["environment_evidence"]["challenge_count"] == 1
+    assert "independent_environment_outcome_evidence_missing" in wrong_claim_report["promotion_blockers"]
+
+    evidenced_report = finalize_semantic_review(
+        review_out / "public_review/review_manifest.json",
+        review_out / "private_steward/review_map.jsonl",
+        [
+            review_out / "reviewer_a/annotations.jsonl",
+            review_out / "reviewer_b/annotations.jsonl",
+        ],
+        review_out / "private_steward/near_duplicate_audit.json",
+        tmp_path / "semantic-review-evidenced",
+        evidence_store=EvidenceReceiptStore(registry, receipts),
+    )
+    assert evidenced_report["environment_evidence"]["coverage"] == 1.0
+    assert evidenced_report["environment_evidence"]["challenge_count"] == 0
+    assert "independent_environment_outcome_evidence_missing" not in evidenced_report["promotion_blockers"]
+    assert "review_sample_evidence_cannot_authorize_corpus_release" in evidenced_report["promotion_blockers"]
+    assert not evidenced_report["training_release_authorized"]
 
     run_mock_setups_on_dataset(
         root / "configs/curation_adapter_verifier.yaml",

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/evidence_verification_receipt.schema.json",
+  "title": "Content-bound evidence verification receipt v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "subject_sha256",
+    "evidence_type",
+    "verifier_id",
+    "method_id",
+    "custody",
+    "asserted_by",
+    "verdict",
+    "registry_sha256",
+    "challenge_sha256",
+    "observation_sha256",
+    "replay_spec_sha256",
+    "claim_types",
+    "artifact_sha256s",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "evidence-verification-receipt.v2"},
+    "subject_sha256": {"$ref": "#/$defs/sha256"},
+    "evidence_type": {"enum": ["ENVIRONMENT_VERIFIED", "INDEPENDENT_HARNESS"]},
+    "verifier_id": {"type": "string", "minLength": 1},
+    "method_id": {"type": "string", "minLength": 1},
+    "custody": {"enum": ["ENVIRONMENT_OWNED", "INDEPENDENT"]},
+    "asserted_by": {"type": "string", "minLength": 1},
+    "verdict": {"enum": ["PASS", "FAIL", "INCONCLUSIVE"]},
+    "registry_sha256": {"$ref": "#/$defs/sha256"},
+    "challenge_sha256": {"$ref": "#/$defs/sha256"},
+    "observation_sha256": {"$ref": "#/$defs/sha256"},
+    "replay_spec_sha256": {"$ref": "#/$defs/sha256"},
+    "claim_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "CONTENT_INTEGRITY",
+          "POLICY_ELIGIBILITY",
+          "RULE_COMPLIANCE",
+          "OUTCOME_VALIDITY",
+          "STATE_GROUNDING"
+        ]
+      }
+    },
+    "artifact_sha256s": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/sha256"}
+    },
+    "receipt_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
