@@ -8,6 +8,7 @@ from pathlib import Path
 from datagoblin.data_etiquette.evidence_receipts import EvidenceReceiptStore
 
 from .corpus_projection import build_corpus_projection, build_safe_field_projection
+from .drift_benchmark import run_drift_confirmation, run_drift_gym
 from .environment import (
     compare_adapter_reports,
     evaluate_adapter_setup,
@@ -74,6 +75,29 @@ def build_parser() -> argparse.ArgumentParser:
     compare = subparsers.add_parser("compare", help="compare two or more adapter evaluation reports")
     compare.add_argument("--report", type=Path, action="append", required=True)
     compare.add_argument("--out", type=Path, required=True)
+
+    drift = subparsers.add_parser(
+        "drift-gym",
+        help="fit and compare a shape-only learned adapter against the frozen exact-key baseline",
+    )
+    drift.add_argument(
+        "--config",
+        type=Path,
+        default=Path("configs/preregistrations/game_adapter_schema_drift_v1.yaml"),
+    )
+    drift.add_argument("--out", type=Path, required=True)
+    drift.add_argument("--seed", type=int, default=101)
+
+    confirmation = subparsers.add_parser(
+        "drift-confirm",
+        help="run the preregistered pilot and fresh-seed schema-drift confirmation",
+    )
+    confirmation.add_argument(
+        "--config",
+        type=Path,
+        default=Path("configs/preregistrations/game_adapter_schema_drift_v1.yaml"),
+    )
+    confirmation.add_argument("--out", type=Path, required=True)
 
     review = subparsers.add_parser(
         "build-semantic-review",
@@ -187,6 +211,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif args.command == "compare":
             compare_adapter_reports(args.report, args.out)
             print(args.out / "comparison.md")
+        elif args.command == "drift-gym":
+            comparison = run_drift_gym(args.config, args.out, seed=args.seed)
+            print(args.out / "comparison.md")
+            return (
+                0
+                if comparison["promotion_assessment"]["eligible_for_next_architecture_gate"]
+                else 3
+            )
+        elif args.command == "drift-confirm":
+            confirmation = run_drift_confirmation(args.config, args.out)
+            print(args.out / "confirmation_report.json")
+            return 0 if confirmation["confirmed_for_next_architecture_gate"] else 3
         elif args.command == "build-semantic-review":
             build_semantic_review_queue(
                 args.config,

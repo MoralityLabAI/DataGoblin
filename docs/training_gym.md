@@ -13,6 +13,11 @@ constitutional repair, counterfactual mechanism discrimination, experiment-outco
 long-horizon state plus halt calibration. This prevents selection of a model that is merely good at one
 classifier-shaped benchmark.
 
+The separate four-game [curation adapter verifier](curation_adapter_verifier.md) now includes an
+executable schema-drift gate. Its small character n-gram mapper and emitted LoRA/HRM-Text SFT packs
+validate custody, split, and normalization signal only. Passing that gate does not enable a real
+checkpoint run or satisfy the remaining multi-task architecture-promotion requirements here.
+
 ## Candidate families
 
 - `lora_sft`: rank and target-module sweeps with a frozen-base and randomly initialized adapter control.

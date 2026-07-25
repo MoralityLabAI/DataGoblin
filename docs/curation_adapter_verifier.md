@@ -29,6 +29,49 @@ The demo compares three mocks: a strict policy adapter, a permissive map-all neg
 and a conservative abstain control. All remain promotion-ineligible because mocks are plumbing
 tests. The comparison deliberately has no universal scalar winner.
 
+## Learned schema-drift gate
+
+The canonical fixture is deliberately easy for the strict policy because its source keys are
+already the answer vocabulary. `drift-confirm` creates a harder, leakage-safe task: one canonical
+safe field at a time is replaced by a generated alias. The frozen exact-key policy remains the
+baseline, while a fitted character n-gram mapper must recover fields from transformation families
+that do not occur in its fitting or calibration roles.
+
+The benchmark keeps three custody lanes:
+
+- Public rows contain game names, field-name shapes, typed flags, opaque lineage commitments, and
+  transformation-family names. They contain no labels or corpus values.
+- The candidate workspace contains labels only for `train` and `calibration`.
+- The private steward file contains all labels and enters only the evaluator.
+
+Generated lineages cannot cross splits. Fitting/calibration transformation families cannot cross
+into ordinary or OOD evaluation, and a fresh confirmation is invalid unless its public schema
+surface hash differs from the pilot. The fixed privacy/evaluation membrane handles private,
+reasoning-bearing, ambiguous, and sealed rows; only the safe-field mapper is learned.
+
+```powershell
+$env:PYTHONPATH = "src"
+python -m datagoblin.adapter_verifier drift-confirm `
+  --config configs/preregistrations/game_adapter_schema_drift_v1.yaml `
+  --out D:\Temp\datagoblin-schema-drift-confirmation
+```
+
+Passing this gate means only that a small fitted adapter beat exact-key normalization on the
+synthetic shape task with the preregistered safety rates. It advances the same recipe-shaped
+examples to the optional LoRA/QLoRA/HRM-Text architecture gate; it does not release private game
+records or establish that any larger architecture is better.
+
+The recipe ordering is grounded in primary references:
+
+- [LoRA](https://openreview.net/forum?id=nZeVKeeFYf9) motivates testing low-rank checkpoint
+  adaptation only after a learnable task and baseline have been established.
+- [QLoRA](https://papers.neurips.cc/paper_files/paper/2023/file/1feb87871436031bdc0f2beaa62a049b-Paper-Conference.pdf)
+  motivates a memory-bounded adapter variant; quantization does not relax evidence or custody gates.
+- [SetFit](https://arxiv.org/abs/2209.11055) motivates a small supervised representation baseline
+  for a label-scarce text task before spending on a larger checkpoint.
+- [Valentine](https://arxiv.org/abs/2010.07386) motivates explicit schema-family holdouts and
+  field-mapping evaluation instead of treating exact canonical keys as a sufficient benchmark.
+
 ## Evaluate a setup against a given dataset
 
 Supply a candidate manifest and one prediction per dataset item:

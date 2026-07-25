@@ -1,0 +1,117 @@
+schema_version: '1.0'
+benchmark_id: datagoblin-game-adapter-schema-drift-v1
+policy_config: configs/curation_adapter_verifier.yaml
+games: [centauri, they_sing, court, diplomacy]
+
+hypothesis:
+  primary: >
+    A fitted character n-gram field adapter will recover safe canonical game fields from
+    held-out schema drift more accurately than the frozen exact-key policy while preserving
+    zero privacy leakage and zero critical false release.
+  claim_scope: >
+    Shape-only field normalization under synthetic, environment-owned drift. This is not
+    evidence of game-record truth, corpus-wide training eligibility, LoRA quality, or HRM quality.
+
+split_contract:
+  fitting_splits: [train]
+  calibration_splits: [calibration]
+  evaluation_splits: [ordinary_test, ood_test, sealed_poison]
+  group_key: lineage_group_sha256
+  transformation_family_key: transformation_family
+  require_disjoint_lineage_groups: true
+  require_disjoint_transformation_families:
+    - [train, ordinary_test]
+    - [train, ood_test]
+    - [calibration, ordinary_test]
+    - [calibration, ood_test]
+  canonical_contract_tokens_may_repeat: true
+  note: >
+    Canonical field names are the public task vocabulary and may repeat. Generated row
+    lineages and transformation families may not cross fitting/evaluation roles.
+
+generator:
+  version: '1.0.0'
+  content_policy: >
+    Field names, typed flags, game identifiers, environment-owned synthetic labels, and
+    hashes only; no raw corpus values, filesystem paths, prompts, responses, private state,
+    hidden reasoning, or model-generated claims.
+  aliases_per_field:
+    train: 3
+    calibration: 2
+    ordinary_test: 2
+    ood_test: 1
+  hazard_rows_per_game:
+    train: 3
+    calibration: 1
+    ordinary_test: 1
+    ood_test: 2
+    sealed_poison: 2
+
+candidate:
+  family: sparse_character_ngram_field_adapter
+  feature_dimension: 1024
+  character_ngram_min: 2
+  character_ngram_max: 5
+  epochs: 360
+  learning_rate: 0.7
+  l2: 0.0001
+  maximum_trainable_parameters: 32768
+  model_input_contract: public_shape_only
+  learned_component: multiclass linear field mapper
+  fixed_component: fail-closed privacy/evaluation membrane
+
+promotion_gates:
+  maximum_privacy_leak_rate: 0.0
+  maximum_critical_false_release_rate: 0.0
+  minimum_sealed_exact_record_accuracy: 1.0
+  minimum_ordinary_exact_record_accuracy: 0.70
+  minimum_ood_exact_record_accuracy: 0.55
+  minimum_ordinary_exact_gain_over_exact_key: 0.35
+  minimum_ood_exact_gain_over_exact_key: 0.20
+  require_nonnegative_exact_gain_every_game: true
+  require_weights_trained: true
+  require_evaluation_labels_unseen: true
+
+confirmation:
+  pilot_seed: 101
+  fresh_confirmation_seed: 211
+  config_must_be_unchanged_between_runs: true
+  schema_surface_must_differ: true
+  both_runs_must_pass: true
+
+architecture_recipes:
+  - recipe_id: sparse-char-ngram-v1
+    status: executable_cpu_reference
+    purpose: Prove the data, custody, baseline, and evaluation contract before checkpoint training.
+  - recipe_id: lora-schema-normalizer-v1
+    status: proposed_not_executed
+    target: small locally supplied text encoder or causal LM
+    rank_grid: [4, 8, 16]
+    alpha_rule: 2x_rank
+    modules: [query, value]
+    selection_metric: ordinary_exact_subject_to_safety_gates
+  - recipe_id: qlora-schema-normalizer-v1
+    status: proposed_not_executed
+    target: operator-supplied checkpoint under a hard resource-cap wrapper
+    quantization_bits: 4
+    rank_grid: [8, 16]
+    selection_metric: ood_exact_subject_to_safety_gates
+  - recipe_id: hrm-text-schema-normalizer-v1
+    status: proposed_not_executed
+    target: optional HRM-Text checkpoint
+    recurrence_grid: [2, 4, 8]
+    selection_metric: calibration_and_ood_exact_subject_to_safety_gates
+
+primary_references:
+  - title: 'LoRA: Low-Rank Adaptation of Large Language Models'
+    url: https://openreview.net/forum?id=nZeVKeeFYf9
+    use: Parameter-efficient checkpoint recipe after the benchmark proves learnable signal.
+  - title: 'QLoRA: Efficient Finetuning of Quantized LLMs'
+    url: https://papers.neurips.cc/paper_files/paper/2023/file/1feb87871436031bdc0f2beaa62a049b-Paper-Conference.pdf
+    use: Memory-bounded checkpoint recipe; quantization does not relax evidence gates.
+  - title: 'Efficient Few-Shot Learning Without Prompts'
+    url: https://arxiv.org/abs/2209.11055
+    use: Motivates a small supervised representation baseline before large-model tuning.
+  - title: 'Valentine: Evaluating Matching Techniques for Dataset Discovery'
+    url: https://arxiv.org/abs/2010.07386
+    use: Motivates explicit held-out schema families and field-mapping metrics.

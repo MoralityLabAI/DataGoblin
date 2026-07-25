@@ -57,6 +57,8 @@ datagoblin upstream-status
 datagoblin gym-demo --seed 7 --out runs/training-gym-demo
 datagoblin etiquette-demo --seed 7 --out runs/etiquette-demo
 datagoblin etiquette-build-training-dataset --seed 17 --out runs/ldt-fit/dataset
+python -m datagoblin.adapter_verifier drift-confirm \
+  --out runs/adapter-schema-drift-confirmation
 ```
 
 The architecture-neutral training gym evaluates LoRA, HRM-Text, and bounded looping-transformer candidates through a
@@ -66,6 +68,11 @@ frozen split and metric firewall. The default command runs mock controls only an
 The collection-etiquette pipeline classifies public metadata envelopes into reject, quarantine, discovery, verified,
 and evaluation custody lanes. Its LDT is currently a deterministic plumbing control and has no authority to release
 training data. See [`docs/data_collection_etiquette.md`](docs/data_collection_etiquette.md).
+
+The four-game curation verifier also has a learned, shape-only schema-drift gate. It fits a small
+CPU reference adapter, compares it with the frozen exact-key policy, and requires a different-surface
+confirmation before emitting checkpoint-ready LoRA and HRM-Text recipe packs. See
+[`docs/curation_adapter_verifier.md`](docs/curation_adapter_verifier.md).
 
 ## Optional HRM-Text cycle milestone
 

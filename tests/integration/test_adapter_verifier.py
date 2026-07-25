@@ -8,10 +8,14 @@ import pytest
 
 from datagoblin.adapter_verifier import (
     build_corpus_projection,
+    build_drift_benchmark,
     build_safe_field_projection,
     build_semantic_review_queue,
     evaluate_adapter_setup,
+    evaluate_drift_setup,
     finalize_semantic_review,
+    fit_drift_adapter,
+    run_drift_confirmation,
     run_mock_setups_on_dataset,
     run_verifier_demo,
 )
@@ -96,6 +100,108 @@ def test_adapter_verifier_rejects_dataset_rebinding_and_authority_escalation(tmp
             escalated,
             out / "setups/strict-policy-mock/predictions.jsonl",
             tmp_path / "rejected-authority",
+        )
+
+
+def test_schema_drift_gym_beats_exact_key_baseline_on_fresh_surface(tmp_path: Path) -> None:
+    root = Path(__file__).parents[2]
+    out = tmp_path / "schema-drift-confirmation"
+    confirmation = run_drift_confirmation(
+        root / "configs/preregistrations/game_adapter_schema_drift_v1.yaml",
+        out,
+    )
+
+    assert confirmation["confirmed_for_next_architecture_gate"]
+    assert all(confirmation["checks"].values())
+    assert (
+        confirmation["runs"]["pilot"]["schema_surface_sha256"]
+        != confirmation["runs"]["fresh_confirmation"]["schema_surface_sha256"]
+    )
+    for run_name in ("pilot", "fresh_confirmation"):
+        run = out / run_name
+        baseline = load_structured(
+            run / "evaluations/frozen-exact-key-policy-v1/evaluation_report.json"
+        )
+        candidate = load_structured(
+            run / "evaluations/sparse-char-ngram-v1/evaluation_report.json"
+        )
+        fit = load_structured(run / "setups/sparse-char-ngram-v1/fit_receipt.json")
+        assert candidate["split_results"]["ordinary_test"]["exact_record_accuracy"] > baseline[
+            "split_results"
+        ]["ordinary_test"]["exact_record_accuracy"]
+        assert candidate["split_results"]["ood_test"]["exact_record_accuracy"] > baseline[
+            "split_results"
+        ]["ood_test"]["exact_record_accuracy"]
+        assert candidate["evaluation_overall"]["privacy_leak_rate"] == 0.0
+        assert candidate["evaluation_overall"]["critical_false_release_rate"] == 0.0
+        assert candidate["split_results"]["sealed_poison"]["exact_record_accuracy"] == 1.0
+        assert fit["fit"]["converged"]
+        assert fit["fit"]["steps_completed"] > 0
+        assert 0 < fit["trainable_parameters"] <= fit["maximum_trainable_parameters"]
+        assert fit["evaluation_splits_read_as_labels"] == []
+        assert not fit["network_used"]
+        assert not fit["raw_corpus_values_read"]
+
+        public_rows = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (run / "public_dataset").glob("*.jsonl")
+        )
+        assert '"expected":' not in public_rows
+        assert '"field_targets":' not in public_rows
+        training_labels = [
+            json.loads(line)
+            for line in (run / "candidate_workspace/training_labels.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ]
+        assert {row["split"] for row in training_labels} == {"train", "calibration"}
+        assert not {row["split"] for row in training_labels} & {
+            "ordinary_test",
+            "ood_test",
+            "sealed_poison",
+        }
+        recipe_manifest = load_structured(
+            run / "candidate_workspace/architecture_recipes/recipe_manifest.json"
+        )
+        assert recipe_manifest["allowed_splits"] == ["calibration", "train"]
+        assert recipe_manifest["evaluation_splits_included"] == []
+        assert recipe_manifest["examples_per_file"] == len(training_labels)
+        for entry in recipe_manifest["files"].values():
+            recipe_path = (
+                run / "candidate_workspace/architecture_recipes" / entry["path"]
+            )
+            assert sha256_file(recipe_path) == entry["sha256"]
+            recipe_rows = [
+                json.loads(line)
+                for line in recipe_path.read_text(encoding="utf-8").splitlines()
+            ]
+            assert {row["split"] for row in recipe_rows} == {"train", "calibration"}
+            assert all(
+                row["record_hash"] in {label["record_hash"] for label in training_labels}
+                for row in recipe_rows
+            )
+
+
+def test_schema_drift_evaluator_rejects_evaluation_label_access(tmp_path: Path) -> None:
+    root = Path(__file__).parents[2]
+    config = root / "configs/preregistrations/game_adapter_schema_drift_v1.yaml"
+    out = tmp_path / "schema-drift"
+    build_drift_benchmark(config, out, seed=313)
+    setup = out / "setup"
+    fit_drift_adapter(config, out / "public_dataset/dataset_manifest.json", setup)
+    candidate = load_structured(setup / "candidate_manifest.json")
+    candidate["evaluation_label_access"] = True
+    rejected = tmp_path / "evaluation-label-access.json"
+    dump_structured(rejected, candidate)
+
+    with pytest.raises(ValueError, match="evaluation-label access"):
+        evaluate_drift_setup(
+            config,
+            out / "public_dataset/dataset_manifest.json",
+            out / "private_steward/ground_truth.jsonl",
+            rejected,
+            setup / "predictions.jsonl",
+            tmp_path / "rejected-drift-evaluation",
         )
 
 
