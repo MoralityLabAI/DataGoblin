@@ -53,5 +53,6 @@ export TRANSFORMERS_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false
 export CUDA_MODULE_LOADING=LAZY
 export DATAGOBLIN_GYM_EVENTS="$events"
+export DATAGOBLIN_HARD_CAPS_VERIFIED=1
 json_event candidate_process_start weights_loaded=unknown
 exec "$@"

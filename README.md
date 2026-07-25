@@ -83,6 +83,9 @@ confirmation before emitting checkpoint-ready LoRA and HRM-Text recipe packs. Se
 Repeated boundary, authority, and robustness rounds can also produce a split-safe pairwise LDT
 selection curriculum; see
 [`docs/curation_skill_tournament_succession.md`](docs/curation_skill_tournament_succession.md).
+The bounded array-sorter gym fits linear, latent, and weight-tied looped heads to that
+curriculum under WSL2 cgroup caps and scores them through a separate steward join; see
+[`docs/ldt_array_sorter_gym.md`](docs/ldt_array_sorter_gym.md).
 
 ## Optional HRM-Text cycle milestone
 

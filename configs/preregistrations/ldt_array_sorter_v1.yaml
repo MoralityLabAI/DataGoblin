@@ -1,0 +1,164 @@
+schema_version: '1.0'
+experiment_id: datagoblin-ldt-array-sorter-v1
+status: frozen_before_heldout_evaluation
+training_task_id: ldt-array-sorter-v1-seed-sweep
+
+purpose: >
+  Test whether small dense-array selection heads can recover DataGoblin's typed curation
+  taste on lineage-disjoint tournament comparisons, and whether weight-tied recurrence
+  improves over linear and one-pass latent controls.
+claim_scope: >
+  Results apply only to environment-owned synthetic tournament meta-preferences. They do
+  not establish game-playing skill, corpus quality, safe release authority, or superiority
+  of LDT, TRM, LoRA, HRM-Text, or larger checkpoints.
+
+dataset_contract:
+  schema_version: curation-taste-ldt-foundation.v1
+  required_train_examples: 180
+  required_heldout_examples: 180
+  required_cross_split_lineages: 0
+  train_targets_available_to_candidate: true
+  heldout_inputs_available_to_candidate: true
+  heldout_targets_available_to_candidate: false
+  feature_whitelist:
+    - game
+    - fixture_pressure
+    - context_mode
+    - optimization_pressure
+    - trainable_parameter_bucket
+    - safety_qualified
+    - ordinary_exact_record_accuracy
+    - ordinary_mapping_f1
+    - ood_exact_record_accuracy
+    - ood_mapping_f1
+  forbidden_candidate_inputs:
+    - example_id_as_feature
+    - lineage_hash_as_feature
+    - source_tournament_hash_as_feature
+    - row_level_game_records
+    - sealed_metrics
+    - heldout_targets
+    - source_agent_identity
+    - hidden_reasoning
+
+array_representation:
+  fit_vocabulary_on: train_only
+  swap_augmentation: true
+  raw_features:
+    - signed_and_absolute_quality_deltas
+    - signed_safety_delta
+    - signed_parameter_bucket_delta
+    - train_fitted_signed_context_indicators
+    - train_fitted_signed_optimization_indicators
+    - game_indicator
+    - fixture_pressure_indicator
+  typed_lattice_features:
+    - safety_direction
+    - pareto_direction
+    - metric_equivalence
+    - parameter_efficiency_direction
+    - mixed_tradeoff
+  metric_equivalence_tolerance: 0.01
+
+models:
+  controls:
+    - model_id: majority-control
+      family: non_trainable
+    - model_id: frozen-taste-policy
+      family: non_trainable_environment_rule
+  candidates:
+    - model_id: linear-raw
+      family: joint_linear_array
+      feature_view: raw
+      hidden_width: 0
+      loop_count: 0
+      epochs: 300
+      learning_rate: 0.08
+    - model_id: linear-typed
+      family: joint_linear_array
+      feature_view: typed
+      hidden_width: 0
+      loop_count: 0
+      epochs: 300
+      learning_rate: 0.08
+    - model_id: latent-typed-h4
+      family: latent_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 1
+      epochs: 500
+      learning_rate: 0.03
+    - model_id: looped-typed-h4-l2
+      family: weight_tied_looped_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 2
+      epochs: 500
+      learning_rate: 0.03
+    - model_id: looped-typed-h4-l4
+      family: weight_tied_looped_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 4
+      epochs: 500
+      learning_rate: 0.03
+    - model_id: looped-typed-h8-l4
+      family: weight_tied_looped_array
+      feature_view: typed
+      hidden_width: 8
+      loop_count: 4
+      epochs: 500
+      learning_rate: 0.025
+
+training:
+  seeds: [11, 23, 47]
+  validation: leave_one_training_lineage_out
+  batch_size: 24
+  checkpoint_interval: {epochs: 100, seconds: 60}
+  chunk_strategy: at_most_24_pair_arrays_per_gradient_chunk
+  class_balancing: inverse_frequency_after_swap_augmentation
+  rationale_loss_weight: 0.5
+  l2: 0.0005
+  gradient_norm_clip: 5.0
+  external_checkpoint: null
+  network_permitted: false
+
+hard_caps:
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  ram_mb: 2048
+  cpu_percent: 50
+  io_mb_per_second: 50
+  wall_clock_seconds: 900
+  swap_bytes: 0
+  fallback_if_unavailable: abort_without_training
+
+heldout_evaluation:
+  reveal_count: 1
+  no_post_reveal_tuning: true
+  primary_metrics:
+    - preference_macro_f1
+    - safety_gate_accuracy
+    - tradeoff_recall
+    - joint_exact_accuracy
+  secondary_metrics:
+    - preference_accuracy
+    - rationale_macro_f1
+    - multiclass_brier
+    - swap_consistency
+    - per_game_preference_accuracy
+    - per_pressure_preference_accuracy
+    - trainable_parameter_count
+  report_each_seed: true
+  aggregate_seed_mean_and_range: true
+  universal_scalar_champion_permitted: false
+  comparison_rule: >
+    Safety regressions disqualify first. Otherwise retain the per-metric Pareto set and
+    prefer fewer parameters only when heldout quality is equivalent within 0.01.
+
+promotion_boundary:
+  sorter_authority: MODEL_RECOMMENDATION_ONLY
+  checkpoint_promotion_authorized: false
+  larger_model_training_authorized: false
+  next_gate: >
+    Repeat on a newly generated succession with fresh development and heldout lineages
+    before using any learned sorter as a curation recommendation feature.
