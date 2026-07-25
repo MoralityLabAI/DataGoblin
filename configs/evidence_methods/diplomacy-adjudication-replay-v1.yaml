@@ -1,0 +1,23 @@
+schema_version: evidence-replay-method.v1
+method_id: diplomacy-adjudication-replay-v1
+custody: INDEPENDENT
+claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+inputs:
+  - content-addressed semantic-review challenge
+  - private safe-field derivation ledger entry
+  - exact indexed curated game record
+  - hash-bound provenance archive
+  - independently operated Diplomacy adjudicator root
+procedure:
+  - Re-read the bounded indexed curated record and verify its source-content and safe-field commitments.
+  - Resolve the provenance archive beneath the approved corpus root and verify its SHA-256 commitment.
+  - Read only lmvsgame.json from the archive; do not inspect player sessions, responses, prompts, or reasoning.
+  - Replay every saved phase with the independent adjudicator, including order-legality and next-state checks.
+  - Recompute the public adjudicated-outcome projection from the saved game and compare it exactly with the curated trace.
+pass_condition: The source, archive, saved-game replay, and public outcome projection bindings all pass.
+inconclusive_conditions:
+  - The hash-bound provenance archive or adjudicator is unavailable.
+  - The saved game cannot be replayed with the declared adjudication rules.
+non_claims:
+  - Source-check counters are proposer-side claims and cannot replace adjudication.
+  - Press, strategic plans, model responses, and reasoning are excluded from verification.

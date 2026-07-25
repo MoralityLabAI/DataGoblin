@@ -1,0 +1,23 @@
+schema_version: evidence-replay-method.v1
+method_id: court-state-transition-replay-v1
+custody: ENVIRONMENT_OWNED
+claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+inputs:
+  - content-addressed semantic-review challenge
+  - private safe-field derivation ledger entry
+  - exact indexed decision record
+  - canonical Court episode and complete decision shard
+  - operator-selected Court engine snapshot matching the canonical env_version
+procedure:
+  - Re-read the bounded indexed decision record and verify its source-content and safe-field commitments.
+  - Require the selected decision to belong to the canonical episode and complete decision shard.
+  - Replay the episode with every recorded model decision under the exact declared Court engine version.
+  - Require all decisions to be consumed exactly once.
+  - Compare canonical player metadata, every turn record, and the complete outcome object.
+pass_condition: The source binding, engine-version binding, decision consumption, turns, and outcome all match.
+inconclusive_conditions:
+  - The exact historical Court engine snapshot is unavailable.
+  - A different engine version is available but the declared version is not.
+non_claims:
+  - Replaying under a newer Court version cannot certify an older canonical episode.
+  - Canonical outcome presence without replay does not verify the outcome.

@@ -6,6 +6,7 @@ from .environment import (
     run_mock_setups_on_dataset,
     run_verifier_demo,
 )
+from .evidence_replay import verify_semantic_evidence
 from .semantic_review import build_semantic_review_queue, finalize_semantic_review, validate_semantic_annotations
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "run_mock_setups_on_dataset",
     "run_verifier_demo",
     "validate_semantic_annotations",
+    "verify_semantic_evidence",
 ]

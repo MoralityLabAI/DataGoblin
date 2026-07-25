@@ -115,6 +115,30 @@ or receipts that certify only rule compliance cannot satisfy the outcome gate. M
 content-free `evidence_challenges.jsonl` queue naming the required per-game replay contract. Even complete evidence
 for the bounded review sample cannot authorize a corpus-wide training release.
 
+`verify-semantic-evidence` consumes that challenge queue in a private workspace. It reopens each exact indexed
+source record, checks the safe-field derivation commitments, binds the record to an environment-owned native
+episode or hash-bound provenance archive, and runs the game-specific replay declared in
+`configs/evidence_methods`. The registry commits the SHA-256 of each method file, so editing a replay contract
+invalidates old receipts. The verifier emits a receipt for every challenge, but only a `PASS` receipt carrying
+`OUTCOME_VALIDITY` can satisfy finalization; missing historical engines and state-hash drift remain
+`INCONCLUSIVE`.
+
+The game methods deliberately differ:
+
+- Centauri requires the selected actor/turn/phase/legal-command tuple to occur exactly once in the native
+  research episode and requires the environment replay to reproduce all state commitments.
+- They Sing binds both selected order lists to the native faction/turn records, reconstructs a replay-only
+  configuration, and compares every completed-turn post-state hash.
+- Court consumes the complete decision shard under an explicitly supplied engine snapshot whose version equals
+  the canonical episode's `env_version`, then compares all turns and the complete outcome.
+- Diplomacy reads only `lmvsgame.json` from the hash-bound provenance archive, independently adjudicates every
+  saved phase, and recomputes the public outcome projection. Player sessions, responses, prompts, press, plans,
+  and reasoning are excluded.
+
+All paths, safe values, replay inputs, environment reports, and receipts remain under the private output root.
+Only code, method specifications, and deterministic tests belong in the repository. A complete bounded review
+sample still cannot authorize a corpus-wide training release.
+
 ```powershell
 $env:PYTHONPATH = "src"
 python -m datagoblin.adapter_verifier build-semantic-review `
@@ -124,6 +148,22 @@ python -m datagoblin.adapter_verifier build-semantic-review `
   --approved-root D:\approved-corpus-root `
   --out D:\Temp\semantic-review
 
+python -m datagoblin.adapter_verifier verify-semantic-evidence `
+  --challenges D:\Temp\semantic-review-final\evidence_challenges.jsonl `
+  --review-map D:\Temp\semantic-review\private_steward\review_map.jsonl `
+  --derivation-ledger D:\Temp\safe-field-gym\private_projection\derivation_ledger.jsonl `
+  --evidence-registry configs\game_evidence_verifiers.yaml `
+  --method-specs configs\evidence_methods `
+  --approved-root D:\approved-aicourt-corpus `
+  --approved-root D:\approved-diplomacy-corpus `
+  --aicourt-corpus-root D:\approved-aicourt-corpus `
+  --centauri-root C:\projects\AIpha-CentaurAI `
+  --they-sing-root C:\projects\TheySing `
+  --diplomacy-engine-root C:\projects\AI_Diplomacy `
+  --diplomacy-corpus-root D:\approved-diplomacy-corpus `
+  --court-engine-snapshot 1.2.0=D:\private-engine-snapshots\court-1.2.0\src\court\engine.mjs `
+  --out D:\Temp\semantic-evidence-replay
+
 python -m datagoblin.adapter_verifier finalize-semantic-review `
   --review-manifest D:\Temp\semantic-review\public_review\review_manifest.json `
   --review-map D:\Temp\semantic-review\private_steward\review_map.jsonl `
@@ -131,6 +171,6 @@ python -m datagoblin.adapter_verifier finalize-semantic-review `
   --annotations D:\Temp\semantic-review\reviewer_b\annotations.jsonl `
   --near-duplicate-audit D:\Temp\semantic-review\private_steward\near_duplicate_audit.json `
   --evidence-registry configs\game_evidence_verifiers.yaml `
-  --evidence-receipts D:\Temp\semantic-review\private_steward\game_evidence_receipts.jsonl `
+  --evidence-receipts D:\Temp\semantic-evidence-replay\evidence_receipts.jsonl `
   --out D:\Temp\semantic-review-final
 ```

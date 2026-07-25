@@ -1,0 +1,23 @@
+schema_version: evidence-replay-method.v1
+method_id: they-sing-state-transition-replay-v1
+custody: ENVIRONMENT_OWNED
+claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+inputs:
+  - content-addressed semantic-review challenge
+  - private safe-field derivation ledger entry
+  - exact indexed decision record
+  - native They Sing session log
+  - operator-selected They Sing harness root
+procedure:
+  - Re-read the bounded indexed decision record and verify its source-content and safe-field commitments.
+  - Bind both selected order lists to the matching faction, turn, and phase-reasoning records in the native log.
+  - Derive a replay-only session configuration from the environment-owned session-created event.
+  - Replay every completed turn with the environment harness and recorded normalized plans.
+  - Compare every replayed turn-completed post-state hash with the original native trace.
+pass_condition: The source and native bindings pass and every selected session turn hash reproduces.
+inconclusive_conditions:
+  - The environment harness or native session is unavailable.
+  - The available environment version does not reproduce the recorded state commitments.
+non_claims:
+  - Trace schema validation without deterministic replay does not verify an outcome.
+  - Private messages and reasoning are neither emitted nor treated as evidence.

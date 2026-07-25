@@ -6,28 +6,28 @@ verifiers:
     evidence_types: [ENVIRONMENT_VERIFIED]
     methods:
       - method_id: centauri-state-transition-replay-v1
-        replay_spec_sha256: 11b338edf5506612a5cdf826a6974eb9cd3f5103d7b2f8df42c3f5e3c69bfaa6
+        replay_spec_sha256: 45901d350a37ccf6f54ac93425b50ef50a1d56c3de0bb272fcdfcc9d04f4fcd7
         allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
   - verifier_id: they-sing-environment-replay-v1
     custody: ENVIRONMENT_OWNED
     evidence_types: [ENVIRONMENT_VERIFIED]
     methods:
       - method_id: they-sing-state-transition-replay-v1
-        replay_spec_sha256: d8db1d3b47d08ebddfa4718995e9e048f8dce88b4812f54a5ea20df2b35e8632
+        replay_spec_sha256: edf42d0147887cc09a056e42ceab8d656cdeb1652027d16221079b645c5e3775
         allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
   - verifier_id: court-environment-replay-v1
     custody: ENVIRONMENT_OWNED
     evidence_types: [ENVIRONMENT_VERIFIED]
     methods:
       - method_id: court-state-transition-replay-v1
-        replay_spec_sha256: e80962efcda86156d2e0d3cf7496f58d650399aca96909b50237aee5b8f0e0fc
+        replay_spec_sha256: eedb80ecafb7a087449b1d1af54a97f33f2abfbf1268522078cdc4f6c63f7fc1
         allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
   - verifier_id: diplomacy-adjudication-replay-v1
     custody: INDEPENDENT
     evidence_types: [INDEPENDENT_HARNESS]
     methods:
       - method_id: diplomacy-adjudication-replay-v1
-        replay_spec_sha256: 8469389ba0da4e6e960c8e31d8295761094d73d989976eeaa1d5729091c5f005
+        replay_spec_sha256: c2331122ff7b6e13e154d59a8be87fdf56c4a0a5a8af936f278a01e2b9b4a941
         allowed_claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
 trust_boundary:
   registry_owner: environment_operator

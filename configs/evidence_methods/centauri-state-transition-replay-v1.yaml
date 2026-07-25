@@ -1,0 +1,22 @@
+schema_version: evidence-replay-method.v1
+method_id: centauri-state-transition-replay-v1
+custody: ENVIRONMENT_OWNED
+claim_types: [RULE_COMPLIANCE, OUTCOME_VALIDITY, STATE_GROUNDING]
+inputs:
+  - content-addressed semantic-review challenge
+  - private safe-field derivation ledger entry
+  - exact indexed decision record
+  - native aipha.synthetic.v2 episode
+  - operator-selected AIpha CentaurAI environment root
+procedure:
+  - Re-read the bounded indexed decision record and verify its source-content and safe-field commitments.
+  - Bind the decision to one native episode decision by episode, turn, phase, actor, and legal-command equality.
+  - Run the environment-owned research replay for the complete native episode.
+  - Require reset, before-step, after-step, counterfactual, and terminal state commitments to reproduce.
+pass_condition: The source and native bindings pass and the environment replay reports no mismatch.
+inconclusive_conditions:
+  - The committed engine snapshot is unavailable.
+  - The available environment version does not reproduce the recorded state commitments.
+non_claims:
+  - Structural dataset validation alone does not verify an outcome.
+  - A newer engine failing an older trace does not prove the recorded outcome false.

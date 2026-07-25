@@ -14,6 +14,7 @@ from .environment import (
     run_mock_setups_on_dataset,
     run_verifier_demo,
 )
+from .evidence_replay import verify_semantic_evidence
 from .semantic_review import build_semantic_review_queue, finalize_semantic_review
 
 
@@ -100,6 +101,31 @@ def build_parser() -> argparse.ArgumentParser:
     finalize.add_argument("--evidence-registry", type=Path)
     finalize.add_argument("--evidence-receipts", type=Path)
     finalize.add_argument("--out", type=Path, required=True)
+
+    replay = subparsers.add_parser(
+        "verify-semantic-evidence",
+        help="run private environment replays and issue claim-scoped evidence receipts",
+    )
+    replay.add_argument("--challenges", type=Path, required=True)
+    replay.add_argument("--review-map", type=Path, required=True)
+    replay.add_argument("--derivation-ledger", type=Path, required=True)
+    replay.add_argument("--evidence-registry", type=Path, required=True)
+    replay.add_argument("--method-specs", type=Path)
+    replay.add_argument("--approved-root", type=Path, action="append", required=True)
+    replay.add_argument("--aicourt-corpus-root", type=Path, required=True)
+    replay.add_argument("--centauri-root", type=Path, required=True)
+    replay.add_argument("--they-sing-root", type=Path, required=True)
+    replay.add_argument("--diplomacy-engine-root", type=Path, required=True)
+    replay.add_argument("--diplomacy-corpus-root", type=Path, action="append", required=True)
+    replay.add_argument(
+        "--court-engine-snapshot",
+        action="append",
+        default=[],
+        metavar="VERSION=ENGINE_PATH",
+    )
+    replay.add_argument("--out", type=Path, required=True)
+    replay.add_argument("--max-record-bytes", type=int, default=2_000_000)
+    replay.add_argument("--timeout-seconds", type=int, default=180)
     return parser
 
 
@@ -175,6 +201,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 max_record_bytes=args.max_record_bytes,
             )
             print(args.out / "public_review" / "review_manifest.json")
+        elif args.command == "verify-semantic-evidence":
+            snapshots = _parse_engine_snapshots(args.court_engine_snapshot)
+            verify_semantic_evidence(
+                args.challenges,
+                args.review_map,
+                args.derivation_ledger,
+                args.evidence_registry,
+                args.approved_root,
+                args.out,
+                aicourt_corpus_root=args.aicourt_corpus_root,
+                centauri_root=args.centauri_root,
+                they_sing_root=args.they_sing_root,
+                diplomacy_engine_root=args.diplomacy_engine_root,
+                diplomacy_corpus_roots=args.diplomacy_corpus_root,
+                court_engine_snapshots=snapshots,
+                method_specs_dir=args.method_specs,
+                max_record_bytes=args.max_record_bytes,
+                timeout_seconds=args.timeout_seconds,
+            )
+            print(args.out / "evidence_replay_report.json")
         else:
             if (args.evidence_registry is None) != (args.evidence_receipts is None):
                 raise ValueError("evidence registry and receipt store must be supplied together")
@@ -196,6 +242,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"adapter-verifier: {exc}", file=sys.stderr)
         return 2
     return 0
+
+
+def _parse_engine_snapshots(values: Sequence[str]) -> dict[str, Path]:
+    snapshots: dict[str, Path] = {}
+    for value in values:
+        version, separator, path = value.partition("=")
+        if not separator or not version or not path or version in snapshots:
+            raise ValueError("court engine snapshots must be unique VERSION=ENGINE_PATH values")
+        snapshots[version] = Path(path)
+    return snapshots
 
 
 if __name__ == "__main__":
