@@ -463,6 +463,7 @@ def build_drift_benchmark(config_path: Path, out_dir: Path, *, seed: int = 101) 
         "seed": seed,
         "config_sha256": sha256_file(config_path),
         "generator_version": config["generator"]["version"],
+        "generator_implementation_sha256": sha256_file(Path(__file__)),
         "schema_surface_sha256": sha256_json(surface_rows),
         "games": list(GAMES),
         "splits": split_entries,
@@ -813,9 +814,39 @@ def fit_drift_adapter(
     out_dir: Path,
     *,
     setup_id: str = "sparse-char-ngram-v1",
+    candidate_profile: Mapping[str, Any] | None = None,
+    profile_id: str | None = None,
+    tournament_config_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Fit only on the released train labels, calibrate on calibration, then predict public evaluation rows."""
     config, policy = _load_contract(config_path)
+    if candidate_profile is not None:
+        allowed = {
+            "feature_dimension",
+            "character_ngram_min",
+            "character_ngram_max",
+            "epochs",
+            "learning_rate",
+            "l2",
+            "minimum_mapping_confidence",
+            "force_mapping_confidence_threshold",
+            "maximum_trainable_parameters",
+        }
+        unknown = set(candidate_profile) - allowed
+        if unknown:
+            raise ValueError(f"unsupported schema-drift candidate profile keys: {sorted(unknown)}")
+        configured_candidate = {**config["candidate"], **candidate_profile}
+        if int(configured_candidate["feature_dimension"]) < 32:
+            raise ValueError("schema-drift candidate feature dimension is too small")
+        if not 1 <= int(configured_candidate["character_ngram_min"]) <= int(
+            configured_candidate["character_ngram_max"]
+        ):
+            raise ValueError("invalid schema-drift character n-gram range")
+        if int(configured_candidate["epochs"]) < 1:
+            raise ValueError("schema-drift candidate epochs must be positive")
+        config = {**config, "candidate": configured_candidate}
+    if (profile_id is None) != (tournament_config_sha256 is None):
+        raise ValueError("profile ID and tournament config hash must be supplied together")
     manifest, rows_by_split = _read_dataset(dataset_manifest_path)
     if manifest["config_sha256"] != sha256_file(config_path):
         raise ValueError("schema-drift dataset is not bound to this preregistration")
@@ -829,6 +860,18 @@ def fit_drift_adapter(
     threshold, calibration = _calibrate_threshold(
         config, classes, weights, calibration_samples
     )
+    if "force_mapping_confidence_threshold" in config["candidate"]:
+        threshold = float(config["candidate"]["force_mapping_confidence_threshold"])
+        calibration["threshold_source"] = "profile_forced"
+    else:
+        threshold = max(
+            threshold,
+            float(config["candidate"].get("minimum_mapping_confidence", 0.0)),
+        )
+        calibration["threshold_source"] = "calibration_with_profile_floor"
+    if not 0.0 <= threshold <= 1.0:
+        raise ValueError("schema-drift candidate threshold is outside [0,1]")
+    calibration["selected_threshold"] = threshold
     model = {
         "schema_version": "sparse-character-ngram-adapter.v1",
         "classes": classes,
@@ -838,6 +881,7 @@ def fit_drift_adapter(
             int(config["candidate"]["character_ngram_max"]),
         ],
         "threshold": threshold,
+        "profile_id": profile_id,
         "weights": np.round(weights, 12).tolist(),
     }
     model_path = out_dir / "model_weights.json"
@@ -862,6 +906,7 @@ def fit_drift_adapter(
         "evaluation_public_shapes_read_for_inference": list(EVALUATION_SPLITS),
         "fit": fit,
         "calibration": calibration,
+        "candidate_profile": dict(config["candidate"]),
         "trainable_parameters": int(weights.size),
         "maximum_trainable_parameters": int(config["candidate"]["maximum_trainable_parameters"]),
         "model_weights_sha256": sha256_file(model_path),
@@ -869,6 +914,14 @@ def fit_drift_adapter(
         "network_used": False,
         "raw_corpus_values_read": False,
         "checkpoint_downloaded": False,
+        **(
+            {
+                "profile_id": profile_id,
+                "tournament_config_sha256": tournament_config_sha256,
+            }
+            if profile_id is not None
+            else {}
+        ),
     }
     if fit_receipt["trainable_parameters"] > fit_receipt["maximum_trainable_parameters"]:
         raise ValueError("schema-drift candidate exceeded preregistered parameter cap")
@@ -891,6 +944,14 @@ def fit_drift_adapter(
         "fit_receipt_sha256": sha256_file(fit_path),
         "training_splits": ["train"],
         "calibration_splits": ["calibration"],
+        **(
+            {
+                "profile_id": profile_id,
+                "tournament_config_sha256": tournament_config_sha256,
+            }
+            if profile_id is not None
+            else {}
+        ),
     }
     dump_structured(out_dir / "candidate_manifest.json", candidate_manifest)
     return candidate_manifest
@@ -1100,6 +1161,19 @@ def evaluate_drift_setup(
         game: _aggregate([row for row in evaluation_rows if row["game"] == game])
         for game in GAMES
     }
+    game_split_results = {
+        game: {
+            split: _aggregate(
+                [
+                    row
+                    for row in evaluation_rows
+                    if row["game"] == game and row["split"] == split
+                ]
+            )
+            for split in EVALUATION_SPLITS
+        }
+        for game in GAMES
+    }
     report = {
         "schema_version": "game-adapter-drift-evaluation.v1",
         "setup_id": setup_id,
@@ -1117,6 +1191,7 @@ def evaluate_drift_setup(
         },
         "evaluation_overall": _aggregate(evaluation_rows),
         "game_results": game_results,
+        "game_split_results": game_split_results,
         "custody_checks": {
             "dataset_bound": True,
             "config_bound": manifest["config_sha256"] == sha256_file(config_path),

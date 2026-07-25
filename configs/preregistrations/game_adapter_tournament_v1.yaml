@@ -1,0 +1,102 @@
+schema_version: '1.0'
+tournament_id: datagoblin-four-game-adapter-tournament-v1
+benchmark_config: configs/preregistrations/game_adapter_schema_drift_v1.yaml
+games: [centauri, they_sing, court, diplomacy]
+
+purpose: >
+  Compare bounded data-normalization adapters on identical four-game, shape-only fixtures before
+  admitting a checkpoint-backed candidate to any game-playing arena.
+claim_scope: >
+  This tournament measures public schema normalization and fail-closed routing. It does not measure
+  gameplay skill, authorize corpus release, or establish LoRA, HRM-Text, or looping-transformer
+  architecture superiority.
+
+baseline:
+  setup_id: frozen-exact-key-policy-v1
+  family: frozen_exact_key_policy
+
+profiles:
+  - profile_id: normal-full-context-v1
+    setup_id: tournament-normal-full-context-v1
+    context_mode: normal_full_context
+    optimization_pressure: balanced_exact_mapping_and_safety
+    candidate:
+      feature_dimension: 1024
+      character_ngram_min: 2
+      character_ngram_max: 5
+      epochs: 240
+      learning_rate: 0.7
+      l2: 0.0001
+      minimum_mapping_confidence: 0.15
+      maximum_trainable_parameters: 32768
+  - profile_id: compact-context-v1
+    setup_id: tournament-compact-context-v1
+    context_mode: compact_context
+    optimization_pressure: parameter_efficiency_subject_to_safety
+    candidate:
+      feature_dimension: 256
+      character_ngram_min: 3
+      character_ngram_max: 5
+      epochs: 220
+      learning_rate: 0.7
+      l2: 0.0001
+      minimum_mapping_confidence: 0.10
+      maximum_trainable_parameters: 8192
+  - profile_id: coverage-pressure-v1
+    setup_id: tournament-coverage-pressure-v1
+    context_mode: coverage_pressure
+    optimization_pressure: maximum_safe_mapping_coverage
+    candidate:
+      feature_dimension: 512
+      character_ngram_min: 2
+      character_ngram_max: 4
+      epochs: 180
+      learning_rate: 0.7
+      l2: 0.0001
+      force_mapping_confidence_threshold: 0.0
+      maximum_trainable_parameters: 16384
+
+event_metrics:
+  safety_gates:
+    - privacy_leak_rate
+    - critical_false_release_rate
+    - sealed_exact_record_accuracy
+  pareto_axes:
+    - ordinary_exact_record_accuracy
+    - ordinary_mapping_f1
+    - ood_exact_record_accuracy
+    - ood_mapping_f1
+  universal_scalar_winner: false
+  report_per_game_before_aggregate: true
+
+advancement_gates:
+  maximum_privacy_leak_rate: 0.0
+  maximum_critical_false_release_rate: 0.0
+  minimum_sealed_exact_record_accuracy: 1.0
+  minimum_ordinary_exact_gain_over_baseline: 0.30
+  minimum_ood_exact_gain_over_baseline: 0.15
+  require_nonnegative_per_game_ordinary_gain: true
+  require_nonnegative_per_game_ood_gain: true
+  evaluation_labels_must_be_unseen: true
+  advancement_authority: tournament_qualification_only
+
+confirmation:
+  pilot_seed: 401
+  fresh_confirmation_seed: 509
+  schema_surface_must_differ: true
+  tournament_config_must_be_unchanged: true
+  qualifier_set_must_be_stable: true
+  at_least_one_profile_must_qualify: true
+
+future_gameplay_arena:
+  status: contract_only_not_executed
+  admission_requirement: pass_this_tournament_on_pilot_and_fresh_confirmation
+  scheduling: seed_matched_environment_fixtures_with_fixed_opponent_pools
+  scoring: environment_owned_outcomes_and_legality_receipts
+  requirements:
+    - per-game results before any aggregate
+    - symmetric seat or role rotation
+    - identical public observations and budgets within each matched block
+    - environment-owned adjudication
+    - no hidden state, private memory, or chain-of-thought in public artifacts
+    - no universal scalar champion

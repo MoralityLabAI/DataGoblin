@@ -59,6 +59,8 @@ datagoblin etiquette-demo --seed 7 --out runs/etiquette-demo
 datagoblin etiquette-build-training-dataset --seed 17 --out runs/ldt-fit/dataset
 python -m datagoblin.adapter_verifier drift-confirm \
   --out runs/adapter-schema-drift-confirmation
+python -m datagoblin.adapter_verifier tournament-confirm \
+  --out runs/four-game-adapter-tournament
 ```
 
 The architecture-neutral training gym evaluates LoRA, HRM-Text, and bounded looping-transformer candidates through a

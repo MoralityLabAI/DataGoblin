@@ -17,6 +17,7 @@ from .environment import (
 )
 from .evidence_replay import verify_semantic_evidence
 from .semantic_review import build_semantic_review_queue, finalize_semantic_review
+from .tournament import run_adapter_tournament, run_adapter_tournament_confirmation
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -98,6 +99,29 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("configs/preregistrations/game_adapter_schema_drift_v1.yaml"),
     )
     confirmation.add_argument("--out", type=Path, required=True)
+
+    tournament = subparsers.add_parser(
+        "tournament",
+        help="run normal, compact, and coverage-pressure adapters on one four-game fixture",
+    )
+    tournament.add_argument(
+        "--config",
+        type=Path,
+        default=Path("configs/preregistrations/game_adapter_tournament_v1.yaml"),
+    )
+    tournament.add_argument("--out", type=Path, required=True)
+    tournament.add_argument("--seed", type=int, default=401)
+
+    tournament_confirmation = subparsers.add_parser(
+        "tournament-confirm",
+        help="run pilot and different-surface four-game adapter tournaments",
+    )
+    tournament_confirmation.add_argument(
+        "--config",
+        type=Path,
+        default=Path("configs/preregistrations/game_adapter_tournament_v1.yaml"),
+    )
+    tournament_confirmation.add_argument("--out", type=Path, required=True)
 
     review = subparsers.add_parser(
         "build-semantic-review",
@@ -223,6 +247,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             confirmation = run_drift_confirmation(args.config, args.out)
             print(args.out / "confirmation_report.json")
             return 0 if confirmation["confirmed_for_next_architecture_gate"] else 3
+        elif args.command == "tournament":
+            tournament = run_adapter_tournament(
+                args.config,
+                args.out,
+                seed=args.seed,
+            )
+            print(args.out / "tournament_report.json")
+            return 0 if tournament["qualifiers"] else 3
+        elif args.command == "tournament-confirm":
+            confirmation = run_adapter_tournament_confirmation(args.config, args.out)
+            print(args.out / "tournament_confirmation.json")
+            return (
+                0
+                if confirmation["confirmed_for_checkpoint_candidate_admission"]
+                else 3
+            )
         elif args.command == "build-semantic-review":
             build_semantic_review_queue(
                 args.config,

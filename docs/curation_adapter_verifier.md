@@ -72,6 +72,35 @@ The recipe ordering is grounded in primary references:
 - [Valentine](https://arxiv.org/abs/2010.07386) motivates explicit schema-family holdouts and
   field-mapping evaluation instead of treating exact canonical keys as a sufficient benchmark.
 
+## Four-game adapter tournament
+
+`tournament-confirm` applies the schema-drift gate to several adapter profiles on identical
+Centauri, They Sing, Court, and Diplomacy fixtures:
+
+- normal full-context;
+- compact context under a lower parameter budget;
+- coverage pressure with a zero mapping-confidence threshold; and
+- the frozen exact-key baseline.
+
+```powershell
+$env:PYTHONPATH = "src"
+python -m datagoblin.adapter_verifier tournament-confirm `
+  --config configs/preregistrations/game_adapter_tournament_v1.yaml `
+  --out D:\Temp\datagoblin-four-game-adapter-tournament
+```
+
+Safety gates are applied before mapping metrics. The report emits ordinary and OOD results per
+game, pairwise Pareto dominance, and a Pareto front for each game. It deliberately emits
+`winner: null`: a compact adapter can be preferable on parameter cost while a larger adapter can
+be more robust on one game's OOD schemas. Qualification must repeat on a different schema surface,
+but Pareto-front movement is retained as evidence rather than hidden behind an aggregate score.
+
+This is a **data-adapter tournament**, not yet a tournament in which models play the games.
+The preregistration includes the next arena contract: admitted checkpoint candidates must use
+seed-matched public observations, fixed opponent pools, symmetric seat or role rotation,
+environment-owned legality and outcome receipts, and per-game results before aggregates. No
+checkpoint is downloaded or trained by this command.
+
 ## Evaluate a setup against a given dataset
 
 Supply a candidate manifest and one prediction per dataset item:
