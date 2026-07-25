@@ -17,6 +17,7 @@ from .environment import (
 )
 from .evidence_replay import verify_semantic_evidence
 from .semantic_review import build_semantic_review_queue, finalize_semantic_review
+from .skill_tournament import run_curation_skill_tournament_succession
 from .tournament import run_adapter_tournament, run_adapter_tournament_confirmation
 
 
@@ -122,6 +123,22 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("configs/preregistrations/game_adapter_tournament_v1.yaml"),
     )
     tournament_confirmation.add_argument("--out", type=Path, required=True)
+
+    succession = subparsers.add_parser(
+        "skill-tournament-succession",
+        help="run pressure-varied tournaments and emit an LDT curation-taste foundation",
+    )
+    succession.add_argument(
+        "--config",
+        type=Path,
+        default=Path(
+            "configs/preregistrations/curation_skill_tournament_succession_v1.yaml"
+        ),
+    )
+    succession.add_argument("--skill-before-fingerprint", type=Path, required=True)
+    succession.add_argument("--skill-after-fingerprint", type=Path, required=True)
+    succession.add_argument("--candidate-validator", type=Path, required=True)
+    succession.add_argument("--out", type=Path, required=True)
 
     review = subparsers.add_parser(
         "build-semantic-review",
@@ -263,6 +280,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if confirmation["confirmed_for_checkpoint_candidate_admission"]
                 else 3
             )
+        elif args.command == "skill-tournament-succession":
+            succession = run_curation_skill_tournament_succession(
+                args.config,
+                args.skill_before_fingerprint,
+                args.skill_after_fingerprint,
+                args.candidate_validator,
+                args.out,
+            )
+            print(args.out / "succession_report.json")
+            return 0 if succession["succession_passed"] else 3
         elif args.command == "build-semantic-review":
             build_semantic_review_queue(
                 args.config,

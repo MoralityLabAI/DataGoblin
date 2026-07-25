@@ -101,6 +101,10 @@ seed-matched public observations, fixed opponent pools, symmetric seat or role r
 environment-owned legality and outcome receipts, and per-game results before aggregates. No
 checkpoint is downloaded or trained by this command.
 
+For repeated boundary, authority, and robustness tournaments that derive a split-safe pairwise
+selection task for a future LDT, see
+[Curation-skill tournament succession](curation_skill_tournament_succession.md).
+
 ## Evaluate a setup against a given dataset
 
 Supply a candidate manifest and one prediction per dataset item:

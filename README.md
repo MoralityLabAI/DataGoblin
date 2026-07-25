@@ -61,6 +61,11 @@ python -m datagoblin.adapter_verifier drift-confirm \
   --out runs/adapter-schema-drift-confirmation
 python -m datagoblin.adapter_verifier tournament-confirm \
   --out runs/four-game-adapter-tournament
+python -m datagoblin.adapter_verifier skill-tournament-succession \
+  --skill-before-fingerprint path/to/skill_before.json \
+  --skill-after-fingerprint path/to/skill_after.json \
+  --candidate-validator path/to/validate_adapter_candidate.py \
+  --out runs/curation-skill-succession
 ```
 
 The architecture-neutral training gym evaluates LoRA, HRM-Text, and bounded looping-transformer candidates through a
@@ -75,6 +80,9 @@ The four-game curation verifier also has a learned, shape-only schema-drift gate
 CPU reference adapter, compares it with the frozen exact-key policy, and requires a different-surface
 confirmation before emitting checkpoint-ready LoRA and HRM-Text recipe packs. See
 [`docs/curation_adapter_verifier.md`](docs/curation_adapter_verifier.md).
+Repeated boundary, authority, and robustness rounds can also produce a split-safe pairwise LDT
+selection curriculum; see
+[`docs/curation_skill_tournament_succession.md`](docs/curation_skill_tournament_succession.md).
 
 ## Optional HRM-Text cycle milestone
 

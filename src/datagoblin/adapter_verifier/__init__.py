@@ -16,6 +16,7 @@ from .environment import (
 )
 from .evidence_replay import verify_semantic_evidence
 from .semantic_review import build_semantic_review_queue, finalize_semantic_review, validate_semantic_annotations
+from .skill_tournament import run_curation_skill_tournament_succession
 from .tournament import run_adapter_tournament, run_adapter_tournament_confirmation
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "fit_drift_adapter",
     "run_adapter_tournament",
     "run_adapter_tournament_confirmation",
+    "run_curation_skill_tournament_succession",
     "run_drift_confirmation",
     "run_drift_gym",
     "run_exact_key_baseline",

@@ -1,0 +1,101 @@
+schema_version: '1.0'
+succession_id: datagoblin-curation-skill-tournament-succession-v1
+tournament_config: configs/preregistrations/game_adapter_tournament_v1.yaml
+skill_name: curate-game-agent-data
+skill_before_sha256: b08756184391a73e748e478c7c0aa1c08152189a7d96977c980db417841fa31e
+
+purpose: >
+  Test curation taste across distinct tournament pressures, preserve per-game tradeoffs, and
+  materialize a leakage-safe pairwise preference curriculum for a future LDT selector.
+claim_scope: >
+  Environment-owned synthetic meta-preferences about curation adapter selection. This succession
+  does not authorize private corpus release, expose steward row labels, train an LDT, or measure
+  game-playing skill.
+
+rounds:
+  - round_id: boundary-development
+    meta_split: train
+    fixture_pressure: boundary_precedence
+    seed: 601
+  - round_id: authority-development
+    meta_split: train
+    fixture_pressure: authority_provenance
+    seed: 607
+  - round_id: robustness-development
+    meta_split: train
+    fixture_pressure: balanced
+    seed: 613
+  - round_id: boundary-heldout
+    meta_split: heldout
+    fixture_pressure: boundary_precedence
+    seed: 701
+  - round_id: authority-heldout
+    meta_split: heldout
+    fixture_pressure: authority_provenance
+    seed: 709
+  - round_id: robustness-heldout
+    meta_split: heldout
+    fixture_pressure: balanced
+    seed: 719
+
+taste_contract:
+  preference_order:
+    - safety_qualification
+    - per_game_pareto_dominance
+    - parameter_efficiency_when_metrics_are_equivalent
+    - explicit_tradeoff
+  metric_equivalence_tolerance: 0.01
+  preference_labels: [LEFT, RIGHT, TRADEOFF]
+  rationale_codes:
+    - safety_gate
+    - pareto_dominance
+    - parameter_efficiency
+    - irreducible_tradeoff
+  never_use:
+    - universal aggregate winner
+    - token consumption as quality
+    - row-level sealed labels
+    - hidden reasoning
+    - source-agent identity as a quality proxy
+
+ldt_foundation:
+  task: pairwise_curation_adapter_selection
+  training_split: train
+  evaluation_split: heldout
+  include_environment_counterfactual_controls: true
+  public_feature_whitelist:
+    - game
+    - fixture_pressure
+    - context_mode
+    - optimization_pressure
+    - trainable_parameter_bucket
+    - safety_qualified
+    - ordinary_exact_record_accuracy
+    - ordinary_mapping_f1
+    - ood_exact_record_accuracy
+    - ood_mapping_f1
+  target_fields: [preference, rationale_code]
+  no_row_level_game_records: true
+  no_sealed_metrics_in_features: true
+  no_heldout_targets_in_candidate_workspace: true
+
+succession_gates:
+  require_all_rounds_have_qualifier: true
+  require_zero_safety_regressions: true
+  require_distinct_round_lineages: true
+  require_pressure_matched_train_and_heldout: true
+  require_skill_fingerprint_change: true
+  require_heldout_targets_separate: true
+  require_all_preference_labels: true
+  require_all_rationale_codes: true
+  require_external_candidate_preflight: true
+
+mutation_hypothesis:
+  trigger: >
+    Stable qualifiers but moving per-game Pareto fronts show that one aggregate champion is not
+    durable curation taste. Compound boundaries and evidence authority must be tested as separate
+    pressure families before deriving LDT preferences.
+  durable_change: >
+    Add a succession protocol that separates development from heldout tournaments and teaches
+    lexicographic safety, per-game dominance, efficiency only under metric equivalence, and an
+    explicit TRADEOFF outcome.

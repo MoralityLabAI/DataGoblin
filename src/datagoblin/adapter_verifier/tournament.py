@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
 import shutil
+import subprocess
+import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -16,6 +19,46 @@ from .drift_benchmark import (
     run_exact_key_baseline,
 )
 from .environment import GAMES
+
+
+def _run_external_preflight(
+    validator_path: Path,
+    dataset_manifest_path: Path,
+    candidate_manifest_path: Path,
+    predictions_path: Path,
+    out_path: Path,
+) -> dict[str, Any]:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(validator_path),
+            "--dataset-manifest",
+            str(dataset_manifest_path),
+            "--candidate-manifest",
+            str(candidate_manifest_path),
+            "--predictions",
+            str(predictions_path),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"adapter tournament preflight emitted invalid JSON: {candidate_manifest_path}"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise ValueError("adapter tournament preflight must emit a JSON object")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    dump_structured(out_path, payload)
+    if completed.returncode != 0 or payload.get("valid") is not True:
+        raise ValueError(
+            f"adapter tournament preflight failed: {candidate_manifest_path}"
+        )
+    return payload
 
 
 def _load_tournament_config(config_path: Path) -> tuple[dict[str, Any], Path]:
@@ -242,13 +285,20 @@ def run_adapter_tournament(
     out_dir: Path,
     *,
     seed: int,
+    fixture_pressure: str = "balanced",
+    candidate_validator_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run normal, compact, and coverage-pressure profiles on one frozen four-game fixture."""
     config, benchmark_config = _load_tournament_config(config_path)
     out_dir.mkdir(parents=True, exist_ok=False)
     shutil.copyfile(config_path, out_dir / "frozen_tournament_config.yaml")
     benchmark_root = out_dir / "benchmark"
-    build_drift_benchmark(benchmark_config, benchmark_root, seed=seed)
+    build_drift_benchmark(
+        benchmark_config,
+        benchmark_root,
+        seed=seed,
+        pressure_mode=fixture_pressure,
+    )
     manifest_path = benchmark_root / "public_dataset" / "dataset_manifest.json"
     steward_path = benchmark_root / "private_steward" / "ground_truth.jsonl"
     dataset_manifest = load_structured(manifest_path)
@@ -261,6 +311,19 @@ def run_adapter_tournament(
         baseline_dir,
         setup_id=baseline_setup_id,
     )
+    preflight_results: dict[str, dict[str, Any]] = {}
+    if candidate_validator_path is not None:
+        if not candidate_validator_path.is_file():
+            raise ValueError(
+                f"adapter tournament candidate validator is missing: {candidate_validator_path}"
+            )
+        preflight_results[baseline_setup_id] = _run_external_preflight(
+            candidate_validator_path,
+            manifest_path,
+            baseline_dir / "candidate_manifest.json",
+            baseline_dir / "predictions.jsonl",
+            out_dir / "preflight" / f"{baseline_setup_id}.json",
+        )
     baseline_report_path = out_dir / "evaluations" / baseline_setup_id
     baseline_report = evaluate_drift_setup(
         benchmark_config,
@@ -298,6 +361,14 @@ def run_adapter_tournament(
         for key, value in profile["candidate"].items():
             if fit_receipt["candidate_profile"].get(key) != value:
                 raise ValueError(f"adapter tournament fit profile drift: {setup_id}/{key}")
+        if candidate_validator_path is not None:
+            preflight_results[setup_id] = _run_external_preflight(
+                candidate_validator_path,
+                manifest_path,
+                entrant_dir / "candidate_manifest.json",
+                entrant_dir / "predictions.jsonl",
+                out_dir / "preflight" / f"{setup_id}.json",
+            )
         evaluation_dir = out_dir / "evaluations" / setup_id
         report = evaluate_drift_setup(
             benchmark_config,
@@ -339,6 +410,7 @@ def run_adapter_tournament(
         "schema_version": "game-adapter-tournament-report.v1",
         "tournament_id": config["tournament_id"],
         "seed": seed,
+        "fixture_pressure": fixture_pressure,
         "tournament_config_sha256": tournament_hash,
         "tournament_implementation_sha256": sha256_file(Path(__file__)),
         "benchmark_config_sha256": sha256_file(benchmark_config),
@@ -356,6 +428,24 @@ def run_adapter_tournament(
         ),
         "per_game_pareto_fronts": _pareto_fronts(entries),
         "pairwise_matches": _pairwise_matches(entries),
+        "public_preflight": {
+            "mode": (
+                "external_skill_validator"
+                if candidate_validator_path is not None
+                else "in_process_evaluator_contract"
+            ),
+            "validator_sha256": (
+                sha256_file(candidate_validator_path)
+                if candidate_validator_path is not None
+                else None
+            ),
+            "all_candidates_valid": (
+                all(result.get("valid") is True for result in preflight_results.values())
+                if candidate_validator_path is not None
+                else True
+            ),
+            "validated_setups": sorted(preflight_results),
+        },
         "winner": None,
         "universal_scalar_winner": False,
         "future_gameplay_arena": config["future_gameplay_arena"],

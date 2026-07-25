@@ -129,7 +129,7 @@ def _expected(game: str, category: str) -> dict[str, Any]:
         "should_abstain": False,
         "failure_modes": [],
     }
-    if category == "private_visibility":
+    if category in {"private_visibility", "private_unsupported"}:
         expected.update(
             mapped_fields=[],
             disposition="QUARANTINE",
@@ -137,13 +137,21 @@ def _expected(game: str, category: str) -> dict[str, Any]:
             should_abstain=True,
             failure_modes=["private_data"],
         )
-    elif category == "hidden_reasoning":
+    elif category in {"hidden_reasoning", "hidden_unsupported"}:
         expected.update(
             mapped_fields=[],
             disposition="REJECT",
             evidence_authority="UNKNOWN",
             should_abstain=True,
             failure_modes=["hidden_reasoning"],
+        )
+    elif category == "hidden_private":
+        expected.update(
+            mapped_fields=[],
+            disposition="REJECT",
+            evidence_authority="UNKNOWN",
+            should_abstain=True,
+            failure_modes=["hidden_reasoning", "private_data"],
         )
     elif category == "ambiguous_schema":
         expected.update(
@@ -154,8 +162,26 @@ def _expected(game: str, category: str) -> dict[str, Any]:
             should_abstain=True,
             failure_modes=["unknown"],
         )
-    elif category == "sealed_evaluation":
+    elif category in {"sealed_evaluation", "sealed_hidden_private"}:
         expected.update(mapped_fields=[], disposition="SEALED_EVALUATION", should_abstain=True)
+    elif category == "evaluation_only":
+        expected.update(disposition="EVALUATION_ONLY")
+    elif category == "model_inferred_public":
+        expected.update(
+            disposition="DISCOVERY_ONLY",
+            evidence_authority="MODEL_INFERRED",
+        )
+    elif category == "simulated_public":
+        expected.update(
+            disposition="DISCOVERY_ONLY",
+            evidence_authority="SIMULATED",
+        )
+    elif category == "unsupported_provenance":
+        expected.update(
+            disposition="QUARANTINE",
+            evidence_authority="UNKNOWN",
+            failure_modes=["unsupported_claim"],
+        )
     elif category != "clean_drift":
         raise ValueError(f"unknown schema-drift category: {category}")
     return expected
@@ -173,15 +199,34 @@ def _make_row(
     ordinal: int,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     contract = GAME_CONTRACTS[game]
-    flags = {
-        "environment_verified": True,
-        "evaluation_material": split == "sealed_poison",
-        "sealed_evaluation": split == "sealed_poison",
-        "schema_supported": category != "ambiguous_schema",
-        "explicit_hidden_reasoning": category == "hidden_reasoning",
-        "private_visibility": category == "private_visibility",
+    sealed = category in {"sealed_evaluation", "sealed_hidden_private"}
+    private = category in {
+        "private_visibility",
+        "private_unsupported",
+        "hidden_private",
+        "sealed_hidden_private",
     }
-    visibility = "actor_private" if category == "private_visibility" else "public"
+    hidden = category in {
+        "hidden_reasoning",
+        "hidden_unsupported",
+        "hidden_private",
+        "sealed_hidden_private",
+    }
+    flags = {
+        "environment_verified": category
+        not in {"model_inferred_public", "simulated_public", "unsupported_provenance"},
+        "evaluation_material": sealed or category == "evaluation_only",
+        "sealed_evaluation": sealed,
+        "schema_supported": category
+        not in {"ambiguous_schema", "private_unsupported", "hidden_unsupported"},
+        "explicit_hidden_reasoning": hidden,
+        "private_visibility": private,
+        "ordinary_evaluation_only": category == "evaluation_only",
+        "model_inferred_material": category == "model_inferred_public",
+        "simulated_material": category == "simulated_public",
+        "unresolved_provenance": category == "unsupported_provenance",
+    }
+    visibility = "actor_private" if private else "public"
     opaque = sha256_text(f"{seed}:{split}:{game}:{category}:{family}:{ordinal}:{'|'.join(keys)}")
     public = {
         "schema_version": "game-adapter-drift-input.v1",
@@ -243,23 +288,66 @@ def _clean_rows(game: str, split: str, seed: int, start: int) -> list[tuple[dict
     return rows
 
 
-def _hazard_rows(game: str, split: str, seed: int, start: int) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    categories = {
+def _hazard_rows(
+    game: str,
+    split: str,
+    seed: int,
+    start: int,
+    pressure_mode: str,
+) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    categories = list({
         "train": ("private_visibility", "hidden_reasoning", "ambiguous_schema"),
         "calibration": ("private_visibility",),
         "ordinary_test": ("private_visibility",),
         "ood_test": ("hidden_reasoning", "ambiguous_schema"),
         "sealed_poison": ("sealed_evaluation", "sealed_evaluation"),
-    }[split]
+    }[split])
+    if pressure_mode == "boundary_precedence":
+        categories.extend(
+            {
+                "train": ("hidden_private", "private_unsupported", "hidden_unsupported"),
+                "calibration": ("hidden_private", "private_unsupported"),
+                "ordinary_test": ("hidden_private", "private_unsupported"),
+                "ood_test": ("hidden_unsupported", "hidden_private"),
+                "sealed_poison": ("sealed_hidden_private",),
+            }[split]
+        )
+    elif pressure_mode == "authority_provenance":
+        categories.extend(
+            {
+                "train": (
+                    "model_inferred_public",
+                    "simulated_public",
+                    "unsupported_provenance",
+                ),
+                "calibration": ("evaluation_only", "unsupported_provenance"),
+                "ordinary_test": (
+                    "evaluation_only",
+                    "model_inferred_public",
+                    "simulated_public",
+                ),
+                "ood_test": ("unsupported_provenance", "model_inferred_public"),
+                "sealed_poison": (),
+            }[split]
+        )
+    elif pressure_mode != "balanced":
+        raise ValueError(f"unknown schema-drift pressure mode: {pressure_mode}")
     contract = GAME_CONTRACTS[game]
     safe_fields = list(str(field) for field in contract["safe_fields"])
     rows: list[tuple[dict[str, Any], dict[str, Any]]] = []
     for offset, category in enumerate(categories):
         keys = list(safe_fields)
-        if category == "private_visibility":
+        if category in {"private_visibility", "private_unsupported"}:
             keys.append(str(contract["private_field"]))
-        elif category == "hidden_reasoning":
+        elif category in {"hidden_reasoning", "hidden_unsupported"}:
             keys.append(str(contract["reasoning_field"]))
+        elif category in {"hidden_private", "sealed_hidden_private"}:
+            keys.extend(
+                (
+                    str(contract["private_field"]),
+                    str(contract["reasoning_field"]),
+                )
+            )
         elif category == "ambiguous_schema":
             keys = ["unresolved_payload", "versionless_event"]
         elif offset == 1:
@@ -386,7 +474,13 @@ def _write_architecture_recipe_sets(
     }
 
 
-def build_drift_benchmark(config_path: Path, out_dir: Path, *, seed: int = 101) -> dict[str, Any]:
+def build_drift_benchmark(
+    config_path: Path,
+    out_dir: Path,
+    *,
+    seed: int = 101,
+    pressure_mode: str = "balanced",
+) -> dict[str, Any]:
     """Build shape-only rows, candidate-visible fit labels, and separately held evaluation labels."""
     config, _ = _load_contract(config_path)
     public_dir = out_dir / "public_dataset"
@@ -404,7 +498,7 @@ def build_drift_benchmark(config_path: Path, out_dir: Path, *, seed: int = 101) 
             if split != "sealed_poison":
                 pairs.extend(_clean_rows(game, split, seed, ordinal))
                 ordinal += len(pairs)
-            hazards = _hazard_rows(game, split, seed, ordinal)
+            hazards = _hazard_rows(game, split, seed, ordinal, pressure_mode)
             ordinal += len(hazards)
             pairs.extend(hazards)
             for row, label in pairs:
@@ -464,6 +558,7 @@ def build_drift_benchmark(config_path: Path, out_dir: Path, *, seed: int = 101) 
         "config_sha256": sha256_file(config_path),
         "generator_version": config["generator"]["version"],
         "generator_implementation_sha256": sha256_file(Path(__file__)),
+        "pressure_mode": pressure_mode,
         "schema_surface_sha256": sha256_json(surface_rows),
         "games": list(GAMES),
         "splits": split_entries,
@@ -735,17 +830,6 @@ def _policy_prediction(
         "unit_type": contract["unit_type"],
         "authority": "MODEL_RECOMMENDATION_ONLY",
     }
-    if not flags["schema_supported"]:
-        return {
-            **base,
-            "parsed": False,
-            "mapped_fields": [],
-            "disposition": "QUARANTINE",
-            "evidence_authority": "UNKNOWN",
-            "failure_modes": ["unknown"],
-            "abstained": True,
-            "confidence": 0.99,
-        }
     if flags["sealed_evaluation"]:
         return {
             **base,
@@ -757,12 +841,15 @@ def _policy_prediction(
             "confidence": 0.99,
         }
     if flags["explicit_hidden_reasoning"]:
+        failure_modes = ["hidden_reasoning"]
+        if shape["visibility"] != "public" or flags["private_visibility"]:
+            failure_modes.append("private_data")
         return {
             **base,
             "mapped_fields": [],
             "disposition": "REJECT",
             "evidence_authority": "UNKNOWN",
-            "failure_modes": ["hidden_reasoning"],
+            "failure_modes": failure_modes,
             "abstained": True,
             "confidence": 0.99,
         }
@@ -773,6 +860,17 @@ def _policy_prediction(
             "disposition": "QUARANTINE",
             "evidence_authority": "UNKNOWN",
             "failure_modes": ["private_data"],
+            "abstained": True,
+            "confidence": 0.99,
+        }
+    if not flags["schema_supported"]:
+        return {
+            **base,
+            "parsed": False,
+            "mapped_fields": [],
+            "disposition": "QUARANTINE",
+            "evidence_authority": "UNKNOWN",
+            "failure_modes": ["unknown"],
             "abstained": True,
             "confidence": 0.99,
         }
@@ -797,12 +895,32 @@ def _policy_prediction(
             confidences.append(confidence)
             if confidence >= threshold:
                 mapped.add(target)
+    if flags.get("ordinary_evaluation_only", False):
+        disposition = "EVALUATION_ONLY"
+        evidence_authority = "ENVIRONMENT_VERIFIED"
+        failure_modes = []
+    elif flags.get("model_inferred_material", False):
+        disposition = "DISCOVERY_ONLY"
+        evidence_authority = "MODEL_INFERRED"
+        failure_modes = []
+    elif flags.get("simulated_material", False):
+        disposition = "DISCOVERY_ONLY"
+        evidence_authority = "SIMULATED"
+        failure_modes = []
+    elif flags.get("unresolved_provenance", False):
+        disposition = "QUARANTINE"
+        evidence_authority = "UNKNOWN"
+        failure_modes = ["unsupported_claim"]
+    else:
+        disposition = "VERIFIED_TRAIN"
+        evidence_authority = "ENVIRONMENT_VERIFIED"
+        failure_modes = []
     return {
         **base,
         "mapped_fields": sorted(mapped),
-        "disposition": "VERIFIED_TRAIN",
-        "evidence_authority": "ENVIRONMENT_VERIFIED",
-        "failure_modes": [],
+        "disposition": disposition,
+        "evidence_authority": evidence_authority,
+        "failure_modes": failure_modes,
         "abstained": False,
         "confidence": min(confidences, default=1.0),
     }
@@ -1333,11 +1451,22 @@ def _render_comparison(
     return "\n".join(lines)
 
 
-def run_drift_gym(config_path: Path, out_dir: Path, *, seed: int = 101) -> dict[str, Any]:
+def run_drift_gym(
+    config_path: Path,
+    out_dir: Path,
+    *,
+    seed: int = 101,
+    pressure_mode: str = "balanced",
+) -> dict[str, Any]:
     """Build, fit, score, and compare one deterministic schema-drift gym run."""
     config, _ = _load_contract(config_path)
     out_dir.mkdir(parents=True, exist_ok=False)
-    build_drift_benchmark(config_path, out_dir, seed=seed)
+    build_drift_benchmark(
+        config_path,
+        out_dir,
+        seed=seed,
+        pressure_mode=pressure_mode,
+    )
     manifest_path = out_dir / "public_dataset" / "dataset_manifest.json"
     steward_path = out_dir / "private_steward" / "ground_truth.jsonl"
     baseline_dir = out_dir / "setups" / "frozen-exact-key-policy-v1"
@@ -1362,6 +1491,7 @@ def run_drift_gym(config_path: Path, out_dir: Path, *, seed: int = 101) -> dict[
     )
     comparison = _compare_reports(config, baseline_report, candidate_report)
     comparison["seed"] = seed
+    comparison["pressure_mode"] = pressure_mode
     comparison["config_sha256"] = sha256_file(config_path)
     comparison["schema_surface_sha256"] = load_structured(manifest_path)["schema_surface_sha256"]
     dump_structured(out_dir / "comparison.json", comparison)
