@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -438,6 +438,154 @@ def _score_run(
     }
 
 
+def _support_counts(
+    predictions: Sequence[Mapping[str, Any]],
+    pair_labels: Mapping[str, Mapping[str, Any]],
+    array_labels: Mapping[str, Mapping[str, Any]],
+    arrays_by_id: Mapping[str, Mapping[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "pair_count": len(predictions),
+        "array_count": len(arrays_by_id),
+        "preference": dict(
+            sorted(
+                Counter(
+                    str(
+                        pair_labels[str(row["example_id"])]["target"][
+                            "preference"
+                        ]
+                    )
+                    for row in predictions
+                ).items()
+            )
+        ),
+        "rationale": dict(
+            sorted(
+                Counter(
+                    str(
+                        pair_labels[str(row["example_id"])]["target"][
+                            "rationale_code"
+                        ]
+                    )
+                    for row in predictions
+                ).items()
+            )
+        ),
+        "array_status": dict(
+            sorted(
+                Counter(
+                    str(status)
+                    for array_id in arrays_by_id
+                    for status in array_labels[array_id]["target"][
+                        "statuses"
+                    ]
+                ).items()
+            )
+        ),
+    }
+
+
+def _supported_macro(
+    support: Mapping[str, Mapping[str, int]],
+    metrics: Mapping[str, Any],
+    *,
+    support_key: str,
+    per_class_key: str,
+) -> float:
+    labels = [
+        label
+        for label, count in support[support_key].items()
+        if int(count) > 0
+    ]
+    return sum(
+        float(metrics[per_class_key][label]["f1"])
+        for label in labels
+    ) / len(labels)
+
+
+def _slice_reports(
+    predictions: Sequence[Mapping[str, Any]],
+    pair_labels: Mapping[str, Mapping[str, Any]],
+    array_labels: Mapping[str, Mapping[str, Any]],
+    arrays_by_id: Mapping[str, Mapping[str, Any]],
+    *,
+    field: str,
+    trainable_parameters: int,
+    trained: bool,
+    ece_bins: int,
+    maximum_ece: float,
+    minimum_selected_set_exact: float,
+) -> dict[str, Any]:
+    result = {}
+    values = sorted(
+        {str(row[field]) for row in arrays_by_id.values()}
+    )
+    for value in values:
+        array_subset = {
+            array_id: row
+            for array_id, row in arrays_by_id.items()
+            if str(row[field]) == value
+        }
+        pair_subset = [
+            row
+            for row in predictions
+            if str(row["array_id"]) in array_subset
+        ]
+        support = _support_counts(
+            pair_subset,
+            pair_labels,
+            array_labels,
+            array_subset,
+        )
+        metrics = _score_run(
+            pair_subset,
+            pair_labels,
+            array_labels,
+            array_subset,
+            trainable_parameters=trainable_parameters,
+            trained=trained,
+            ece_bins=ece_bins,
+            maximum_ece=maximum_ece,
+            minimum_selected_set_exact=(
+                minimum_selected_set_exact
+            ),
+        )
+
+        result[value] = {
+            "support": support,
+            "metrics": metrics,
+            "support_aware_macro_f1": {
+                "preference": _supported_macro(
+                    support,
+                    metrics,
+                    support_key="preference",
+                    per_class_key="preference_per_class",
+                ),
+                "rationale": _supported_macro(
+                    support,
+                    metrics,
+                    support_key="rationale",
+                    per_class_key="rationale_per_class",
+                ),
+                "array_status": _supported_macro(
+                    support,
+                    metrics,
+                    support_key="array_status",
+                    per_class_key="status_per_class",
+                ),
+            },
+            "full_schema_macro_support_limited": {
+                "preference": len(support["preference"])
+                < len(HARD_PREFERENCES),
+                "rationale": len(support["rationale"])
+                < len(HARD_RATIONALES),
+                "array_status": len(support["array_status"])
+                < len(ARRAY_STATUSES),
+            },
+        }
+    return result
+
+
 def _aggregate(reports: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     scalars = (
         "preference_accuracy",
@@ -724,6 +872,53 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "seed": seed,
             **scored,
         }
+        if preregistration.get("schema_version") == "7.0":
+            run_reports[key]["slices"] = {
+                "by_game": _slice_reports(
+                    rows,
+                    pair_labels,
+                    array_labels,
+                    arrays_by_id,
+                    field="game",
+                    trainable_parameters=int(
+                        receipt["trainable_parameters"]
+                    ),
+                    trained=bool(receipt["trained"]),
+                    ece_bins=int(
+                        calibration["expected_calibration_error_bins"]
+                    ),
+                    maximum_ece=float(
+                        calibration["maximum_qualified_ece"]
+                    ),
+                    minimum_selected_set_exact=float(
+                        evaluation[
+                            "minimum_selected_set_exact_accuracy"
+                        ]
+                    ),
+                ),
+                "by_pressure": _slice_reports(
+                    rows,
+                    pair_labels,
+                    array_labels,
+                    arrays_by_id,
+                    field="fixture_pressure",
+                    trainable_parameters=int(
+                        receipt["trainable_parameters"]
+                    ),
+                    trained=bool(receipt["trained"]),
+                    ece_bins=int(
+                        calibration["expected_calibration_error_bins"]
+                    ),
+                    maximum_ece=float(
+                        calibration["maximum_qualified_ece"]
+                    ),
+                    minimum_selected_set_exact=float(
+                        evaluation[
+                            "minimum_selected_set_exact_accuracy"
+                        ]
+                    ),
+                ),
+            }
         by_candidate[candidate_id].append(scored)
     aggregates = {
         candidate_id: _aggregate(reports)
@@ -744,7 +939,19 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             for other_id, other in eligible.items()
         )
     )
-    retained_id = "latent-typed-h4-v3"
+    retained_id = preregistration["heldout_evaluation"].get(
+        "retained_candidate_id"
+    )
+    if retained_id is None:
+        retained_id = trainer.get("development_selection", {}).get(
+            "primary_candidate_id"
+        )
+    if retained_id is None and preregistration.get("schema_version") != "7.0":
+        retained_id = "latent-typed-h4-v3"
+    retained_confirmed = (
+        retained_id is not None and retained_id in pareto
+    )
+    v7_boundary = preregistration.get("schema_version") == "7.0"
     report = {
         "schema_version": "ldt-array-confirmation-heldout-evaluation.v3",
         "experiment_id": trainer["experiment_id"],
@@ -764,12 +971,13 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "candidate_run_reports": run_reports,
         "candidate_aggregates": aggregates,
         "learned_pareto_set": pareto,
-        "retained_architecture_confirmed": retained_id in pareto,
+        "development_primary_candidate_id": retained_id,
+        "retained_architecture_confirmed": retained_confirmed,
         "universal_scalar_champion": None,
         "environment_rule_controls_are_learned_evidence": False,
         "larger_model_training_authorized": False,
         "shadow_recommendation_integration_authorized": (
-            retained_id in pareto
+            retained_confirmed and not v7_boundary
         ),
         "claim_boundary": (
             "Heldout evidence applies only to fresh content-free tournament "

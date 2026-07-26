@@ -6,6 +6,8 @@ import runpy
 from array import array
 from pathlib import Path
 
+import pytest
+
 from datagoblin.experiments.ldt_array_confirmation import (
     ConfirmationPairEncoder,
     derive_confirmation_array_target,
@@ -17,6 +19,9 @@ from datagoblin.experiments.ldt_array_confirmation import (
 )
 from datagoblin.experiments.ldt_array_hard_surface import HARD_INVERT_PREFERENCE
 from datagoblin.experiments.ldt_array_sorter import METRIC_FIELDS, make_model
+from datagoblin.experiments.ldt_target_independent_v7 import (
+    generate_target_independent_dataset,
+)
 
 
 def _candidate(
@@ -157,6 +162,42 @@ def test_confirmation_generator_is_variable_split_safe_and_content_free(
     assert manifest["category_shift_audit"]["overlap"] == 0
 
 
+def test_v7_generator_seals_target_independent_confirmation(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    report = generate_target_independent_dataset(
+        root
+        / "configs/preregistrations/ldt_target_independent_v7.yaml",
+        tmp_path / "v7",
+    )
+    manifest = json.loads(
+        (
+            tmp_path / "v7/public_dataset/dataset_manifest.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert report["generation_passed"]
+    assert report["sealed_confirmation_created_before_training"]
+    assert manifest["lineage_audit"]["cross_split_groups"] == 0
+    assert manifest["lineage_audit"]["prior_overlap"] == 0
+    audit = manifest["target_independence_audit"]
+    assert audit["feature_count"] == 45
+    assert audit["forbidden_feature_hits"] == []
+    assert not audit["executes_verifier_policy"]
+    assert not audit["includes_context_or_pressure_categories"]
+    assert all(
+        not split["targets_in_file"]
+        for name, split in manifest["splits"].items()
+        if name.startswith("heldout_")
+    )
+    assert (
+        tmp_path / "v7/private_steward/heldout_pair_labels.jsonl"
+    ).is_file()
+    assert (
+        tmp_path / "v7/private_steward/heldout_array_labels.jsonl"
+    ).is_file()
+
+
 def test_confirmation_encoder_supports_dynamic_joint_heads() -> None:
     row = {
         "input": {
@@ -185,6 +226,50 @@ def test_confirmation_encoder_supports_dynamic_joint_heads() -> None:
     preference, rationale = model.predict_proba(typed)
     assert math.isclose(sum(preference), 1.0)
     assert math.isclose(sum(rationale), 1.0)
+
+
+def test_independent_encoder_never_executes_policy_or_exposes_proxies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    row = {
+        "input": {
+            "left": _candidate(
+                (0.85, 0.85, 0.85, 0.85),
+                upper_missing=0,
+            ),
+            "right": _candidate((0.7, 0.7, 0.7, 0.7)),
+        }
+    }
+    encoder = ConfirmationPairEncoder.fit([row])
+
+    def forbidden_policy(*args: object, **kwargs: object) -> None:
+        raise AssertionError("independent features executed target policy")
+
+    monkeypatch.setattr(
+        "datagoblin.experiments.ldt_array_confirmation."
+        "partial_interval_taste_policy",
+        forbidden_policy,
+    )
+    encoded = encoder.transform(row["input"], view="independent")
+    names = encoder.feature_names("independent")
+    forbidden_fragments = (
+        "lattice",
+        "domin",
+        "equivalent",
+        "tradeoff",
+        "insufficient",
+        "context_mode",
+        "fixture_pressure",
+        "optimization_pressure",
+        "delta",
+        "mismatch",
+    )
+    assert len(encoded) == len(names) == 45
+    assert not any(
+        fragment in name
+        for name in names
+        for fragment in forbidden_fragments
+    )
 
 
 def test_temperature_calibration_uses_only_frozen_grid() -> None:
@@ -216,6 +301,35 @@ def test_temperature_calibration_uses_only_frozen_grid() -> None:
     assert {
         row["temperature"] for row in receipt["grid_reports"]
     } == {0.5, 1.0, 2.0}
+
+
+def test_v7_selection_excludes_zero_support_abstain_folds() -> None:
+    root = Path(__file__).resolve().parents[2]
+    selector = runpy.run_path(
+        str(root / "scripts/select_ldt_target_independent_v7.py")
+    )
+    receipt = {
+        "cv_fold_metrics": [
+            {
+                "preference_macro_f1": 0.4,
+                "abstain_recall": None,
+            },
+            {
+                "preference_macro_f1": 0.5,
+                "abstain_recall": 0.75,
+            },
+        ],
+        "cv_mean_metrics": {"preference_macro_f1": 0.45},
+        "calibration": {
+            "selected_metrics": {
+                "multiclass_negative_log_likelihood": 1.0,
+            }
+        },
+        "trainable_parameters": 20,
+        "seed": 7,
+    }
+    rank = selector["_rank"](receipt)
+    assert rank[0:3] == (-0.4, -0.45, -0.75)
 
 
 def test_confirmation_evaluator_calibration_and_pareto_rules() -> None:

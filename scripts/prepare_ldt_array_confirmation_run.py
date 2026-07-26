@@ -6,9 +6,13 @@ from pathlib import Path
 
 from datagoblin.experiments.ldt_array_confirmation import (
     CONFIRMATION_FEATURE_WHITELIST,
+    ConfirmationPairEncoder,
     load_confirmation_dataset,
 )
 from datagoblin.experiments.ldt_array_sorter import sha256_file
+from datagoblin.experiments.ldt_target_independent_v7 import (
+    INDEPENDENT_FEATURE_FORBIDDEN_FRAGMENTS,
+)
 from datagoblin.serialization import dump_structured, load_structured
 
 
@@ -46,6 +50,36 @@ def prepare(
         raise ValueError("confirmation counts differ from preregistration")
     if manifest["feature_whitelist"] != list(CONFIRMATION_FEATURE_WHITELIST):
         raise ValueError("confirmation feature whitelist differs")
+    feature_independence_audit: dict[str, object] | None = None
+    if preregistration.get("schema_version") == "7.0":
+        feature_views = {
+            str(model["feature_view"])
+            for model in preregistration["models"]["candidates"]
+        }
+        if feature_views != {"independent"}:
+            raise ValueError("v7 candidates include a target-derived feature view")
+        independent_names = ConfirmationPairEncoder.fit(
+            train_pairs
+        ).feature_names("independent")
+        forbidden_hits = [
+            name
+            for name in independent_names
+            if any(
+                fragment in name
+                for fragment in INDEPENDENT_FEATURE_FORBIDDEN_FRAGMENTS
+            )
+        ]
+        if forbidden_hits:
+            raise ValueError(
+                "v7 independent feature view contains forbidden proxies"
+            )
+        feature_independence_audit = {
+            "candidate_feature_views": sorted(feature_views),
+            "independent_feature_count": len(independent_names),
+            "forbidden_feature_hits": forbidden_hits,
+            "typed_or_lattice_views_present": False,
+            "audit_split": "development_only",
+        }
     hard_caps = preregistration["hard_caps"]
     if hard_caps != {
         "wrapper": "scripts/run_training_gym_capped_wsl.sh",
@@ -81,6 +115,8 @@ def prepare(
         "sorter_authority": "MODEL_RECOMMENDATION_ONLY",
         "larger_model_training_authorized": False,
     }
+    if feature_independence_audit is not None:
+        plan["feature_independence_audit"] = feature_independence_audit
     dump_structured(out_path, plan)
     return plan
 

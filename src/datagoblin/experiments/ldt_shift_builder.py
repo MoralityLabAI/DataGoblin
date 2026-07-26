@@ -236,13 +236,14 @@ def _report(
     slot: int,
     lineage: str,
     features: Mapping[str, Any],
+    meta_split: str = "heldout",
 ) -> dict[str, Any]:
     payload = {
         "schema_version": "content-free-tournament-summary.v6",
         "report_id": f"shift-report-{sha256_text(f'{array_id}:{slot}')[:20]}",
         "array_id": array_id,
         "candidate_slot": slot,
-        "meta_split": "heldout",
+        "meta_split": meta_split,
         "lineage_group_sha256": lineage,
         "feature_summary": dict(features),
         "contains_row_level_game_records": False,
@@ -257,6 +258,9 @@ def _materialize(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     surface = contract["shift_surface"]
     seed = int(surface["seed"])
+    meta_split = str(surface.get("meta_split", "heldout"))
+    if meta_split not in {"train", "heldout"}:
+        raise ValueError("shift surface meta_split must be train or heldout")
     games = [str(value) for value in surface["games"]]
     pairs = []
     arrays = []
@@ -291,6 +295,7 @@ def _materialize(
                     slot=slot,
                     lineage=lineage,
                     features=candidate,
+                    meta_split=meta_split,
                 )
                 for slot, candidate in enumerate(features)
             ]
@@ -326,7 +331,7 @@ def _materialize(
                             "right_tournament_report_sha256": (
                                 report_hashes[right_index]
                             ),
-                            "meta_split": "heldout",
+                            "meta_split": meta_split,
                             "lineage_group_sha256": lineage,
                             "source_kind": (
                                 "content_free_tournament_summary"
@@ -343,7 +348,7 @@ def _materialize(
                         "curation-taste-confirmation-array.v3"
                     ),
                     "array_id": array_id,
-                    "meta_split": "heldout",
+                    "meta_split": meta_split,
                     "lineage_group_sha256": lineage,
                     "game": game,
                     "fixture_pressure": pressure,

@@ -951,6 +951,32 @@ class ConfirmationPairEncoder:
         )
 
     def feature_names(self, view: str) -> tuple[str, ...]:
+        if view == "independent":
+            names = ["bias"]
+            for field in METRIC_FIELDS:
+                names.extend(
+                    (
+                        f"{field}:left_lower",
+                        f"{field}:left_upper",
+                        f"{field}:right_lower",
+                        f"{field}:right_upper",
+                        f"{field}:left_width",
+                        f"{field}:right_width",
+                        f"{field}:left_lower_missing",
+                        f"{field}:left_upper_missing",
+                        f"{field}:right_lower_missing",
+                        f"{field}:right_upper_missing",
+                    )
+                )
+            names.extend(
+                (
+                    "safety:left",
+                    "safety:right",
+                    "parameter_bucket:left_rank",
+                    "parameter_bucket:right_rank",
+                )
+            )
+            return tuple(names)
         names = ["bias"]
         for field in METRIC_FIELDS:
             names.extend(
@@ -1009,6 +1035,65 @@ class ConfirmationPairEncoder:
     ) -> array:
         left = input_["left"]
         right = input_["right"]
+        if view == "independent":
+            values = [1.0]
+            for field in METRIC_FIELDS:
+                left_value = left[field]
+                right_value = right[field]
+                left_lower = (
+                    0.0
+                    if left_value["lower"] is None
+                    else float(left_value["lower"])
+                )
+                left_upper = (
+                    1.0
+                    if left_value["upper"] is None
+                    else float(left_value["upper"])
+                )
+                right_lower = (
+                    0.0
+                    if right_value["lower"] is None
+                    else float(right_value["lower"])
+                )
+                right_upper = (
+                    1.0
+                    if right_value["upper"] is None
+                    else float(right_value["upper"])
+                )
+                values.extend(
+                    (
+                        left_lower,
+                        left_upper,
+                        right_lower,
+                        right_upper,
+                        left_upper - left_lower,
+                        right_upper - right_lower,
+                        float(left_value["lower"] is None),
+                        float(left_value["upper"] is None),
+                        float(right_value["lower"] is None),
+                        float(right_value["upper"] is None),
+                    )
+                )
+            values.extend(
+                (
+                    float(bool(left["safety_qualified"])),
+                    float(bool(right["safety_qualified"])),
+                    BUCKET_RANK[
+                        str(left["trainable_parameter_bucket"])
+                    ]
+                    / 3.0,
+                    BUCKET_RANK[
+                        str(right["trainable_parameter_bucket"])
+                    ]
+                    / 3.0,
+                )
+            )
+            result = array("d", values)
+            if len(result) != len(self.feature_names(view)):
+                raise AssertionError(
+                    "confirmation feature names and values differ"
+                )
+            return result
         values = [1.0]
         for field in METRIC_FIELDS:
             left_value = left[field]
