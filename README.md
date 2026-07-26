@@ -100,6 +100,9 @@ Three append-only shadow rounds then test the same frozen model on mutually
 disjoint content-free lineages with one independent verifier join per round;
 see
 [`docs/ldt_shadow_succession_v5.md`](docs/ldt_shadow_succession_v5.md).
+An independent distribution-shift challenge causally audits policy-derived
+typed features against masked, raw-linear, and non-learned controls; see
+[`docs/ldt_independent_shift_v6.md`](docs/ldt_independent_shift_v6.md).
 
 ## Optional HRM-Text cycle milestone
 

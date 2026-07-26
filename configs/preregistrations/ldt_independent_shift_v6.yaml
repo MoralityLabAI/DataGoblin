@@ -1,0 +1,191 @@
+schema_version: '6.0'
+experiment_id: datagoblin-ldt-independent-shift-v6
+status: frozen_before_shift_generation
+
+purpose: >
+  Measure how frozen LDT and linear sorters behave under independently generated,
+  boundary-dense feature shifts and controlled missingness, while causally isolating
+  reliance on policy-derived typed lattice features.
+claim_scope: >
+  Synthetic sealed-evaluation evidence only. The full-lattice setup is a circularity
+  diagnostic, not an eligible model. No setup may select an adapter, alter verifier
+  decisions, enter training, promote corpus records, or authorize deployment.
+
+source_shadow_succession:
+  experiment_id: datagoblin-ldt-shadow-succession-v5
+  contract_sha256: 4bb3ff84151f52a473e0035ddf3e1e1a7449aae7ce5451357dff3977a908d095
+  comparison_sha256: 1d2ba6912ee98cc3e34c5db4730ecb1afdd672d40746ffe6c4b2d3af64437fb4
+  round_count: 3
+  worst_round_ece: 0.01899693907577777
+  minimum_pair_preference_macro_f1: 1.0
+  minimum_exact_array_accuracy: 1.0
+
+source_training:
+  experiment_id: datagoblin-ldt-array-confirmation-v3
+  trainer_summary_sha256: 75e1c59e425d8c8f9faa9dc8cf3a44c459dc91d65c017a48a8593f532b85e3d5
+  hard_caps_verified: true
+  heldout_targets_seen: false
+  model_weights_committed_to_repository: false
+
+independent_builder:
+  implementation_id: datagoblin.shift_builder.v6
+  role: FIXTURE_BUILDER
+  target_logic_available: false
+  target_files_emitted: false
+  imports_verifier_policy: false
+
+independent_verifier:
+  implementation_id: datagoblin.shift_verifier.v6
+  role: ENVIRONMENT_OWNED_VERIFIER
+  target_logic_separate_from_builder_templates: true
+  labels_emitted_only_to_private_custody: true
+
+shift_surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - near_tolerance_dominance
+    - near_tolerance_equivalence
+    - controlled_missingness
+    - boundary_pareto_tradeoff
+  array_sizes: [4, 5, 6]
+  seed: 3203
+  context_prefix: independent_shift_v6_novel
+  metric_equivalence_tolerance: 0.01
+  required_pairs: 248
+  required_arrays: 12
+  required_reports: 60
+  required_lineage_groups: 4
+  required_missing_bound_count: 28
+  minimum_complete_interval_metric_count: 4
+  minimum_near_tolerance_directed_metric_count: 20
+  forbidden_prior_seeds: [1217, 1429, 1777, 1901, 2017, 2131]
+  forbidden_prior_lineage_sha256:
+    - 01a0ce29c70009771b84e8e20b9f1e31e3499de31329bb2cabe1e7247d3799ff
+    - 06f32c908b5084b71e81cc7caf4b77bb9e9a6cbf61e38347a92efb4a7671f910
+    - 34c73521746d31fbdd618c4d8b04fd6fc460d0fa4f17512219117824f96ef84e
+    - 3eb9f201e9d47a819c29b412949d98ce22fc6521969503cd19957dfbbefea192
+    - 74aa9197e488da8ac7e154691d47efa41324ff252022841a695a7b96d55775c3
+    - d1644470f5636a46d738c81fff03525e9c0a70d79bede79187caa54ad500f041
+    - de81d52b45d8a01d4c4f347e14edd8c204375bde0acf2d7a9fdf1f2dfe245702
+    - ec53c730a782878da748665d01f80cd02bd8a9d5470afc3f9f63996e3fce134b
+    - 28a70a16ddd246e187534ace0756129c34658f5c0d160c48373c6829bb920bdc
+    - 72f5256460e078f63e7a8b97e158b4d25d8d94994f0e5596098be2c5cf09d6c1
+    - 84a3bd82344886f13d363acfbe9883876dd1d67afd647bbc7200986c1c67d6e9
+    - c51e26f01cb4968751f407bdcdebdbe26d6e717bf29e1618ff79ced021d004b9
+    - 1bcaa15c326680d9ff1d0194987ad42bbbf80c7a81e477a7b8bf92aa009906a1
+    - 31b451888074bcbd257c6644ac84e399ae878ab48ed61a19fa29c71c4bd2228f
+    - 477e61d3f83e0cf34ee52d6c71f33a80a642fc18c070e7e6926c5855a311ba8a
+    - 4badd8690e24b06c476954b101a0993cc01ffb6894cf30ee01a1d8dda7300e40
+    - 52bdfb57e8c0b5f39f5607732e5303335f299dd2f776e5fc36d6a1c388043ffb
+    - 82624d3769253c55de5002040bdbbac23e1024e236a8fceaac3d6142550ced44
+    - 9803fbe8d5393f9d5840fbf1ed1cc6a071843d8267f21b81795e1a9670c8c297
+    - beeaa9b12f0ea93b4cfa0013499d40fd8075ba0acb702759e8ef8a1ceb238119
+    - c0a5bc3eecd89a2e64cecefd7eb39ebeb0c1380ee03bae0be424ab18cbf1b303
+    - cecc746e5b70d7362ecf44ab2899f6b45fe20deedf7b3b11c917265936cf4a17
+    - d45888491285c84123460f0c9e5acf8b5f0c072f544c340c64a0bd4b56e71c1f
+    - eac0e08ba88e4c76fe12c5d5e3a249c371e8739b6d6d3655b412b9289af76731
+
+candidate_setups:
+  - setup_id: latent-typed-full-lattice-diagnostic
+    kind: frozen_model
+    evidence_class: CIRCULAR_DIAGNOSTIC_CONTROL
+    source_candidate_id: latent-typed-h4-v3
+    source_seed: 17
+    source_model_filename: latent-typed-h4-v3-seed-17.json
+    source_model_sha256: 4ea5efd01de222279dc02e942fa95f6a944caa52ec20889fe1580e6867a3e94b
+    source_family: latent_array
+    source_feature_view: typed
+    inference_feature_view: typed
+    policy_lattice_mode: full_diagnostic_control
+    trainable_parameters: 369
+    calibration_temperature: 1.0
+    selection_eligible: false
+  - setup_id: latent-typed-policy-masked
+    kind: frozen_model
+    evidence_class: ARCHITECTURE_ABLATION
+    source_candidate_id: latent-typed-h4-v3
+    source_seed: 17
+    source_model_filename: latent-typed-h4-v3-seed-17.json
+    source_model_sha256: 4ea5efd01de222279dc02e942fa95f6a944caa52ec20889fe1580e6867a3e94b
+    source_family: latent_array
+    source_feature_view: typed
+    inference_feature_view: typed_policy_lattice_masked
+    policy_lattice_mode: masked
+    trainable_parameters: 369
+    calibration_temperature: 1.0
+    selection_eligible: false
+  - setup_id: linear-typed-policy-masked
+    kind: frozen_model
+    evidence_class: LINEAR_TYPED_ABLATION
+    source_candidate_id: linear-typed-v3
+    source_seed: 17
+    source_model_filename: linear-typed-v3-seed-17.json
+    source_model_sha256: 966d6a29e9b806bce6f1653af31a939c986a69b9176dc316e489d8700f768e13
+    source_family: joint_linear_array
+    source_feature_view: typed
+    inference_feature_view: typed_policy_lattice_masked
+    policy_lattice_mode: masked
+    trainable_parameters: 720
+    calibration_temperature: 0.75
+    selection_eligible: false
+  - setup_id: linear-raw-frozen
+    kind: frozen_model
+    evidence_class: LINEAR_RAW_BASELINE
+    source_candidate_id: linear-raw-v3
+    source_seed: 17
+    source_model_filename: linear-raw-v3-seed-17.json
+    source_model_sha256: 986c94e2f303f37c2f81bb553294aa420883bbbf2be5956d0dd56b792f1a76a8
+    source_family: joint_linear_array
+    source_feature_view: raw
+    inference_feature_view: raw
+    policy_lattice_mode: not_applicable
+    trainable_parameters: 630
+    calibration_temperature: 1.5
+    selection_eligible: false
+  - setup_id: nonlearned-safety-scalar
+    kind: nonlearned
+    evidence_class: NONLEARNED_BASELINE
+    inference_feature_view: public_intervals
+    policy_lattice_mode: not_applicable
+    scalar_margin: 0.01
+    probability_rule: fixed_by_decision_branch_v1
+    trainable_parameters: 0
+    selection_eligible: false
+
+sealed_verifier_custody:
+  seal_stage: before_candidate_inference
+  candidate_workspace_receives_label_paths: false
+  public_fixture_contains_targets: false
+  labels_authority: ENVIRONMENT_OWNED
+  evaluated_records_immutable: true
+  corrections_append_superseding_receipts: true
+  reveal_count: 1
+
+causal_ablation:
+  full_lattice_setup_id: latent-typed-full-lattice-diagnostic
+  masked_lattice_setup_id: latent-typed-policy-masked
+  minimum_accuracy_drop_for_reliance: 0.10
+  minimum_array_accuracy_drop_for_reliance: 0.10
+  full_lattice_control_selection_eligible: false
+
+monitoring:
+  calibration_bins: 10
+  require_safety_accuracy: 1.0
+  require_swap_consistency: 1.0
+  minimum_abstain_recall: 0.50
+  maximum_ece: 0.35
+  report_by_game: true
+  report_by_pressure: true
+  report_by_missingness: true
+  universal_scalar_champion_permitted: false
+
+decision_boundary:
+  model_selection_authorized: false
+  training_authorized: false
+  corpus_promotion_authorized: false
+  deployment_authorized: false
+  decision_effect: NONE
+  next_gate: >
+    Use the causal ablation to decide whether the current typed-LDT evidence is
+    architecture evidence or policy-feature circularity. Any feature redesign or
+    retraining requires a new development-only contract and fresh sealed confirmation.

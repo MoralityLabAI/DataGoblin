@@ -156,9 +156,8 @@ builder and verifier share the same typed synthetic task semantics, so exact
 performance cannot justify deployment, retraining, or choosing this adapter
 over alternatives.
 
-The next useful gate is a preregistered distribution-shift challenge produced
-by an independent fixture builder: changed feature marginals, boundary-dense
-tradeoffs, and controlled missingness, while retaining content-free exports
-and verifier custody. It should compare the frozen LDT against simple
-non-learned and linear baselines and keep model selection disabled until the
-shifted labels are sealed and all candidate outputs are immutable.
+That gate is completed by the
+[`independent LDT distribution shift v6`](ldt_independent_shift_v6.md).
+Its same-checkpoint ablation shows that the exact latent result depends on ten
+features computed from the verifier policy. The v5 result remains interface
+evidence, but it is not independent latent-architecture evidence.
