@@ -1,0 +1,181 @@
+schema_version: '3.0'
+experiment_id: datagoblin-ldt-array-confirmation-v3
+status: frozen_before_dataset_generation
+training_task_id: ldt-array-confirmation-v3-seed-sweep
+
+purpose: >
+  Confirm the retained typed latent LDT architecture on fresh content-free tournament
+  summaries with variable candidate-array sizes, asymmetric and one-sided evidence
+  intervals, heldout-only context categories, and development-only confidence calibration.
+claim_scope: >
+  Environment-owned synthetic tournament-summary evidence only. This experiment does not
+  reuse v2 heldout examples, authorize corpus promotion, or authorize a larger checkpoint.
+
+surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - one_sided_bounds
+    - asymmetric_intervals
+    - tolerance_calibration
+    - cross_game_pareto
+  train_array_sizes: [4, 5, 6, 4, 5, 6]
+  heldout_array_sizes: [6, 4, 5]
+  train_seed: 1217
+  heldout_seed: 1429
+  orientation_contract: both_directions_for_every_unordered_pair
+  train_context_prefix: confirmation_development
+  heldout_context_prefix: confirmation_heldout_novel
+  metric_equivalence_tolerance: 0.01
+  metric_representation:
+    lower: number_or_null
+    upper: number_or_null
+    partial_intervals_permitted: true
+    conservative_null_completion: {lower: 0.0, upper: 1.0}
+
+targets:
+  pair_preferences: [LEFT, RIGHT, TRADEOFF, ABSTAIN]
+  rationale_codes:
+    - safety_gate
+    - pareto_dominance
+    - parameter_efficiency
+    - irreducible_tradeoff
+    - insufficient_evidence
+  array_statuses: [SELECTED, DOMINATED, UNRESOLVED, UNSAFE]
+  uncertainty_rule: >
+    Complete a missing lower bound to zero and a missing upper bound to one. Permit a
+    directional result only when dominance remains valid under those conservative bounds.
+    Otherwise emit ABSTAIN rather than converting uncertainty into TRADEOFF.
+
+dataset_contract:
+  schema_version: curation-taste-array-confirmation.v3
+  required_train_pairs: 496
+  required_heldout_pairs: 248
+  required_train_arrays: 24
+  required_heldout_arrays: 12
+  required_train_reports: 120
+  required_heldout_reports: 60
+  required_cross_split_lineages: 0
+  require_array_sizes: [4, 5, 6]
+  require_all_pair_preferences: true
+  require_all_rationale_codes: true
+  require_all_array_statuses: true
+  require_disjoint_context_categories: true
+  require_report_hash_bindings: true
+  heldout_pair_targets_available_to_candidate: false
+  heldout_array_targets_available_to_candidate: false
+  forbidden_candidate_features:
+    - example_id
+    - candidate_id
+    - array_id
+    - lineage_hash
+    - tournament_report_hash
+    - source_hash
+    - heldout_targets
+    - row_level_game_records
+    - sealed_metrics
+    - hidden_reasoning
+    - source_agent_identity
+
+models:
+  controls:
+    - model_id: majority-control-v3
+      family: non_trainable
+    - model_id: forced-tradeoff-control-v3
+      family: non_trainable_abstain_collapse
+    - model_id: frozen-partial-interval-policy-v3
+      family: non_trainable_environment_rule
+  candidates:
+    - model_id: linear-raw-v3
+      family: joint_linear_array
+      feature_view: raw
+      hidden_width: 0
+      loop_count: 0
+      epochs: 400
+      learning_rate: 0.06
+    - model_id: linear-typed-v3
+      family: joint_linear_array
+      feature_view: typed
+      hidden_width: 0
+      loop_count: 0
+      epochs: 400
+      learning_rate: 0.06
+    - model_id: latent-typed-h4-v3
+      family: latent_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 1
+      epochs: 600
+      learning_rate: 0.025
+    - model_id: looped-typed-h4-l2-v3
+      family: weight_tied_looped_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 2
+      epochs: 600
+      learning_rate: 0.025
+
+training:
+  seeds: [17, 37, 71]
+  validation: leave_one_training_pressure_lineage_out
+  batch_size: 24
+  checkpoint_interval: {epochs: 100, seconds: 60}
+  chunk_strategy: at_most_24_pair_arrays_per_gradient_chunk
+  class_balancing: inverse_frequency
+  rationale_loss_weight: 0.5
+  l2: 0.0005
+  gradient_norm_clip: 5.0
+  external_checkpoint: null
+  network_permitted: false
+
+confidence_calibration:
+  fit_split: out_of_fold_development_predictions_only
+  method: frozen_temperature_grid
+  temperatures: [0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+  selection_metric: multiclass_negative_log_likelihood
+  expected_calibration_error_bins: 10
+  maximum_qualified_ece: 0.10
+  report_metrics:
+    - multiclass_brier
+    - multiclass_negative_log_likelihood
+    - expected_calibration_error
+
+hard_caps:
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  ram_mb: 2048
+  cpu_percent: 50
+  io_mb_per_second: 50
+  wall_clock_seconds: 900
+  swap_bytes: 0
+  fallback_if_unavailable: abort_without_training
+
+heldout_evaluation:
+  reveal_count: 1
+  no_post_reveal_tuning: true
+  require_all_array_sizes: [4, 5, 6]
+  minimum_selected_set_exact_accuracy: 0.90
+  pair_metrics:
+    - preference_macro_f1
+    - abstain_recall
+    - safety_gate_accuracy
+    - rationale_macro_f1
+    - swap_consistency
+  array_metrics:
+    - status_macro_f1
+    - exact_array_accuracy
+    - selected_set_exact_accuracy
+    - exact_array_accuracy_by_size
+    - unresolved_recall
+    - unsafe_exclusion_accuracy
+  universal_scalar_champion_permitted: false
+  comparison_rule: >
+    Disqualify safety, orientation, uncertainty, calibration, or selected-set regressions
+    first. Retain a per-metric Pareto set; use parameter efficiency only when predictive
+    and calibration quality are equivalent within 0.01.
+
+promotion_boundary:
+  sorter_authority: MODEL_RECOMMENDATION_ONLY
+  checkpoint_promotion_authorized: false
+  larger_model_training_authorized: false
+  next_gate: >
+    If the retained architecture confirms, integrate it only as a shadow recommendation
+    beside the independent curation verifier on fresh approved tournament summaries.

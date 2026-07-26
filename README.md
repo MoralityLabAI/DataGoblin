@@ -89,6 +89,10 @@ curriculum under WSL2 cgroup caps and scores them through a separate steward joi
 Its fresh hard-surface successor separates abstention from genuine tradeoffs and reduces
 orientation-balanced pair predictions into five-candidate Pareto arrays; see
 [`docs/ldt_array_hard_surface_v2.md`](docs/ldt_array_hard_surface_v2.md).
+The retained one-pass latent head is independently confirmed on fresh content-free
+tournament summaries with variable array sizes, one-sided bounds, and development-only
+confidence calibration; see
+[`docs/ldt_array_confirmation_v3.md`](docs/ldt_array_confirmation_v3.md).
 
 ## Optional HRM-Text cycle milestone
 

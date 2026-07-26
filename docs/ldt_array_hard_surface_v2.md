@@ -137,3 +137,7 @@ asymmetric partial intervals, calibrated confidence scoring, and fresh
 tournament-summary lineages. Only that confirmation can justify using its
 recommendations as one input to curation tooling; authority remains with the
 independent verifier.
+
+That fresh confirmation is complete; see
+[`ldt_array_confirmation_v3.md`](ldt_array_confirmation_v3.md). The v2 split
+remains closed to tuning.
