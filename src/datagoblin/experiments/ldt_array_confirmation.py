@@ -545,6 +545,15 @@ def _make_split(
     )
 
 
+def make_confirmation_split(
+    config: Mapping[str, Any],
+    *,
+    split: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Materialize one deterministic split for a bound downstream protocol."""
+    return _make_split(config, split=split)
+
+
 def _public_without_target(row: Mapping[str, Any]) -> dict[str, Any]:
     return {
         key: value for key, value in row.items() if key not in {"target", "authority"}

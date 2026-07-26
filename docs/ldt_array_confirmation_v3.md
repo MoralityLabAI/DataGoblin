@@ -154,3 +154,6 @@ model and calibration hashes, expose abstentions and unresolved candidates, and
 compare its recommendation with the independent verifier without changing the
 verifier's decision. No larger model, corpus promotion, or autonomous action is
 authorized.
+
+That interface and its first fresh synthetic shadow round are complete; see
+[`ldt_shadow_v4.md`](ldt_shadow_v4.md).

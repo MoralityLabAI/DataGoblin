@@ -1,0 +1,108 @@
+schema_version: '4.0'
+experiment_id: datagoblin-ldt-shadow-v4
+status: frozen_before_shadow_generation
+shadow_run_id: ldt-shadow-v4-round-1
+
+purpose: >
+  Integrate the confirmed one-pass typed latent sorter as a non-authoritative shadow
+  recommendation beside the independent curation verifier on fresh, content-free
+  tournament summaries.
+claim_scope: >
+  Synthetic shadow-monitoring evidence only. The model cannot change verifier decisions,
+  promote corpus records, trigger training, or authorize a larger checkpoint.
+
+source_confirmation:
+  experiment_id: datagoblin-ldt-array-confirmation-v3
+  preregistration_sha256: f2ef7459998587d609da8da0fe7749434c2e78a654977c0be0ba55a27fa5a985
+  dataset_manifest_sha256: fb100fdce2de9af43002400cadf12e416e313dfce0174d06ef9fe7c8e101d485
+  heldout_evaluation_sha256: 73d0084f4d15daf3842321aba632fd4852e19798c55a52acbabbd0e2fe9b0ebd
+  retained_architecture_confirmed: true
+
+frozen_model:
+  selection_rule: lowest_preregistered_seed_without_heldout_seed_selection
+  candidate_id: latent-typed-h4-v3
+  seed: 17
+  family: latent_array
+  feature_view: typed
+  trainable_parameters: 369
+  model_sha256: 4ea5efd01de222279dc02e942fa95f6a944caa52ec20889fe1580e6867a3e94b
+  trainer_summary_sha256: 75e1c59e425d8c8f9faa9dc8cf3a44c459dc91d65c017a48a8593f532b85e3d5
+  calibration:
+    method: frozen_temperature_grid
+    fit_split: out_of_fold_development_predictions_only
+    temperature: 1.0
+  model_weights_committed_to_repository: false
+
+approved_input_scope:
+  source_kind: content_free_tournament_summary
+  allowed_games: [centauri, they_sing, court, diplomacy]
+  allowed_pressures:
+    - one_sided_bounds
+    - asymmetric_intervals
+    - tolerance_calibration
+    - cross_game_pareto
+  raw_game_records_permitted: false
+  hidden_reasoning_permitted: false
+  sealed_metrics_permitted: false
+  local_paths_permitted: false
+  provider_ids_permitted: false
+  source_agent_identity_permitted: false
+  tournament_report_hash_as_model_feature: false
+
+fresh_shadow_surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - one_sided_bounds
+    - asymmetric_intervals
+    - tolerance_calibration
+    - cross_game_pareto
+  array_sizes: [4, 5, 6]
+  seed: 1777
+  forbidden_prior_seeds: [1217, 1429]
+  forbidden_prior_lineage_sha256:
+    - 01a0ce29c70009771b84e8e20b9f1e31e3499de31329bb2cabe1e7247d3799ff
+    - 06f32c908b5084b71e81cc7caf4b77bb9e9a6cbf61e38347a92efb4a7671f910
+    - 34c73521746d31fbdd618c4d8b04fd6fc460d0fa4f17512219117824f96ef84e
+    - 3eb9f201e9d47a819c29b412949d98ce22fc6521969503cd19957dfbbefea192
+    - 74aa9197e488da8ac7e154691d47efa41324ff252022841a695a7b96d55775c3
+    - d1644470f5636a46d738c81fff03525e9c0a70d79bede79187caa54ad500f041
+    - de81d52b45d8a01d4c4f347e14edd8c204375bde0acf2d7a9fdf1f2dfe245702
+    - ec53c730a782878da748665d01f80cd02bd8a9d5470afc3f9f63996e3fce134b
+  context_prefix: shadow_round_1_novel
+  metric_equivalence_tolerance: 0.01
+  orientation_contract: both_directions_for_every_unordered_pair
+  required_pairs: 248
+  required_arrays: 12
+  required_reports: 60
+
+custody:
+  public_shadow_inputs_include_targets: false
+  verifier_pair_targets_available_to_shadow_runner: false
+  verifier_array_targets_available_to_shadow_runner: false
+  verifier_authority: ENVIRONMENT_OWNED
+  shadow_authority: MODEL_RECOMMENDATION_ONLY
+  evaluated_records_immutable: true
+  corrections_append_superseding_receipts: true
+
+monitoring:
+  calibration_bins: 10
+  maximum_ece: 0.10
+  minimum_pair_preference_macro_f1: 0.95
+  minimum_abstain_recall: 0.95
+  minimum_selected_set_exact_accuracy: 0.90
+  require_safety_accuracy: 1.0
+  require_swap_consistency: 1.0
+  report_by_game: true
+  report_by_array_size: true
+  disagreement_review: aggregate_and_hash_only
+  universal_scalar_champion_permitted: false
+
+decision_boundary:
+  shadow_decision_effect: NONE
+  independent_verifier_remains_decision_owner: true
+  automatic_corpus_promotion_authorized: false
+  training_from_disagreements_authorized: false
+  larger_model_training_authorized: false
+  next_gate: >
+    Review aggregate disagreement slices and a separately authorized, content-free
+    disagreement queue before considering any new training or procedural mutation.

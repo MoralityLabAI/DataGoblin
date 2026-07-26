@@ -93,6 +93,9 @@ The retained one-pass latent head is independently confirmed on fresh content-fr
 tournament summaries with variable array sizes, one-sided bounds, and development-only
 confidence calibration; see
 [`docs/ldt_array_confirmation_v3.md`](docs/ldt_array_confirmation_v3.md).
+The confirmed latent head can also run through a hash-bound, non-authoritative
+shadow interface that keeps the independent verifier in control; see
+[`docs/ldt_shadow_v4.md`](docs/ldt_shadow_v4.md).
 
 ## Optional HRM-Text cycle milestone
 
