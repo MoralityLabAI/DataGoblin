@@ -187,8 +187,16 @@ def swap_pair(row: Mapping[str, Any]) -> dict[str, Any]:
         "left": copy.deepcopy(row["input"]["right"]),
         "right": copy.deepcopy(row["input"]["left"]),
     }
+    if "left_index" in swapped:
+        swapped["left_index"], swapped["right_index"] = (
+            swapped["right_index"],
+            swapped["left_index"],
+        )
     if "target" in swapped:
-        swapped["target"]["preference"] = INVERT_PREFERENCE[str(row["target"]["preference"])]
+        preference = str(row["target"]["preference"])
+        swapped["target"]["preference"] = INVERT_PREFERENCE.get(
+            preference, preference
+        )
     return swapped
 
 
@@ -352,20 +360,22 @@ def _softmax_rows(logits: np.ndarray) -> np.ndarray:
 class LinearJointArray:
     input_width: int
     seed: int
+    preference_count: int = len(PREFERENCES)
+    rationale_count: int = len(RATIONALE_CODES)
 
     def __post_init__(self) -> None:
         rng = np.random.default_rng(self.seed)
         scale = 1.0 / math.sqrt(max(1, self.input_width))
         self.preference_weights = rng.uniform(
-            -scale, scale, size=(len(PREFERENCES), self.input_width)
+            -scale, scale, size=(self.preference_count, self.input_width)
         )
         self.rationale_weights = rng.uniform(
-            -scale, scale, size=(len(RATIONALE_CODES), self.input_width)
+            -scale, scale, size=(self.rationale_count, self.input_width)
         )
 
     @property
     def parameter_count(self) -> int:
-        return (len(PREFERENCES) + len(RATIONALE_CODES)) * self.input_width
+        return (self.preference_count + self.rationale_count) * self.input_width
 
     def predict_proba(self, features: Sequence[float]) -> tuple[array, array]:
         vector = np.asarray(features, dtype=np.float64)
@@ -428,6 +438,8 @@ class LoopedJointArray:
     hidden_width: int
     loop_count: int
     seed: int
+    preference_count: int = len(PREFERENCES)
+    rationale_count: int = len(RATIONALE_CODES)
 
     def __post_init__(self) -> None:
         if self.hidden_width < 1 or self.loop_count < 1:
@@ -451,15 +463,15 @@ class LoopedJointArray:
         self.preference_weights = rng.uniform(
             -hidden_scale,
             hidden_scale,
-            size=(len(PREFERENCES), self.hidden_width),
+            size=(self.preference_count, self.hidden_width),
         )
-        self.preference_bias = np.zeros(len(PREFERENCES), dtype=np.float64)
+        self.preference_bias = np.zeros(self.preference_count, dtype=np.float64)
         self.rationale_weights = rng.uniform(
             -hidden_scale,
             hidden_scale,
-            size=(len(RATIONALE_CODES), self.hidden_width),
+            size=(self.rationale_count, self.hidden_width),
         )
-        self.rationale_bias = np.zeros(len(RATIONALE_CODES), dtype=np.float64)
+        self.rationale_bias = np.zeros(self.rationale_count, dtype=np.float64)
 
     @property
     def parameter_count(self) -> int:
@@ -468,10 +480,10 @@ class LoopedJointArray:
             self.hidden_width * self.input_width
             + recurrent
             + self.hidden_width
-            + len(PREFERENCES) * self.hidden_width
-            + len(PREFERENCES)
-            + len(RATIONALE_CODES) * self.hidden_width
-            + len(RATIONALE_CODES)
+            + self.preference_count * self.hidden_width
+            + self.preference_count
+            + self.rationale_count * self.hidden_width
+            + self.rationale_count
         )
 
     def _forward(self, features: np.ndarray) -> tuple[list[np.ndarray], np.ndarray, np.ndarray]:
@@ -594,16 +606,30 @@ class LoopedJointArray:
         return float(np.linalg.norm(states[-1][0] - states[-2][0]))
 
 
-def make_model(spec: Mapping[str, Any], input_width: int, seed: int) -> LinearJointArray | LoopedJointArray:
+def make_model(
+    spec: Mapping[str, Any],
+    input_width: int,
+    seed: int,
+    *,
+    preference_count: int = len(PREFERENCES),
+    rationale_count: int = len(RATIONALE_CODES),
+) -> LinearJointArray | LoopedJointArray:
     family = str(spec["family"])
     if family == "joint_linear_array":
-        return LinearJointArray(input_width=input_width, seed=seed)
+        return LinearJointArray(
+            input_width=input_width,
+            seed=seed,
+            preference_count=preference_count,
+            rationale_count=rationale_count,
+        )
     if family in {"latent_array", "weight_tied_looped_array"}:
         return LoopedJointArray(
             input_width=input_width,
             hidden_width=int(spec["hidden_width"]),
             loop_count=int(spec["loop_count"]),
             seed=seed,
+            preference_count=preference_count,
+            rationale_count=rationale_count,
         )
     raise ValueError(f"unsupported model family: {family}")
 
@@ -614,6 +640,8 @@ def encode_examples(
     *,
     view: str,
     augment_swaps: bool,
+    preference_labels: Sequence[str] = PREFERENCES,
+    rationale_labels: Sequence[str] = RATIONALE_CODES,
 ) -> list[tuple[array, int, int]]:
     selected: list[Mapping[str, Any]] = []
     for row in rows:
@@ -623,8 +651,8 @@ def encode_examples(
     return [
         (
             encoder.transform(row["input"], view=view),
-            PREFERENCES.index(str(row["target"]["preference"])),
-            RATIONALE_CODES.index(str(row["target"]["rationale_code"])),
+            preference_labels.index(str(row["target"]["preference"])),
+            rationale_labels.index(str(row["target"]["rationale_code"])),
         )
         for row in selected
     ]
@@ -660,11 +688,13 @@ def train_array_model(
     checkpoint_every_epochs: int,
     checkpoint_every_seconds: float,
     checkpoint_callback: CheckpointCallback | None = None,
+    preference_count: int = len(PREFERENCES),
+    rationale_count: int = len(RATIONALE_CODES),
 ) -> int:
     if not examples or epochs < 1 or not 1 <= batch_size <= 32:
         raise ValueError("invalid bounded array training request")
-    preference_weights = inverse_frequency_weights(examples, 1, len(PREFERENCES))
-    rationale_weights = inverse_frequency_weights(examples, 2, len(RATIONALE_CODES))
+    preference_weights = inverse_frequency_weights(examples, 1, preference_count)
+    rationale_weights = inverse_frequency_weights(examples, 2, rationale_count)
     order = list(range(len(examples)))
     rng = random.Random(seed)
     steps = 0
@@ -700,29 +730,42 @@ def predict_model(
     row: Mapping[str, Any],
     *,
     view: str,
+    preference_labels: Sequence[str] = PREFERENCES,
+    rationale_labels: Sequence[str] = RATIONALE_CODES,
 ) -> dict[str, Any]:
     features = encoder.transform(row["input"], view=view)
     preference_probabilities, rationale_probabilities = model.predict_proba(features)
-    preference_index = max(range(len(PREFERENCES)), key=lambda index: preference_probabilities[index])
+    preference_index = max(
+        range(len(preference_labels)),
+        key=lambda index: preference_probabilities[index],
+    )
     rationale_index = max(
-        range(len(RATIONALE_CODES)), key=lambda index: rationale_probabilities[index]
+        range(len(rationale_labels)),
+        key=lambda index: rationale_probabilities[index],
     )
     swapped_features = encoder.transform(swap_pair(row)["input"], view=view)
     swapped_probabilities, _ = model.predict_proba(swapped_features)
     swapped_index = max(
-        range(len(PREFERENCES)), key=lambda index: swapped_probabilities[index]
+        range(len(preference_labels)),
+        key=lambda index: swapped_probabilities[index],
     )
+    invert = {
+        **{label: label for label in preference_labels},
+        "LEFT": "RIGHT",
+        "RIGHT": "LEFT",
+    }
     return {
-        "preference": PREFERENCES[preference_index],
-        "rationale_code": RATIONALE_CODES[rationale_index],
+        "preference": preference_labels[preference_index],
+        "rationale_code": rationale_labels[rationale_index],
         "confidence": float(preference_probabilities[preference_index]),
         "preference_probabilities": {
             label: float(preference_probabilities[index])
-            for index, label in enumerate(PREFERENCES)
+            for index, label in enumerate(preference_labels)
         },
-        "swapped_preference": PREFERENCES[swapped_index],
+        "swapped_preference": preference_labels[swapped_index],
         "swap_consistent": (
-            PREFERENCES[swapped_index] == INVERT_PREFERENCE[PREFERENCES[preference_index]]
+            preference_labels[swapped_index]
+            == invert[preference_labels[preference_index]]
         ),
         "loop_delta": model.loop_delta(features),
     }

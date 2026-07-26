@@ -1,0 +1,163 @@
+schema_version: '2.0'
+experiment_id: datagoblin-ldt-array-hard-surface-v2
+status: frozen_before_dataset_generation
+training_task_id: ldt-array-hard-surface-v2-seed-sweep
+
+purpose: >
+  Test whether bounded pairwise LDT arrays can sort fresh multi-adapter sets when evidence
+  lies near the equivalence tolerance, is interval-valued or missing, and uses heldout-only
+  context categories.
+claim_scope: >
+  Environment-owned synthetic meta-selection evidence only. This experiment does not
+  authorize corpus promotion, row-level game training, or a larger checkpoint.
+
+surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - tolerance_edge
+    - interval_uncertainty
+    - missing_evidence
+    - mixed_pareto
+  candidates_per_array: 5
+  train_arrays_per_pressure: 4
+  heldout_arrays_per_pressure: 3
+  train_seed: 811
+  heldout_seed: 911
+  orientation_contract: both_directions_for_every_unordered_pair
+  train_context_prefix: development_surface
+  heldout_context_prefix: novel_heldout_surface
+  metric_equivalence_tolerance: 0.01
+  metric_representation: {lower: number_or_null, upper: number_or_null}
+
+targets:
+  pair_preferences: [LEFT, RIGHT, TRADEOFF, ABSTAIN]
+  rationale_codes:
+    - safety_gate
+    - pareto_dominance
+    - parameter_efficiency
+    - irreducible_tradeoff
+    - insufficient_evidence
+  array_statuses: [SELECTED, DOMINATED, UNRESOLVED, UNSAFE]
+  abstain_rule: >
+    Emit ABSTAIN when missing or interval-valued metrics prevent a conservative dominance
+    or equivalence conclusion. Do not relabel epistemic uncertainty as a tradeoff.
+
+dataset_contract:
+  schema_version: curation-taste-array-hard-surface.v2
+  required_train_pairs: 320
+  required_heldout_pairs: 240
+  required_train_arrays: 16
+  required_heldout_arrays: 12
+  required_cross_split_lineages: 0
+  require_all_pair_preferences: true
+  require_all_rationale_codes: true
+  require_all_array_statuses: true
+  require_disjoint_context_categories: true
+  heldout_pair_targets_available_to_candidate: false
+  heldout_array_targets_available_to_candidate: false
+  forbidden_candidate_inputs:
+    - example_id_as_feature
+    - candidate_id_as_feature
+    - array_id_as_feature
+    - lineage_hash_as_feature
+    - source_hash_as_feature
+    - heldout_targets
+    - row_level_game_records
+    - sealed_metrics
+    - hidden_reasoning
+    - source_agent_identity
+
+models:
+  controls:
+    - model_id: majority-control-v2
+      family: non_trainable
+    - model_id: forced-tradeoff-control-v2
+      family: non_trainable_abstain_collapse
+    - model_id: frozen-interval-policy-v2
+      family: non_trainable_environment_rule
+  candidates:
+    - model_id: linear-raw-v2
+      family: joint_linear_array
+      feature_view: raw
+      hidden_width: 0
+      loop_count: 0
+      epochs: 350
+      learning_rate: 0.07
+    - model_id: linear-typed-v2
+      family: joint_linear_array
+      feature_view: typed
+      hidden_width: 0
+      loop_count: 0
+      epochs: 350
+      learning_rate: 0.07
+    - model_id: latent-typed-h4-v2
+      family: latent_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 1
+      epochs: 550
+      learning_rate: 0.03
+    - model_id: looped-typed-h4-l2-v2
+      family: weight_tied_looped_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 2
+      epochs: 550
+      learning_rate: 0.03
+    - model_id: looped-typed-h4-l4-v2
+      family: weight_tied_looped_array
+      feature_view: typed
+      hidden_width: 4
+      loop_count: 4
+      epochs: 550
+      learning_rate: 0.03
+
+training:
+  seeds: [13, 29, 53]
+  validation: leave_one_training_pressure_lineage_out
+  batch_size: 24
+  checkpoint_interval: {epochs: 100, seconds: 60}
+  chunk_strategy: at_most_24_pair_arrays_per_gradient_chunk
+  class_balancing: inverse_frequency
+  rationale_loss_weight: 0.5
+  l2: 0.0005
+  gradient_norm_clip: 5.0
+  external_checkpoint: null
+  network_permitted: false
+
+hard_caps:
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  ram_mb: 2048
+  cpu_percent: 50
+  io_mb_per_second: 50
+  wall_clock_seconds: 900
+  swap_bytes: 0
+  fallback_if_unavailable: abort_without_training
+
+heldout_evaluation:
+  reveal_count: 1
+  no_post_reveal_tuning: true
+  pair_metrics:
+    - preference_macro_f1
+    - abstain_recall
+    - safety_gate_accuracy
+    - rationale_macro_f1
+    - swap_consistency
+  array_metrics:
+    - status_macro_f1
+    - exact_array_accuracy
+    - selected_set_exact_accuracy
+    - unresolved_recall
+    - unsafe_exclusion_accuracy
+  universal_scalar_champion_permitted: false
+  comparison_rule: >
+    Disqualify safety, orientation, or uncertainty regressions first. Retain a per-metric
+    Pareto set; use parameter efficiency only when quality is equivalent within 0.01.
+
+promotion_boundary:
+  sorter_authority: MODEL_RECOMMENDATION_ONLY
+  checkpoint_promotion_authorized: false
+  larger_model_training_authorized: false
+  next_gate: >
+    Confirm any retained architecture on a separately generated surface before it may be
+    used as a recommendation feature in curation tooling.

@@ -86,6 +86,9 @@ selection curriculum; see
 The bounded array-sorter gym fits linear, latent, and weight-tied looped heads to that
 curriculum under WSL2 cgroup caps and scores them through a separate steward join; see
 [`docs/ldt_array_sorter_gym.md`](docs/ldt_array_sorter_gym.md).
+Its fresh hard-surface successor separates abstention from genuine tradeoffs and reduces
+orientation-balanced pair predictions into five-candidate Pareto arrays; see
+[`docs/ldt_array_hard_surface_v2.md`](docs/ldt_array_hard_surface_v2.md).
 
 ## Optional HRM-Text cycle milestone
 
