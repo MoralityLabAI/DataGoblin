@@ -6,8 +6,9 @@ V8 fixed the development-support and orientation defects exposed by v7, but
 no candidate cleared the frozen development gate. Exact antisymmetric
 projection made swap consistency 1.0000 by construction, and the structured
 pair weighting raised mean array-status macro-F1 as high as 0.8711. Mean
-selected-set exactness nevertheless reached only 0.5625, below the
-preregistered 0.7500 requirement.
+selected-set exactness reached at most 0.6250 across all 15 runs and at most
+0.5625 among the worst-fold-ranked diagnostic seeds, below the preregistered
+0.7500 requirement.
 
 The development-only selector therefore recorded
 `confirmation_join_authorized: false`. Private pair and array labels were not
