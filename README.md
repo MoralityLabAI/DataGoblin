@@ -96,6 +96,10 @@ confidence calibration; see
 The confirmed latent head can also run through a hash-bound, non-authoritative
 shadow interface that keeps the independent verifier in control; see
 [`docs/ldt_shadow_v4.md`](docs/ldt_shadow_v4.md).
+Three append-only shadow rounds then test the same frozen model on mutually
+disjoint content-free lineages with one independent verifier join per round;
+see
+[`docs/ldt_shadow_succession_v5.md`](docs/ldt_shadow_succession_v5.md).
 
 ## Optional HRM-Text cycle milestone
 

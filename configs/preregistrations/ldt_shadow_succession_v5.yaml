@@ -1,0 +1,139 @@
+schema_version: '5.0'
+experiment_id: datagoblin-ldt-shadow-succession-v5
+status: frozen_before_shadow_generation
+
+purpose: >
+  Test whether the confirmed one-pass typed latent sorter remains calibrated and
+  exact across three append-only, non-authoritative shadow rounds on fresh,
+  content-free tournament summaries.
+claim_scope: >
+  Synthetic shadow-monitoring evidence only. Every round is independently
+  verified. No recommendation can change a verifier decision, promote corpus
+  records, trigger training, or authorize a larger checkpoint.
+
+source_shadow:
+  experiment_id: datagoblin-ldt-shadow-v4
+  contract_sha256: 7416a92f49c6040630c1843f0459d38ea0c2abf70448b527124dc0116818a08b
+  corrected_comparison_revision: 2
+  corrected_comparison_sha256: 3f19925fba58a6b5b8ddacd91aec7ceafd3b98b8b58a5d1ec9bb4e2581fde5bc
+  monitoring_passed: true
+  verifier_join_count: 1
+
+source_confirmation:
+  experiment_id: datagoblin-ldt-array-confirmation-v3
+  preregistration_sha256: f2ef7459998587d609da8da0fe7749434c2e78a654977c0be0ba55a27fa5a985
+  dataset_manifest_sha256: fb100fdce2de9af43002400cadf12e416e313dfce0174d06ef9fe7c8e101d485
+  heldout_evaluation_sha256: 73d0084f4d15daf3842321aba632fd4852e19798c55a52acbabbd0e2fe9b0ebd
+  retained_architecture_confirmed: true
+
+frozen_model:
+  selection_rule: lowest_preregistered_seed_without_heldout_seed_selection
+  candidate_id: latent-typed-h4-v3
+  seed: 17
+  family: latent_array
+  feature_view: typed
+  trainable_parameters: 369
+  model_sha256: 4ea5efd01de222279dc02e942fa95f6a944caa52ec20889fe1580e6867a3e94b
+  trainer_summary_sha256: 75e1c59e425d8c8f9faa9dc8cf3a44c459dc91d65c017a48a8593f532b85e3d5
+  calibration:
+    method: frozen_temperature_grid
+    fit_split: out_of_fold_development_predictions_only
+    temperature: 1.0
+  model_weights_committed_to_repository: false
+
+approved_input_scope:
+  source_kind: content_free_tournament_summary
+  allowed_games: [centauri, they_sing, court, diplomacy]
+  allowed_pressures:
+    - one_sided_bounds
+    - asymmetric_intervals
+    - tolerance_calibration
+    - cross_game_pareto
+  raw_game_records_permitted: false
+  hidden_reasoning_permitted: false
+  sealed_metrics_permitted: false
+  local_paths_permitted: false
+  provider_ids_permitted: false
+  source_agent_identity_permitted: false
+  tournament_report_hash_as_model_feature: false
+
+succession_surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - one_sided_bounds
+    - asymmetric_intervals
+    - tolerance_calibration
+    - cross_game_pareto
+  forbidden_prior_seeds: [1217, 1429, 1777]
+  forbidden_prior_lineage_sha256:
+    - 01a0ce29c70009771b84e8e20b9f1e31e3499de31329bb2cabe1e7247d3799ff
+    - 06f32c908b5084b71e81cc7caf4b77bb9e9a6cbf61e38347a92efb4a7671f910
+    - 34c73521746d31fbdd618c4d8b04fd6fc460d0fa4f17512219117824f96ef84e
+    - 3eb9f201e9d47a819c29b412949d98ce22fc6521969503cd19957dfbbefea192
+    - 74aa9197e488da8ac7e154691d47efa41324ff252022841a695a7b96d55775c3
+    - d1644470f5636a46d738c81fff03525e9c0a70d79bede79187caa54ad500f041
+    - de81d52b45d8a01d4c4f347e14edd8c204375bde0acf2d7a9fdf1f2dfe245702
+    - ec53c730a782878da748665d01f80cd02bd8a9d5470afc3f9f63996e3fce134b
+    - 28a70a16ddd246e187534ace0756129c34658f5c0d160c48373c6829bb920bdc
+    - 72f5256460e078f63e7a8b97e158b4d25d8d94994f0e5596098be2c5cf09d6c1
+    - 84a3bd82344886f13d363acfbe9883876dd1d67afd647bbc7200986c1c67d6e9
+    - c51e26f01cb4968751f407bdcdebdbe26d6e717bf29e1618ff79ced021d004b9
+  metric_equivalence_tolerance: 0.01
+  orientation_contract: both_directions_for_every_unordered_pair
+  required_pairs_per_round: 248
+  required_arrays_per_round: 12
+  required_reports_per_round: 60
+  require_cross_round_lineage_disjointness: true
+  rounds:
+    - shadow_run_id: ldt-shadow-v5-round-2
+      seed: 1901
+      context_prefix: shadow_round_2_novel
+      array_sizes: [6, 5, 4]
+    - shadow_run_id: ldt-shadow-v5-round-3
+      seed: 2017
+      context_prefix: shadow_round_3_novel
+      array_sizes: [5, 6, 4]
+    - shadow_run_id: ldt-shadow-v5-round-4
+      seed: 2131
+      context_prefix: shadow_round_4_novel
+      array_sizes: [4, 6, 5]
+
+custody:
+  public_shadow_inputs_include_targets: false
+  verifier_pair_targets_available_to_shadow_runner: false
+  verifier_array_targets_available_to_shadow_runner: false
+  verifier_authority: ENVIRONMENT_OWNED
+  shadow_authority: MODEL_RECOMMENDATION_ONLY
+  one_independent_join_per_round: true
+  evaluated_records_immutable: true
+  corrections_append_superseding_receipts: true
+  aggregate_contains_comparison_receipts_only: true
+
+monitoring:
+  calibration_bins: 10
+  maximum_ece_per_round: 0.10
+  minimum_pair_preference_macro_f1_per_round: 0.95
+  minimum_abstain_recall_per_round: 0.95
+  minimum_selected_set_exact_accuracy_per_round: 0.90
+  require_safety_accuracy_per_round: 1.0
+  require_swap_consistency_per_round: 1.0
+  require_every_round_pass: true
+  report_by_game: true
+  report_by_array_size: true
+  disagreement_review: aggregate_and_hash_only
+  universal_scalar_champion_permitted: false
+
+decision_boundary:
+  approval_authority: user_instruction_do
+  approved_action: >
+    Three synthetic content-free shadow rounds and independent comparison-only
+    aggregation.
+  shadow_decision_effect: NONE
+  independent_verifier_remains_decision_owner: true
+  automatic_corpus_promotion_authorized: false
+  training_from_disagreements_authorized: false
+  larger_model_training_authorized: false
+  adapter_selection_authorized: false
+  next_gate: >
+    Review round-level and support-aware slice stability. Any data inspection,
+    retraining, model selection, or deployment requires separate authorization.

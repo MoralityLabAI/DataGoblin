@@ -155,8 +155,8 @@ Round 1 validates the shadow interface on a fresh synthetic surface. It is not
 a deployment claim and does not authorize training from disagreements—there
 were no disagreements to review.
 
-The next evidence-producing step is another append-only shadow round on a
-separately approved content-free tournament-summary export with new lineages.
-The independent verifier remains the only decision owner. Any disagreement
-sample requires separate authorization before content-free review and still
-cannot expose raw records or verifier labels to the model runner.
+That append-only step is completed by the three-round
+[`LDT shadow succession v5`](ldt_shadow_succession_v5.md). The independent
+verifier remains the only decision owner. Any disagreement sample still
+requires separate authorization before content-free review and cannot expose
+raw records or verifier labels to the model runner.
