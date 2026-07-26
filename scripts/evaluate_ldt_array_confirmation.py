@@ -805,6 +805,16 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     ):
         raise ValueError("confirmation trainer is incomplete or contaminated")
     if (
+        preregistration.get("schema_version") == "8.0"
+        and not trainer.get("development_selection", {}).get(
+            "confirmation_join_authorized",
+            False,
+        )
+    ):
+        raise ValueError(
+            "v8 development gate did not authorize confirmation"
+        )
+    if (
         trainer["preregistration_sha256"]
         != sha256_file(args.preregistration.resolve())
     ):
@@ -872,7 +882,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "seed": seed,
             **scored,
         }
-        if preregistration.get("schema_version") == "7.0":
+        if preregistration.get("schema_version") in {"7.0", "8.0"}:
             run_reports[key]["slices"] = {
                 "by_game": _slice_reports(
                     rows,
@@ -946,12 +956,17 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         retained_id = trainer.get("development_selection", {}).get(
             "primary_candidate_id"
         )
-    if retained_id is None and preregistration.get("schema_version") != "7.0":
+    if (
+        retained_id is None
+        and preregistration.get("schema_version") not in {"7.0", "8.0"}
+    ):
         retained_id = "latent-typed-h4-v3"
     retained_confirmed = (
         retained_id is not None and retained_id in pareto
     )
-    v7_boundary = preregistration.get("schema_version") == "7.0"
+    target_independent_boundary = preregistration.get(
+        "schema_version"
+    ) in {"7.0", "8.0"}
     report = {
         "schema_version": "ldt-array-confirmation-heldout-evaluation.v3",
         "experiment_id": trainer["experiment_id"],
@@ -977,7 +992,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "environment_rule_controls_are_learned_evidence": False,
         "larger_model_training_authorized": False,
         "shadow_recommendation_integration_authorized": (
-            retained_confirmed and not v7_boundary
+            retained_confirmed and not target_independent_boundary
         ),
         "claim_boundary": (
             "Heldout evidence applies only to fresh content-free tournament "

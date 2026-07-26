@@ -394,25 +394,35 @@ class LinearJointArray:
         preference_class_weights: Sequence[float],
         rationale_class_weights: Sequence[float],
         rationale_loss_weight: float,
+        sample_weights: Sequence[float] | None = None,
     ) -> None:
         features, preference_index, rationale_index = _batch_arrays(examples)
         count = len(examples)
+        weights = (
+            np.ones(count, dtype=np.float64)
+            if sample_weights is None
+            else np.asarray(sample_weights, dtype=np.float64)
+        )
+        normalizer = float(np.sum(weights))
         preference_probabilities = _softmax_rows(features @ self.preference_weights.T)
         rationale_probabilities = _softmax_rows(features @ self.rationale_weights.T)
         preference_probabilities[np.arange(count), preference_index] -= 1.0
         rationale_probabilities[np.arange(count), rationale_index] -= 1.0
         preference_probabilities *= np.asarray(preference_class_weights)[
             preference_index, np.newaxis
-        ]
+        ] * weights[:, np.newaxis]
         rationale_probabilities *= (
             np.asarray(rationale_class_weights)[rationale_index, np.newaxis]
             * rationale_loss_weight
+            * weights[:, np.newaxis]
         )
         preference_gradient = (
-            preference_probabilities.T @ features / count + l2 * self.preference_weights
+            preference_probabilities.T @ features / normalizer
+            + l2 * self.preference_weights
         )
         rationale_gradient = (
-            rationale_probabilities.T @ features / count + l2 * self.rationale_weights
+            rationale_probabilities.T @ features / normalizer
+            + l2 * self.rationale_weights
         )
         clip = _gradient_clip_scale(
             (preference_gradient, rationale_gradient), gradient_clip
@@ -514,28 +524,42 @@ class LoopedJointArray:
         preference_class_weights: Sequence[float],
         rationale_class_weights: Sequence[float],
         rationale_loss_weight: float,
+        sample_weights: Sequence[float] | None = None,
     ) -> None:
         features, preference_index, rationale_index = _batch_arrays(examples)
         count = len(examples)
+        weights = (
+            np.ones(count, dtype=np.float64)
+            if sample_weights is None
+            else np.asarray(sample_weights, dtype=np.float64)
+        )
+        normalizer = float(np.sum(weights))
         states, preference_probabilities, rationale_probabilities = self._forward(features)
         preference_probabilities[np.arange(count), preference_index] -= 1.0
         rationale_probabilities[np.arange(count), rationale_index] -= 1.0
         preference_probabilities *= np.asarray(preference_class_weights)[
             preference_index, np.newaxis
-        ]
+        ] * weights[:, np.newaxis]
         rationale_probabilities *= (
             np.asarray(rationale_class_weights)[rationale_index, np.newaxis]
             * rationale_loss_weight
+            * weights[:, np.newaxis]
         )
         final = states[-1]
         preference_gradient = (
-            preference_probabilities.T @ final / count + l2 * self.preference_weights
+            preference_probabilities.T @ final / normalizer
+            + l2 * self.preference_weights
         )
-        preference_bias_gradient = np.mean(preference_probabilities, axis=0)
+        preference_bias_gradient = (
+            np.sum(preference_probabilities, axis=0) / normalizer
+        )
         rationale_gradient = (
-            rationale_probabilities.T @ final / count + l2 * self.rationale_weights
+            rationale_probabilities.T @ final / normalizer
+            + l2 * self.rationale_weights
         )
-        rationale_bias_gradient = np.mean(rationale_probabilities, axis=0)
+        rationale_bias_gradient = (
+            np.sum(rationale_probabilities, axis=0) / normalizer
+        )
         hidden_delta = (
             preference_probabilities @ self.preference_weights
             + rationale_probabilities @ self.rationale_weights
@@ -551,10 +575,16 @@ class LoopedJointArray:
             current = states[loop_index + 1]
             previous = states[loop_index]
             pre_activation_delta = hidden_delta * (1.0 - current * current)
-            input_gradient += pre_activation_delta.T @ features / count
-            hidden_bias_gradient += np.mean(pre_activation_delta, axis=0)
+            input_gradient += (
+                pre_activation_delta.T @ features / normalizer
+            )
+            hidden_bias_gradient += (
+                np.sum(pre_activation_delta, axis=0) / normalizer
+            )
             if self.recurrent_weights is not None and recurrent_gradient is not None:
-                recurrent_gradient += pre_activation_delta.T @ previous / count
+                recurrent_gradient += (
+                    pre_activation_delta.T @ previous / normalizer
+                )
                 hidden_delta = pre_activation_delta @ self.recurrent_weights
         input_gradient += l2 * self.input_weights
         gradients = [
@@ -690,19 +720,44 @@ def train_array_model(
     checkpoint_callback: CheckpointCallback | None = None,
     preference_count: int = len(PREFERENCES),
     rationale_count: int = len(RATIONALE_CODES),
+    sample_weights: Sequence[float] | None = None,
+    paired_group_size: int = 1,
 ) -> int:
-    if not examples or epochs < 1 or not 1 <= batch_size <= 32:
+    if (
+        not examples
+        or epochs < 1
+        or not 1 <= batch_size <= 32
+        or paired_group_size < 1
+        or len(examples) % paired_group_size
+        or batch_size % paired_group_size
+        or (
+            sample_weights is not None
+            and (
+                len(sample_weights) != len(examples)
+                or any(
+                    not math.isfinite(float(weight))
+                    or float(weight) <= 0.0
+                    for weight in sample_weights
+                )
+            )
+        )
+    ):
         raise ValueError("invalid bounded array training request")
     preference_weights = inverse_frequency_weights(examples, 1, preference_count)
     rationale_weights = inverse_frequency_weights(examples, 2, rationale_count)
-    order = list(range(len(examples)))
+    groups = [
+        list(range(offset, offset + paired_group_size))
+        for offset in range(0, len(examples), paired_group_size)
+    ]
     rng = random.Random(seed)
     steps = 0
     last_checkpoint = time.monotonic()
     for epoch in range(1, epochs + 1):
-        rng.shuffle(order)
+        rng.shuffle(groups)
+        order = [index for group in groups for index in group]
         for offset in range(0, len(order), batch_size):
-            batch = [examples[index] for index in order[offset : offset + batch_size]]
+            batch_indices = order[offset : offset + batch_size]
+            batch = [examples[index] for index in batch_indices]
             model.train_batch(
                 batch,
                 learning_rate=learning_rate,
@@ -711,6 +766,11 @@ def train_array_model(
                 preference_class_weights=preference_weights,
                 rationale_class_weights=rationale_weights,
                 rationale_loss_weight=rationale_loss_weight,
+                sample_weights=(
+                    None
+                    if sample_weights is None
+                    else [sample_weights[index] for index in batch_indices]
+                ),
             )
             steps += 1
         checkpoint_due = (
@@ -732,9 +792,48 @@ def predict_model(
     view: str,
     preference_labels: Sequence[str] = PREFERENCES,
     rationale_labels: Sequence[str] = RATIONALE_CODES,
+    antisymmetric: bool = False,
 ) -> dict[str, Any]:
     features = encoder.transform(row["input"], view=view)
     preference_probabilities, rationale_probabilities = model.predict_proba(features)
+    swapped_features = encoder.transform(swap_pair(row)["input"], view=view)
+    swapped_probabilities, swapped_rationale = model.predict_proba(
+        swapped_features
+    )
+    invert = {
+        **{label: label for label in preference_labels},
+        "LEFT": "RIGHT",
+        "RIGHT": "LEFT",
+    }
+    if antisymmetric:
+        label_to_index = {
+            label: index
+            for index, label in enumerate(preference_labels)
+        }
+        preference_probabilities = array(
+            "d",
+            (
+                0.5
+                * (
+                    preference_probabilities[index]
+                    + swapped_probabilities[
+                        label_to_index[invert[label]]
+                    ]
+                )
+                for index, label in enumerate(preference_labels)
+            ),
+        )
+        rationale_probabilities = array(
+            "d",
+            (
+                0.5
+                * (
+                    rationale_probabilities[index]
+                    + swapped_rationale[index]
+                )
+                for index in range(len(rationale_labels))
+            ),
+        )
     preference_index = max(
         range(len(preference_labels)),
         key=lambda index: preference_probabilities[index],
@@ -743,17 +842,14 @@ def predict_model(
         range(len(rationale_labels)),
         key=lambda index: rationale_probabilities[index],
     )
-    swapped_features = encoder.transform(swap_pair(row)["input"], view=view)
-    swapped_probabilities, _ = model.predict_proba(swapped_features)
-    swapped_index = max(
-        range(len(preference_labels)),
-        key=lambda index: swapped_probabilities[index],
+    swapped_index = (
+        label_to_index[invert[preference_labels[preference_index]]]
+        if antisymmetric
+        else max(
+            range(len(preference_labels)),
+            key=lambda index: swapped_probabilities[index],
+        )
     )
-    invert = {
-        **{label: label for label in preference_labels},
-        "LEFT": "RIGHT",
-        "RIGHT": "LEFT",
-    }
     return {
         "preference": preference_labels[preference_index],
         "rationale_code": rationale_labels[rationale_index],

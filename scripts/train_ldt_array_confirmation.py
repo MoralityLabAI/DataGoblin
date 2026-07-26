@@ -20,8 +20,10 @@ from datagoblin.experiments.ldt_array_confirmation import (
     ConfirmationPairEncoder,
     load_confirmation_dataset,
     partial_interval_taste_policy,
+    reduce_confirmation_array,
 )
 from datagoblin.experiments.ldt_array_hard_surface import (
+    ARRAY_STATUSES,
     HARD_INVERT_PREFERENCE,
     HARD_PREFERENCES,
     HARD_RATIONALES,
@@ -228,6 +230,158 @@ def _labeled_metrics(
     }
 
 
+def _array_labeled_metrics(
+    rows: Sequence[Mapping[str, Any]],
+    predictions: Sequence[Mapping[str, Any]],
+    arrays: Sequence[Mapping[str, Any]],
+) -> dict[str, float]:
+    pair_predictions: dict[
+        str,
+        dict[tuple[int, int], str],
+    ] = {}
+    for row, prediction in zip(rows, predictions, strict=True):
+        pair_predictions.setdefault(str(row["array_id"]), {})[
+            (int(row["left_index"]), int(row["right_index"]))
+        ] = str(prediction["preference"])
+    actual_statuses = []
+    predicted_statuses = []
+    exact_arrays = 0
+    selected_sets = 0
+    for array_row in arrays:
+        array_id = str(array_row["array_id"])
+        candidates = [
+            candidate["features"]
+            for candidate in array_row["candidates"]
+        ]
+        predicted = reduce_confirmation_array(
+            candidates,
+            pair_predictions[array_id],
+        )["statuses"]
+        actual = [
+            str(value) for value in array_row["target"]["statuses"]
+        ]
+        actual_statuses.extend(actual)
+        predicted_statuses.extend(predicted)
+        exact_arrays += actual == predicted
+        selected_sets += {
+            index
+            for index, status in enumerate(actual)
+            if status == "SELECTED"
+        } == {
+            index
+            for index, status in enumerate(predicted)
+            if status == "SELECTED"
+        }
+    status = classification_metrics(
+        actual_statuses,
+        predicted_statuses,
+        ARRAY_STATUSES,
+    )
+    return {
+        "status_macro_f1": float(status["macro_f1"]),
+        "exact_array_accuracy": exact_arrays / len(arrays),
+        "selected_set_exact_accuracy": selected_sets / len(arrays),
+    }
+
+
+def _paired_training_rows(
+    rows: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    lookup = {
+        (
+            str(row["array_id"]),
+            int(row["left_index"]),
+            int(row["right_index"]),
+        ): row
+        for row in rows
+    }
+    if len(lookup) != len(rows):
+        raise ValueError("paired training rows contain duplicate orientations")
+    result = []
+    for row in sorted(
+        rows,
+        key=lambda value: (
+            str(value["array_id"]),
+            int(value["left_index"]),
+            int(value["right_index"]),
+        ),
+    ):
+        left = int(row["left_index"])
+        right = int(row["right_index"])
+        if left >= right:
+            continue
+        reverse = lookup[(str(row["array_id"]), right, left)]
+        if (
+            str(reverse["target"]["preference"])
+            != HARD_INVERT_PREFERENCE[
+                str(row["target"]["preference"])
+            ]
+            or str(reverse["target"]["rationale_code"])
+            != str(row["target"]["rationale_code"])
+        ):
+            raise ValueError("paired orientations disagree on target binding")
+        result.extend((row, reverse))
+    if len(result) != len(rows):
+        raise ValueError("paired training rows are incomplete")
+    return result
+
+
+def _array_consistency_weights(
+    rows: Sequence[Mapping[str, Any]],
+    arrays: Sequence[Mapping[str, Any]],
+    *,
+    extra_weight: float,
+) -> tuple[list[float], dict[str, float | int]]:
+    if extra_weight < 0.0 or not math.isfinite(extra_weight):
+        raise ValueError("array consistency weight must be non-negative")
+    statuses = {
+        str(row["array_id"]): [
+            str(status) for status in row["target"]["statuses"]
+        ]
+        for row in arrays
+    }
+    weights = []
+    critical = 0
+    for row in rows:
+        array_statuses = statuses[str(row["array_id"])]
+        left_status = array_statuses[int(row["left_index"])]
+        right_status = array_statuses[int(row["right_index"])]
+        preference = str(row["target"]["preference"])
+        rationale = str(row["target"]["rationale_code"])
+        loser_status = (
+            right_status
+            if preference == "LEFT"
+            else left_status
+            if preference == "RIGHT"
+            else None
+        )
+        structural = (
+            (rationale == "safety_gate" and loser_status == "UNSAFE")
+            or (
+                rationale == "pareto_dominance"
+                and loser_status == "DOMINATED"
+            )
+            or (
+                preference == "ABSTAIN"
+                and "UNRESOLVED" in {left_status, right_status}
+            )
+            or (
+                preference == "TRADEOFF"
+                and left_status == right_status == "SELECTED"
+            )
+        )
+        critical += structural
+        weights.append(1.0 + extra_weight * float(structural))
+    return weights, {
+        "example_count": len(rows),
+        "structural_edge_count": critical,
+        "base_weight": 1.0,
+        "extra_structural_weight": extra_weight,
+        "mean_weight": sum(weights) / len(weights),
+        "maximum_weight": max(weights),
+    }
+
+
 def _mean_metrics(
     reports: Sequence[Mapping[str, Any]],
 ) -> dict[str, float | None]:
@@ -399,7 +553,7 @@ def train(args: argparse.Namespace) -> int:
             _,
             train_rows,
             heldout_rows,
-            _,
+            train_arrays,
             _,
             _,
             _,
@@ -486,6 +640,15 @@ def train(args: argparse.Namespace) -> int:
         for spec in plan["candidate_models"]:
             candidate_id = str(spec["model_id"])
             view = str(spec["feature_view"])
+            paired_swap_batches = bool(
+                spec.get("paired_swap_batches", False)
+            )
+            antisymmetric_inference = bool(
+                spec.get("antisymmetric_inference", False)
+            )
+            array_consistency_loss_weight = float(
+                spec.get("array_consistency_loss_weight", 0.0)
+            )
             input_width = len(encoder.feature_names(view))
             for seed_value in training["seeds"]:
                 seed = int(seed_value)
@@ -505,19 +668,41 @@ def train(args: argparse.Namespace) -> int:
                         for row in train_rows
                         if row["lineage_group_sha256"] == validation_lineage
                     ]
+                    fold_train_arrays = [
+                        row
+                        for row in train_arrays
+                        if row["lineage_group_sha256"]
+                        != validation_lineage
+                    ]
+                    fold_validation_arrays = [
+                        row
+                        for row in train_arrays
+                        if row["lineage_group_sha256"]
+                        == validation_lineage
+                    ]
                     fold_encoder = ConfirmationPairEncoder.fit(
                         fold_train,
                         tolerance=float(
                             plan["metric_equivalence_tolerance"]
                         ),
                     )
+                    ordered_fold_train = (
+                        _paired_training_rows(fold_train)
+                        if paired_swap_batches
+                        else fold_train
+                    )
                     examples = encode_examples(
-                        fold_train,
+                        ordered_fold_train,
                         fold_encoder,
                         view=view,
                         augment_swaps=False,
                         preference_labels=HARD_PREFERENCES,
                         rationale_labels=HARD_RATIONALES,
+                    )
+                    sample_weights, _ = _array_consistency_weights(
+                        ordered_fold_train,
+                        fold_train_arrays,
+                        extra_weight=array_consistency_loss_weight,
                     )
                     model_seed = seed * 100 + fold_index
                     model = make_model(
@@ -557,6 +742,10 @@ def train(args: argparse.Namespace) -> int:
                         checkpoint_callback=callback,
                         preference_count=len(HARD_PREFERENCES),
                         rationale_count=len(HARD_RATIONALES),
+                        sample_weights=sample_weights,
+                        paired_group_size=(
+                            2 if paired_swap_batches else 1
+                        ),
                     )
                     seed_checkpoints.extend(fold_paths)
                     fold_predictions = [
@@ -567,11 +756,22 @@ def train(args: argparse.Namespace) -> int:
                             view=view,
                             preference_labels=HARD_PREFERENCES,
                             rationale_labels=HARD_RATIONALES,
+                            antisymmetric=antisymmetric_inference,
                         )
                         for row in fold_validation
                     ]
                     cv_reports.append(
-                        _labeled_metrics(fold_validation, fold_predictions)
+                        {
+                            **_labeled_metrics(
+                                fold_validation,
+                                fold_predictions,
+                            ),
+                            **_array_labeled_metrics(
+                                fold_validation,
+                                fold_predictions,
+                                fold_validation_arrays,
+                            ),
+                        }
                     )
                     calibration_examples.extend(
                         (
@@ -594,13 +794,25 @@ def train(args: argparse.Namespace) -> int:
                 selected_temperature = float(
                     calibration_receipt["selected_temperature"]
                 )
+                ordered_train_rows = (
+                    _paired_training_rows(train_rows)
+                    if paired_swap_batches
+                    else train_rows
+                )
                 final_examples = encode_examples(
-                    train_rows,
+                    ordered_train_rows,
                     encoder,
                     view=view,
                     augment_swaps=False,
                     preference_labels=HARD_PREFERENCES,
                     rationale_labels=HARD_RATIONALES,
+                )
+                final_sample_weights, array_weight_receipt = (
+                    _array_consistency_weights(
+                        ordered_train_rows,
+                        train_arrays,
+                        extra_weight=array_consistency_loss_weight,
+                    )
                 )
                 final_seed = seed * 100 + 97
                 final_model = make_model(
@@ -638,6 +850,10 @@ def train(args: argparse.Namespace) -> int:
                     checkpoint_callback=final_callback,
                     preference_count=len(HARD_PREFERENCES),
                     rationale_count=len(HARD_RATIONALES),
+                    sample_weights=final_sample_weights,
+                    paired_group_size=(
+                        2 if paired_swap_batches else 1
+                    ),
                 )
                 seed_checkpoints.extend(final_paths)
                 model_payload = {
@@ -652,6 +868,16 @@ def train(args: argparse.Namespace) -> int:
                     "rationale_labels": list(HARD_RATIONALES),
                     "trainable_parameters": final_model.parameter_count,
                     "calibration": calibration_receipt,
+                    "structured_objectives": {
+                        "paired_swap_batches": paired_swap_batches,
+                        "antisymmetric_inference": (
+                            antisymmetric_inference
+                        ),
+                        "array_consistency_loss_weight": (
+                            array_consistency_loss_weight
+                        ),
+                        "array_weight_receipt": array_weight_receipt,
+                    },
                     "state": final_model.state_dict(),
                     "authority": "MODEL_RECOMMENDATION_ONLY",
                     "heldout_targets_seen": False,
@@ -668,6 +894,7 @@ def train(args: argparse.Namespace) -> int:
                         view=view,
                         preference_labels=HARD_PREFERENCES,
                         rationale_labels=HARD_RATIONALES,
+                        antisymmetric=antisymmetric_inference,
                     )
                     prediction_rows.append(
                         _prediction_envelope(
@@ -699,6 +926,14 @@ def train(args: argparse.Namespace) -> int:
                     "model_sha256": sha256_file(model_path),
                     "checkpoint_count": len(seed_checkpoints),
                     "heldout_targets_seen": False,
+                    "paired_swap_batches": paired_swap_batches,
+                    "antisymmetric_inference": (
+                        antisymmetric_inference
+                    ),
+                    "array_consistency_loss_weight": (
+                        array_consistency_loss_weight
+                    ),
+                    "array_weight_receipt": array_weight_receipt,
                 }
                 receipts.append(receipt)
                 checkpoints.extend(seed_checkpoints)

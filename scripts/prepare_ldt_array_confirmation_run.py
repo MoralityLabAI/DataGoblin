@@ -51,13 +51,16 @@ def prepare(
     if manifest["feature_whitelist"] != list(CONFIRMATION_FEATURE_WHITELIST):
         raise ValueError("confirmation feature whitelist differs")
     feature_independence_audit: dict[str, object] | None = None
-    if preregistration.get("schema_version") == "7.0":
+    schema_version = str(preregistration.get("schema_version"))
+    if schema_version in {"7.0", "8.0"}:
         feature_views = {
             str(model["feature_view"])
             for model in preregistration["models"]["candidates"]
         }
         if feature_views != {"independent"}:
-            raise ValueError("v7 candidates include a target-derived feature view")
+            raise ValueError(
+                "target-independent candidates include a derived feature view"
+            )
         independent_names = ConfirmationPairEncoder.fit(
             train_pairs
         ).feature_names("independent")
@@ -71,7 +74,7 @@ def prepare(
         ]
         if forbidden_hits:
             raise ValueError(
-                "v7 independent feature view contains forbidden proxies"
+                "independent feature view contains forbidden proxies"
             )
         feature_independence_audit = {
             "candidate_feature_views": sorted(feature_views),
@@ -80,6 +83,51 @@ def prepare(
             "typed_or_lattice_views_present": False,
             "audit_split": "development_only",
         }
+        if schema_version == "8.0":
+            support = manifest.get("development_support_audit")
+            if not support or not all(
+                int(count) >= int(
+                    preregistration["dataset_contract"][
+                        "minimum_lineages_per_critical_class"
+                    ]
+                )
+                for axis in support["lineage_support"].values()
+                for count in axis.values()
+            ):
+                raise ValueError(
+                    "v8 development critical-class support is incomplete"
+                )
+            objectives = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    "paired_swap_batches": bool(
+                        model["paired_swap_batches"]
+                    ),
+                    "antisymmetric_inference": bool(
+                        model["antisymmetric_inference"]
+                    ),
+                    "array_consistency_loss_weight": float(
+                        model["array_consistency_loss_weight"]
+                    ),
+                }
+                for model in preregistration["models"]["candidates"]
+            ]
+            if any(
+                row["array_consistency_loss_weight"] < 0.0
+                or row["array_consistency_loss_weight"] > 2.0
+                for row in objectives
+            ):
+                raise ValueError("v8 array objective weight is out of bounds")
+            if not any(
+                row["paired_swap_batches"]
+                and row["antisymmetric_inference"]
+                and row["array_consistency_loss_weight"] > 0.0
+                for row in objectives
+            ):
+                raise ValueError("v8 lacks a complete structured objective")
+            feature_independence_audit[
+                "structured_objectives"
+            ] = objectives
     hard_caps = preregistration["hard_caps"]
     if hard_caps != {
         "wrapper": "scripts/run_training_gym_capped_wsl.sh",

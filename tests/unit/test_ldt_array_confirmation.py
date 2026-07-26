@@ -18,7 +18,10 @@ from datagoblin.experiments.ldt_array_confirmation import (
     swap_confirmation_pair,
 )
 from datagoblin.experiments.ldt_array_hard_surface import HARD_INVERT_PREFERENCE
-from datagoblin.experiments.ldt_array_sorter import METRIC_FIELDS, make_model
+from datagoblin.experiments.ldt_array_sorter import METRIC_FIELDS, make_model, predict_model
+from datagoblin.experiments.ldt_structured_array_v8 import (
+    generate_structured_array_dataset,
+)
 from datagoblin.experiments.ldt_target_independent_v7 import (
     generate_target_independent_dataset,
 )
@@ -198,6 +201,76 @@ def test_v7_generator_seals_target_independent_confirmation(
     ).is_file()
 
 
+def test_v8_generator_mixes_critical_classes_across_folds(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    report = generate_structured_array_dataset(
+        root / "configs/preregistrations/ldt_structured_array_v8.yaml",
+        tmp_path / "v8",
+    )
+    manifest_path = (
+        tmp_path / "v8/public_dataset/dataset_manifest.json"
+    )
+    (
+        manifest,
+        train_pairs,
+        _,
+        train_arrays,
+        _,
+        _,
+        _,
+    ) = load_confirmation_dataset(manifest_path)
+    assert report["generation_passed"]
+    assert report["counts"] == {
+        "train_pairs": 350,
+        "heldout_pairs": 350,
+        "train_arrays": 16,
+        "heldout_arrays": 16,
+        "train_reports": 82,
+        "heldout_reports": 82,
+    }
+    support = manifest["development_support_audit"]
+    assert all(
+        int(count) == 4
+        for axis in support["lineage_support"].values()
+        for count in axis.values()
+    )
+    assert all(
+        int(count) > 0
+        for fold in support["folds"].values()
+        for side in ("training", "validation")
+        for axis in fold[side].values()
+        for count in axis.values()
+    )
+    trainer = runpy.run_path(
+        str(root / "scripts/train_ldt_array_confirmation.py")
+    )
+    ordered = trainer["_paired_training_rows"](train_pairs)
+    assert len(ordered) == len(train_pairs)
+    assert all(
+        (
+            ordered[index]["array_id"],
+            ordered[index]["left_index"],
+            ordered[index]["right_index"],
+        )
+        == (
+            ordered[index + 1]["array_id"],
+            ordered[index + 1]["right_index"],
+            ordered[index + 1]["left_index"],
+        )
+        for index in range(0, len(ordered), 2)
+    )
+    weights, receipt = trainer["_array_consistency_weights"](
+        ordered,
+        train_arrays,
+        extra_weight=0.75,
+    )
+    assert len(weights) == len(ordered)
+    assert receipt["structural_edge_count"] > 0
+    assert receipt["maximum_weight"] == 1.75
+
+
 def test_confirmation_encoder_supports_dynamic_joint_heads() -> None:
     row = {
         "input": {
@@ -226,6 +299,85 @@ def test_confirmation_encoder_supports_dynamic_joint_heads() -> None:
     preference, rationale = model.predict_proba(typed)
     assert math.isclose(sum(preference), 1.0)
     assert math.isclose(sum(rationale), 1.0)
+
+
+def test_antisymmetric_projection_is_exact_by_construction() -> None:
+    row = {
+        "input": {
+            "left": _candidate((0.8, 0.7, 0.8, 0.7)),
+            "right": _candidate((0.7, 0.8, 0.7, 0.8)),
+        }
+    }
+    swapped = {"input": {"left": row["input"]["right"], "right": row["input"]["left"]}}
+    encoder = ConfirmationPairEncoder.fit([row, swapped])
+    model = make_model(
+        {
+            "family": "weight_tied_looped_array",
+            "hidden_width": 4,
+            "loop_count": 2,
+        },
+        len(encoder.feature_names("independent")),
+        31,
+        preference_count=4,
+        rationale_count=5,
+    )
+    forward = predict_model(
+        model,
+        encoder,
+        row,
+        view="independent",
+        preference_labels=(
+            "LEFT",
+            "RIGHT",
+            "TRADEOFF",
+            "ABSTAIN",
+        ),
+        rationale_labels=(
+            "safety_gate",
+            "pareto_dominance",
+            "parameter_efficiency",
+            "irreducible_tradeoff",
+            "insufficient_evidence",
+        ),
+        antisymmetric=True,
+    )
+    reverse = predict_model(
+        model,
+        encoder,
+        swapped,
+        view="independent",
+        preference_labels=(
+            "LEFT",
+            "RIGHT",
+            "TRADEOFF",
+            "ABSTAIN",
+        ),
+        rationale_labels=(
+            "safety_gate",
+            "pareto_dominance",
+            "parameter_efficiency",
+            "irreducible_tradeoff",
+            "insufficient_evidence",
+        ),
+        antisymmetric=True,
+    )
+    invert = {
+        "LEFT": "RIGHT",
+        "RIGHT": "LEFT",
+        "TRADEOFF": "TRADEOFF",
+        "ABSTAIN": "ABSTAIN",
+    }
+    assert forward["swap_consistent"]
+    assert reverse["swap_consistent"]
+    assert reverse["preference"] == invert[forward["preference"]]
+    assert all(
+        math.isclose(
+            forward["preference_probabilities"][label],
+            reverse["preference_probabilities"][invert[label]],
+            abs_tol=1e-12,
+        )
+        for label in invert
+    )
 
 
 def test_independent_encoder_never_executes_policy_or_exposes_proxies(
