@@ -1,0 +1,264 @@
+schema_version: '9.0'
+experiment_id: datagoblin-ldt-listwise-array-v9
+status: frozen_before_dataset_generation
+training_task_id: ldt-listwise-array-v9-seed-sweep
+
+purpose: >
+  Test whether direct, permutation-equivariant listwise status training can
+  recover complete selected sets after v8 solved support, safety, orientation,
+  and calibration but failed the array-selection gate.
+claim_scope: >
+  Environment-owned synthetic tournament-summary evidence only. Results do not
+  authorize corpus promotion, deployment, a universal adapter champion, or
+  training a larger checkpoint.
+skill_fingerprint:
+  schema_version: skill-fingerprint.v1
+  skill_name: curate-game-agent-data
+  skill_sha256: 4a601e0dfa9989fef1492674fd0fb5355d6be6d39152f0de21c8c00318fe266a
+
+source_evidence:
+  experiment_id: datagoblin-ldt-structured-array-v8
+  preregistration_sha256: 6e2eed040c4b1f8d9f87823e09ca6c2c51f165bf6b8c2656a3616ccc353e547b
+  development_selection_sha256: c8c5617bfb5b49d33bd74598af5fc3c2cc0514994ed4798df4272e164dc756e5
+  confirmation_spent: false
+  conclusion: >
+    Exact antisymmetry reached 1.0 swap consistency and structured weighting
+    raised status macro-F1 to 0.8711, but selected-set exactness peaked at
+    0.6250 across all runs. ECE was not the bottleneck. Replace the indirect
+    pair weighting with one direct listwise status objective.
+
+independent_builder:
+  implementation_id: datagoblin.structured_array_builder.v9
+  role: FIXTURE_BUILDER
+  target_logic_available: false
+  target_files_emitted: false
+
+independent_verifier:
+  implementation_id: datagoblin.shift_verifier.v6
+  role: ENVIRONMENT_OWNED_VERIFIER
+  labels_sealed_before_training: true
+  labels_emitted_only_to_private_custody: true
+
+surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - near_tolerance_dominance
+    - near_tolerance_equivalence
+    - controlled_missingness
+    - boundary_pareto_tradeoff
+  array_sizes: [4, 5, 6]
+  minimum_array_size_by_pressure:
+    controlled_missingness: 6
+  train_seed: 5003
+  heldout_seed: 5231
+  train_lineage_count: 6
+  heldout_lineage_count: 4
+  train_context_prefix: listwise_array_v9_development
+  heldout_context_prefix: listwise_array_v9_confirmation
+  orientation_contract: both_directions_for_every_unordered_pair
+  metric_equivalence_tolerance: 0.01
+  forbidden_prior_lineage_sha256:
+    - 01a0ce29c70009771b84e8e20b9f1e31e3499de31329bb2cabe1e7247d3799ff
+    - 06f32c908b5084b71e81cc7caf4b77bb9e9a6cbf61e38347a92efb4a7671f910
+    - 34c73521746d31fbdd618c4d8b04fd6fc460d0fa4f17512219117824f96ef84e
+    - 3eb9f201e9d47a819c29b412949d98ce22fc6521969503cd19957dfbbefea192
+    - 74aa9197e488da8ac7e154691d47efa41324ff252022841a695a7b96d55775c3
+    - d1644470f5636a46d738c81fff03525e9c0a70d79bede79187caa54ad500f041
+    - de81d52b45d8a01d4c4f347e14edd8c204375bde0acf2d7a9fdf1f2dfe245702
+    - ec53c730a782878da748665d01f80cd02bd8a9d5470afc3f9f63996e3fce134b
+    - 28a70a16ddd246e187534ace0756129c34658f5c0d160c48373c6829bb920bdc
+    - 72f5256460e078f63e7a8b97e158b4d25d8d94994f0e5596098be2c5cf09d6c1
+    - 84a3bd82344886f13d363acfbe9883876dd1d67afd647bbc7200986c1c67d6e9
+    - c51e26f01cb4968751f407bdcdebdbe26d6e717bf29e1618ff79ced021d004b9
+    - 1bcaa15c326680d9ff1d0194987ad42bbbf80c7a81e477a7b8bf92aa009906a1
+    - 31b451888074bcbd257c6644ac84e399ae878ab48ed61a19fa29c71c4bd2228f
+    - 477e61d3f83e0cf34ee52d6c71f33a80a642fc18c070e7e6926c5855a311ba8a
+    - 4badd8690e24b06c476954b101a0993cc01ffb6894cf30ee01a1d8dda7300e40
+    - 52bdfb57e8c0b5f39f5607732e5303335f299dd2f776e5fc36d6a1c388043ffb
+    - 82624d3769253c55de5002040bdbbac23e1024e236a8fceaac3d6142550ced44
+    - 9803fbe8d5393f9d5840fbf1ed1cc6a071843d8267f21b81795e1a9670c8c297
+    - beeaa9b12f0ea93b4cfa0013499d40fd8075ba0acb702759e8ef8a1ceb238119
+    - c0a5bc3eecd89a2e64cecefd7eb39ebeb0c1380ee03bae0be424ab18cbf1b303
+    - cecc746e5b70d7362ecf44ab2899f6b45fe20deedf7b3b11c917265936cf4a17
+    - d45888491285c84123460f0c9e5acf8b5f0c072f544c340c64a0bd4b56e71c1f
+    - eac0e08ba88e4c76fe12c5d5e3a249c371e8739b6d6d3655b412b9289af76731
+    - 206ba0e72d1239399d05904a45ccb918bbca382a32f666ae8971a6747853f8d7
+    - b3a5f824e8fb17e6e60c2d092fb4504bb4beec5209900bedba3b9372c34dfff5
+    - edddb66c45686388a189a83a43a2efd939fd67c61dcd2428df5dde8aca21c3f6
+    - f72dc1beb8cf3ebec6c1fabbe10a17dbe8e8840b98d01749e74d763c15c5f73a
+    - 004b462d28f1585dfe0275a149b833fef92199d5091a4bedd538873b5d113b72
+    - 13c0f8db3ec77a83187bec5b3bdef88c5eb59afc5a19b3f5f2a9ab07cb993a6e
+    - 14d1763af0ceb948f3d8d7cd9221cf54880b1d1ce9d6982a4ace11f00c9df28f
+    - 15c207a87204ac7d1ae519b6229553027ff3a6a7bae36eb6cec0b972c0e2a1ec
+    - 8b8023472419581b32a8f7283eec932dbddeabec4cd104a8d294087bed90173f
+    - bb600b4bb5ff63d5f5c5b2278a3256f0b3943ee61b58c3fe338a70cfc585eb57
+    - ef562665919c57b04704e4774b10eb5d30c6ec9430d10f20d7ce372f22f70c11
+    - efcdb154a245883ad472992e208d841e2894e3b8901f2b9147568dcfdaf500dd
+    - 314eeacb003169b167448362e086a68b3b31a96a744eba899bebd2086f0d29ac
+    - 59d5cb480c9f502c6d57acc05d70f19db46eaf170ed775b870a3a88fd225ff7f
+    - 6b3ffb73488f2ab686e6a86db2ed88266b8236ebe680354a3b4abbcd8e9b9ad6
+    - 72c0e01d94bbb0151fc846ac5cf569e315a83e4061a93486c1922d952cba6384
+    - 91229fd2fa55965d7d43e4c8f73d906b1c864c650c5c5f14eb174dca56c05069
+    - a5f942b1fba4323731ffabbc7b42205ca33b2b5c88d3c74bd6d7841f0d9ff665
+    - baf43cb1e6e4c20da1200ea1d4cf56e4c03c73b0c3abd4826d7420515b275a61
+    - f85da91ba9cd96db30a3a4190e2cda58431e19aa51bf2a85f524ba24b200ea38
+
+dataset_contract:
+  schema_version: curation-taste-array-confirmation.v3
+  required_train_pairs: 552
+  required_heldout_pairs: 350
+  required_train_arrays: 24
+  required_heldout_arrays: 16
+  required_train_reports: 126
+  required_heldout_reports: 82
+  required_train_lineage_groups: 6
+  required_heldout_lineage_groups: 4
+  minimum_lineages_per_critical_class: 4
+  require_array_sizes: [4, 5, 6]
+  require_all_pair_preferences: true
+  require_all_rationale_codes: true
+  require_all_array_statuses: true
+  require_every_cv_training_fold_class_complete: true
+  require_every_cv_validation_fold_class_complete: true
+  require_disjoint_context_categories: true
+  require_report_hash_bindings: true
+  heldout_pair_targets_available_to_candidate: false
+  heldout_array_targets_available_to_candidate: false
+
+models:
+  controls: []
+  candidates:
+    - model_id: looped-h4-pair-control-v9
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: deterministic_pair_reducer
+        enabled: false
+    - model_id: looped-h4-pooled-listwise-v9
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: looped_permutation_equivariant_status
+        enabled: true
+        hidden_width: 4
+        loop_count: 1
+        epochs: 300
+        learning_rate: 0.03
+    - model_id: looped-h4-recurrent-listwise-v9
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: looped_permutation_equivariant_status
+        enabled: true
+        hidden_width: 4
+        loop_count: 3
+        epochs: 300
+        learning_rate: 0.025
+
+training:
+  seeds: [29, 53, 97]
+  validation: leave_one_mixed_mechanism_lineage_out
+  batch_size: 24
+  checkpoint_interval: {epochs: 100, seconds: 60}
+  listwise_checkpoint_interval_epochs: 100
+  chunk_strategy: >
+    At most 24 ordered pairs with orientation pairs kept in a batch, followed
+    by one complete array of at most 6 candidates per listwise status step.
+  class_balancing: inverse_frequency
+  listwise_class_balancing: inverse_frequency
+  rationale_loss_weight: 0.5
+  l2: 0.0005
+  gradient_norm_clip: 5.0
+  external_checkpoint: null
+  network_permitted: false
+
+confidence_calibration:
+  fit_split: out_of_fold_development_predictions_only
+  method: frozen_temperature_grid
+  temperatures: [0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+  selection_metric: multiclass_negative_log_likelihood
+  expected_calibration_error_bins: 10
+  maximum_qualified_ece: 0.20
+
+development_selection:
+  timing: after_training_before_confirmation_join
+  source: development_cv_array_metrics_and_oof_pair_calibration_only
+  select_one_seed_per_architecture: true
+  primary_selection_permitted: true
+  required_mean_safety_gate_accuracy: 1.0
+  required_mean_swap_consistency: 1.0
+  minimum_mean_preference_macro_f1: 0.75
+  minimum_mean_abstain_recall: 0.75
+  minimum_mean_status_macro_f1: 0.80
+  minimum_mean_exact_array_accuracy: 0.65
+  minimum_mean_selected_set_exact_accuracy: 0.75
+  minimum_worst_fold_selected_set_exact_accuracy: 0.50
+  maximum_oof_expected_calibration_error: 0.20
+  ranking:
+    - maximize_worst_fold_selected_set_exact_accuracy
+    - maximize_worst_fold_exact_array_accuracy
+    - maximize_worst_fold_status_macro_f1
+    - maximize_worst_fold_preference_macro_f1
+    - maximize_mean_selected_set_exact_accuracy
+    - maximize_mean_exact_array_accuracy
+    - maximize_mean_status_macro_f1
+    - maximize_mean_preference_macro_f1
+    - minimize_oof_negative_log_likelihood
+    - minimize_trainable_parameters
+    - minimize_seed
+  no_qualified_primary_result: null
+  confirmation_join_requires_qualified_primary: true
+
+hard_caps:
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  ram_mb: 2048
+  cpu_percent: 50
+  io_mb_per_second: 50
+  wall_clock_seconds: 900
+  swap_bytes: 0
+  fallback_if_unavailable: abort_without_training
+
+heldout_evaluation:
+  reveal_count: 1
+  no_post_reveal_tuning: true
+  retained_candidate_id: null
+  require_all_array_sizes: [4, 5, 6]
+  minimum_selected_set_exact_accuracy: 0.75
+  report_by_game: true
+  report_by_pressure: true
+  report_support_counts: true
+  use_direct_listwise_array_predictions: true
+  universal_scalar_champion_permitted: false
+  confirmation_condition: qualified_development_primary_only
+
+promotion_boundary:
+  sorter_authority: MODEL_RECOMMENDATION_ONLY
+  checkpoint_promotion_authorized: false
+  corpus_promotion_authorized: false
+  deployment_authorized: false
+  larger_model_training_authorized: false
+  next_gate: >
+    If and only if a development-qualified primary exists, spend one fresh
+    sealed confirmation. Otherwise preserve the confirmation and diagnose
+    listwise generalization from development evidence only.

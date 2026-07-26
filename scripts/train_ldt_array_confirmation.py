@@ -37,6 +37,12 @@ from datagoblin.experiments.ldt_array_sorter import (
     sha256_json,
     train_array_model,
 )
+from datagoblin.experiments.ldt_listwise_array_v9 import (
+    IndependentCandidateEncoder,
+    LoopedSetStatusModel,
+    predict_array_statuses,
+    train_status_model,
+)
 
 
 def _write_json(path: Path, value: Any) -> None:
@@ -234,6 +240,8 @@ def _array_labeled_metrics(
     rows: Sequence[Mapping[str, Any]],
     predictions: Sequence[Mapping[str, Any]],
     arrays: Sequence[Mapping[str, Any]],
+    *,
+    direct_statuses: Mapping[str, Sequence[str]] | None = None,
 ) -> dict[str, float]:
     pair_predictions: dict[
         str,
@@ -249,14 +257,17 @@ def _array_labeled_metrics(
     selected_sets = 0
     for array_row in arrays:
         array_id = str(array_row["array_id"])
-        candidates = [
-            candidate["features"]
-            for candidate in array_row["candidates"]
-        ]
-        predicted = reduce_confirmation_array(
-            candidates,
-            pair_predictions[array_id],
-        )["statuses"]
+        if direct_statuses is None:
+            candidates = [
+                candidate["features"]
+                for candidate in array_row["candidates"]
+            ]
+            predicted = reduce_confirmation_array(
+                candidates,
+                pair_predictions[array_id],
+            )["statuses"]
+        else:
+            predicted = list(direct_statuses[array_id])
         actual = [
             str(value) for value in array_row["target"]["statuses"]
         ]
@@ -530,6 +541,72 @@ def _prediction_envelope(
     }
 
 
+def _array_prediction_envelope(
+    *,
+    candidate_id: str,
+    seed: int,
+    row: Mapping[str, Any],
+    prediction: Mapping[str, Any],
+    dataset_manifest_sha256: str,
+    prediction_source: str,
+) -> dict[str, Any]:
+    return {
+        "schema_version": "ldt-listwise-array-prediction.v9",
+        "candidate_id": candidate_id,
+        "seed": seed,
+        "array_id": row["array_id"],
+        "lineage_group_sha256": row["lineage_group_sha256"],
+        "candidate_count": row["candidate_count"],
+        "candidate_input_sha256": sha256_json(
+            row["candidates"]
+        ),
+        "dataset_manifest_sha256": dataset_manifest_sha256,
+        "prediction_source": prediction_source,
+        "statuses": list(prediction["statuses"]),
+        "status_probabilities": list(
+            prediction["status_probabilities"]
+        ),
+        "authority": "MODEL_RECOMMENDATION_ONLY",
+    }
+
+
+def _reduced_status_predictions(
+    rows: Sequence[Mapping[str, Any]],
+    predictions: Sequence[Mapping[str, Any]],
+    arrays: Sequence[Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    pair_predictions: dict[
+        str,
+        dict[tuple[int, int], str],
+    ] = {}
+    for row, prediction in zip(rows, predictions, strict=True):
+        pair_predictions.setdefault(str(row["array_id"]), {})[
+            (int(row["left_index"]), int(row["right_index"]))
+        ] = str(prediction["preference"])
+    result = {}
+    for array_row in arrays:
+        array_id = str(array_row["array_id"])
+        candidates = [
+            candidate["features"]
+            for candidate in array_row["candidates"]
+        ]
+        statuses = reduce_confirmation_array(
+            candidates,
+            pair_predictions[array_id],
+        )["statuses"]
+        result[array_id] = {
+            "statuses": statuses,
+            "status_probabilities": [
+                {
+                    label: float(label == status)
+                    for label in ARRAY_STATUSES
+                }
+                for status in statuses
+            ],
+        }
+    return result
+
+
 def train(args: argparse.Namespace) -> int:
     out_dir = args.out.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -549,12 +626,15 @@ def train(args: argparse.Namespace) -> int:
             raise ValueError("confirmation must stay local and checkpoint-free")
         if os.environ.get("DATAGOBLIN_HARD_CAPS_VERIFIED") != "1":
             raise RuntimeError("hard-cap wrapper verification receipt is missing")
+        is_v9 = (
+            plan.get("preregistration_schema_version") == "9.0"
+        )
         (
             _,
             train_rows,
             heldout_rows,
             train_arrays,
-            _,
+            heldout_arrays,
             _,
             _,
         ) = load_confirmation_dataset(args.dataset_manifest.resolve())
@@ -566,6 +646,36 @@ def train(args: argparse.Namespace) -> int:
             tolerance=float(plan["metric_equivalence_tolerance"]),
         )
         training = plan["training"]
+        candidate_models = list(plan["candidate_models"])
+        seed_values = [
+            int(value) for value in training["seeds"]
+        ]
+        shard_requested = (
+            args.candidate_id is not None or args.seed is not None
+        )
+        if shard_requested:
+            if args.candidate_id is None:
+                raise ValueError(
+                    "a seed shard requires a candidate filter"
+                )
+            candidate_models = [
+                model
+                for model in candidate_models
+                if str(model["model_id"]) == args.candidate_id
+            ]
+            if args.seed is not None:
+                seed_values = [
+                    seed
+                    for seed in seed_values
+                    if seed == args.seed
+                ]
+            if (
+                len(candidate_models) != 1
+                or not seed_values
+            ):
+                raise ValueError(
+                    "trainer shard is outside the frozen sweep"
+                )
         calibration = plan["confidence_calibration"]
         temperatures = [
             float(value) for value in calibration["temperatures"]
@@ -582,11 +692,13 @@ def train(args: argparse.Namespace) -> int:
             heldout_pairs=len(heldout_rows),
             heldout_pair_labels_available=False,
             heldout_array_labels_available=False,
-            candidate_count=len(plan["candidate_models"]),
-            seeds=training["seeds"],
+            candidate_count=len(candidate_models),
+            seeds=seed_values,
+            shard_requested=shard_requested,
             temperature_grid=temperatures,
         )
         prediction_rows: list[dict[str, Any]] = []
+        array_prediction_rows: list[dict[str, Any]] = []
         receipts: list[dict[str, Any]] = []
         train_preferences = Counter(
             str(row["target"]["preference"]) for row in train_rows
@@ -606,7 +718,9 @@ def train(args: argparse.Namespace) -> int:
             label: train_preferences[label] / len(train_rows)
             for label in HARD_PREFERENCES
         }
-        for control in plan["controls"]:
+        for control in (
+            [] if shard_requested else plan["controls"]
+        ):
             control_id = str(control["model_id"])
             for row in heldout_rows:
                 prediction_rows.append(
@@ -637,7 +751,7 @@ def train(args: argparse.Namespace) -> int:
                     "heldout_targets_seen": False,
                 }
             )
-        for spec in plan["candidate_models"]:
+        for spec in candidate_models:
             candidate_id = str(spec["model_id"])
             view = str(spec["feature_view"])
             paired_swap_batches = bool(
@@ -649,8 +763,21 @@ def train(args: argparse.Namespace) -> int:
             array_consistency_loss_weight = float(
                 spec.get("array_consistency_loss_weight", 0.0)
             )
+            listwise_spec = dict(
+                spec.get(
+                    "listwise_status",
+                    {
+                        "enabled": False,
+                        "family": "deterministic_pair_reducer",
+                    },
+                )
+            )
+            listwise_enabled = bool(
+                listwise_spec.get("enabled", False)
+            )
+            candidate_encoder = IndependentCandidateEncoder()
             input_width = len(encoder.feature_names(view))
-            for seed_value in training["seeds"]:
+            for seed_value in seed_values:
                 seed = int(seed_value)
                 cv_reports: list[dict[str, Any]] = []
                 calibration_examples: list[
@@ -760,6 +887,74 @@ def train(args: argparse.Namespace) -> int:
                         )
                         for row in fold_validation
                     ]
+                    fold_direct_statuses = None
+                    status_model = None
+                    if listwise_enabled:
+                        listwise_seed = (
+                            seed * 1000 + fold_index
+                        )
+                        status_model = LoopedSetStatusModel(
+                            input_width=len(
+                                candidate_encoder.feature_names()
+                            ),
+                            hidden_width=int(
+                                listwise_spec["hidden_width"]
+                            ),
+                            loop_count=int(
+                                listwise_spec["loop_count"]
+                            ),
+                            seed=listwise_seed,
+                        )
+                        (
+                            status_paths,
+                            status_callback,
+                        ) = _checkpoint_writer(
+                            out_dir / "checkpoints",
+                            events_path,
+                            candidate_id=candidate_id,
+                            seed=seed,
+                            stage=(
+                                f"cv-fold-{fold_index + 1}"
+                                "-listwise"
+                            ),
+                        )
+                        steps_completed += train_status_model(
+                            status_model,
+                            candidate_encoder,
+                            fold_train_arrays,
+                            epochs=int(
+                                listwise_spec["epochs"]
+                            ),
+                            learning_rate=float(
+                                listwise_spec["learning_rate"]
+                            ),
+                            l2=float(training["l2"]),
+                            gradient_clip=float(
+                                training[
+                                    "gradient_norm_clip"
+                                ]
+                            ),
+                            seed=listwise_seed,
+                            checkpoint_every_epochs=int(
+                                training[
+                                    "listwise_checkpoint_interval_epochs"
+                                ]
+                            ),
+                            checkpoint_callback=status_callback,
+                        )
+                        seed_checkpoints.extend(status_paths)
+                        fold_direct_statuses = {
+                            str(array_row["array_id"]): (
+                                predict_array_statuses(
+                                    status_model,
+                                    candidate_encoder,
+                                    array_row,
+                                )["statuses"]
+                            )
+                            for array_row in (
+                                fold_validation_arrays
+                            )
+                        }
                     cv_reports.append(
                         {
                             **_labeled_metrics(
@@ -770,6 +965,9 @@ def train(args: argparse.Namespace) -> int:
                                 fold_validation,
                                 fold_predictions,
                                 fold_validation_arrays,
+                                direct_statuses=(
+                                    fold_direct_statuses
+                                ),
                             ),
                         }
                     )
@@ -785,6 +983,8 @@ def train(args: argparse.Namespace) -> int:
                         )
                     )
                     del model
+                    if status_model is not None:
+                        del status_model
                     gc.collect()
                 calibration_receipt = _fit_temperature(
                     calibration_examples,
@@ -856,6 +1056,62 @@ def train(args: argparse.Namespace) -> int:
                     ),
                 )
                 seed_checkpoints.extend(final_paths)
+                final_status_model = None
+                listwise_parameter_count = 0
+                if listwise_enabled:
+                    listwise_final_seed = seed * 1000 + 997
+                    final_status_model = LoopedSetStatusModel(
+                        input_width=len(
+                            candidate_encoder.feature_names()
+                        ),
+                        hidden_width=int(
+                            listwise_spec["hidden_width"]
+                        ),
+                        loop_count=int(
+                            listwise_spec["loop_count"]
+                        ),
+                        seed=listwise_final_seed,
+                    )
+                    (
+                        final_status_paths,
+                        final_status_callback,
+                    ) = _checkpoint_writer(
+                        out_dir / "checkpoints",
+                        events_path,
+                        candidate_id=candidate_id,
+                        seed=seed,
+                        stage="final-train-listwise",
+                    )
+                    steps_completed += train_status_model(
+                        final_status_model,
+                        candidate_encoder,
+                        train_arrays,
+                        epochs=int(listwise_spec["epochs"]),
+                        learning_rate=float(
+                            listwise_spec["learning_rate"]
+                        ),
+                        l2=float(training["l2"]),
+                        gradient_clip=float(
+                            training["gradient_norm_clip"]
+                        ),
+                        seed=listwise_final_seed,
+                        checkpoint_every_epochs=int(
+                            training[
+                                "listwise_checkpoint_interval_epochs"
+                            ]
+                        ),
+                        checkpoint_callback=(
+                            final_status_callback
+                        ),
+                    )
+                    seed_checkpoints.extend(final_status_paths)
+                    listwise_parameter_count = (
+                        final_status_model.parameter_count
+                    )
+                total_parameter_count = (
+                    final_model.parameter_count
+                    + listwise_parameter_count
+                )
                 model_payload = {
                     "schema_version": "ldt-array-confirmation-model.v3",
                     "candidate_id": candidate_id,
@@ -866,7 +1122,13 @@ def train(args: argparse.Namespace) -> int:
                     "encoder": encoder.receipt(),
                     "preference_labels": list(HARD_PREFERENCES),
                     "rationale_labels": list(HARD_RATIONALES),
-                    "trainable_parameters": final_model.parameter_count,
+                    "trainable_parameters": total_parameter_count,
+                    "pair_trainable_parameters": (
+                        final_model.parameter_count
+                    ),
+                    "listwise_trainable_parameters": (
+                        listwise_parameter_count
+                    ),
                     "calibration": calibration_receipt,
                     "structured_objectives": {
                         "paired_swap_batches": paired_swap_batches,
@@ -878,7 +1140,22 @@ def train(args: argparse.Namespace) -> int:
                         ),
                         "array_weight_receipt": array_weight_receipt,
                     },
+                    "listwise_objective": {
+                        **listwise_spec,
+                        "candidate_encoder": (
+                            candidate_encoder.receipt()
+                        ),
+                        "development_array_targets_seen": (
+                            listwise_enabled
+                        ),
+                        "heldout_array_targets_seen": False,
+                    },
                     "state": final_model.state_dict(),
+                    "listwise_state": (
+                        None
+                        if final_status_model is None
+                        else final_status_model.state_dict()
+                    ),
                     "authority": "MODEL_RECOMMENDATION_ONLY",
                     "heldout_targets_seen": False,
                 }
@@ -886,6 +1163,7 @@ def train(args: argparse.Namespace) -> int:
                     out_dir / "models" / f"{candidate_id}-seed-{seed}.json"
                 )
                 _write_json(model_path, model_payload)
+                heldout_pair_predictions = []
                 for row in heldout_rows:
                     prediction = predict_model(
                         final_model,
@@ -896,19 +1174,70 @@ def train(args: argparse.Namespace) -> int:
                         rationale_labels=HARD_RATIONALES,
                         antisymmetric=antisymmetric_inference,
                     )
+                    scaled_prediction = _scaled_prediction(
+                        prediction,
+                        temperature=selected_temperature,
+                    )
+                    heldout_pair_predictions.append(
+                        scaled_prediction
+                    )
                     prediction_rows.append(
                         _prediction_envelope(
                             candidate_id=candidate_id,
                             seed=seed,
                             row=row,
-                            prediction=_scaled_prediction(
-                                prediction,
-                                temperature=selected_temperature,
-                            ),
+                            prediction=scaled_prediction,
                             dataset_manifest_sha256=manifest_sha256,
                             calibration_temperature=selected_temperature,
                         )
                     )
+                if final_status_model is None:
+                    heldout_status_predictions = (
+                        _reduced_status_predictions(
+                            heldout_rows,
+                            heldout_pair_predictions,
+                            heldout_arrays,
+                        )
+                    )
+                    prediction_source = (
+                        "deterministic_pair_reducer"
+                    )
+                else:
+                    heldout_status_predictions = {
+                        str(array_row["array_id"]): (
+                            predict_array_statuses(
+                                final_status_model,
+                                candidate_encoder,
+                                array_row,
+                            )
+                        )
+                        for array_row in heldout_arrays
+                    }
+                    prediction_source = (
+                        "direct_listwise_status_head"
+                    )
+                for array_row in heldout_arrays:
+                    if is_v9:
+                        array_prediction_rows.append(
+                            _array_prediction_envelope(
+                                candidate_id=candidate_id,
+                                seed=seed,
+                                row=array_row,
+                                prediction=(
+                                    heldout_status_predictions[
+                                        str(
+                                            array_row["array_id"]
+                                        )
+                                    ]
+                                ),
+                                dataset_manifest_sha256=(
+                                    manifest_sha256
+                                ),
+                                prediction_source=(
+                                    prediction_source
+                                ),
+                            )
+                        )
                 receipt = {
                     "candidate_id": candidate_id,
                     "family": spec["family"],
@@ -916,7 +1245,13 @@ def train(args: argparse.Namespace) -> int:
                     "hidden_width": int(spec["hidden_width"]),
                     "loop_count": int(spec["loop_count"]),
                     "seed": seed,
-                    "trainable_parameters": final_model.parameter_count,
+                    "trainable_parameters": total_parameter_count,
+                    "pair_trainable_parameters": (
+                        final_model.parameter_count
+                    ),
+                    "listwise_trainable_parameters": (
+                        listwise_parameter_count
+                    ),
                     "trained": True,
                     "train_pairs": len(final_examples),
                     "validation": training["validation"],
@@ -934,6 +1269,16 @@ def train(args: argparse.Namespace) -> int:
                         array_consistency_loss_weight
                     ),
                     "array_weight_receipt": array_weight_receipt,
+                    "listwise_objective": {
+                        **listwise_spec,
+                        "candidate_encoder": (
+                            candidate_encoder.receipt()
+                        ),
+                        "development_array_targets_seen": (
+                            listwise_enabled
+                        ),
+                        "heldout_array_targets_seen": False,
+                    },
                 }
                 receipts.append(receipt)
                 checkpoints.extend(seed_checkpoints)
@@ -952,6 +1297,8 @@ def train(args: argparse.Namespace) -> int:
                     model_sha256=receipt["model_sha256"],
                 )
                 del final_model
+                if final_status_model is not None:
+                    del final_status_model
                 gc.collect()
         predictions_path = out_dir / "heldout_pair_predictions.jsonl"
         with predictions_path.open(
@@ -971,6 +1318,31 @@ def train(args: argparse.Namespace) -> int:
                     json.dumps(row, sort_keys=True, separators=(",", ":"))
                     + "\n"
                 )
+        array_predictions_path = (
+            out_dir / "heldout_array_predictions.jsonl"
+        )
+        if is_v9:
+            with array_predictions_path.open(
+                "w",
+                encoding="utf-8",
+                newline="\n",
+            ) as handle:
+                for row in sorted(
+                    array_prediction_rows,
+                    key=lambda value: (
+                        str(value["candidate_id"]),
+                        int(value["seed"]),
+                        str(value["array_id"]),
+                    ),
+                ):
+                    handle.write(
+                        json.dumps(
+                            row,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    )
         summary = {
             "schema_version": "ldt-array-confirmation-trainer-summary.v3",
             "experiment_id": plan["experiment_id"],
@@ -988,12 +1360,24 @@ def train(args: argparse.Namespace) -> int:
             "heldout_pair_targets_seen": False,
             "heldout_array_targets_seen": False,
             "external_checkpoint_loaded": False,
+            "shard_filter": (
+                {
+                    "candidate_id": args.candidate_id,
+                    "seed": args.seed,
+                }
+                if shard_requested
+                else None
+            ),
             "elapsed_seconds": time.monotonic() - started,
             "claim_boundary": (
                 "Fresh content-free tournament-summary confirmation only; "
                 "outputs are recommendation-only and no game record was trained."
             ),
         }
+        if is_v9:
+            summary["array_predictions_sha256"] = sha256_file(
+                array_predictions_path
+            )
         _write_json(summary_path, summary)
         _event(
             events_path,
@@ -1036,6 +1420,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dataset-manifest", type=Path, required=True)
     parser.add_argument("--trainer-plan", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--candidate-id")
+    parser.add_argument("--seed", type=int)
     return parser
 
 

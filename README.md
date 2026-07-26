@@ -103,6 +103,12 @@ see
 An independent distribution-shift challenge causally audits policy-derived
 typed features against masked, raw-linear, and non-learned controls; see
 [`docs/ldt_independent_shift_v6.md`](docs/ldt_independent_shift_v6.md).
+The target-independent successors remove policy-derived inputs, repair
+lineage-heldout class support, and test direct permutation-equivariant array
+heads without opening sealed labels; see
+[`docs/ldt_target_independent_v7.md`](docs/ldt_target_independent_v7.md),
+[`docs/ldt_structured_array_v8.md`](docs/ldt_structured_array_v8.md), and
+[`docs/ldt_listwise_array_v9.md`](docs/ldt_listwise_array_v9.md).
 
 ## Optional HRM-Text cycle milestone
 

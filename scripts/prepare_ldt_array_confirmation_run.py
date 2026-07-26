@@ -10,6 +10,9 @@ from datagoblin.experiments.ldt_array_confirmation import (
     load_confirmation_dataset,
 )
 from datagoblin.experiments.ldt_array_sorter import sha256_file
+from datagoblin.experiments.ldt_listwise_array_v9 import (
+    IndependentCandidateEncoder,
+)
 from datagoblin.experiments.ldt_target_independent_v7 import (
     INDEPENDENT_FEATURE_FORBIDDEN_FRAGMENTS,
 )
@@ -52,7 +55,7 @@ def prepare(
         raise ValueError("confirmation feature whitelist differs")
     feature_independence_audit: dict[str, object] | None = None
     schema_version = str(preregistration.get("schema_version"))
-    if schema_version in {"7.0", "8.0"}:
+    if schema_version in {"7.0", "8.0", "9.0"}:
         feature_views = {
             str(model["feature_view"])
             for model in preregistration["models"]["candidates"]
@@ -83,7 +86,7 @@ def prepare(
             "typed_or_lattice_views_present": False,
             "audit_split": "development_only",
         }
-        if schema_version == "8.0":
+        if schema_version in {"8.0", "9.0"}:
             support = manifest.get("development_support_audit")
             if not support or not all(
                 int(count) >= int(
@@ -117,17 +120,72 @@ def prepare(
                 or row["array_consistency_loss_weight"] > 2.0
                 for row in objectives
             ):
-                raise ValueError("v8 array objective weight is out of bounds")
-            if not any(
+                raise ValueError(
+                    "array objective weight is out of bounds"
+                )
+            if schema_version == "8.0" and not any(
                 row["paired_swap_batches"]
                 and row["antisymmetric_inference"]
                 and row["array_consistency_loss_weight"] > 0.0
                 for row in objectives
             ):
-                raise ValueError("v8 lacks a complete structured objective")
+                raise ValueError(
+                    "v8 lacks a complete structured objective"
+                )
             feature_independence_audit[
                 "structured_objectives"
             ] = objectives
+        if schema_version == "9.0":
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in preregistration["models"]["candidates"]
+            ]
+            enabled = [
+                row for row in listwise if bool(row["enabled"])
+            ]
+            if (
+                len(enabled) < 2
+                or not any(
+                    not bool(row["enabled"])
+                    and row["family"]
+                    == "deterministic_pair_reducer"
+                    for row in listwise
+                )
+                or any(
+                    row["family"]
+                    != "looped_permutation_equivariant_status"
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0
+                    < float(row["learning_rate"])
+                    <= 0.1
+                    for row in enabled
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"])
+                    != 0.0
+                    for model in preregistration["models"]["candidates"]
+                )
+                or any(
+                    not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    for model in preregistration["models"]["candidates"]
+                )
+            ):
+                raise ValueError(
+                    "v9 listwise ablation contract is incomplete"
+                )
+            candidate_encoder = IndependentCandidateEncoder()
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoder": candidate_encoder.receipt(),
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+            }
     hard_caps = preregistration["hard_caps"]
     if hard_caps != {
         "wrapper": "scripts/run_training_gym_capped_wsl.sh",
@@ -141,6 +199,7 @@ def prepare(
         raise ValueError("confirmation hard caps differ from the approved contract")
     plan: dict[str, object] = {
         "schema_version": "ldt-array-confirmation-trainer-plan.v3",
+        "preregistration_schema_version": schema_version,
         "experiment_id": preregistration["experiment_id"],
         "training_task_id": preregistration["training_task_id"],
         "operator_approval": "user instruction: continue",

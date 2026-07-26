@@ -5,6 +5,7 @@ import math
 import runpy
 from array import array
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -19,6 +20,13 @@ from datagoblin.experiments.ldt_array_confirmation import (
 )
 from datagoblin.experiments.ldt_array_hard_surface import HARD_INVERT_PREFERENCE
 from datagoblin.experiments.ldt_array_sorter import METRIC_FIELDS, make_model, predict_model
+from datagoblin.experiments.ldt_listwise_array_v9 import (
+    IndependentCandidateEncoder,
+    LoopedSetStatusModel,
+    generate_listwise_array_dataset,
+    predict_array_statuses,
+    train_status_model,
+)
 from datagoblin.experiments.ldt_structured_array_v8 import (
     generate_structured_array_dataset,
 )
@@ -269,6 +277,165 @@ def test_v8_generator_mixes_critical_classes_across_folds(
     assert len(weights) == len(ordered)
     assert receipt["structural_edge_count"] > 0
     assert receipt["maximum_weight"] == 1.75
+
+
+def test_v9_listwise_surface_is_supported_equivariant_and_trainable(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    report = generate_listwise_array_dataset(
+        root
+        / "configs/preregistrations/ldt_listwise_array_v9.yaml",
+        tmp_path / "v9",
+    )
+    manifest_path = (
+        tmp_path / "v9/public_dataset/dataset_manifest.json"
+    )
+    (
+        manifest,
+        _,
+        _,
+        train_arrays,
+        _,
+        _,
+        _,
+    ) = load_confirmation_dataset(manifest_path)
+    assert report["generation_passed"]
+    assert report["counts"] == {
+        "train_pairs": 552,
+        "heldout_pairs": 350,
+        "train_arrays": 24,
+        "heldout_arrays": 16,
+        "train_reports": 126,
+        "heldout_reports": 82,
+    }
+    assert all(
+        int(count) == 6
+        for axis in manifest["development_support_audit"][
+            "lineage_support"
+        ].values()
+        for count in axis.values()
+    )
+    assert manifest["skill_fingerprint"]["skill_sha256"] == (
+        "4a601e0dfa9989fef1492674fd0fb5355d6be6d39152f0de21c8c00318fe266a"
+    )
+
+    encoder = IndependentCandidateEncoder()
+    model = LoopedSetStatusModel(
+        input_width=len(encoder.feature_names()),
+        hidden_width=4,
+        loop_count=3,
+        seed=41,
+    )
+    row = train_arrays[0]
+    original = predict_array_statuses(model, encoder, row)
+    order = list(reversed(range(int(row["candidate_count"]))))
+    permuted = {
+        **row,
+        "candidates": [row["candidates"][index] for index in order],
+    }
+    rearranged = predict_array_statuses(model, encoder, permuted)
+    assert all(
+        math.isclose(
+            rearranged["status_probabilities"][new_index][label],
+            original["status_probabilities"][old_index][label],
+            abs_tol=1e-12,
+        )
+        for new_index, old_index in enumerate(order)
+        for label in (
+            "UNSAFE",
+            "DOMINATED",
+            "UNRESOLVED",
+            "SELECTED",
+        )
+    )
+
+    def mean_loss() -> float:
+        losses = []
+        for array_row in train_arrays:
+            features = encoder.transform_array(
+                [
+                    candidate["features"]
+                    for candidate in array_row["candidates"]
+                ]
+            )
+            targets = [
+                manifest["array_status_labels"].index(str(status))
+                for status in array_row["target"]["statuses"]
+            ]
+            losses.append(model.loss(features, targets))
+        return sum(losses) / len(losses)
+
+    before = mean_loss()
+    steps = train_status_model(
+        model,
+        encoder,
+        train_arrays,
+        epochs=40,
+        learning_rate=0.025,
+        l2=0.0005,
+        gradient_clip=5.0,
+        seed=41,
+        checkpoint_every_epochs=20,
+    )
+    assert steps == 40 * len(train_arrays)
+    assert mean_loss() < before
+
+
+def test_v9_evaluator_refuses_join_before_opening_labels(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    dataset_root = tmp_path / "v9"
+    generate_listwise_array_dataset(
+        root
+        / "configs/preregistrations/ldt_listwise_array_v9.yaml",
+        dataset_root,
+    )
+    trainer_path = tmp_path / "trainer.json"
+    trainer_path.write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "heldout_pair_targets_seen": False,
+                "heldout_array_targets_seen": False,
+                "development_selection": {
+                    "confirmation_join_authorized": False,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    evaluator = runpy.run_path(
+        str(root / "scripts/evaluate_ldt_array_confirmation.py")
+    )
+    with pytest.raises(
+        ValueError,
+        match="did not authorize confirmation",
+    ):
+        evaluator["evaluate"](
+            SimpleNamespace(
+                preregistration=(
+                    root
+                    / "configs/preregistrations/"
+                    "ldt_listwise_array_v9.yaml"
+                ),
+                dataset_manifest=(
+                    dataset_root
+                    / "public_dataset/dataset_manifest.json"
+                ),
+                predictions=tmp_path / "missing-pairs.jsonl",
+                array_predictions=(
+                    tmp_path / "missing-arrays.jsonl"
+                ),
+                trainer_summary=trainer_path,
+                pair_labels=tmp_path / "missing-pair-labels.jsonl",
+                array_labels=(
+                    tmp_path / "missing-array-labels.jsonl"
+                ),
+                out=tmp_path / "never-created",
+            )
+        )
 
 
 def test_confirmation_encoder_supports_dynamic_joint_heads() -> None:

@@ -26,6 +26,7 @@ from datagoblin.experiments.ldt_array_sorter import (
     classification_metrics,
     read_jsonl,
     sha256_file,
+    sha256_json,
 )
 from datagoblin.serialization import load_structured
 
@@ -50,6 +51,21 @@ PREDICTION_KEYS = {
     "swap_consistent",
     "loop_delta",
     "calibration_temperature",
+    "authority",
+}
+
+ARRAY_PREDICTION_KEYS = {
+    "schema_version",
+    "candidate_id",
+    "seed",
+    "array_id",
+    "lineage_group_sha256",
+    "candidate_count",
+    "candidate_input_sha256",
+    "dataset_manifest_sha256",
+    "prediction_source",
+    "statuses",
+    "status_probabilities",
     "authority",
 }
 
@@ -232,6 +248,125 @@ def _validate_predictions(
     return grouped
 
 
+def _validate_array_predictions(
+    predictions: Sequence[Mapping[str, Any]],
+    heldout_arrays: Sequence[Mapping[str, Any]],
+    *,
+    manifest_sha256: str,
+) -> dict[tuple[str, int], list[Mapping[str, Any]]]:
+    public = {
+        str(row["array_id"]): row for row in heldout_arrays
+    }
+    grouped: dict[
+        tuple[str, int],
+        list[Mapping[str, Any]],
+    ] = defaultdict(list)
+    seen = set()
+    for prediction in predictions:
+        if set(prediction) != ARRAY_PREDICTION_KEYS:
+            raise ValueError(
+                "listwise array prediction has invalid fields"
+            )
+        if (
+            prediction["schema_version"]
+            != "ldt-listwise-array-prediction.v9"
+            or prediction["authority"]
+            != "MODEL_RECOMMENDATION_ONLY"
+        ):
+            raise ValueError(
+                "listwise array prediction asserted invalid schema/authority"
+            )
+        if prediction["dataset_manifest_sha256"] != manifest_sha256:
+            raise ValueError(
+                "listwise array prediction is bound to another dataset"
+            )
+        candidate_id = str(prediction["candidate_id"])
+        seed = int(prediction["seed"])
+        array_id = str(prediction["array_id"])
+        key = (candidate_id, seed, array_id)
+        if key in seen or array_id not in public:
+            raise ValueError(
+                "listwise array prediction IDs differ"
+            )
+        seen.add(key)
+        row = public[array_id]
+        count = int(row["candidate_count"])
+        if (
+            prediction["lineage_group_sha256"]
+            != row["lineage_group_sha256"]
+            or int(prediction["candidate_count"]) != count
+            or prediction["candidate_input_sha256"]
+            != sha256_json(row["candidates"])
+            or prediction["prediction_source"]
+            not in {
+                "deterministic_pair_reducer",
+                "direct_listwise_status_head",
+            }
+        ):
+            raise ValueError(
+                "listwise array prediction binding mismatch"
+            )
+        statuses = list(prediction["statuses"])
+        probabilities = list(
+            prediction["status_probabilities"]
+        )
+        if (
+            len(statuses) != count
+            or len(probabilities) != count
+            or any(status not in ARRAY_STATUSES for status in statuses)
+        ):
+            raise ValueError(
+                "listwise array prediction status count differs"
+            )
+        for status, distribution in zip(
+            statuses,
+            probabilities,
+            strict=True,
+        ):
+            if set(distribution) != set(ARRAY_STATUSES):
+                raise ValueError(
+                    "listwise status probability classes differ"
+                )
+            values = [
+                float(distribution[label])
+                for label in ARRAY_STATUSES
+            ]
+            if (
+                any(
+                    not math.isfinite(value)
+                    or not 0.0 <= value <= 1.0
+                    for value in values
+                )
+                or not math.isclose(
+                    sum(values),
+                    1.0,
+                    abs_tol=1e-6,
+                )
+                or status
+                != max(
+                    ARRAY_STATUSES,
+                    key=lambda label: float(
+                        distribution[label]
+                    ),
+                )
+            ):
+                raise ValueError(
+                    "listwise status probabilities are invalid"
+                )
+        grouped[(candidate_id, seed)].append(prediction)
+    expected_ids = set(public)
+    for key, rows in grouped.items():
+        if {
+            str(row["array_id"]) for row in rows
+        } != expected_ids:
+            raise ValueError(
+                f"listwise candidate does not cover heldout: {key}"
+            )
+    if not grouped:
+        raise ValueError("listwise array predictions are empty")
+    return grouped
+
+
 def _expected_calibration_error(
     actual: Sequence[str],
     predictions: Sequence[Mapping[str, Any]],
@@ -283,6 +418,7 @@ def _score_run(
     array_labels: Mapping[str, Mapping[str, Any]],
     arrays_by_id: Mapping[str, Mapping[str, Any]],
     *,
+    direct_array_predictions: Sequence[Mapping[str, Any]] | None = None,
     trainable_parameters: int,
     trained: bool,
     ece_bins: int,
@@ -354,10 +490,23 @@ def _score_run(
         ordered,
         bins=ece_bins,
     )
-    predicted_statuses = _derive_predicted_array_statuses(
-        ordered,
-        arrays_by_id,
+    predicted_statuses = (
+        _derive_predicted_array_statuses(
+            ordered,
+            arrays_by_id,
+        )
+        if direct_array_predictions is None
+        else {
+            str(row["array_id"]): [
+                str(status) for status in row["statuses"]
+            ]
+            for row in direct_array_predictions
+        }
     )
+    if set(predicted_statuses) != set(arrays_by_id):
+        raise ValueError(
+            "direct listwise predictions do not cover scored arrays"
+        )
     actual_status_flat = []
     predicted_status_flat = []
     exact_arrays = 0
@@ -509,6 +658,7 @@ def _slice_reports(
     array_labels: Mapping[str, Mapping[str, Any]],
     arrays_by_id: Mapping[str, Mapping[str, Any]],
     *,
+    direct_array_predictions: Sequence[Mapping[str, Any]] | None = None,
     field: str,
     trainable_parameters: int,
     trained: bool,
@@ -531,6 +681,15 @@ def _slice_reports(
             for row in predictions
             if str(row["array_id"]) in array_subset
         ]
+        direct_subset = (
+            None
+            if direct_array_predictions is None
+            else [
+                row
+                for row in direct_array_predictions
+                if str(row["array_id"]) in array_subset
+            ]
+        )
         support = _support_counts(
             pair_subset,
             pair_labels,
@@ -542,6 +701,7 @@ def _slice_reports(
             pair_labels,
             array_labels,
             array_subset,
+            direct_array_predictions=direct_subset,
             trainable_parameters=trainable_parameters,
             trained=trained,
             ece_bins=ece_bins,
@@ -779,11 +939,80 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         _,
     ) = load_confirmation_dataset(args.dataset_manifest.resolve())
     manifest_sha256 = sha256_file(args.dataset_manifest.resolve())
+    schema_version = str(preregistration.get("schema_version"))
+    trainer = json.loads(
+        args.trainer_summary.read_text(encoding="utf-8")
+    )
+    if (
+        trainer["status"] != "completed"
+        or trainer["heldout_pair_targets_seen"]
+        or trainer["heldout_array_targets_seen"]
+    ):
+        raise ValueError("confirmation trainer is incomplete or contaminated")
+    if (
+        schema_version in {"8.0", "9.0"}
+        and not trainer.get("development_selection", {}).get(
+            "confirmation_join_authorized",
+            False,
+        )
+    ):
+        raise ValueError(
+            "development gate did not authorize confirmation"
+        )
+    if (
+        trainer["preregistration_sha256"]
+        != sha256_file(args.preregistration.resolve())
+    ):
+        raise ValueError("confirmation trainer used another preregistration")
+    if trainer["predictions_sha256"] != sha256_file(
+        args.predictions.resolve()
+    ):
+        raise ValueError(
+            "confirmation pair prediction hash differs"
+        )
+    grouped = _validate_predictions(
+        read_jsonl(args.predictions.resolve()),
+        heldout_pairs,
+        manifest_sha256=manifest_sha256,
+    )
+    array_grouped: dict[
+        tuple[str, int],
+        list[Mapping[str, Any]],
+    ] = {}
+    if schema_version == "9.0":
+        if args.array_predictions is None:
+            raise ValueError(
+                "v9 confirmation requires direct array predictions"
+            )
+        if trainer["array_predictions_sha256"] != sha256_file(
+            args.array_predictions.resolve()
+        ):
+            raise ValueError(
+                "confirmation array prediction hash differs"
+            )
+        array_grouped = _validate_array_predictions(
+            read_jsonl(args.array_predictions.resolve()),
+            heldout_arrays,
+            manifest_sha256=manifest_sha256,
+        )
+
+    # Private custody is opened only after the public development
+    # authorization and all target-free bindings have passed.
     custody = manifest["heldout_label_custody"]
-    if sha256_file(args.pair_labels.resolve()) != custody["pair_labels_sha256"]:
-        raise ValueError("confirmation pair labels differ from custody receipt")
-    if sha256_file(args.array_labels.resolve()) != custody["array_labels_sha256"]:
-        raise ValueError("confirmation array labels differ from custody receipt")
+    if (
+        sha256_file(args.pair_labels.resolve())
+        != custody["pair_labels_sha256"]
+    ):
+        raise ValueError(
+            "confirmation pair labels differ from custody receipt"
+        )
+    if (
+        sha256_file(args.array_labels.resolve())
+        != custody["array_labels_sha256"]
+    ):
+        raise ValueError(
+            "confirmation array labels differ from custody receipt"
+        )
     pair_labels = _validate_pair_labels(
         read_jsonl(args.pair_labels.resolve()),
         heldout_pairs,
@@ -792,33 +1021,6 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         read_jsonl(args.array_labels.resolve()),
         heldout_arrays,
     )
-    grouped = _validate_predictions(
-        read_jsonl(args.predictions.resolve()),
-        heldout_pairs,
-        manifest_sha256=manifest_sha256,
-    )
-    trainer = json.loads(args.trainer_summary.read_text(encoding="utf-8"))
-    if (
-        trainer["status"] != "completed"
-        or trainer["heldout_pair_targets_seen"]
-        or trainer["heldout_array_targets_seen"]
-    ):
-        raise ValueError("confirmation trainer is incomplete or contaminated")
-    if (
-        preregistration.get("schema_version") == "8.0"
-        and not trainer.get("development_selection", {}).get(
-            "confirmation_join_authorized",
-            False,
-        )
-    ):
-        raise ValueError(
-            "v8 development gate did not authorize confirmation"
-        )
-    if (
-        trainer["preregistration_sha256"]
-        != sha256_file(args.preregistration.resolve())
-    ):
-        raise ValueError("confirmation trainer used another preregistration")
     receipts = {
         (
             str(row["candidate_id"]),
@@ -828,6 +1030,12 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     }
     if set(receipts) != set(grouped):
         raise ValueError("confirmation trainer receipts and predictions differ")
+    if schema_version == "9.0" and set(receipts) != set(
+        array_grouped
+    ):
+        raise ValueError(
+            "confirmation receipts and array predictions differ"
+        )
     for key, predictions in grouped.items():
         receipt = receipts[key]
         expected_temperature = (
@@ -859,11 +1067,17 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         ),
     ):
         receipt = receipts[(candidate_id, seed)]
+        direct_rows = (
+            array_grouped[(candidate_id, int(seed))]
+            if schema_version == "9.0" and seed is not None
+            else None
+        )
         scored = _score_run(
             rows,
             pair_labels,
             array_labels,
             arrays_by_id,
+            direct_array_predictions=direct_rows,
             trainable_parameters=int(receipt["trainable_parameters"]),
             trained=bool(receipt["trained"]),
             ece_bins=int(calibration["expected_calibration_error_bins"]),
@@ -882,13 +1096,14 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "seed": seed,
             **scored,
         }
-        if preregistration.get("schema_version") in {"7.0", "8.0"}:
+        if schema_version in {"7.0", "8.0", "9.0"}:
             run_reports[key]["slices"] = {
                 "by_game": _slice_reports(
                     rows,
                     pair_labels,
                     array_labels,
                     arrays_by_id,
+                    direct_array_predictions=direct_rows,
                     field="game",
                     trainable_parameters=int(
                         receipt["trainable_parameters"]
@@ -911,6 +1126,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
                     pair_labels,
                     array_labels,
                     arrays_by_id,
+                    direct_array_predictions=direct_rows,
                     field="fixture_pressure",
                     trainable_parameters=int(
                         receipt["trainable_parameters"]
@@ -958,7 +1174,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         )
     if (
         retained_id is None
-        and preregistration.get("schema_version") not in {"7.0", "8.0"}
+        and schema_version not in {"7.0", "8.0", "9.0"}
     ):
         retained_id = "latent-typed-h4-v3"
     retained_confirmed = (
@@ -966,7 +1182,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     )
     target_independent_boundary = preregistration.get(
         "schema_version"
-    ) in {"7.0", "8.0"}
+    ) in {"7.0", "8.0", "9.0"}
     report = {
         "schema_version": "ldt-array-confirmation-heldout-evaluation.v3",
         "experiment_id": trainer["experiment_id"],
@@ -975,6 +1191,11 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         ),
         "dataset_manifest_sha256": manifest_sha256,
         "predictions_sha256": sha256_file(args.predictions.resolve()),
+        "array_predictions_sha256": (
+            sha256_file(args.array_predictions.resolve())
+            if schema_version == "9.0"
+            else None
+        ),
         "trainer_summary_sha256": sha256_file(
             args.trainer_summary.resolve()
         ),
@@ -1030,6 +1251,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--preregistration", type=Path, required=True)
     parser.add_argument("--dataset-manifest", type=Path, required=True)
     parser.add_argument("--predictions", type=Path, required=True)
+    parser.add_argument("--array-predictions", type=Path)
     parser.add_argument("--trainer-summary", type=Path, required=True)
     parser.add_argument("--pair-labels", type=Path, required=True)
     parser.add_argument("--array-labels", type=Path, required=True)

@@ -64,10 +64,12 @@ def _mixed_surface(
     pairs = []
     arrays = []
     reports = []
+    major_version = str(config["schema_version"]).split(".", 1)[0]
 
     for lineage_index in range(lineage_count):
         lineage = sha256_text(
-            f"structured-array-builder-v8:{seed}:{lineage_index}"
+            f"structured-array-builder-v{major_version}:"
+            f"{seed}:{lineage_index}"
         )
         for pressure_index, pressure in enumerate(pressures):
             size = sizes[(lineage_index + pressure_index) % len(sizes)]
@@ -325,11 +327,14 @@ def generate_structured_array_dataset(
     out_dir: Path,
 ) -> dict[str, Any]:
     config = load_structured(config_path)
+    schema_version = str(config["schema_version"])
     if (
-        config["schema_version"] != "8.0"
+        schema_version not in {"8.0", "9.0"}
         or config["status"] != "frozen_before_dataset_generation"
     ):
-        raise ValueError("structured-array preregistration is not frozen v8")
+        raise ValueError(
+            "structured-array preregistration is not frozen v8/v9"
+        )
     if (
         config["independent_builder"]["implementation_id"]
         == config["independent_verifier"]["implementation_id"]
@@ -601,10 +606,17 @@ def generate_structured_array_dataset(
         "checks": checks,
         "larger_model_training_authorized": False,
     }
+    if "skill_fingerprint" in config:
+        manifest["skill_fingerprint"] = config[
+            "skill_fingerprint"
+        ]
     manifest_path = public_dir / "dataset_manifest.json"
     dump_structured(manifest_path, manifest)
     report = {
-        "schema_version": "ldt-structured-array-generation-report.v8",
+        "schema_version": (
+            "ldt-structured-array-generation-report.v"
+            + schema_version.split(".", 1)[0]
+        ),
         "experiment_id": config["experiment_id"],
         "preregistration_sha256": sha256_file(config_path),
         "dataset_manifest_sha256": sha256_file(manifest_path),

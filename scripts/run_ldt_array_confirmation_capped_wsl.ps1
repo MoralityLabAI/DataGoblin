@@ -3,7 +3,9 @@ param(
   [Parameter(Mandatory = $true)][string]$OutDir,
   [string]$Preregistration = "configs/preregistrations/ldt_array_confirmation_v3.yaml",
   [string]$RunId = "ldt-array-confirmation-v3-seed-sweep",
-  [string]$Distro = "Ubuntu"
+  [string]$Distro = "Ubuntu",
+  [string]$CandidateId = "",
+  [int]$Seed = -1
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,6 +18,12 @@ if ($out.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
   throw "Generated LDT confirmation runs must stay outside the DataGoblin repository"
 }
 if ($RunId -notmatch '^[a-zA-Z0-9_.-]+$') { throw "RunId contains unsupported characters" }
+if ($CandidateId -and $CandidateId -notmatch '^[a-zA-Z0-9_.-]+$') {
+  throw "CandidateId contains unsupported characters"
+}
+if (-not $CandidateId -and $Seed -ge 0) {
+  throw "Seed requires CandidateId"
+}
 
 function Convert-ToWslPath([string]$WindowsPath) {
   $full = [IO.Path]::GetFullPath($WindowsPath)
@@ -78,11 +86,18 @@ try {
   $runUser = $runUserLine.Trim().Split(':')[0]
   & wsl.exe -d $Distro -u root -- chown -R "${runUser}:${runUser}" $stage
   if ($LASTEXITCODE -ne 0) { throw "could not assign the WSL stage to the run user" }
+  $shardArgs = @()
+  if ($CandidateId) {
+    $shardArgs = @("--candidate-id", $CandidateId)
+    if ($Seed -ge 0) {
+      $shardArgs += @("--seed", [string]$Seed)
+    }
+  }
   & wsl.exe -d $Distro -u root -- bash $wrapperWsl $RunId /usr/bin/python3 $stage $stage "$stage/out" -- `
     /usr/bin/env PYTHONPATH="$stage/src" /usr/bin/python3 "$stage/train_ldt_array_confirmation.py" `
     --dataset-manifest "$stage/dataset/dataset_manifest.json" `
     --trainer-plan "$stage/trainer_plan.json" `
-    --out "$stage/out"
+    --out "$stage/out" @shardArgs
   $status = $LASTEXITCODE
   & wsl.exe -d $Distro -u root -- cp -a "$stage/out/." "$outWsl/"
   if ($LASTEXITCODE -ne 0) { throw "could not copy capped v3 artifacts" }
@@ -115,7 +130,7 @@ $receipt = [ordered]@{
   promotion_eligible = $false
   next_gate = "one independent steward evaluation of pair, calibration, and array targets"
 }
-foreach ($name in @("events.jsonl", "summary.json", "trainer_events.jsonl", "trainer_summary.json", "heldout_pair_predictions.jsonl", "unit_properties.txt")) {
+foreach ($name in @("events.jsonl", "summary.json", "trainer_events.jsonl", "trainer_summary.json", "heldout_pair_predictions.jsonl", "heldout_array_predictions.jsonl", "unit_properties.txt")) {
   $path = Join-Path $cappedOut $name
   if (Test-Path -LiteralPath $path -PathType Leaf) {
     $receipt.artifacts[$name] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
