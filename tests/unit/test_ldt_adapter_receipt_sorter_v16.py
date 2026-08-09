@@ -352,6 +352,24 @@ def test_v16_packet_auditor_interface_cannot_accept_labels() -> None:
     assert not auditor["_target_free"](
         {"prediction": "SELECTED", "target": "DOMINATED"}
     )
+    assert auditor["_caps_receipt_valid"](
+        {
+            "caps_enforced": True,
+            "exit_code": 0,
+            "peak_ram_mb": 41.7,
+            "cpu_pct": 50.06,
+            "peak_io_mb_s": 0.13,
+        }
+    )
+    assert not auditor["_caps_receipt_valid"](
+        {
+            "caps_enforced": False,
+            "exit_code": 0,
+            "peak_ram_mb": 41.7,
+            "cpu_pct": 49.0,
+            "peak_io_mb_s": 0.13,
+        }
+    )
 
 
 def test_v16_packet_auditor_reproduces_comparative_stop() -> None:

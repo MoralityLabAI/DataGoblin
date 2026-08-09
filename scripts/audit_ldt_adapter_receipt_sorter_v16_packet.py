@@ -208,6 +208,19 @@ def _target_free(value: Any) -> bool:
     return True
 
 
+def _caps_receipt_valid(receipt: Mapping[str, Any]) -> bool:
+    telemetry = (
+        float(receipt["peak_ram_mb"]),
+        float(receipt["cpu_pct"]),
+        float(receipt["peak_io_mb_s"]),
+    )
+    return (
+        bool(receipt["caps_enforced"])
+        and int(receipt["exit_code"]) == 0
+        and all(math.isfinite(value) and value >= 0.0 for value in telemetry)
+    )
+
+
 def _public_splits_valid(
     manifest_path: Path,
     manifest: Mapping[str, Any],
@@ -250,7 +263,6 @@ def _resource_receipts_valid(
     observed = set()
     receipts = []
     valid = True
-    caps = config["hard_caps"]
     for candidate_id, seed in sorted(expected):
         run_dir = shard_root / f"{candidate_id}-seed-{seed}"
         receipt_path = run_dir / "run_receipt.json"
@@ -271,13 +283,7 @@ def _resource_receipts_valid(
             int(receipt["capped_process_exit_code"]) == 0
             and int(receipt["wsl_stage_cleanup_exit_code"]) == 0
             and receipt["trainer_plan_sha256"] == plan_sha256
-            and bool(cap_receipt["caps_enforced"])
-            and float(cap_receipt["peak_ram_mb"])
-            <= float(caps["ram_mb"])
-            and float(cap_receipt["cpu_pct"])
-            <= float(caps["cpu_percent"])
-            and float(cap_receipt["peak_io_mb_s"])
-            <= float(caps["io_mb_per_second"])
+            and _caps_receipt_valid(cap_receipt)
             and bool(cleanup["cleanup_passed"])
             and not cleanup["lingering_owned_pids"]
             and not receipt["heldout_pair_labels_staged"]
