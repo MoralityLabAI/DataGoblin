@@ -134,6 +134,11 @@ selected-count global primary. Its single held-out join scored 0.625 on both
 exact status vectors and exact selected sets, so it was not confirmed and no
 adapter tournament is authorized. See
 [`docs/ldt_gate_first_replication_v14.md`](docs/ldt_gate_first_replication_v14.md).
+V15 added target-free edge-difference messages to the exact selected-count
+model. The sole edge-global primary independently confirmed at 0.8125 on both
+exact metrics, authorizing only a separately frozen downstream adapter
+tournament. See
+[`docs/ldt_edge_exact_correction_v15.md`](docs/ldt_edge_exact_correction_v15.md).
 
 ## Optional HRM-Text cycle milestone
 
