@@ -1,0 +1,108 @@
+schema_version: "1.0"
+review_id: datagoblin-ldt-set-metric-robustness-v10-development
+eval_id: datagoblin-ldt-array-v10
+construct: candidate-ID-aligned exact recovery of an array status vector and its derived selected set
+robustness_claim: >
+  Exact status-vector accuracy and exact selected-set accuracy are invariant to
+  candidate ordering and identifier alpha-renaming, sensitive to a single
+  selected-set membership error, non-increasing as membership errors compound,
+  resistant to factorized-majority and candidate-identity attacks, and quiet on
+  exact clean controls.
+evidence_scope: development
+independent_unit: probe_family_id
+metrics:
+  - id: exact_status_vector_accuracy
+    description: >
+      Per-array binary equality of every candidate-ID-aligned predicted status
+      with the oracle status; arrays, not candidates, are the aggregation unit.
+  - id: exact_selected_set_accuracy
+    description: >
+      Per-array binary equality of the candidate IDs whose aligned statuses are
+      SELECTED; the selected set is derived from the status assignment.
+thresholds:
+  min_independent_families_per_type: 2
+  min_invariance_pass_rate: 1.0
+  min_sensitivity_pass_rate: 1.0
+  max_attack_escape_rate: 0.0
+  max_false_positive_rate: 0.0
+  max_monotonicity_violation_rate: 0.0
+hook_policy:
+  require_matched_control: true
+probes:
+  - probe_id: v10-dev-invariance-order-01
+    probe_family_id: candidate-order-permutation
+    probe_type: invariance
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: stable
+    tolerance: 0.0
+    source_ref: fixture://datagoblin-v10-development/candidate-order-permutation
+  - probe_id: v10-dev-invariance-alpha-01
+    probe_family_id: candidate-id-alpha-renaming
+    probe_type: invariance
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: stable
+    tolerance: 0.0
+    source_ref: fixture://datagoblin-v10-development/candidate-id-alpha-renaming
+  - probe_id: v10-dev-sensitivity-fn-01
+    probe_family_id: selected-member-removal
+    probe_type: sensitivity
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 1.0
+    source_ref: fixture://datagoblin-v10-development/selected-member-removal
+  - probe_id: v10-dev-sensitivity-fp-01
+    probe_family_id: selected-nonmember-insertion
+    probe_type: sensitivity
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 1.0
+    source_ref: fixture://datagoblin-v10-development/selected-nonmember-insertion
+  - probe_id: v10-dev-monotonicity-fn-01
+    probe_family_id: compounded-selected-removals
+    probe_type: monotonicity
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 0.0
+    source_ref: fixture://datagoblin-v10-development/compounded-selected-removals
+  - probe_id: v10-dev-monotonicity-fp-01
+    probe_family_id: compounded-selected-insertions
+    probe_type: monotonicity
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 0.0
+    source_ref: fixture://datagoblin-v10-development/compounded-selected-insertions
+  - probe_id: v10-dev-anti-gaming-majority-01
+    probe_family_id: factorized-majority-decoy
+    probe_type: anti_gaming
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: detect_violation
+    source_ref: fixture://datagoblin-v10-development/factorized-majority-decoy
+  - probe_id: v10-dev-anti-gaming-identity-01
+    probe_family_id: duplicate-candidate-identity
+    probe_type: anti_gaming
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: detect_violation
+    source_ref: fixture://datagoblin-v10-development/duplicate-candidate-identity
+  - probe_id: v10-dev-clean-exact-01
+    probe_family_id: exact-canonical-control
+    probe_type: clean_control
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: no_violation
+    source_ref: fixture://datagoblin-v10-development/exact-canonical-control
+  - probe_id: v10-dev-clean-reordered-01
+    probe_family_id: exact-reordered-control
+    probe_type: clean_control
+    split: development
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: no_violation
+    source_ref: fixture://datagoblin-v10-development/exact-reordered-control
+mechanistic_hooks: []

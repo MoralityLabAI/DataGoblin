@@ -109,6 +109,10 @@ heads without opening sealed labels; see
 [`docs/ldt_target_independent_v7.md`](docs/ldt_target_independent_v7.md),
 [`docs/ldt_structured_array_v8.md`](docs/ldt_structured_array_v8.md), and
 [`docs/ldt_listwise_array_v9.md`](docs/ldt_listwise_array_v9.md).
+The proposed v10 whole-array metrics have a staged development robustness
+preflight, while model training and environment-owned holdout confirmation
+remain gated; see
+[`docs/ldt_set_metric_robustness_v10.md`](docs/ldt_set_metric_robustness_v10.md).
 
 ## Optional HRM-Text cycle milestone
 
