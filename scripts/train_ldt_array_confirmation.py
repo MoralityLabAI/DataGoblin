@@ -46,6 +46,10 @@ from datagoblin.experiments.ldt_edge_set_array_v10 import (
     SetCoupledLoopedStatusModel,
     train_edge_status_model,
 )
+from datagoblin.experiments.ldt_exact_array_likelihood_v12 import (
+    ExactArrayLikelihoodModel,
+    predict_exact_array_statuses,
+)
 from datagoblin.experiments.ldt_listwise_array_v9 import (
     IndependentCandidateEncoder,
     LoopedSetStatusModel,
@@ -627,6 +631,7 @@ def _candidate_encoder(listwise_spec: Mapping[str, Any]) -> Any:
         return EdgeDifferenceCandidateEncoder()
     if family in {
         "deterministic_pair_reducer",
+        "exact_globally_normalized_array_status",
         "looped_cardinality_permutation_equivariant_status",
         "looped_permutation_equivariant_status",
     }:
@@ -656,6 +661,13 @@ def _make_status_model(
             max_candidates=int(cardinality["max_candidates"]),
             cardinality_loss_weight=float(cardinality["loss_weight"]),
             decoder=str(cardinality["decoder"]),
+        )
+    if family == "exact_globally_normalized_array_status":
+        exact_array = dict(listwise_spec["exact_array_likelihood"])
+        return ExactArrayLikelihoodModel(
+            **common,
+            max_candidates=int(exact_array["max_candidates"]),
+            decoder=str(exact_array["decoder"]),
         )
     if family == "edge_difference_permutation_equivariant_status":
         set_loss = dict(listwise_spec["set_coupled_loss"])
@@ -688,6 +700,8 @@ def _train_direct_status_model(
         ),
         "checkpoint_callback": checkpoint_callback,
     }
+    if isinstance(model, ExactArrayLikelihoodModel):
+        return train_status_model(model, encoder, arrays, **common)
     if isinstance(model, SetCoupledLoopedStatusModel):
         return train_edge_status_model(model, encoder, arrays, **common)
     return train_status_model(model, encoder, arrays, **common)
@@ -700,6 +714,8 @@ def _predict_direct_statuses(
 ) -> dict[str, Any]:
     if isinstance(model, CardinalityLoopedStatusModel):
         return predict_cardinality_statuses(model, encoder, row)
+    if isinstance(model, ExactArrayLikelihoodModel):
+        return predict_exact_array_statuses(model, encoder, row)
     return predict_array_statuses(model, encoder, row)
 
 
@@ -726,6 +742,7 @@ def train(args: argparse.Namespace) -> int:
             "9.0",
             "10.0",
             "11.0",
+            "12.0",
         }
         (
             _,

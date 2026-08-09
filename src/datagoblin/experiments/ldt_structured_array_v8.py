@@ -329,11 +329,12 @@ def generate_structured_array_dataset(
     config = load_structured(config_path)
     schema_version = str(config["schema_version"])
     if (
-        schema_version not in {"8.0", "9.0", "10.0", "11.0"}
+        schema_version
+        not in {"8.0", "9.0", "10.0", "11.0", "12.0"}
         or config["status"] != "frozen_before_dataset_generation"
     ):
         raise ValueError(
-            "structured-array preregistration is not frozen v8-v11"
+            "structured-array preregistration is not frozen v8-v12"
         )
     if (
         config["independent_builder"]["implementation_id"]

@@ -59,7 +59,14 @@ def prepare(
         raise ValueError("confirmation feature whitelist differs")
     feature_independence_audit: dict[str, object] | None = None
     schema_version = str(preregistration.get("schema_version"))
-    if schema_version in {"7.0", "8.0", "9.0", "10.0", "11.0"}:
+    if schema_version in {
+        "7.0",
+        "8.0",
+        "9.0",
+        "10.0",
+        "11.0",
+        "12.0",
+    }:
         feature_views = {
             str(model["feature_view"])
             for model in preregistration["models"]["candidates"]
@@ -90,7 +97,7 @@ def prepare(
             "typed_or_lattice_views_present": False,
             "audit_split": "development_only",
         }
-        if schema_version in {"8.0", "9.0", "10.0", "11.0"}:
+        if schema_version in {"8.0", "9.0", "10.0", "11.0", "12.0"}:
             support = manifest.get("development_support_audit")
             if not support or not all(
                 int(count) >= int(
@@ -411,6 +418,124 @@ def prepare(
                 ),
                 "cardinality_decoder_ablation_matched": True,
                 "cardinality_shared_state_gradient": False,
+                "metric_gate": metric_gate,
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+            }
+        if schema_version == "12.0":
+            models = preregistration["models"]["candidates"]
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in models
+            ]
+            reducers = [row for row in listwise if not bool(row["enabled"])]
+            recurrent = [
+                row
+                for row in listwise
+                if row["family"]
+                == "looped_permutation_equivariant_status"
+            ]
+            exact = [
+                row
+                for row in listwise
+                if row["family"]
+                == "exact_globally_normalized_array_status"
+            ]
+            enabled = recurrent + exact
+            if (
+                len(reducers) != 1
+                or reducers[0]["family"] != "deterministic_pair_reducer"
+                or len(recurrent) != 1
+                or len(exact) != 2
+                or any(
+                    not bool(row["enabled"])
+                    or row["candidate_encoder"] != "independent_candidate"
+                    or int(row["message_steps"]) != 0
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0 < float(row["learning_rate"]) <= 0.1
+                    for row in enabled
+                )
+            ):
+                raise ValueError(
+                    "v12 exact-array architecture matrix is incomplete"
+                )
+            exact_specs = [
+                dict(row["exact_array_likelihood"])
+                for row in exact
+            ]
+            comparable_fields = (
+                "family",
+                "candidate_encoder",
+                "message_steps",
+                "hidden_width",
+                "loop_count",
+                "epochs",
+                "learning_rate",
+            )
+            decoders = {str(spec["decoder"]) for spec in exact_specs}
+            if (
+                any(
+                    exact[0][field] != exact[1][field]
+                    for field in comparable_fields
+                )
+                or decoders != {"factorized", "global_selected_count_map"}
+                or any(
+                    int(spec["max_candidates"]) != 6
+                    or spec["loss_family"]
+                    != "exact_globally_normalized_status_vector_nll"
+                    or float(spec["loss_weight"]) != 1.0
+                    or spec["normalization"]
+                    != "exact_selected_subset_marginalization"
+                    or spec["represented_status_vectors"]
+                    != "all_four_status_assignments"
+                    or not bool(spec["shared_state_gradient"])
+                    or spec["class_balancing"]
+                    != "none_proper_likelihood"
+                    for spec in exact_specs
+                )
+                or any(
+                    exact_specs[0][field] != exact_specs[1][field]
+                    for field in (
+                        "max_candidates",
+                        "loss_family",
+                        "loss_weight",
+                        "normalization",
+                        "represented_status_vectors",
+                        "shared_state_gradient",
+                        "class_balancing",
+                    )
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"]) != 0.0
+                    or not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    for model in models
+                )
+            ):
+                raise ValueError("v12 exact-array decoder ablation is not matched")
+            metric_gate = preregistration.get("metric_gate", {})
+            if (
+                metric_gate.get("heldout_status")
+                != "supported_on_declared_holdout"
+                or set(metric_gate.get("accepted_metrics", ()))
+                != {
+                    "exact_status_vector_accuracy",
+                    "exact_selected_set_accuracy",
+                }
+            ):
+                raise ValueError("v12 metric robustness gate is incomplete")
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoder": (
+                    IndependentCandidateEncoder().receipt()
+                ),
+                "exact_array_decoder_ablation_matched": True,
+                "exact_array_shared_state_gradient": True,
                 "metric_gate": metric_gate,
                 "direct_array_targets": "development_only",
                 "heldout_array_targets_available": False,
