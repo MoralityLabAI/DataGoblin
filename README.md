@@ -129,6 +129,11 @@ decoding helped its matched factorized head, but the richer model lost to the
 selected-count control and exposed a rank-then-qualify seed-selection caveat;
 confirmation remains sealed. See
 [`docs/ldt_status_composition_v13.md`](docs/ldt_status_composition_v13.md).
+V14 repaired selection to gate seeds before ranking and produced one qualified
+selected-count global primary. Its single held-out join scored 0.625 on both
+exact status vectors and exact selected sets, so it was not confirmed and no
+adapter tournament is authorized. See
+[`docs/ldt_gate_first_replication_v14.md`](docs/ldt_gate_first_replication_v14.md).
 
 ## Optional HRM-Text cycle milestone
 
