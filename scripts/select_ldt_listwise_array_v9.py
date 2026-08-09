@@ -149,12 +149,16 @@ def select(
     out_dir: Path,
 ) -> dict[str, Any]:
     preregistration = load_structured(preregistration_path)
+    schema_version = str(preregistration["schema_version"])
     if (
-        preregistration["schema_version"] != "9.0"
+        schema_version not in {"9.0", "10.0"}
         or preregistration["status"]
         != "frozen_before_dataset_generation"
     ):
-        raise ValueError("selection requires the frozen v9 contract")
+        raise ValueError(
+            "selection requires a frozen direct-array contract"
+        )
+    major_version = schema_version.split(".", 1)[0]
     trainer = json.loads(
         trainer_summary_path.read_text(encoding="utf-8")
     )
@@ -190,7 +194,7 @@ def select(
     for receipt in trainer["candidate_receipts"]:
         if not receipt["trained"]:
             raise ValueError(
-                "v9 selection received a non-trained receipt"
+                "direct-array selection received an untrained receipt"
             )
         by_candidate[str(receipt["candidate_id"])].append(receipt)
     if set(by_candidate) != expected_models or any(
@@ -280,7 +284,9 @@ def select(
     _write_jsonl(selected_pair_path, selected_pair_predictions)
     _write_jsonl(selected_array_path, selected_array_predictions)
     selection = {
-        "schema_version": "ldt-listwise-array-selection.v9",
+        "schema_version": (
+            f"ldt-listwise-array-selection.v{major_version}"
+        ),
         "experiment_id": preregistration["experiment_id"],
         "selection_source": (
             "development_cv_direct_array_metrics_and_oof_pair_"
@@ -341,9 +347,7 @@ def select(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=(
-            "Freeze v9 listwise seeds and condition confirmation"
-        )
+        description="Freeze direct-array seeds and condition confirmation"
     )
     parser.add_argument("--preregistration", type=Path, required=True)
     parser.add_argument("--trainer-summary", type=Path, required=True)

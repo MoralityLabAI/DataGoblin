@@ -43,15 +43,21 @@ def merge(
     out_dir: Path,
 ) -> dict[str, Any]:
     preregistration = load_structured(preregistration_path)
-    if preregistration["schema_version"] != "9.0" or preregistration["status"] != "frozen_before_dataset_generation":
-        raise ValueError("shard merge requires the frozen v9 contract")
+    schema_version = str(preregistration["schema_version"])
+    if (
+        schema_version not in {"9.0", "10.0"}
+        or preregistration["status"]
+        != "frozen_before_dataset_generation"
+    ):
+        raise ValueError("shard merge requires a frozen direct-array contract")
+    major_version = schema_version.split(".", 1)[0]
     expected = {
         (str(model["model_id"]), int(seed))
         for model in preregistration["models"]["candidates"]
         for seed in preregistration["training"]["seeds"]
     }
     if not shard_runs or len(shard_runs) > len(expected):
-        raise ValueError("v9 shard count is empty or excessive")
+        raise ValueError("direct-array shard count is empty or excessive")
     manifest = load_structured(dataset_manifest_path)
     heldout_pair_path = dataset_manifest_path.parent / str(manifest["splits"]["heldout_pairs"]["path"])
     heldout_array_path = dataset_manifest_path.parent / str(manifest["splits"]["heldout_arrays"]["path"])
@@ -200,9 +206,9 @@ def merge(
             }
         )
     if observed != expected:
-        raise ValueError("v9 shard coverage is incomplete")
+        raise ValueError("direct-array shard coverage is incomplete")
     if dataset_hash != expected_dataset_hash:
-        raise ValueError("v9 shards are bound to another public dataset")
+        raise ValueError("direct-array shards use another public dataset")
 
     out_dir.mkdir(parents=True, exist_ok=False)
     pair_path = out_dir / "heldout_pair_predictions.jsonl"
@@ -264,14 +270,16 @@ def merge(
             ),
         ),
         "claim_boundary": (
-            "Merged target-free v9 shard evidence only; every source ran "
+            f"Merged target-free v{major_version} shard evidence only; every source ran "
             "under verified caps and passed PID-scoped cleanup."
         ),
     }
     summary_path = out_dir / "trainer_summary.json"
     dump_structured(summary_path, combined)
     receipt = {
-        "schema_version": "ldt-listwise-array-shard-merge.v9",
+        "schema_version": (
+            f"ldt-listwise-array-shard-merge.v{major_version}"
+        ),
         "experiment_id": preregistration["experiment_id"],
         "source_shard_count": len(source_receipts),
         "complete_candidate_seed_coverage": True,
@@ -288,7 +296,9 @@ def merge(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Merge all hard-capped v9 candidate/seed shards")
+    parser = argparse.ArgumentParser(
+        description="Merge hard-capped direct-array candidate/seed shards"
+    )
     parser.add_argument("--preregistration", type=Path, required=True)
     parser.add_argument(
         "--dataset-manifest",

@@ -109,12 +109,15 @@ heads without opening sealed labels; see
 [`docs/ldt_target_independent_v7.md`](docs/ldt_target_independent_v7.md),
 [`docs/ldt_structured_array_v8.md`](docs/ldt_structured_array_v8.md), and
 [`docs/ldt_listwise_array_v9.md`](docs/ldt_listwise_array_v9.md).
-The proposed v10 whole-array metrics have a staged development preflight and a
-separate environment-owned held-out robustness pass; model training remains a
-distinct next gate. See
+The v10 whole-array metrics have a staged development preflight and a separate
+environment-owned held-out robustness pass. The subsequent edge-conditioned,
+set-coupled adapter tournament did not clear its exact-set gates, so sealed
+confirmation remains unspent. See
 [`docs/ldt_set_metric_robustness_v10.md`](docs/ldt_set_metric_robustness_v10.md)
 and
-[`docs/ldt_set_metric_holdout_v10.md`](docs/ldt_set_metric_holdout_v10.md).
+[`docs/ldt_set_metric_holdout_v10.md`](docs/ldt_set_metric_holdout_v10.md), and
+the tournament report in
+[`docs/ldt_edge_set_array_v10.md`](docs/ldt_edge_set_array_v10.md).
 
 ## Optional HRM-Text cycle milestone
 

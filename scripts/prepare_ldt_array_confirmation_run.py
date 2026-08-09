@@ -10,6 +10,10 @@ from datagoblin.experiments.ldt_array_confirmation import (
     load_confirmation_dataset,
 )
 from datagoblin.experiments.ldt_array_sorter import sha256_file
+from datagoblin.experiments.ldt_edge_set_array_v10 import (
+    EDGE_STATISTICS,
+    EdgeDifferenceCandidateEncoder,
+)
 from datagoblin.experiments.ldt_listwise_array_v9 import (
     IndependentCandidateEncoder,
 )
@@ -55,7 +59,7 @@ def prepare(
         raise ValueError("confirmation feature whitelist differs")
     feature_independence_audit: dict[str, object] | None = None
     schema_version = str(preregistration.get("schema_version"))
-    if schema_version in {"7.0", "8.0", "9.0"}:
+    if schema_version in {"7.0", "8.0", "9.0", "10.0"}:
         feature_views = {
             str(model["feature_view"])
             for model in preregistration["models"]["candidates"]
@@ -86,7 +90,7 @@ def prepare(
             "typed_or_lattice_views_present": False,
             "audit_split": "development_only",
         }
-        if schema_version in {"8.0", "9.0"}:
+        if schema_version in {"8.0", "9.0", "10.0"}:
             support = manifest.get("development_support_audit")
             if not support or not all(
                 int(count) >= int(
@@ -183,6 +187,118 @@ def prepare(
             feature_independence_audit["listwise_status"] = {
                 "candidates": listwise,
                 "candidate_encoder": candidate_encoder.receipt(),
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+            }
+        if schema_version == "10.0":
+            models = preregistration["models"]["candidates"]
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in models
+            ]
+            reducers = [row for row in listwise if not bool(row["enabled"])]
+            recurrent = [
+                row
+                for row in listwise
+                if row["family"]
+                == "looped_permutation_equivariant_status"
+            ]
+            edge = [
+                row
+                for row in listwise
+                if row["family"]
+                == "edge_difference_permutation_equivariant_status"
+            ]
+            if (
+                len(reducers) != 1
+                or reducers[0]["family"] != "deterministic_pair_reducer"
+                or len(recurrent) != 1
+                or len(edge) != 2
+                or any(
+                    not bool(row["enabled"])
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0 < float(row["learning_rate"]) <= 0.1
+                    for row in recurrent + edge
+                )
+                or recurrent[0]["candidate_encoder"]
+                != "independent_candidate"
+                or int(recurrent[0]["message_steps"]) != 0
+                or recurrent[0]["set_coupled_loss"]["family"] != "none"
+                or float(recurrent[0]["set_coupled_loss"]["weight"]) != 0.0
+                or any(
+                    row["candidate_encoder"] != "edge_difference_message"
+                    or int(row["message_steps"]) != 1
+                    or tuple(row["edge_statistics"]) != EDGE_STATISTICS
+                    for row in edge
+                )
+            ):
+                raise ValueError("v10 listwise architecture matrix is incomplete")
+            factorized = [
+                row
+                for row in edge
+                if row["set_coupled_loss"]["family"] == "none"
+                and float(row["set_coupled_loss"]["weight"]) == 0.0
+            ]
+            coupled = [
+                row
+                for row in edge
+                if row["set_coupled_loss"]["family"]
+                == "soft_dice_selected_set"
+                and 0.0 < float(row["set_coupled_loss"]["weight"]) <= 2.0
+            ]
+            comparable_fields = (
+                "family",
+                "candidate_encoder",
+                "message_steps",
+                "edge_statistics",
+                "hidden_width",
+                "loop_count",
+                "epochs",
+                "learning_rate",
+            )
+            if (
+                len(factorized) != 1
+                or len(coupled) != 1
+                or any(
+                    factorized[0][field] != coupled[0][field]
+                    for field in comparable_fields
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"]) != 0.0
+                    or not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    for model in models
+                )
+            ):
+                raise ValueError("v10 set-coupled ablation is not matched")
+            metric_gate = preregistration.get("metric_gate", {})
+            if (
+                metric_gate.get("heldout_status")
+                != "supported_on_declared_holdout"
+                or set(metric_gate.get("accepted_metrics", ()))
+                != {
+                    "exact_status_vector_accuracy",
+                    "exact_selected_set_accuracy",
+                }
+            ):
+                raise ValueError("v10 metric robustness gate is incomplete")
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoders": {
+                    "independent_candidate": (
+                        IndependentCandidateEncoder().receipt()
+                    ),
+                    "edge_difference_message": (
+                        EdgeDifferenceCandidateEncoder().receipt()
+                    ),
+                },
+                "set_coupled_ablation_matched": True,
+                "metric_gate": metric_gate,
                 "direct_array_targets": "development_only",
                 "heldout_array_targets_available": False,
             }

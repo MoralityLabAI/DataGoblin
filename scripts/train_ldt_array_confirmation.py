@@ -37,11 +37,21 @@ from datagoblin.experiments.ldt_array_sorter import (
     sha256_json,
     train_array_model,
 )
+from datagoblin.experiments.ldt_edge_set_array_v10 import (
+    EdgeDifferenceCandidateEncoder,
+    SetCoupledLoopedStatusModel,
+    train_edge_status_model,
+)
 from datagoblin.experiments.ldt_listwise_array_v9 import (
     IndependentCandidateEncoder,
     LoopedSetStatusModel,
     predict_array_statuses,
     train_status_model,
+)
+from datagoblin.experiments.ldt_set_metric_robustness_v10 import (
+    EXACT_SELECTED_SET_ACCURACY,
+    EXACT_STATUS_VECTOR_ACCURACY,
+    score_exact_set_metrics,
 )
 
 
@@ -273,16 +283,16 @@ def _array_labeled_metrics(
         ]
         actual_statuses.extend(actual)
         predicted_statuses.extend(predicted)
-        exact_arrays += actual == predicted
-        selected_sets += {
-            index
-            for index, status in enumerate(actual)
-            if status == "SELECTED"
-        } == {
-            index
-            for index, status in enumerate(predicted)
-            if status == "SELECTED"
-        }
+        candidate_ids = [
+            str(candidate["tournament_report_sha256"])
+            for candidate in array_row["candidates"]
+        ]
+        robust_scores = score_exact_set_metrics(
+            tuple(zip(candidate_ids, actual, strict=True)),
+            tuple(zip(candidate_ids, predicted, strict=True)),
+        )
+        exact_arrays += robust_scores[EXACT_STATUS_VECTOR_ACCURACY]
+        selected_sets += robust_scores[EXACT_SELECTED_SET_ACCURACY]
     status = classification_metrics(
         actual_statuses,
         predicted_statuses,
@@ -607,6 +617,69 @@ def _reduced_status_predictions(
     return result
 
 
+def _candidate_encoder(listwise_spec: Mapping[str, Any]) -> Any:
+    family = str(listwise_spec.get("family"))
+    if family == "edge_difference_permutation_equivariant_status":
+        return EdgeDifferenceCandidateEncoder()
+    if family in {
+        "deterministic_pair_reducer",
+        "looped_permutation_equivariant_status",
+    }:
+        return IndependentCandidateEncoder()
+    raise ValueError(f"unsupported listwise family: {family}")
+
+
+def _make_status_model(
+    listwise_spec: Mapping[str, Any],
+    *,
+    input_width: int,
+    seed: int,
+) -> Any:
+    family = str(listwise_spec["family"])
+    common = {
+        "input_width": input_width,
+        "hidden_width": int(listwise_spec["hidden_width"]),
+        "loop_count": int(listwise_spec["loop_count"]),
+        "seed": seed,
+    }
+    if family == "looped_permutation_equivariant_status":
+        return LoopedSetStatusModel(**common)
+    if family == "edge_difference_permutation_equivariant_status":
+        set_loss = dict(listwise_spec["set_coupled_loss"])
+        return SetCoupledLoopedStatusModel(
+            **common,
+            set_loss_weight=float(set_loss["weight"]),
+            set_loss_smoothing=float(set_loss["smoothing"]),
+        )
+    raise ValueError(f"unsupported enabled listwise family: {family}")
+
+
+def _train_direct_status_model(
+    model: Any,
+    encoder: Any,
+    arrays: Sequence[Mapping[str, Any]],
+    listwise_spec: Mapping[str, Any],
+    training: Mapping[str, Any],
+    *,
+    seed: int,
+    checkpoint_callback: Any,
+) -> int:
+    common = {
+        "epochs": int(listwise_spec["epochs"]),
+        "learning_rate": float(listwise_spec["learning_rate"]),
+        "l2": float(training["l2"]),
+        "gradient_clip": float(training["gradient_norm_clip"]),
+        "seed": seed,
+        "checkpoint_every_epochs": int(
+            training["listwise_checkpoint_interval_epochs"]
+        ),
+        "checkpoint_callback": checkpoint_callback,
+    }
+    if isinstance(model, SetCoupledLoopedStatusModel):
+        return train_edge_status_model(model, encoder, arrays, **common)
+    return train_status_model(model, encoder, arrays, **common)
+
+
 def train(args: argparse.Namespace) -> int:
     out_dir = args.out.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -626,9 +699,10 @@ def train(args: argparse.Namespace) -> int:
             raise ValueError("confirmation must stay local and checkpoint-free")
         if os.environ.get("DATAGOBLIN_HARD_CAPS_VERIFIED") != "1":
             raise RuntimeError("hard-cap wrapper verification receipt is missing")
-        is_v9 = (
-            plan.get("preregistration_schema_version") == "9.0"
-        )
+        is_v9 = plan.get("preregistration_schema_version") in {
+            "9.0",
+            "10.0",
+        }
         (
             _,
             train_rows,
@@ -775,7 +849,7 @@ def train(args: argparse.Namespace) -> int:
             listwise_enabled = bool(
                 listwise_spec.get("enabled", False)
             )
-            candidate_encoder = IndependentCandidateEncoder()
+            candidate_encoder = _candidate_encoder(listwise_spec)
             input_width = len(encoder.feature_names(view))
             for seed_value in seed_values:
                 seed = int(seed_value)
@@ -893,15 +967,10 @@ def train(args: argparse.Namespace) -> int:
                         listwise_seed = (
                             seed * 1000 + fold_index
                         )
-                        status_model = LoopedSetStatusModel(
+                        status_model = _make_status_model(
+                            listwise_spec,
                             input_width=len(
                                 candidate_encoder.feature_names()
-                            ),
-                            hidden_width=int(
-                                listwise_spec["hidden_width"]
-                            ),
-                            loop_count=int(
-                                listwise_spec["loop_count"]
                             ),
                             seed=listwise_seed,
                         )
@@ -918,28 +987,13 @@ def train(args: argparse.Namespace) -> int:
                                 "-listwise"
                             ),
                         )
-                        steps_completed += train_status_model(
+                        steps_completed += _train_direct_status_model(
                             status_model,
                             candidate_encoder,
                             fold_train_arrays,
-                            epochs=int(
-                                listwise_spec["epochs"]
-                            ),
-                            learning_rate=float(
-                                listwise_spec["learning_rate"]
-                            ),
-                            l2=float(training["l2"]),
-                            gradient_clip=float(
-                                training[
-                                    "gradient_norm_clip"
-                                ]
-                            ),
+                            listwise_spec,
+                            training,
                             seed=listwise_seed,
-                            checkpoint_every_epochs=int(
-                                training[
-                                    "listwise_checkpoint_interval_epochs"
-                                ]
-                            ),
                             checkpoint_callback=status_callback,
                         )
                         seed_checkpoints.extend(status_paths)
@@ -1060,15 +1114,10 @@ def train(args: argparse.Namespace) -> int:
                 listwise_parameter_count = 0
                 if listwise_enabled:
                     listwise_final_seed = seed * 1000 + 997
-                    final_status_model = LoopedSetStatusModel(
+                    final_status_model = _make_status_model(
+                        listwise_spec,
                         input_width=len(
                             candidate_encoder.feature_names()
-                        ),
-                        hidden_width=int(
-                            listwise_spec["hidden_width"]
-                        ),
-                        loop_count=int(
-                            listwise_spec["loop_count"]
                         ),
                         seed=listwise_final_seed,
                     )
@@ -1082,24 +1131,13 @@ def train(args: argparse.Namespace) -> int:
                         seed=seed,
                         stage="final-train-listwise",
                     )
-                    steps_completed += train_status_model(
+                    steps_completed += _train_direct_status_model(
                         final_status_model,
                         candidate_encoder,
                         train_arrays,
-                        epochs=int(listwise_spec["epochs"]),
-                        learning_rate=float(
-                            listwise_spec["learning_rate"]
-                        ),
-                        l2=float(training["l2"]),
-                        gradient_clip=float(
-                            training["gradient_norm_clip"]
-                        ),
+                        listwise_spec,
+                        training,
                         seed=listwise_final_seed,
-                        checkpoint_every_epochs=int(
-                            training[
-                                "listwise_checkpoint_interval_epochs"
-                            ]
-                        ),
                         checkpoint_callback=(
                             final_status_callback
                         ),
