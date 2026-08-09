@@ -13,6 +13,11 @@ constitutional repair, counterfactual mechanism discrimination, experiment-outco
 long-horizon state plus halt calibration. This prevents selection of a model that is merely good at one
 classifier-shaped benchmark.
 
+The separately preregistered
+[four-game adapter architecture tournament v2](game_adapter_architecture_tournament_v2.md) is now executable for tiny
+NumPy surrogates. It tests low-rank and tied-recurrence parameterizations on public-shape normalization under hard caps;
+it does not satisfy this broader gym's checkpoint-scale, multi-task architecture-promotion requirements.
+
 The separate four-game [curation adapter verifier](curation_adapter_verifier.md) now includes an
 executable schema-drift gate. Its small character n-gram mapper and emitted LoRA/HRM-Text SFT packs
 validate custody, split, and normalization signal only. Passing that gate does not enable a real

@@ -1,0 +1,118 @@
+version: '1.0'
+eval_id: datagoblin-game-adapter-architecture-tournament-v2-review
+claim: >-
+  On fresh four-game public-shape fixtures, at least one trainable tiny adapter clears every
+  development and independent heldout safety and mapping gate, while the frozen v15 LDT recovers
+  the environment-owned heldout status vectors and selected sets at the preregistered rates.
+mode: pairwise
+adapter: generic
+
+candidates:
+  - id: frozen-exact-key-control-v2
+    model: deterministic-policy
+    model_family: frozen_exact_key_policy
+    blinded_label: candidate-a
+  - id: lora-like-r4-v2
+    model: local-numpy-surrogate
+    model_family: frozen_prototype_plus_low_rank_update
+    blinded_label: candidate-b
+  - id: recurrent-one-pass-h32-v2
+    model: local-numpy-surrogate
+    model_family: frozen_recurrent_reservoir_readout
+    blinded_label: candidate-c
+  - id: hrm-style-loop4-h32-v2
+    model: local-numpy-surrogate
+    model_family: tied_recurrent_public_shape_readout
+    blinded_label: candidate-d
+
+dataset:
+  path: external-public-fixture/tournament_manifest.json
+  size: 12
+  unit: surface-game-adapter-array
+  held_out: false
+  contamination_check: completed
+  selection: >-
+    Three preregistered development surfaces yield twelve arrays. Three separately seeded sealed
+    confirmation surfaces yield another twelve. Generator seeds, pressures, model seeds, array
+    size, lineage checks, and the single reveal budget are frozen before generation.
+
+scoring:
+  deterministic:
+    - output_schema_valid
+    - task_completion
+    - prediction_identity_complete
+    - candidate_manifest_bound
+    - only_development_train_labels_used
+    - only_development_calibration_labels_used_for_threshold
+    - heldout_labels_unseen
+    - lineage_contamination_zero
+    - exact_record_contamination_zero
+    - privacy_leak_rate_zero
+    - critical_false_release_rate_zero
+    - sealed_exact_record_accuracy_one
+    - per_game_metrics_complete
+    - seed_intervals_complete
+    - hard_caps_enforced
+    - checkpoint_cadence_satisfied
+    - cleanup_passed
+    - ldt_checkpoint_hash_bound
+    - ldt_inputs_content_free
+    - exact_status_vector_accuracy
+    - exact_selected_set_accuracy
+    - single_heldout_join
+    - no_post_reveal_tuning
+    - independent_final_audit_reproduces
+  subjective_dimensions: []
+  subjective_omission: >-
+    No LLM judge is used. Exact environment labels, hashes, resource receipts, and deterministic
+    array-policy targets exhaust the scoped claim; style preference is outside scope.
+  llm_judges: []
+
+pairwise:
+  blind_identity: true
+  swap_positions: false
+  randomize_order: false
+  random_seed: 21601
+  allow_tie: true
+  allow_uncertain: true
+
+escalation:
+  deterministic_conflict: block
+  missing_candidate_seed_cell: block
+  missing_surface_game_array: block
+  lineage_or_record_overlap: reject
+  resource_or_cleanup_failure: preserve_failed_cell_and_block_arm
+  post_reveal_threshold_change: reject
+
+decision_rule:
+  primary_candidate: lora-like-r4-v2
+  baseline_candidate: frozen-exact-key-control-v2
+  minimum_win_rate: 0.5
+  confidence: 0.95
+  reliability:
+    cross_judge_required: false
+    max_hard_fail_selection_rate: 0.0
+    min_deterministic_coverage: 1.0
+  deterministic_primary_gates:
+    required_privacy_leak_rate: 0.0
+    required_critical_false_release_rate: 0.0
+    required_sealed_exact_record_accuracy: 1.0
+    minimum_ordinary_exact_record_accuracy: 0.60
+    minimum_ood_exact_record_accuracy: 0.45
+    minimum_ldt_exact_status_vector_accuracy: 0.65
+    minimum_ldt_exact_selected_set_accuracy: 0.75
+    minimum_worst_surface_exact_status_vector_accuracy: 0.25
+    minimum_worst_surface_exact_selected_set_accuracy: 0.25
+    heldout_reveal_budget: 1
+  pairwise_win_rate_is_diagnostic_only: true
+
+data_contract:
+  judgments: not-applicable-no-subjective-judge.jsonl
+  deterministic: architecture-v2-deterministic-review.jsonl
+
+provenance:
+  manifest_frozen_at: '2026-08-09T00:00:00-04:00'
+  code_revision: git-commit-containing-this-manifest
+  evidence_mode: development
+  source_v15_final_audit_sha256: 165f346c1120e301190d111932fca8acf113f765a457c69c91edf6e34e0b9227
+  source_v15_model_sha256: d524e083f4cfc62f2aceada89873227fce9ad601b0bde36999de584c8544a3ad

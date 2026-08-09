@@ -1,0 +1,238 @@
+schema_version: '2.0'
+tournament_id: datagoblin-game-adapter-architecture-tournament-v2
+status: frozen_before_dataset_generation
+benchmark_config: configs/preregistrations/game_adapter_schema_drift_v1.yaml
+games: [centauri, they_sing, court, diplomacy]
+
+purpose: >-
+  Compare tiny architecture-neutral surrogates for four-game public-shape normalization under
+  identical data, model-seed, inference, and hard-resource contracts, then test whether the
+  independently confirmed v15 LDT can recover the environment-owned heldout Pareto status arrays.
+claim_scope: >-
+  Synthetic shape-only mapping evidence for the declared tiny surrogates. This tournament does
+  not establish checkpoint-scale LoRA or HRM-Text quality, gameplay skill, corpus eligibility,
+  deployment authority, or a universal architecture winner.
+
+source_evidence:
+  retained_sorter: exact-edge-h4-global-v15
+  retained_seed: 167
+  v15_preregistration_sha256: d28c52cca0c1bf4b904ed708b9b0c2df7db11d32ae82109ca809f816f87da905
+  v15_final_audit_sha256: 165f346c1120e301190d111932fca8acf113f765a457c69c91edf6e34e0b9227
+  v15_model_sha256: d524e083f4cfc62f2aceada89873227fce9ad601b0bde36999de584c8544a3ad
+  authority: MODEL_RECOMMENDATION_ONLY
+  use: development_receipt_shadow_sorting_only
+  environment_verifier_remains_decision_owner: true
+
+fixture_plan:
+  development:
+    - surface_id: development-balanced-v2
+      generator_seed: 1201
+      pressure: balanced
+    - surface_id: development-boundary-v2
+      generator_seed: 1237
+      pressure: boundary_precedence
+    - surface_id: development-authority-v2
+      generator_seed: 1291
+      pressure: authority_provenance
+  heldout:
+    - surface_id: heldout-balanced-v2
+      generator_seed: 1601
+      pressure: balanced
+    - surface_id: heldout-boundary-v2
+      generator_seed: 1657
+      pressure: boundary_precedence
+    - surface_id: heldout-authority-v2
+      generator_seed: 1699
+      pressure: authority_provenance
+  forbidden_prior_generator_seeds: [101, 211, 401, 509, 601, 607, 613, 701, 709, 719]
+  independent_unit: one_surface_game_adapter_array
+  required_arrays_per_lane: 12
+  required_candidates_per_array: 4
+  require_zero_lineage_overlap_between_lanes: true
+  require_zero_exact_record_overlap_between_lanes: true
+  heldout_labels_sealed_before_candidate_training: true
+  heldout_reveal_budget: 1
+
+model_seed_plan:
+  seeds: [31, 73, 127]
+  pairing: identical seeds for every trainable architecture
+  selection: no_seed_selection_use_min_max_intervals
+  deterministic_inference: true
+
+candidate_contract:
+  input: public_shape_only
+  training_labels: development_train_only
+  calibration_labels: development_calibration_only
+  development_evaluation_labels_available_to_candidate: false
+  heldout_labels_available_to_candidate: false
+  fixed_component: fail_closed_decision_table_membrane
+  learned_component: safe_public_field_mapping_only
+  predictions_complete_before_any_heldout_join: true
+  authority: MODEL_RECOMMENDATION_ONLY
+
+arms:
+  - candidate_id: frozen-exact-key-control-v2
+    architecture_family: frozen_exact_key_policy
+    role: unchanged_deterministic_control
+    trainable: false
+    trainable_parameters: 0
+    model_seed_behavior: one_identical_prediction_set
+    trainable_parameter_bucket: zero
+    context_mode: deterministic_exact_key
+    optimization_pressure: no_adaptation
+  - candidate_id: lora-like-r4-v2
+    architecture_family: frozen_prototype_plus_low_rank_update
+    role: low_rank_adapter
+    trainable: true
+    feature_dimension: 256
+    character_ngram_min: 2
+    character_ngram_max: 5
+    rank: 4
+    alpha: 8.0
+    base_prototype_scale: 2.0
+    epochs: 240
+    learning_rate: 0.35
+    l2: 0.0001
+    trainable_parameter_bucket: medium
+    context_mode: low_rank_public_shape
+    optimization_pressure: parameter_efficient_mapping
+  - candidate_id: recurrent-one-pass-h32-v2
+    architecture_family: frozen_recurrent_reservoir_readout
+    role: recurrence_matched_one_pass_control
+    trainable: true
+    feature_dimension: 256
+    character_ngram_min: 2
+    character_ngram_max: 5
+    hidden_width: 32
+    recurrence_steps: 1
+    epochs: 240
+    learning_rate: 0.35
+    l2: 0.0001
+    trainable_parameter_bucket: small
+    context_mode: recurrent_readout_one_pass
+    optimization_pressure: matched_recurrence_control
+  - candidate_id: hrm-style-loop4-h32-v2
+    architecture_family: tied_recurrent_public_shape_readout
+    role: hrm_text_style_recurrent_surrogate
+    trainable: true
+    feature_dimension: 256
+    character_ngram_min: 2
+    character_ngram_max: 5
+    hidden_width: 32
+    recurrence_steps: 4
+    epochs: 240
+    learning_rate: 0.35
+    l2: 0.0001
+    trainable_parameter_bucket: small
+    context_mode: tied_recurrent_readout_loop4
+    optimization_pressure: bounded_recurrent_refinement
+
+calibration:
+  source: out_of_sample_development_calibration_labels_only
+  threshold_grid: [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+  incorrect_mapping_penalty: 2.0
+  heldout_recalibration_permitted: false
+
+resource_contract:
+  training_task_id: game-adapter-architecture-tournament-v2
+  caps:
+    ram_mb: 2048
+    cpu_percent: 50
+    io_mb_per_second: 50
+    wall_clock_seconds: 900
+    swap_bytes: 0
+  chunk_strategy: one_game_batch_per_update_no_full_corpus_matrix
+  checkpoint_interval:
+    steps: 100
+    seconds: 300
+  network: false
+  external_checkpoint_loaded: false
+  real_checkpoint_run_permitted: false
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  cleanup: scripts/post_run_hrm_cleanup.ps1
+
+metrics:
+  safety_gates_first:
+    - privacy_leak_rate
+    - critical_false_release_rate
+    - sealed_exact_record_accuracy
+    - lineage_contamination_count
+  ldt_feature_axes:
+    - ordinary_exact_record_accuracy
+    - ordinary_mapping_f1
+    - ood_exact_record_accuracy
+    - ood_mapping_f1
+  diagnostics:
+    - abstention_accuracy
+    - coverage
+    - brier_score
+    - expected_calibration_error
+    - seed_interval_width
+    - trainable_parameters
+    - recurrence_steps
+    - steps_completed
+  whole_array:
+    - exact_status_vector_accuracy
+    - exact_selected_set_accuracy
+    - worst_surface_exact_status_vector_accuracy
+    - worst_surface_exact_selected_set_accuracy
+  report_per_game_before_aggregate: true
+  universal_scalar_winner: false
+
+decision_policy:
+  tolerance: 0.01
+  precedence: [UNSAFE, DOMINATED, UNRESOLVED, SELECTED]
+  safety_before_quality: true
+  conservative_interval_dominance: true
+  parameter_efficiency_only_when_quality_equivalent: true
+  missing_or_partial_evidence_status: UNRESOLVED
+  environment_owned_statuses_are_authoritative: true
+
+development_gates:
+  maximum_privacy_leak_rate: 0.0
+  maximum_critical_false_release_rate: 0.0
+  minimum_sealed_exact_record_accuracy: 1.0
+  require_every_game_every_surface_every_seed_safe: true
+  minimum_ordinary_exact_record_accuracy: 0.60
+  minimum_ood_exact_record_accuracy: 0.45
+  require_nonnegative_per_game_ordinary_gain_over_control: true
+  require_nonnegative_per_game_ood_gain_over_control: true
+
+heldout_gates:
+  maximum_privacy_leak_rate: 0.0
+  maximum_critical_false_release_rate: 0.0
+  minimum_sealed_exact_record_accuracy: 1.0
+  require_every_game_every_surface_every_seed_safe: true
+  minimum_ordinary_exact_record_accuracy: 0.60
+  minimum_ood_exact_record_accuracy: 0.45
+  require_nonnegative_per_game_ordinary_gain_over_control: true
+  require_nonnegative_per_game_ood_gain_over_control: true
+  minimum_ldt_exact_status_vector_accuracy: 0.65
+  minimum_ldt_exact_selected_set_accuracy: 0.75
+  minimum_worst_surface_exact_status_vector_accuracy: 0.25
+  minimum_worst_surface_exact_selected_set_accuracy: 0.25
+  no_post_reveal_tuning: true
+  operational_authority: confirmed_for_next_preregistration_only
+
+candidate_advancement:
+  require_development_qualification: true
+  require_heldout_qualification: true
+  minimum_heldout_selected_array_fraction: 0.25
+  require_no_unsafe_array_status: true
+  require_global_ldt_whole_array_gates: true
+  authority: environment_verified_admission_to_next_preregistration_only
+
+independent_audit:
+  implementation: scripts/audit_game_adapter_architecture_tournament_v2.py
+  reproduce_whole_array_metrics: true
+  revalidate_resource_and_custody_receipts: true
+  require_all_final_checks: true
+  conclusion_when_passing: confirmed_for_next_preregistration_only
+
+mandatory_non_claims:
+  - The low-rank arm is a tiny executable surrogate, not a checkpoint-scale LoRA result.
+  - The recurrent arm tests tied state refinement, not HRM-Text capability or mechanism.
+  - The fixed decision-table membrane, not the learned mapper, owns privacy and custody routing.
+  - The v15 LDT emits shadow recommendations only and cannot promote an adapter.
+  - Passing this tournament does not authorize corpus release, real-weight training, deployment, or gameplay claims.
+  - Null, adverse, aborted, and cleanup-failed cells remain immutable evidence.

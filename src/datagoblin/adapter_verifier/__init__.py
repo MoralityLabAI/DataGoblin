@@ -1,3 +1,12 @@
+from .architecture_tournament import (
+    apply_v15_shadow_sorter,
+    audit_architecture_confirmation_packet,
+    build_architecture_tournament_fixture,
+    evaluate_architecture_development,
+    evaluate_architecture_heldout,
+    train_architecture_candidate,
+    validate_architecture_candidate,
+)
 from .corpus_projection import build_corpus_projection, build_safe_field_projection
 from .drift_benchmark import (
     build_drift_benchmark,
@@ -20,6 +29,9 @@ from .skill_tournament import run_curation_skill_tournament_succession
 from .tournament import run_adapter_tournament, run_adapter_tournament_confirmation
 
 __all__ = [
+    "apply_v15_shadow_sorter",
+    "audit_architecture_confirmation_packet",
+    "build_architecture_tournament_fixture",
     "build_corpus_projection",
     "build_drift_benchmark",
     "build_safe_field_projection",
@@ -27,6 +39,8 @@ __all__ = [
     "build_verifier_dataset",
     "compare_adapter_reports",
     "evaluate_adapter_setup",
+    "evaluate_architecture_development",
+    "evaluate_architecture_heldout",
     "evaluate_drift_setup",
     "finalize_semantic_review",
     "fit_drift_adapter",
@@ -38,6 +52,8 @@ __all__ = [
     "run_exact_key_baseline",
     "run_mock_setups_on_dataset",
     "run_verifier_demo",
+    "train_architecture_candidate",
+    "validate_architecture_candidate",
     "validate_semantic_annotations",
     "verify_semantic_evidence",
 ]

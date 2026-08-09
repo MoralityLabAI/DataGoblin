@@ -1,0 +1,20 @@
+name: datagoblin_architecture_tournament_deterministic_development
+purpose: >-
+  Preflight a deterministic four-game adapter tournament with twelve development arrays and a
+  separately sealed twelve-array confirmation lane. This policy cannot support deployment,
+  corpus promotion, real-checkpoint claims, or a universal architecture winner.
+thresholds:
+  min_dataset_size: 12
+  min_judge_families: 0
+  min_repetitions_if_stochastic: 3
+  min_subjective_dimensions: 0
+  require_held_out: false
+  require_contamination_check: true
+  require_deterministic_or_justification: true
+  require_blind_identity: false
+  require_swap_positions: false
+  require_randomize_order: false
+  require_allow_tie: true
+  require_allow_uncertain: false
+  require_decision_rule: true
+  require_escalation: true
