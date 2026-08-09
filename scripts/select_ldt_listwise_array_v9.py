@@ -125,6 +125,57 @@ def _rank(receipt: Mapping[str, Any]) -> tuple[float, ...]:
     )
 
 
+def _comparative_primary_checks(
+    primary: Mapping[str, Any],
+    baseline: Mapping[str, Any],
+    gates: Mapping[str, Any],
+) -> dict[str, bool]:
+    primary_mean = primary["cv_mean_metrics"]
+    baseline_mean = baseline["cv_mean_metrics"]
+    primary_folds = primary["cv_fold_metrics"]
+    baseline_folds = baseline["cv_fold_metrics"]
+    if len(primary_folds) != len(baseline_folds):
+        raise ValueError("comparative candidates have different fold counts")
+    return {
+        "mean_exact_array_accuracy_delta": (
+            float(primary_mean["exact_array_accuracy"])
+            - float(baseline_mean["exact_array_accuracy"])
+            >= float(gates["minimum_mean_exact_array_accuracy_delta"])
+        ),
+        "mean_selected_set_exact_accuracy_delta": (
+            float(primary_mean["selected_set_exact_accuracy"])
+            - float(baseline_mean["selected_set_exact_accuracy"])
+            >= float(
+                gates[
+                    "minimum_mean_selected_set_exact_accuracy_delta"
+                ]
+            )
+        ),
+        "worst_fold_exact_array_accuracy_delta": (
+            min(float(row["exact_array_accuracy"]) for row in primary_folds)
+            - min(float(row["exact_array_accuracy"]) for row in baseline_folds)
+            >= float(
+                gates["minimum_worst_fold_exact_array_accuracy_delta"]
+            )
+        ),
+        "worst_fold_selected_set_exact_accuracy_delta": (
+            min(
+                float(row["selected_set_exact_accuracy"])
+                for row in primary_folds
+            )
+            - min(
+                float(row["selected_set_exact_accuracy"])
+                for row in baseline_folds
+            )
+            >= float(
+                gates[
+                    "minimum_worst_fold_selected_set_exact_accuracy_delta"
+                ]
+            )
+        ),
+    }
+
+
 def _select_seed(
     receipts: Sequence[dict[str, Any]],
     contract: Mapping[str, Any],
@@ -180,6 +231,7 @@ def select(
             "13.0",
             "14.0",
             "15.0",
+            "16.0",
         }
         or preregistration["status"]
         != "frozen_before_dataset_generation"
@@ -235,7 +287,7 @@ def select(
         )
 
     contract = preregistration["development_selection"]
-    gate_first = schema_version in {"14.0", "15.0"}
+    gate_first = schema_version in {"14.0", "15.0", "16.0"}
     if gate_first and (
         contract.get("selection_semantics")
         != "gate_then_rank_per_architecture"
@@ -303,11 +355,32 @@ def select(
     )
     if not primary_scope or not primary_scope.issubset(by_candidate):
         raise ValueError("development primary candidate scope is invalid")
+    comparative_checks: dict[str, bool] | None = None
+    if schema_version == "16.0":
+        comparative_gates = contract["comparative_primary_gates"]
+        baseline_id = str(comparative_gates["baseline_candidate_id"])
+        primary_id = next(iter(primary_scope))
+        selected_by_id = {
+            str(receipt["candidate_id"]): receipt
+            for receipt in selected_receipts
+        }
+        comparative_checks = _comparative_primary_checks(
+            selected_by_id[primary_id],
+            selected_by_id[baseline_id],
+            comparative_gates,
+        )
+        candidate_selection[primary_id]["comparative_primary_checks"] = (
+            comparative_checks
+        )
     qualified = [
         receipt
         for receipt in selected_receipts
         if str(receipt["candidate_id"]) in primary_scope
         and _qualified(receipt, contract)
+        and (
+            comparative_checks is None
+            or all(comparative_checks.values())
+        )
     ]
     primary = min(qualified, key=_rank) if qualified else None
     selected_keys = {
@@ -392,6 +465,7 @@ def select(
                 ),
                 "primary_candidate_scope": sorted(primary_scope),
                 "rank_only_diagnostic_never_authorizes_confirmation": True,
+                "comparative_primary_checks": comparative_checks,
             }
         )
     selected_summary = {

@@ -83,7 +83,110 @@ def _candidate(
     mode = "baseline"
     metrics = tuple(_point(value) for value in base)
 
-    if slot == 2:
+    receipt_pressures = {
+        "receipt_clear_dominance",
+        "receipt_seed_interval_overlap",
+        "receipt_mixed_frontier",
+        "receipt_parameter_equivalence",
+        "receipt_cross_neighbor_frontier",
+        "receipt_safety_sentinel",
+    }
+    if pressure in receipt_pressures:
+        receipt_base = (
+            0.24 + jitter,
+            0.89 - jitter / 2,
+            0.34 + jitter / 3,
+            0.91 - jitter / 4,
+        )
+        safe = True
+        bucket = "medium"
+        optimization = "adapter_receipt_quality"
+        mode = "receipt_baseline"
+        metrics = tuple(_point(value) for value in receipt_base)
+        if pressure == "receipt_clear_dominance":
+            vectors = (
+                receipt_base,
+                (0.96, 0.995, 0.80, 0.985),
+                (0.84, 0.975, 0.51, 0.955),
+                (0.88, 0.982, 0.61, 0.965),
+                (0.90, 0.986, 0.68, 0.972),
+                (0.82, 0.968, 0.49, 0.948),
+            )
+            vector = tuple(value + jitter for value in vectors[slot])
+            metrics = tuple(_point(value) for value in vector)
+            bucket = ("zero", "medium", "small", "small", "large", "zero")[slot]
+            optimization = "clear_conservative_dominance"
+            mode = ("control", "robust", "one_pass", "looped", "wide", "compact")[slot]
+        elif pressure == "receipt_seed_interval_overlap":
+            bounds = (
+                tuple((value, value) for value in receipt_base),
+                ((0.93, 1.0), (0.982, 1.0), (0.60, 0.88), (0.955, 0.995)),
+                ((0.94, 1.0), (0.981, 1.0), (0.55, 0.91), (0.952, 0.996)),
+                ((0.84, 0.99), (0.965, 0.998), (0.47, 0.80), (0.938, 0.982)),
+                ((0.86, 1.0), (0.968, 1.0), (0.45, 0.83), (0.940, 0.985)),
+                ((0.89, 0.99), (0.974, 0.998), (0.52, 0.86), (0.947, 0.989)),
+            )
+            metrics = tuple(
+                _interval(lower + jitter, upper + jitter)
+                for lower, upper in bounds[slot]
+            )
+            bucket = ("zero", "medium", "medium", "small", "small", "large")[slot]
+            optimization = "seed_interval_uncertainty"
+            mode = ("control", "low_rank_a", "low_rank_b", "one_pass", "looped", "wide")[slot]
+        elif pressure == "receipt_mixed_frontier":
+            vectors = (
+                receipt_base,
+                (0.98, 0.995, 0.62, 0.958),
+                (0.87, 0.975, 0.93, 0.995),
+                (0.94, 0.988, 0.79, 0.978),
+                (0.79, 0.960, 0.48, 0.941),
+                (0.83, 0.968, 0.58, 0.950),
+            )
+            metrics = tuple(_point(value + jitter) for value in vectors[slot])
+            bucket = ("zero", "small", "small", "medium", "zero", "large")[slot]
+            optimization = "mixed_pareto_frontier"
+            mode = ("control", "ordinary", "ood", "balanced", "weak_a", "weak_b")[slot]
+        elif pressure == "receipt_parameter_equivalence":
+            vectors = (
+                receipt_base,
+                (0.915, 0.985, 0.745, 0.975),
+                (0.918, 0.987, 0.749, 0.978),
+                (0.921, 0.989, 0.752, 0.981),
+                (0.82, 0.965, 0.55, 0.948),
+                (0.80, 0.958, 0.51, 0.942),
+            )
+            metrics = tuple(_point(value + jitter) for value in vectors[slot])
+            bucket = ("zero", "large", "medium", "small", "zero", "medium")[slot]
+            optimization = "equivalent_parameter_tiebreak"
+            mode = ("control", "expensive", "mid_cost", "compact", "weak_a", "weak_b")[slot]
+        elif pressure == "receipt_cross_neighbor_frontier":
+            vectors = (
+                receipt_base,
+                (0.96, 0.990, 0.64, 0.950),
+                (0.66, 0.955, 0.96, 0.992),
+                (0.83, 0.975, 0.82, 0.973),
+                (0.90, 0.982, 0.73, 0.962),
+                (0.78, 0.960, 0.52, 0.940),
+            )
+            metrics = tuple(_point(value + jitter) for value in vectors[slot])
+            bucket = ("zero", "small", "small", "medium", "large", "zero")[slot]
+            optimization = "neighbor_coupled_pareto"
+            mode = ("control", "ordinary", "ood", "middle", "tilted", "weak")[slot]
+        else:
+            vectors = (
+                receipt_base,
+                (0.94, 0.990, 0.79, 0.980),
+                (0.995, 0.999, 0.995, 0.999),
+                (0.82, 0.968, 0.54, 0.948),
+                (0.90, 0.982, 0.70, 0.965),
+                (0.86, 0.974, 0.62, 0.956),
+            )
+            metrics = tuple(_point(value + jitter) for value in vectors[slot])
+            safe = slot != 2
+            bucket = ("zero", "medium", "zero", "small", "large", "small")[slot]
+            optimization = "fixed_safety_membrane_canary"
+            mode = ("control", "robust", "unsafe_high", "weak", "wide", "compact")[slot]
+    elif slot == 2:
         metrics = tuple(_point(0.99) for _ in METRIC_FIELDS)
         bucket = "zero"
         optimization = "coverage_without_safety"

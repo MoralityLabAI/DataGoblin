@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 
 from datagoblin.experiments.ldt_array_hard_surface import ARRAY_STATUSES
+from datagoblin.experiments.ldt_array_sorter import BUCKET_RANK, METRIC_FIELDS
 from datagoblin.experiments.ldt_listwise_array_v9 import (
     IndependentCandidateEncoder,
     LoopedSetStatusModel,
@@ -25,6 +26,14 @@ EDGE_STATISTICS = (
     "min_signed_delta",
     "max_signed_delta",
 )
+
+CROSS_BOUND_EDGE_STATISTICS = (
+    "mean",
+    "min",
+    "max",
+)
+CROSS_BOUND_PROJECTION_WIDTH = 8
+CROSS_BOUND_PROJECTION_SEED = 16031
 
 
 @dataclass(frozen=True)
@@ -89,6 +98,159 @@ class EdgeDifferenceCandidateEncoder:
             "permutation_equivariant": True,
             "fit_split": "none_stateless",
             "executes_verifier_policy": False,
+            "uses_targets": False,
+        }
+
+
+@dataclass(frozen=True)
+class CrossBoundEdgeCandidateEncoder:
+    """Target-free directed interval edges with neighbor-coupled projections."""
+
+    base: IndependentCandidateEncoder = field(
+        default_factory=IndependentCandidateEncoder
+    )
+    projection_width: int = CROSS_BOUND_PROJECTION_WIDTH
+    projection_seed: int = CROSS_BOUND_PROJECTION_SEED
+
+    def __post_init__(self) -> None:
+        if self.projection_width < 1 or self.projection_width > 32:
+            raise ValueError("cross-bound projection width is out of bounds")
+
+    def raw_edge_names(self) -> tuple[str, ...]:
+        names = []
+        for metric in METRIC_FIELDS:
+            names.extend(
+                (
+                    f"{metric}:candidate_lower_minus_neighbor_upper",
+                    f"{metric}:neighbor_lower_minus_candidate_upper",
+                )
+            )
+        names.append("parameter_bucket:candidate_minus_neighbor")
+        return tuple(names)
+
+    def feature_names(self) -> tuple[str, ...]:
+        raw_names = self.raw_edge_names()
+        projected_names = tuple(
+            f"projection_{index:02d}"
+            for index in range(self.projection_width)
+        )
+        return (
+            *self.base.feature_names(),
+            *(
+                f"cross_bound:{statistic}:{name}"
+                for statistic in CROSS_BOUND_EDGE_STATISTICS
+                for name in raw_names
+            ),
+            *(
+                f"cross_bound_projection:{statistic}:{name}"
+                for statistic in CROSS_BOUND_EDGE_STATISTICS
+                for name in projected_names
+            ),
+        )
+
+    @staticmethod
+    def _conservative_interval(
+        candidate: Mapping[str, Any],
+        field: str,
+    ) -> tuple[float, float]:
+        interval = candidate[field]
+        lower = 0.0 if interval["lower"] is None else float(interval["lower"])
+        upper = 1.0 if interval["upper"] is None else float(interval["upper"])
+        return lower, upper
+
+    def _raw_edge(
+        self,
+        candidate: Mapping[str, Any],
+        neighbor: Mapping[str, Any],
+    ) -> np.ndarray:
+        values = []
+        for metric in METRIC_FIELDS:
+            candidate_lower, candidate_upper = self._conservative_interval(
+                candidate,
+                metric,
+            )
+            neighbor_lower, neighbor_upper = self._conservative_interval(
+                neighbor,
+                metric,
+            )
+            values.extend(
+                (
+                    candidate_lower - neighbor_upper,
+                    neighbor_lower - candidate_upper,
+                )
+            )
+        values.append(
+            (
+                BUCKET_RANK[str(candidate["trainable_parameter_bucket"])]
+                - BUCKET_RANK[str(neighbor["trainable_parameter_bucket"])]
+            )
+            / 3.0
+        )
+        return np.asarray(values, dtype=np.float64)
+
+    def _projection(self) -> np.ndarray:
+        rng = np.random.default_rng(self.projection_seed)
+        return rng.normal(
+            loc=0.0,
+            scale=1.0 / math.sqrt(len(self.raw_edge_names())),
+            size=(self.projection_width, len(self.raw_edge_names())),
+        )
+
+    def transform_array(
+        self,
+        candidates: Sequence[Mapping[str, Any]],
+    ) -> np.ndarray:
+        base = self.base.transform_array(candidates)
+        if base.shape[0] < 2:
+            raise ValueError("cross-bound encoder requires at least two candidates")
+        projection = self._projection()
+        messages = []
+        for index, candidate in enumerate(candidates):
+            raw_edges = np.stack(
+                [
+                    self._raw_edge(candidate, neighbor)
+                    for neighbor_index, neighbor in enumerate(candidates)
+                    if neighbor_index != index
+                ]
+            )
+            projected_edges = np.tanh(raw_edges @ projection.T)
+            raw_summary = np.concatenate(
+                (
+                    np.mean(raw_edges, axis=0),
+                    np.min(raw_edges, axis=0),
+                    np.max(raw_edges, axis=0),
+                )
+            )
+            projected_summary = np.concatenate(
+                (
+                    np.mean(projected_edges, axis=0),
+                    np.min(projected_edges, axis=0),
+                    np.max(projected_edges, axis=0),
+                )
+            )
+            messages.append(np.concatenate((raw_summary, projected_summary)))
+        result = np.concatenate((base, np.stack(messages)), axis=1)
+        if result.shape != (len(candidates), len(self.feature_names())):
+            raise AssertionError("cross-bound feature names and values differ")
+        return result
+
+    def receipt(self) -> dict[str, Any]:
+        return {
+            "feature_view": "cross_bound_edge_message",
+            "base_encoder": self.base.receipt(),
+            "feature_names": list(self.feature_names()),
+            "feature_count": len(self.feature_names()),
+            "message_steps": 1,
+            "raw_edge_names": list(self.raw_edge_names()),
+            "edge_statistics": list(CROSS_BOUND_EDGE_STATISTICS),
+            "projection_width": self.projection_width,
+            "projection_seed": self.projection_seed,
+            "projection_trainable": False,
+            "pooling": "per_candidate_all_neighbor_statistics",
+            "permutation_equivariant": True,
+            "fit_split": "none_stateless",
+            "executes_verifier_policy": False,
+            "uses_metric_tolerance": False,
             "uses_targets": False,
         }
 

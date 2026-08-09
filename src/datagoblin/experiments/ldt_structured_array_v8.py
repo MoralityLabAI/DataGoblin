@@ -339,11 +339,12 @@ def generate_structured_array_dataset(
             "13.0",
             "14.0",
             "15.0",
+            "16.0",
         }
         or config["status"] != "frozen_before_dataset_generation"
     ):
         raise ValueError(
-            "structured-array preregistration is not frozen v8-v15"
+            "structured-array preregistration is not frozen v8-v16"
         )
     if (
         config["independent_builder"]["implementation_id"]

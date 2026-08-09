@@ -11,7 +11,9 @@ from datagoblin.experiments.ldt_array_confirmation import (
 )
 from datagoblin.experiments.ldt_array_sorter import sha256_file
 from datagoblin.experiments.ldt_edge_set_array_v10 import (
+    CROSS_BOUND_EDGE_STATISTICS,
     EDGE_STATISTICS,
+    CrossBoundEdgeCandidateEncoder,
     EdgeDifferenceCandidateEncoder,
 )
 from datagoblin.experiments.ldt_listwise_array_v9 import (
@@ -69,6 +71,7 @@ def prepare(
         "13.0",
         "14.0",
         "15.0",
+        "16.0",
     }:
         feature_views = {
             str(model["feature_view"])
@@ -109,6 +112,7 @@ def prepare(
             "13.0",
             "14.0",
             "15.0",
+            "16.0",
         }:
             support = manifest.get("development_support_audit")
             if not support or not all(
@@ -839,6 +843,234 @@ def prepare(
                 "status_macro_f1_gate": float(
                     heldout["minimum_status_macro_f1"]
                 ),
+            }
+        if schema_version == "16.0":
+            models = preregistration["models"]["candidates"]
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in models
+            ]
+            by_id = {row["candidate_id"]: row for row in listwise}
+            comparison = preregistration["architecture_comparison"]
+            independent_id = str(
+                comparison["independent_global_control_id"]
+            )
+            edge_id = str(comparison["same_encoder_control_id"])
+            cross_factorized_id = str(
+                comparison["cross_bound_factorized_id"]
+            )
+            cross_global_id = str(
+                comparison["cross_bound_global_primary_id"]
+            )
+            if set(by_id) != {
+                independent_id,
+                edge_id,
+                cross_factorized_id,
+                cross_global_id,
+            }:
+                raise ValueError("v16 architecture IDs differ from contract")
+            independent = by_id[independent_id]
+            edge = by_id[edge_id]
+            cross_factorized = by_id[cross_factorized_id]
+            cross_global = by_id[cross_global_id]
+            exact = [independent, edge, cross_factorized, cross_global]
+            if (
+                independent["candidate_encoder"] != "independent_candidate"
+                or int(independent["message_steps"]) != 0
+                or edge["candidate_encoder"] != "edge_difference_message"
+                or int(edge["message_steps"]) != 1
+                or tuple(edge["edge_statistics"]) != EDGE_STATISTICS
+                or any(
+                    row["candidate_encoder"] != "cross_bound_edge_message"
+                    or int(row["message_steps"]) != 1
+                    or tuple(row["edge_statistics"])
+                    != CROSS_BOUND_EDGE_STATISTICS
+                    or int(row["projection_width"]) != 8
+                    or int(row["projection_seed"]) != 16031
+                    for row in (cross_factorized, cross_global)
+                )
+                or any(
+                    not bool(row["enabled"])
+                    or row["family"]
+                    != "exact_globally_normalized_array_status"
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0 < float(row["learning_rate"]) <= 0.1
+                    for row in exact
+                )
+            ):
+                raise ValueError("v16 cross-bound architecture matrix is incomplete")
+            exact_specs = [
+                dict(row["exact_array_likelihood"]) for row in exact
+            ]
+            if any(
+                int(spec["max_candidates"]) != 6
+                or spec["loss_family"]
+                != "exact_globally_normalized_status_vector_nll"
+                or float(spec["loss_weight"]) != 1.0
+                or spec["normalization"]
+                != "exact_selected_subset_marginalization"
+                or spec["represented_status_vectors"]
+                != "all_four_status_assignments"
+                or not bool(spec["shared_state_gradient"])
+                or spec["class_balancing"]
+                != "none_proper_likelihood"
+                for spec in exact_specs
+            ):
+                raise ValueError("v16 exact-array objective differs")
+            comparable_fields = (
+                "family",
+                "candidate_encoder",
+                "message_steps",
+                "edge_statistics",
+                "projection_width",
+                "projection_seed",
+                "hidden_width",
+                "loop_count",
+                "epochs",
+                "learning_rate",
+            )
+            if (
+                any(
+                    cross_factorized[field] != cross_global[field]
+                    for field in comparable_fields
+                )
+                or cross_factorized["exact_array_likelihood"]["decoder"]
+                != "factorized"
+                or cross_global["exact_array_likelihood"]["decoder"]
+                != "global_selected_count_map"
+                or any(
+                    cross_factorized["exact_array_likelihood"][field]
+                    != cross_global["exact_array_likelihood"][field]
+                    for field in (
+                        "max_candidates",
+                        "loss_family",
+                        "loss_weight",
+                        "normalization",
+                        "represented_status_vectors",
+                        "shared_state_gradient",
+                        "class_balancing",
+                    )
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"]) != 0.0
+                    or not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    or model["feature_view"] != "independent"
+                    for model in models
+                )
+            ):
+                raise ValueError("v16 cross-bound decoder ablation is not matched")
+            metric_gate = preregistration.get("metric_gate", {})
+            if (
+                metric_gate.get("heldout_status")
+                != "supported_on_declared_holdout"
+                or set(metric_gate.get("accepted_metrics", ()))
+                != {
+                    "exact_status_vector_accuracy",
+                    "exact_selected_set_accuracy",
+                }
+            ):
+                raise ValueError("v16 metric robustness gate is incomplete")
+            selection = preregistration["development_selection"]
+            heldout = preregistration["heldout_evaluation"]
+            comparative = selection["comparative_primary_gates"]
+            if (
+                selection.get("selection_semantics")
+                != "gate_then_rank_per_architecture"
+                or set(selection.get("primary_candidate_ids", ()))
+                != {cross_global_id}
+                or comparative["baseline_candidate_id"] != edge_id
+                or float(
+                    comparative["minimum_mean_exact_array_accuracy_delta"]
+                )
+                < 0.05
+                or float(
+                    comparative[
+                        "minimum_mean_selected_set_exact_accuracy_delta"
+                    ]
+                )
+                < 0.05
+                or not bool(heldout.get("primary_only_confirmation_packet"))
+                or float(heldout["minimum_exact_status_vector_accuracy"])
+                != float(selection["minimum_mean_exact_array_accuracy"])
+                or float(heldout["minimum_selected_set_exact_accuracy"])
+                != float(
+                    selection[
+                        "minimum_mean_selected_set_exact_accuracy"
+                    ]
+                )
+                or float(heldout["minimum_safety_gate_accuracy"])
+                != float(selection["required_mean_safety_gate_accuracy"])
+                or float(heldout["minimum_swap_consistency"])
+                != float(selection["required_mean_swap_consistency"])
+            ):
+                raise ValueError("v16 gate-first confirmation contract is incomplete")
+            transfer_controls = preregistration["transfer_controls"]
+            if (
+                len(transfer_controls) != 2
+                or any(
+                    bool(control["eligible_for_selection"])
+                    for control in transfer_controls
+                )
+                or {control["role"] for control in transfer_controls}
+                != {
+                    "frozen_out_of_domain_transfer_control",
+                    "environment_policy_ceiling_circularity_diagnostic",
+                }
+            ):
+                raise ValueError("v16 transfer controls are not diagnostic-only")
+            if not bool(
+                preregistration["corrective_hypothesis"][
+                    "fixed_safety_membrane_not_credited_to_learned_model"
+                ]
+            ):
+                raise ValueError("v16 fixed safety membrane is not disclosed")
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoders": {
+                    "independent_candidate": (
+                        IndependentCandidateEncoder().receipt()
+                    ),
+                    "edge_difference_message": (
+                        EdgeDifferenceCandidateEncoder().receipt()
+                    ),
+                    "cross_bound_edge_message": (
+                        CrossBoundEdgeCandidateEncoder().receipt()
+                    ),
+                },
+                "cross_bound_decoder_ablation_matched": True,
+                "same_data_edge_control_present": True,
+                "independent_global_control_present": True,
+                "exact_array_shared_state_gradient": True,
+                "metric_gate": metric_gate,
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+                "fixed_safety_membrane": {
+                    "source_feature": "safety_qualified",
+                    "applied_before_learned_quality": True,
+                    "credited_to_learned_model": False,
+                },
+            }
+            feature_independence_audit["selection_policy"] = {
+                "semantics": "gate_then_rank_per_architecture",
+                "primary_candidate_ids": [cross_global_id],
+                "primary_only_confirmation_packet": True,
+                "comparative_primary_gates": comparative,
+                "exact_status_vector_gate": float(
+                    heldout["minimum_exact_status_vector_accuracy"]
+                ),
+                "exact_selected_set_gate": float(
+                    heldout["minimum_selected_set_exact_accuracy"]
+                ),
+                "safety_gate": float(
+                    heldout["minimum_safety_gate_accuracy"]
+                ),
+                "swap_gate": float(heldout["minimum_swap_consistency"]),
             }
         if schema_version == "13.0":
             models = preregistration["models"]["candidates"]

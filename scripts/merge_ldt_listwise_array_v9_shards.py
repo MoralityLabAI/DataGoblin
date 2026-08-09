@@ -54,6 +54,7 @@ def merge(
             "13.0",
             "14.0",
             "15.0",
+            "16.0",
         }
         or preregistration["status"]
         != "frozen_before_dataset_generation"

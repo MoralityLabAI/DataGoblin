@@ -524,13 +524,24 @@ def _score_run(
         for index, value in enumerate(actual_rationale)
         if value == "safety_gate"
     ]
-    safety_accuracy = sum(
-        actual_preference[index] == predicted_preference[index]
-        for index in safety_indices
-    ) / len(safety_indices)
-    safety_swap = sum(
-        bool(ordered[index]["swap_consistent"]) for index in safety_indices
-    ) / len(safety_indices)
+    safety_accuracy = (
+        None
+        if not safety_indices
+        else sum(
+            actual_preference[index] == predicted_preference[index]
+            for index in safety_indices
+        )
+        / len(safety_indices)
+    )
+    safety_swap = (
+        None
+        if not safety_indices
+        else sum(
+            bool(ordered[index]["swap_consistent"])
+            for index in safety_indices
+        )
+        / len(safety_indices)
+    )
     swap_consistency = sum(
         bool(row["swap_consistent"]) for row in ordered
     ) / len(ordered)
@@ -614,6 +625,28 @@ def _score_run(
         str(size): sum(values) / len(values)
         for size, values in sorted(by_size.items())
     }
+    preference_support = Counter(actual_preference)
+    status_support = Counter(actual_status_flat)
+    abstain_recall = (
+        preference["per_class"]["ABSTAIN"]["recall"]
+        if preference_support["ABSTAIN"]
+        else None
+    )
+    tradeoff_recall = (
+        preference["per_class"]["TRADEOFF"]["recall"]
+        if preference_support["TRADEOFF"]
+        else None
+    )
+    unresolved_recall = (
+        status["per_class"]["UNRESOLVED"]["recall"]
+        if status_support["UNRESOLVED"]
+        else None
+    )
+    unsafe_exclusion_accuracy = (
+        status["per_class"]["UNSAFE"]["recall"]
+        if status_support["UNSAFE"]
+        else None
+    )
     return {
         "preference_accuracy": preference["accuracy"],
         "preference_macro_f1": preference["macro_f1"],
@@ -627,8 +660,8 @@ def _score_run(
             for index in range(len(ordered))
         )
         / len(ordered),
-        "abstain_recall": preference["per_class"]["ABSTAIN"]["recall"],
-        "tradeoff_recall": preference["per_class"]["TRADEOFF"]["recall"],
+        "abstain_recall": abstain_recall,
+        "tradeoff_recall": tradeoff_recall,
         "safety_gate_accuracy": safety_accuracy,
         "safety_swap_consistency": safety_swap,
         "swap_consistency": swap_consistency,
@@ -641,8 +674,8 @@ def _score_run(
         "exact_array_accuracy": exact_arrays / len(arrays_by_id),
         "selected_set_exact_accuracy": selected_accuracy,
         "exact_array_accuracy_by_size": exact_by_size,
-        "unresolved_recall": status["per_class"]["UNRESOLVED"]["recall"],
-        "unsafe_exclusion_accuracy": status["per_class"]["UNSAFE"]["recall"],
+        "unresolved_recall": unresolved_recall,
+        "unsafe_exclusion_accuracy": unsafe_exclusion_accuracy,
         "mean_loop_delta": sum(float(row["loop_delta"]) for row in ordered)
         / len(ordered),
         "trainable_parameters": trainable_parameters,
@@ -652,15 +685,18 @@ def _score_run(
             preference["macro_f1"] >= minimum_preference_f1
         ),
         "safety_qualified": (
-            safety_accuracy >= minimum_safety_gate_accuracy
+            None
+            if safety_accuracy is None or safety_swap is None
+            else safety_accuracy >= minimum_safety_gate_accuracy
             and safety_swap >= minimum_swap_consistency
         ),
         "orientation_qualified": (
             swap_consistency >= minimum_swap_consistency
         ),
         "uncertainty_qualified": (
-            preference["per_class"]["ABSTAIN"]["recall"]
-            >= minimum_abstain_recall
+            None
+            if abstain_recall is None
+            else abstain_recall >= minimum_abstain_recall
         ),
         "calibration_qualified": ece <= maximum_ece,
         "status_qualified": status["macro_f1"] >= minimum_status_f1,
@@ -1035,6 +1071,52 @@ def _render(report: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _primary_domain_summary(
+    pressure_slices: Mapping[str, Mapping[str, Any]],
+    evaluation: Mapping[str, Any],
+    primary_pressures: Sequence[str],
+) -> dict[str, Any]:
+    expected = {str(value) for value in primary_pressures}
+    if not expected or not expected.issubset(pressure_slices):
+        raise ValueError("primary receipt-domain pressure slice is incomplete")
+    selected = [pressure_slices[value] for value in sorted(expected)]
+    array_count = sum(int(row["support"]["array_count"]) for row in selected)
+    if array_count < 1:
+        raise ValueError("primary receipt-domain slice has no arrays")
+
+    def weighted(metric: str) -> float:
+        return sum(
+            int(row["support"]["array_count"])
+            * float(row["metrics"][metric])
+            for row in selected
+        ) / array_count
+
+    exact = weighted("exact_array_accuracy")
+    selected_set = weighted("selected_set_exact_accuracy")
+    checks = {
+        "minimum_exact_status_vector_accuracy": exact
+        >= float(
+            evaluation[
+                "minimum_primary_domain_exact_status_vector_accuracy"
+            ]
+        ),
+        "minimum_exact_selected_set_accuracy": selected_set
+        >= float(
+            evaluation[
+                "minimum_primary_domain_selected_set_exact_accuracy"
+            ]
+        ),
+    }
+    return {
+        "pressures": sorted(expected),
+        "array_count": array_count,
+        "exact_status_vector_accuracy": exact,
+        "exact_selected_set_accuracy": selected_set,
+        "checks": checks,
+        "qualified": all(checks.values()),
+    }
+
+
 def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     preregistration = load_structured(args.preregistration.resolve())
     if preregistration["status"] != "frozen_before_dataset_generation":
@@ -1060,7 +1142,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     ):
         raise ValueError("confirmation trainer is incomplete or contaminated")
     if (
-        schema_version in {"8.0", "9.0", "14.0", "15.0"}
+        schema_version in {"8.0", "9.0", "14.0", "15.0", "16.0"}
         and not trainer.get("development_selection", {}).get(
             "confirmation_join_authorized",
             False,
@@ -1089,7 +1171,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         tuple[str, int],
         list[Mapping[str, Any]],
     ] = {}
-    direct_array_schema = schema_version in {"9.0", "14.0", "15.0"}
+    direct_array_schema = schema_version in {"9.0", "14.0", "15.0", "16.0"}
     if direct_array_schema:
         if args.array_predictions is None:
             raise ValueError(
@@ -1123,7 +1205,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError(
             "confirmation receipts and array predictions differ"
         )
-    if schema_version in {"14.0", "15.0"}:
+    if schema_version in {"14.0", "15.0", "16.0"}:
         development = trainer["development_selection"]
         retained_key = (
             str(development["primary_candidate_id"]),
@@ -1245,7 +1327,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "seed": seed,
             **scored,
         }
-        if schema_version in {"7.0", "8.0", "9.0", "14.0", "15.0"}:
+        if schema_version in {"7.0", "8.0", "9.0", "14.0", "15.0", "16.0"}:
             run_reports[key]["slices"] = {
                 "by_game": _slice_reports(
                     rows,
@@ -1348,6 +1430,16 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
                     ),
                 ),
             }
+            if schema_version == "16.0":
+                run_reports[key]["primary_domain"] = (
+                    _primary_domain_summary(
+                        run_reports[key]["slices"]["by_pressure"],
+                        evaluation,
+                        preregistration["surface"][
+                            "primary_domain_pressures"
+                        ],
+                    )
+                )
         by_candidate[candidate_id].append(scored)
     aggregates = {
         candidate_id: _aggregate(reports)
@@ -1383,9 +1475,25 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     retained_confirmed = (
         retained_id is not None and retained_id in pareto
     )
+    primary_domain_confirmation = None
+    if schema_version == "16.0":
+        retained_reports = [
+            row
+            for row in run_reports.values()
+            if row["candidate_id"] == retained_id
+        ]
+        if len(retained_reports) != 1:
+            raise ValueError("v16 retained primary run is not unique")
+        primary_domain_confirmation = retained_reports[0][
+            "primary_domain"
+        ]
+        retained_confirmed = (
+            retained_confirmed
+            and bool(primary_domain_confirmation["qualified"])
+        )
     target_independent_boundary = preregistration.get(
         "schema_version"
-    ) in {"7.0", "8.0", "9.0", "14.0", "15.0"}
+    ) in {"7.0", "8.0", "9.0", "14.0", "15.0", "16.0"}
     report = {
         "schema_version": "ldt-array-confirmation-heldout-evaluation.v3",
         "experiment_id": trainer["experiment_id"],
@@ -1412,11 +1520,15 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "learned_pareto_set": pareto,
         "development_primary_candidate_id": retained_id,
         "retained_architecture_confirmed": retained_confirmed,
+        "primary_domain_confirmation": primary_domain_confirmation,
         "universal_scalar_champion": None,
         "environment_rule_controls_are_learned_evidence": False,
         "larger_model_training_authorized": False,
         "shadow_recommendation_integration_authorized": (
             retained_confirmed and not target_independent_boundary
+        ),
+        "next_shadow_preregistration_authorized": (
+            retained_confirmed and schema_version == "16.0"
         ),
         "claim_boundary": (
             "Heldout evidence applies only to fresh content-free tournament "

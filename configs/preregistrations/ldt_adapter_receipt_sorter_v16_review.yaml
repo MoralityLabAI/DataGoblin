@@ -1,0 +1,131 @@
+version: '1.0'
+eval_id: datagoblin-ldt-adapter-receipt-sorter-v16-development-review
+claim: >
+  On fresh representative adapter-receipt development lineages, the
+  cross-bound exact-global primary clears every frozen gate and improves both
+  mean exact whole-array metrics by at least 0.05 over the same-data v15 edge
+  encoder, without consuming sealed confirmation labels.
+mode: pairwise
+adapter: generic
+
+candidates:
+  - id: exact-independent-h4-global-v16
+    model: local-content-free-ldt
+    model_family: exact-selected-count-independent-array
+    blinded_label: candidate-a
+  - id: exact-edge-h4-global-v16
+    model: local-content-free-ldt
+    model_family: exact-selected-count-edge-array
+    blinded_label: candidate-b
+  - id: exact-crossbound-h4-factorized-v16
+    model: local-content-free-ldt
+    model_family: exact-selected-count-cross-bound-array
+    blinded_label: candidate-c
+  - id: exact-crossbound-h4-global-v16
+    model: local-content-free-ldt
+    model_family: exact-selected-count-cross-bound-array
+    blinded_label: candidate-d
+
+dataset:
+  path: external-public-fixture/train_arrays.jsonl
+  size: 36
+  unit: tournament-array
+  held_out: false
+  contamination_check: completed
+  selection: >
+    Six development and six sealed confirmation lineages each mix six
+    preregistered receipt mechanisms and sizes four through six. The firewall
+    binds all ten v15 lineages plus the transitive v1-v14 receipt, uses new
+    seeds, keeps architecture identity out of features, and seals targets
+    before any official capped run.
+
+scoring:
+  deterministic:
+    - output_schema_valid
+    - task_completion
+    - exact_status_vector_accuracy
+    - exact_selected_set_accuracy
+    - primary_domain_exact_status_vector_accuracy
+    - primary_domain_exact_selected_set_accuracy
+    - worst_lineage_exact_status_vector_accuracy
+    - worst_lineage_selected_set_exact_accuracy
+    - status_macro_f1
+    - preference_macro_f1
+    - abstain_recall
+    - safety_gate_accuracy
+    - swap_consistency
+    - expected_calibration_error
+    - fixed_safety_membrane_not_credited_to_model
+    - cross_bound_encoder_target_independence
+    - matched_encoder_and_decoder_ablations
+    - comparative_primary_gate_reproduced
+    - lineage_contamination_zero
+    - gate_first_selection_reproduced
+    - primary_only_confirmation_packet
+    - confirmation_targets_unseen
+    - hard_caps_enforced
+    - cleanup_passed
+  subjective_dimensions: []
+  subjective_omission: >
+    No LLM judge is used. Exact environment targets plus deterministic schema,
+    architecture, custody, resource, selection, comparison, and metric checks
+    exhaust this narrow claim; style judgments are outside scope.
+  llm_judges: []
+
+pairwise:
+  blind_identity: true
+  swap_positions: false
+  randomize_order: false
+  random_seed: 16311
+  allow_tie: true
+  allow_uncertain: true
+
+escalation:
+  deterministic_conflict: block
+  missing_candidate_seed_cell: block
+  missing_lineage_fold: block
+  support_mismatch: block
+  comparative_primary_gate_failure: preserve_confirmation
+  rank_only_diagnostic_selected: preserve_confirmation
+  post_freeze_threshold_change: reject
+
+decision_rule:
+  primary_candidate: exact-crossbound-h4-global-v16
+  baseline_candidate: exact-edge-h4-global-v16
+  matched_decoder_candidate: exact-crossbound-h4-factorized-v16
+  minimum_win_rate: 0.5
+  confidence: 0.95
+  reliability:
+    cross_judge_required: false
+    max_hard_fail_selection_rate: 0.0
+    min_deterministic_coverage: 1.0
+  deterministic_primary_gates:
+    selection_semantics: gate_then_rank_per_architecture
+    required_mean_safety_gate_accuracy: 1.0
+    required_mean_swap_consistency: 1.0
+    minimum_mean_preference_macro_f1: 0.75
+    minimum_mean_abstain_recall: 0.75
+    minimum_mean_status_macro_f1: 0.80
+    minimum_mean_exact_status_vector_accuracy: 0.65
+    minimum_mean_exact_selected_set_accuracy: 0.75
+    minimum_worst_fold_exact_status_vector_accuracy: 0.50
+    minimum_worst_fold_selected_set_exact_accuracy: 0.50
+    maximum_oof_expected_calibration_error: 0.20
+    minimum_mean_exact_status_delta_over_baseline: 0.05
+    minimum_mean_exact_selected_delta_over_baseline: 0.05
+    confirmation_join_requires_qualified_primary: true
+    confirmation_packet_candidate_count: 1
+  pairwise_win_rate_is_diagnostic_only: true
+
+data_contract:
+  judgments: not-applicable-no-subjective-judge.jsonl
+  deterministic: v16-deterministic-review.jsonl
+
+provenance:
+  manifest_frozen_at: '2026-08-09T00:00:00-04:00'
+  code_revision: git-commit-containing-this-manifest
+  evidence_mode: development
+  contamination_preflight_manifest_sha256: pending_official_generation
+  source_v2_development_evaluation_sha256: fd77ffa5ee83c88815eea2cfb577085eb6f704147bfa93f00df20f30dc143641
+  source_v2_final_audit_sha256: cf736bb5c68cceaf3d83a7f10e6303307ec6254b22b771610cd379b6551c2f52
+  metric_robustness_receipt: 2ff88579e010953378c160ec10c25e94f5093585e697a1fabb726fec72899087

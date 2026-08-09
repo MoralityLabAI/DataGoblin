@@ -42,6 +42,7 @@ from datagoblin.experiments.ldt_cardinality_decoder_v11 import (
     predict_cardinality_statuses,
 )
 from datagoblin.experiments.ldt_edge_set_array_v10 import (
+    CrossBoundEdgeCandidateEncoder,
     EdgeDifferenceCandidateEncoder,
     SetCoupledLoopedStatusModel,
     train_edge_status_model,
@@ -202,6 +203,50 @@ def _scaled_prediction(
         "preference": preference,
         "confidence": probabilities[preference],
         "preference_probabilities": probabilities,
+    }
+
+
+def _apply_fixed_pair_safety_membrane(
+    row: Mapping[str, Any],
+    prediction: Mapping[str, Any],
+) -> dict[str, Any]:
+    left_safe = bool(row["input"]["left"]["safety_qualified"])
+    right_safe = bool(row["input"]["right"]["safety_qualified"])
+    if left_safe == right_safe:
+        return dict(prediction)
+    preference = "LEFT" if left_safe else "RIGHT"
+    swapped_preference = HARD_INVERT_PREFERENCE[preference]
+    probabilities = {
+        label: float(label == preference) for label in HARD_PREFERENCES
+    }
+    return {
+        **prediction,
+        "preference": preference,
+        "rationale_code": "safety_gate",
+        "confidence": 1.0,
+        "preference_probabilities": probabilities,
+        "swapped_preference": swapped_preference,
+        "swap_consistent": True,
+    }
+
+
+def _apply_fixed_array_safety_membrane(
+    row: Mapping[str, Any],
+    prediction: Mapping[str, Any],
+) -> dict[str, Any]:
+    statuses = [str(value) for value in prediction["statuses"]]
+    probabilities = [dict(value) for value in prediction["status_probabilities"]]
+    for index, candidate in enumerate(row["candidates"]):
+        if bool(candidate["features"]["safety_qualified"]):
+            continue
+        statuses[index] = "UNSAFE"
+        probabilities[index] = {
+            label: float(label == "UNSAFE") for label in ARRAY_STATUSES
+        }
+    return {
+        **prediction,
+        "statuses": statuses,
+        "status_probabilities": probabilities,
     }
 
 
@@ -632,6 +677,8 @@ def _reduced_status_predictions(
 def _candidate_encoder(listwise_spec: Mapping[str, Any]) -> Any:
     family = str(listwise_spec.get("family"))
     encoder_name = str(listwise_spec.get("candidate_encoder", ""))
+    if encoder_name == "cross_bound_edge_message":
+        return CrossBoundEdgeCandidateEncoder()
     if encoder_name == "edge_difference_message" or (
         not encoder_name
         and family == "edge_difference_permutation_equivariant_status"
@@ -766,7 +813,11 @@ def train(args: argparse.Namespace) -> int:
             "13.0",
             "14.0",
             "15.0",
+            "16.0",
         }
+        fixed_safety_membrane = (
+            plan.get("preregistration_schema_version") == "16.0"
+        )
         (
             _,
             train_rows,
@@ -1013,8 +1064,9 @@ def train(args: argparse.Namespace) -> int:
                         ),
                     )
                     seed_checkpoints.extend(fold_paths)
-                    fold_predictions = [
-                        predict_model(
+                    fold_predictions = []
+                    for row in fold_validation:
+                        prediction = predict_model(
                             model,
                             fold_encoder,
                             row,
@@ -1023,8 +1075,12 @@ def train(args: argparse.Namespace) -> int:
                             rationale_labels=HARD_RATIONALES,
                             antisymmetric=antisymmetric_inference,
                         )
-                        for row in fold_validation
-                    ]
+                        if fixed_safety_membrane:
+                            prediction = _apply_fixed_pair_safety_membrane(
+                                row,
+                                prediction,
+                            )
+                        fold_predictions.append(prediction)
                     fold_direct_statuses = None
                     status_model = None
                     if listwise_enabled:
@@ -1061,18 +1117,23 @@ def train(args: argparse.Namespace) -> int:
                             checkpoint_callback=status_callback,
                         )
                         seed_checkpoints.extend(status_paths)
-                        fold_direct_statuses = {
-                            str(array_row["array_id"]): (
-                                _predict_direct_statuses(
-                                    status_model,
-                                    candidate_encoder,
-                                    array_row,
-                                )["statuses"]
+                        fold_direct_statuses = {}
+                        for array_row in fold_validation_arrays:
+                            status_prediction = _predict_direct_statuses(
+                                status_model,
+                                candidate_encoder,
+                                array_row,
                             )
-                            for array_row in (
-                                fold_validation_arrays
-                            )
-                        }
+                            if fixed_safety_membrane:
+                                status_prediction = (
+                                    _apply_fixed_array_safety_membrane(
+                                        array_row,
+                                        status_prediction,
+                                    )
+                                )
+                            fold_direct_statuses[
+                                str(array_row["array_id"])
+                            ] = status_prediction["statuses"]
                     cv_reports.append(
                         {
                             **_labeled_metrics(
@@ -1242,6 +1303,11 @@ def train(args: argparse.Namespace) -> int:
                         ),
                         "array_weight_receipt": array_weight_receipt,
                     },
+                    "fixed_safety_membrane": {
+                        "applied": fixed_safety_membrane,
+                        "credited_to_learned_model": False,
+                        "source_feature": "safety_qualified",
+                    },
                     "listwise_objective": {
                         **listwise_spec,
                         "candidate_encoder": (
@@ -1280,6 +1346,13 @@ def train(args: argparse.Namespace) -> int:
                         prediction,
                         temperature=selected_temperature,
                     )
+                    if fixed_safety_membrane:
+                        scaled_prediction = (
+                            _apply_fixed_pair_safety_membrane(
+                                row,
+                                scaled_prediction,
+                            )
+                        )
                     heldout_pair_predictions.append(
                         scaled_prediction
                     )
@@ -1305,16 +1378,23 @@ def train(args: argparse.Namespace) -> int:
                         "deterministic_pair_reducer"
                     )
                 else:
-                    heldout_status_predictions = {
-                        str(array_row["array_id"]): (
-                            _predict_direct_statuses(
-                                final_status_model,
-                                candidate_encoder,
-                                array_row,
-                            )
+                    heldout_status_predictions = {}
+                    for array_row in heldout_arrays:
+                        status_prediction = _predict_direct_statuses(
+                            final_status_model,
+                            candidate_encoder,
+                            array_row,
                         )
-                        for array_row in heldout_arrays
-                    }
+                        if fixed_safety_membrane:
+                            status_prediction = (
+                                _apply_fixed_array_safety_membrane(
+                                    array_row,
+                                    status_prediction,
+                                )
+                            )
+                        heldout_status_predictions[
+                            str(array_row["array_id"])
+                        ] = status_prediction
                     prediction_source = str(
                         listwise_spec.get(
                             "prediction_source",
@@ -1374,6 +1454,11 @@ def train(args: argparse.Namespace) -> int:
                         array_consistency_loss_weight
                     ),
                     "array_weight_receipt": array_weight_receipt,
+                    "fixed_safety_membrane": {
+                        "applied": fixed_safety_membrane,
+                        "credited_to_learned_model": False,
+                        "source_feature": "safety_qualified",
+                    },
                     "listwise_objective": {
                         **listwise_spec,
                         "candidate_encoder": (

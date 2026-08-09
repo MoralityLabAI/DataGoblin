@@ -1,0 +1,382 @@
+schema_version: '16.0'
+experiment_id: datagoblin-ldt-adapter-receipt-sorter-v16
+status: frozen_before_dataset_generation
+training_task_id: ldt-adapter-receipt-sorter-v16-seed-sweep
+
+purpose: >
+  Test whether representative safe adapter-receipt arrays and a target-free
+  directed cross-bound edge encoder repair v15's failure to distinguish
+  SELECTED, DOMINATED, and UNRESOLVED trainable candidates on the downstream
+  four-game architecture-tournament domain.
+claim_scope: >
+  Environment-owned synthetic adapter-receipt evidence only. A passing result
+  may authorize one newly frozen downstream shadow use. It does not authorize
+  corpus promotion, deployment, a universal adapter champion, or real
+  LoRA/HRM checkpoint training.
+skill_fingerprint:
+  schema_version: skill-fingerprint.v1
+  skill_name: curate-game-agent-data
+  skill_sha256: b74de9417f153a47d34d9e94413510f186af1d7ce52e30c9fd8fc813f1dc4e7f
+
+source_evidence:
+  prior_sorter_id: exact-edge-h4-global-v15
+  prior_sorter_sha256: d524e083f4cfc62f2aceada89873227fce9ad601b0bde36999de584c8544a3ad
+  v15_confirmation_spent: true
+  v2_development_arrays_sha256: bd8fd579da7a9aa7aaf95bad2db41013245643ffa6af44f576b8e7d498c454ed
+  v2_development_evaluation_sha256: fd77ffa5ee83c88815eea2cfb577085eb6f704147bfa93f00df20f30dc143641
+  v2_shadow_predictions_sha256: 26c48ccd0b23d2b8cd758fcf740811ded013400803e0d20774cddcc880165c77
+  v2_heldout_evaluation_sha256: 8b611984c3366b8d154901345de0c6348ef6127069779ea878a7e9a54f6e6f41
+  v2_final_audit_sha256: cf736bb5c68cceaf3d83a7f10e6303307ec6254b22b771610cd379b6551c2f52
+  v2_heldout_confirmation_spent: true
+  development_only_diagnosis:
+    candidate_status_count: 48
+    correctly_dominated_control: 12
+    correctly_selected: 8
+    dominated_misclassified_selected: 16
+    unresolved_misclassified_selected: 12
+    exact_status_vectors: 0
+    exact_selected_sets: 0
+  forbidden_design_inputs:
+    - v2_heldout_row_labels
+    - v2_heldout_per_array_targets
+    - v2_heldout_error_identifiers
+
+corrective_hypothesis:
+  evidence_status: prospective_after_v2_negative_promotion_decision
+  v2_records_immutable: true
+  v2_thresholds_unchanged: true
+  post_reveal_v2_tuning_permitted: false
+  data_intervention: representative_safe_seed_interval_receipt_arrays
+  architecture_intervention: directed_cross_bound_edge_message
+  architecture_identity_as_feature: false
+  tolerance_as_feature: false
+  verifier_output_as_feature: false
+  target_or_rationale_as_feature: false
+  fixed_safety_membrane_not_credited_to_learned_model: true
+
+metric_gate:
+  development_spec_sha256: aa76ce31a0f32a518f4b33a6d83c76b577401a9ff8761d18c2694a9ebdaa46c0
+  development_audit_sha256: f1ceba9bfd337d630aa9ee676a83972da076dd0caa32c270e76007ea165874c6
+  heldout_spec_sha256: 21aaec2e05ac352984de5f929d20c458f297e40a77dbfa3eae87c81e9326fb32
+  heldout_audit_sha256: 2ff88579e010953378c160ec10c25e94f5093585e697a1fabb726fec72899087
+  heldout_status: supported_on_declared_holdout
+  accepted_metrics:
+    - exact_status_vector_accuracy
+    - exact_selected_set_accuracy
+
+independent_builder:
+  implementation_id: datagoblin.adapter_receipt_builder.v16
+  role: FIXTURE_BUILDER
+  target_logic_available: false
+  target_files_emitted: false
+
+independent_verifier:
+  implementation_id: datagoblin.shift_verifier.v16
+  role: ENVIRONMENT_OWNED_VERIFIER
+  labels_sealed_before_training: true
+  labels_emitted_only_to_private_custody: true
+
+surface:
+  games: [centauri, they_sing, court, diplomacy]
+  pressures:
+    - receipt_clear_dominance
+    - receipt_seed_interval_overlap
+    - receipt_mixed_frontier
+    - receipt_parameter_equivalence
+    - receipt_cross_neighbor_frontier
+    - receipt_safety_sentinel
+  primary_domain_pressures:
+    - receipt_clear_dominance
+    - receipt_seed_interval_overlap
+    - receipt_mixed_frontier
+    - receipt_parameter_equivalence
+    - receipt_cross_neighbor_frontier
+  safety_sentinel_pressure: receipt_safety_sentinel
+  array_sizes: [4, 5, 6]
+  minimum_array_size_by_pressure:
+    receipt_clear_dominance: 4
+    receipt_seed_interval_overlap: 5
+    receipt_mixed_frontier: 6
+    receipt_parameter_equivalence: 5
+    receipt_cross_neighbor_frontier: 6
+    receipt_safety_sentinel: 4
+  train_seed: 17011
+  heldout_seed: 17317
+  train_lineage_count: 6
+  heldout_lineage_count: 6
+  train_context_prefix: adapter_receipt_sorter_v16_development
+  heldout_context_prefix: adapter_receipt_sorter_v16_confirmation
+  orientation_contract: both_directions_for_every_unordered_pair
+  metric_equivalence_tolerance: 0.01
+  forbidden_prior_lineage_receipt:
+    inherited_v1_v14_count: 104
+    inherited_from_preregistration_sha256: d28c52cca0c1bf4b904ed708b9b0c2df7db11d32ae82109ca809f816f87da905
+  forbidden_prior_lineage_sha256:
+    - 06dfe5b2df1a59afd831d70ead6752395b3692639a22b1581e19243a8ff7f989
+    - 51df3529e5df0cf00e00af8b16c1e6e4d902ccfefc863ba3990217daa1fec234
+    - 82b4ac349aa672500ec8c10e8eb9bac08e4665cedbd9f7a334ff87da38a21761
+    - aa39d9e990d78dd89840a154a773afc05be2f76708e0c1e5b2a4dc655a12b578
+    - b0e8b4dbe4a80cf4247abe95a42e411218933cbc5381f95a38e8596f0886b355
+    - cd0f5d9925527051a987d2dccfbb86be9ca0423b584ce3755dc707e3c87fc02a
+    - 40291740c29f00b463ebe39d2373cf9ba2a9f531e7715fd3137aee117648660d
+    - 8889d3f694cc4796f8d39775e2b4d82f47c5bf6befddc1eea10507cfd97e8bc2
+    - a1016408a58cdcc160d7611b369cac691dde649221a501c1c00d6385d88863b5
+    - cce8f6c8476ecdd98a787bbeb686e73edd013a63928737737a0f6b3021a2f17a
+
+dataset_contract:
+  schema_version: curation-taste-array-confirmation.v3
+  required_train_pairs: 888
+  required_heldout_pairs: 888
+  required_train_arrays: 36
+  required_heldout_arrays: 36
+  required_train_arrays_by_size: {4: 4, 5: 12, 6: 20}
+  required_heldout_arrays_by_size: {4: 4, 5: 12, 6: 20}
+  required_train_reports: 196
+  required_heldout_reports: 196
+  required_train_lineage_groups: 6
+  required_heldout_lineage_groups: 6
+  minimum_lineages_per_critical_class: 6
+  require_array_sizes: [4, 5, 6]
+  require_all_pair_preferences: true
+  require_all_rationale_codes: true
+  require_all_array_statuses: true
+  require_every_cv_training_fold_class_complete: true
+  require_every_cv_validation_fold_class_complete: true
+  require_disjoint_context_categories: true
+  require_report_hash_bindings: true
+  heldout_pair_targets_available_to_candidate: false
+  heldout_array_targets_available_to_candidate: false
+
+architecture_comparison:
+  independent_global_control_id: exact-independent-h4-global-v16
+  same_encoder_control_id: exact-edge-h4-global-v16
+  cross_bound_factorized_id: exact-crossbound-h4-factorized-v16
+  cross_bound_global_primary_id: exact-crossbound-h4-global-v16
+  matched_cross_bound_decoder_axis: [factorized, global_selected_count_map]
+  encoder_axis: [independent_candidate, edge_difference_message, cross_bound_edge_message]
+  primary_claim: >
+    The cross-bound global primary clears every gate and improves both mean
+    exact whole-array metrics by at least 0.05 over the same-data v15 encoder.
+
+transfer_controls:
+  - control_id: retained-v15-checkpoint
+    candidate_id: exact-edge-h4-global-v15
+    seed: 167
+    model_sha256: d524e083f4cfc62f2aceada89873227fce9ad601b0bde36999de584c8544a3ad
+    role: frozen_out_of_domain_transfer_control
+    eligible_for_selection: false
+  - control_id: exact-interval-policy
+    implementation: datagoblin.experiments.ldt_array_confirmation.partial_interval_taste_policy
+    role: environment_policy_ceiling_circularity_diagnostic
+    eligible_for_selection: false
+
+models:
+  controls: []
+  candidates:
+    - model_id: exact-independent-h4-global-v16
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: exact_globally_normalized_array_status
+        enabled: true
+        candidate_encoder: independent_candidate
+        message_steps: 0
+        hidden_width: 4
+        loop_count: 3
+        epochs: 300
+        learning_rate: 0.025
+        prediction_source: exact_likelihood_global_selected_count_map
+        exact_array_likelihood: &exact_global
+          max_candidates: 6
+          loss_family: exact_globally_normalized_status_vector_nll
+          loss_weight: 1.0
+          normalization: exact_selected_subset_marginalization
+          represented_status_vectors: all_four_status_assignments
+          shared_state_gradient: true
+          class_balancing: none_proper_likelihood
+          decoder: global_selected_count_map
+    - model_id: exact-edge-h4-global-v16
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: exact_globally_normalized_array_status
+        enabled: true
+        candidate_encoder: edge_difference_message
+        message_steps: 1
+        edge_statistics: [mean_signed_delta, mean_absolute_delta, min_signed_delta, max_signed_delta]
+        hidden_width: 4
+        loop_count: 3
+        epochs: 300
+        learning_rate: 0.025
+        prediction_source: exact_likelihood_global_selected_count_map
+        exact_array_likelihood: *exact_global
+    - model_id: exact-crossbound-h4-factorized-v16
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: exact_globally_normalized_array_status
+        enabled: true
+        candidate_encoder: cross_bound_edge_message
+        message_steps: 1
+        edge_statistics: [mean, min, max]
+        projection_width: 8
+        projection_seed: 16031
+        hidden_width: 4
+        loop_count: 3
+        epochs: 300
+        learning_rate: 0.025
+        prediction_source: exact_likelihood_factorized_status_argmax
+        exact_array_likelihood:
+          <<: *exact_global
+          decoder: factorized
+    - model_id: exact-crossbound-h4-global-v16
+      family: weight_tied_looped_array
+      feature_view: independent
+      hidden_width: 4
+      loop_count: 2
+      epochs: 300
+      learning_rate: 0.025
+      paired_swap_batches: true
+      antisymmetric_inference: true
+      array_consistency_loss_weight: 0.0
+      listwise_status:
+        family: exact_globally_normalized_array_status
+        enabled: true
+        candidate_encoder: cross_bound_edge_message
+        message_steps: 1
+        edge_statistics: [mean, min, max]
+        projection_width: 8
+        projection_seed: 16031
+        hidden_width: 4
+        loop_count: 3
+        epochs: 300
+        learning_rate: 0.025
+        prediction_source: exact_likelihood_global_selected_count_map
+        exact_array_likelihood: *exact_global
+
+training:
+  seeds: [311, 367, 421]
+  validation: leave_one_mixed_mechanism_lineage_out
+  batch_size: 24
+  checkpoint_interval: {epochs: 100, seconds: 60}
+  listwise_checkpoint_interval_epochs: 100
+  chunk_strategy: >
+    At most 24 ordered pairs with orientations together, then one complete
+    array of at most 6 candidates. Cross-bound edges are materialized for one
+    array only and exact subset enumeration stays bounded at 2^6 assignments.
+  class_balancing: inverse_frequency
+  listwise_class_balancing: objective_specific
+  rationale_loss_weight: 0.5
+  l2: 0.0005
+  gradient_norm_clip: 5.0
+  external_checkpoint: null
+  network_permitted: false
+
+confidence_calibration:
+  fit_split: out_of_fold_development_predictions_only
+  method: frozen_temperature_grid
+  temperatures: [0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+  selection_metric: multiclass_negative_log_likelihood
+  expected_calibration_error_bins: 10
+  maximum_qualified_ece: 0.20
+
+development_selection:
+  timing: after_training_before_confirmation_join
+  source: development_cv_array_metrics_and_oof_pair_calibration_only
+  select_one_seed_per_architecture: true
+  selection_semantics: gate_then_rank_per_architecture
+  retain_rank_only_diagnostic_if_none: true
+  primary_candidate_ids: [exact-crossbound-h4-global-v16]
+  primary_selection_permitted: true
+  required_mean_safety_gate_accuracy: 1.0
+  required_mean_swap_consistency: 1.0
+  minimum_mean_preference_macro_f1: 0.75
+  minimum_mean_abstain_recall: 0.75
+  minimum_mean_status_macro_f1: 0.80
+  minimum_mean_exact_array_accuracy: 0.65
+  minimum_mean_selected_set_exact_accuracy: 0.75
+  minimum_worst_fold_selected_set_exact_accuracy: 0.50
+  minimum_worst_fold_exact_array_accuracy: 0.50
+  maximum_oof_expected_calibration_error: 0.20
+  comparative_primary_gates:
+    baseline_candidate_id: exact-edge-h4-global-v16
+    minimum_mean_exact_array_accuracy_delta: 0.05
+    minimum_mean_selected_set_exact_accuracy_delta: 0.05
+    minimum_worst_fold_exact_array_accuracy_delta: 0.0
+    minimum_worst_fold_selected_set_exact_accuracy_delta: 0.0
+  ranking:
+    - maximize_worst_fold_selected_set_exact_accuracy
+    - maximize_worst_fold_exact_array_accuracy
+    - maximize_worst_fold_status_macro_f1
+    - maximize_worst_fold_preference_macro_f1
+    - maximize_mean_selected_set_exact_accuracy
+    - maximize_mean_exact_array_accuracy
+    - maximize_mean_status_macro_f1
+    - maximize_mean_preference_macro_f1
+    - minimize_oof_negative_log_likelihood
+    - minimize_trainable_parameters
+    - minimize_seed
+  no_qualified_primary_result: null
+  confirmation_join_requires_qualified_primary: true
+
+hard_caps:
+  wrapper: scripts/run_training_gym_capped_wsl.sh
+  ram_mb: 2048
+  cpu_percent: 50
+  io_mb_per_second: 50
+  wall_clock_seconds: 900
+  swap_bytes: 0
+  fallback_if_unavailable: abort_without_training
+
+heldout_evaluation:
+  reveal_count: 1
+  no_post_reveal_tuning: true
+  retained_candidate_id: null
+  primary_only_confirmation_packet: true
+  require_all_array_sizes: [4, 5, 6]
+  require_primary_domain_pressures: true
+  require_safety_sentinel_pressure: true
+  minimum_safety_gate_accuracy: 1.0
+  minimum_swap_consistency: 1.0
+  minimum_preference_macro_f1: 0.75
+  minimum_abstain_recall: 0.75
+  minimum_status_macro_f1: 0.80
+  minimum_exact_status_vector_accuracy: 0.65
+  minimum_selected_set_exact_accuracy: 0.75
+  minimum_primary_domain_exact_status_vector_accuracy: 0.65
+  minimum_primary_domain_selected_set_exact_accuracy: 0.75
+  report_by_game: true
+  report_by_pressure: true
+  report_support_counts: true
+  use_direct_listwise_array_predictions: true
+  universal_scalar_champion_permitted: false
+  confirmation_condition: qualified_development_primary_only
+
+promotion_boundary:
+  sorter_authority: MODEL_RECOMMENDATION_ONLY
+  checkpoint_promotion_authorized: false
+  corpus_promotion_authorized: false
+  real_adapter_training_authorized: false
+  downstream_shadow_preregistration_authorized_only_if_confirmed: true
+  universal_architecture_claim_permitted: false

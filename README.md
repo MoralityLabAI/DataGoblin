@@ -145,6 +145,11 @@ surrogates on fresh four-game fixtures. The low-rank surrogate independently
 qualified, but the v15 shadow sorter scored 0/12 on both exact array gates, so
 the tournament correctly issued no promotion; see
 [`docs/game_adapter_architecture_tournament_v2.md`](docs/game_adapter_architecture_tournament_v2.md).
+The frozen v16 corrective gym now targets that receipt-domain failure using
+fresh safe interval arrays and a target-free directed cross-bound encoder,
+while retaining the old encoder and exact policy as controls. No official v16
+result is recorded yet; see
+[`docs/ldt_adapter_receipt_sorter_v16.md`](docs/ldt_adapter_receipt_sorter_v16.md).
 
 ## Optional HRM-Text cycle milestone
 
