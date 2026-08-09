@@ -37,6 +37,10 @@ from datagoblin.experiments.ldt_array_sorter import (
     sha256_json,
     train_array_model,
 )
+from datagoblin.experiments.ldt_cardinality_decoder_v11 import (
+    CardinalityLoopedStatusModel,
+    predict_cardinality_statuses,
+)
 from datagoblin.experiments.ldt_edge_set_array_v10 import (
     EdgeDifferenceCandidateEncoder,
     SetCoupledLoopedStatusModel,
@@ -623,6 +627,7 @@ def _candidate_encoder(listwise_spec: Mapping[str, Any]) -> Any:
         return EdgeDifferenceCandidateEncoder()
     if family in {
         "deterministic_pair_reducer",
+        "looped_cardinality_permutation_equivariant_status",
         "looped_permutation_equivariant_status",
     }:
         return IndependentCandidateEncoder()
@@ -644,6 +649,14 @@ def _make_status_model(
     }
     if family == "looped_permutation_equivariant_status":
         return LoopedSetStatusModel(**common)
+    if family == "looped_cardinality_permutation_equivariant_status":
+        cardinality = dict(listwise_spec["selected_cardinality"])
+        return CardinalityLoopedStatusModel(
+            **common,
+            max_candidates=int(cardinality["max_candidates"]),
+            cardinality_loss_weight=float(cardinality["loss_weight"]),
+            decoder=str(cardinality["decoder"]),
+        )
     if family == "edge_difference_permutation_equivariant_status":
         set_loss = dict(listwise_spec["set_coupled_loss"])
         return SetCoupledLoopedStatusModel(
@@ -680,6 +693,16 @@ def _train_direct_status_model(
     return train_status_model(model, encoder, arrays, **common)
 
 
+def _predict_direct_statuses(
+    model: Any,
+    encoder: Any,
+    row: Mapping[str, Any],
+) -> dict[str, Any]:
+    if isinstance(model, CardinalityLoopedStatusModel):
+        return predict_cardinality_statuses(model, encoder, row)
+    return predict_array_statuses(model, encoder, row)
+
+
 def train(args: argparse.Namespace) -> int:
     out_dir = args.out.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -702,6 +725,7 @@ def train(args: argparse.Namespace) -> int:
         is_v9 = plan.get("preregistration_schema_version") in {
             "9.0",
             "10.0",
+            "11.0",
         }
         (
             _,
@@ -999,7 +1023,7 @@ def train(args: argparse.Namespace) -> int:
                         seed_checkpoints.extend(status_paths)
                         fold_direct_statuses = {
                             str(array_row["array_id"]): (
-                                predict_array_statuses(
+                                _predict_direct_statuses(
                                     status_model,
                                     candidate_encoder,
                                     array_row,
@@ -1243,7 +1267,7 @@ def train(args: argparse.Namespace) -> int:
                 else:
                     heldout_status_predictions = {
                         str(array_row["array_id"]): (
-                            predict_array_statuses(
+                            _predict_direct_statuses(
                                 final_status_model,
                                 candidate_encoder,
                                 array_row,
@@ -1251,8 +1275,11 @@ def train(args: argparse.Namespace) -> int:
                         )
                         for array_row in heldout_arrays
                     }
-                    prediction_source = (
-                        "direct_listwise_status_head"
+                    prediction_source = str(
+                        listwise_spec.get(
+                            "prediction_source",
+                            "direct_listwise_status_head",
+                        )
                     )
                 for array_row in heldout_arrays:
                     if is_v9:

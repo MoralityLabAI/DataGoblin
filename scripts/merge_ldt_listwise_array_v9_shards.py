@@ -45,7 +45,7 @@ def merge(
     preregistration = load_structured(preregistration_path)
     schema_version = str(preregistration["schema_version"])
     if (
-        schema_version not in {"9.0", "10.0"}
+        schema_version not in {"9.0", "10.0", "11.0"}
         or preregistration["status"]
         != "frozen_before_dataset_generation"
     ):

@@ -59,7 +59,7 @@ def prepare(
         raise ValueError("confirmation feature whitelist differs")
     feature_independence_audit: dict[str, object] | None = None
     schema_version = str(preregistration.get("schema_version"))
-    if schema_version in {"7.0", "8.0", "9.0", "10.0"}:
+    if schema_version in {"7.0", "8.0", "9.0", "10.0", "11.0"}:
         feature_views = {
             str(model["feature_view"])
             for model in preregistration["models"]["candidates"]
@@ -90,7 +90,7 @@ def prepare(
             "typed_or_lattice_views_present": False,
             "audit_split": "development_only",
         }
-        if schema_version in {"8.0", "9.0", "10.0"}:
+        if schema_version in {"8.0", "9.0", "10.0", "11.0"}:
             support = manifest.get("development_support_audit")
             if not support or not all(
                 int(count) >= int(
@@ -298,6 +298,119 @@ def prepare(
                     ),
                 },
                 "set_coupled_ablation_matched": True,
+                "metric_gate": metric_gate,
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+            }
+        if schema_version == "11.0":
+            models = preregistration["models"]["candidates"]
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in models
+            ]
+            reducers = [row for row in listwise if not bool(row["enabled"])]
+            recurrent = [
+                row
+                for row in listwise
+                if row["family"]
+                == "looped_permutation_equivariant_status"
+            ]
+            cardinality = [
+                row
+                for row in listwise
+                if row["family"]
+                == "looped_cardinality_permutation_equivariant_status"
+            ]
+            enabled = recurrent + cardinality
+            if (
+                len(reducers) != 1
+                or reducers[0]["family"] != "deterministic_pair_reducer"
+                or len(recurrent) != 1
+                or len(cardinality) != 2
+                or any(
+                    not bool(row["enabled"])
+                    or row["candidate_encoder"] != "independent_candidate"
+                    or int(row["message_steps"]) != 0
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0 < float(row["learning_rate"]) <= 0.1
+                    for row in enabled
+                )
+            ):
+                raise ValueError(
+                    "v11 cardinality architecture matrix is incomplete"
+                )
+            cardinality_specs = [
+                dict(row["selected_cardinality"])
+                for row in cardinality
+            ]
+            comparable_fields = (
+                "family",
+                "candidate_encoder",
+                "message_steps",
+                "hidden_width",
+                "loop_count",
+                "epochs",
+                "learning_rate",
+            )
+            decoders = {
+                str(spec["decoder"])
+                for spec in cardinality_specs
+            }
+            if (
+                any(
+                    cardinality[0][field] != cardinality[1][field]
+                    for field in comparable_fields
+                )
+                or decoders != {"factorized", "joint_selected_count_map"}
+                or any(
+                    int(spec["max_candidates"]) != 6
+                    or spec["loss_family"]
+                    != "categorical_selected_count_cross_entropy"
+                    or not 0.0 < float(spec["loss_weight"]) <= 2.0
+                    or bool(spec["shared_state_gradient"])
+                    for spec in cardinality_specs
+                )
+                or any(
+                    cardinality_specs[0][field]
+                    != cardinality_specs[1][field]
+                    for field in (
+                        "max_candidates",
+                        "loss_family",
+                        "loss_weight",
+                        "shared_state_gradient",
+                    )
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"]) != 0.0
+                    or not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    for model in models
+                )
+            ):
+                raise ValueError("v11 decoder ablation is not matched")
+            metric_gate = preregistration.get("metric_gate", {})
+            if (
+                metric_gate.get("heldout_status")
+                != "supported_on_declared_holdout"
+                or set(metric_gate.get("accepted_metrics", ()))
+                != {
+                    "exact_status_vector_accuracy",
+                    "exact_selected_set_accuracy",
+                }
+            ):
+                raise ValueError("v11 metric robustness gate is incomplete")
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoder": (
+                    IndependentCandidateEncoder().receipt()
+                ),
+                "cardinality_decoder_ablation_matched": True,
+                "cardinality_shared_state_gradient": False,
                 "metric_gate": metric_gate,
                 "direct_array_targets": "development_only",
                 "heldout_array_targets_available": False,
