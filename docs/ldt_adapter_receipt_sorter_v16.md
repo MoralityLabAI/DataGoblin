@@ -54,8 +54,11 @@ tournament reports. Each lineage includes:
 
 Sizes four, five, and six are all supported. The disposable generation smoke
 confirmed every preference, rationale, and array status in all six development
-lineages, while heldout row and class counts remain undisclosed. The smoke is
-discovery-only and cannot be merged into an official run.
+lineages, while heldout row and class counts remained undisclosed. Because the
+first official generation reproduced that deterministic smoke byte-for-byte,
+the run stopped before training and all 12 smoke lineages were added to the
+firewall. Official evidence must use the superseding seeds 19001 and 19333.
+The smoke is discovery-only and cannot be merged into an official run.
 
 ## Frozen gates
 
@@ -67,6 +70,11 @@ It must additionally improve both mean exact metrics by at least 0.05 over the
 same-data v15 encoder and be no worse on either worst-fold exact metric.
 
 Only one qualified cross-bound global seed may enter the confirmation packet.
+Before any label path is supplied to an evaluator,
+`audit_ldt_adapter_receipt_sorter_v16_packet.py` independently reproduces the
+development selection, checks all 12 resource and cleanup receipts, verifies
+public split and prediction hashes, and either authorizes one join or records a
+clean development stop. Its command-line interface accepts no label path.
 The single heldout join repeats the overall exact gates and separately applies
 them to the five all-safe primary-domain pressures. A pass authorizes only a
 newly frozen downstream shadow preregistration.
@@ -80,10 +88,10 @@ claim is exhausted by exact environment targets and deterministic checks.
 
 Frozen hashes before official generation:
 
-- preregistration: `75b7d656086fb58c42da5705716071be5e05964f9f78c427b7adc303bbe930f2`;
-- evaluation-review manifest: `bd00711a6b220b3c0cf22164ecb089eab31c2603b910a185bc3913b508fb19d4`;
+- preregistration: `751759b316899a3e8e9d6e5a31a4e392599d8930eae8b555c0a2ea8e02f45fcc`;
+- evaluation-review manifest: `93212b15cfb3d94df5e76b36691d870edeecd1eb573e32d80aaa9db6e148fc8c`;
 - deterministic-development policy: `08a055fd70159e142140acbd2c7a62081d1968cb8489352fce9d4144ea6f0a01`;
-- external preflight report: `63984354dc50af3afa58a9a924731b8a78b3a5ae11af68c1604271d9523cd027`.
+- external preflight report: `db74eded7f33f828821a7f0c51595df66dfd6afcf71081b2bb98b0164c96a6b3`.
 
 One disposable cross-bound seed completed inside the hard-cap wrapper with
 42 checkpoints, 83.49 MB peak RAM, 45.40% sampled CPU, and 11.59 MB/s peak I/O.

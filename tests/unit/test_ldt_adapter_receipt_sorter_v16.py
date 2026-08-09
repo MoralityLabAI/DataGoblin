@@ -51,6 +51,43 @@ def _receipt(
     }
 
 
+def _qualified_receipt(
+    candidate_id: str,
+    *,
+    seed: int,
+    exact: float,
+    selected: float,
+    worst_exact: float,
+    worst_selected: float,
+) -> dict[str, Any]:
+    fold = {
+        "safety_gate_accuracy": 1.0,
+        "swap_consistency": 1.0,
+        "preference_macro_f1": 0.90,
+        "abstain_recall": 1.0,
+        "status_macro_f1": 0.90,
+        "exact_array_accuracy": worst_exact,
+        "selected_set_exact_accuracy": worst_selected,
+    }
+    return {
+        "candidate_id": candidate_id,
+        "seed": seed,
+        "trainable_parameters": 100,
+        "cv_mean_metrics": {
+            **fold,
+            "exact_array_accuracy": exact,
+            "selected_set_exact_accuracy": selected,
+        },
+        "cv_fold_metrics": [fold],
+        "calibration": {
+            "selected_metrics": {
+                "expected_calibration_error": 0.05,
+                "multiclass_negative_log_likelihood": 0.20,
+            }
+        },
+    }
+
+
 def test_v16_contract_is_fresh_receipt_domain_and_comparative() -> None:
     config = load_structured(PREREGISTRATION)
     comparison = config["architecture_comparison"]
@@ -63,7 +100,7 @@ def test_v16_contract_is_fresh_receipt_domain_and_comparative() -> None:
         "v2_heldout_per_array_targets",
         "v2_heldout_error_identifiers",
     ]
-    assert len(config["surface"]["forbidden_prior_lineage_sha256"]) == 10
+    assert len(config["surface"]["forbidden_prior_lineage_sha256"]) == 22
     assert config["training"]["seeds"] == [311, 367, 421]
     assert config["dataset_contract"]["required_train_arrays"] == 36
     assert comparison["cross_bound_global_primary_id"] == (
@@ -153,7 +190,7 @@ def test_v16_generation_and_plan_bind_support_and_custody(
     }
     assert manifest["lineage_audit"] == {
         "cross_split_groups": 0,
-        "forbidden_prior_groups": 10,
+        "forbidden_prior_groups": 22,
         "heldout_groups": 6,
         "prior_overlap": 0,
         "train_groups": 6,
@@ -297,3 +334,61 @@ def test_v16_comparative_gate_requires_mean_and_worst_improvement() -> None:
         gates,
     )
     assert not checks["mean_exact_array_accuracy_delta"]
+
+
+def test_v16_packet_auditor_interface_cannot_accept_labels() -> None:
+    auditor = runpy.run_path(
+        str(
+            ROOT
+            / "scripts/audit_ldt_adapter_receipt_sorter_v16_packet.py"
+        )
+    )
+    parser = auditor["build_parser"]()
+    assert "--pair-labels" not in parser.format_help()
+    assert "--array-labels" not in parser.format_help()
+    assert auditor["_target_free"](
+        {"prediction": "SELECTED", "rationale_code": "safety_gate"}
+    )
+    assert not auditor["_target_free"](
+        {"prediction": "SELECTED", "target": "DOMINATED"}
+    )
+
+
+def test_v16_packet_auditor_reproduces_comparative_stop() -> None:
+    auditor = runpy.run_path(
+        str(
+            ROOT
+            / "scripts/audit_ldt_adapter_receipt_sorter_v16_packet.py"
+        )
+    )
+    config = load_structured(PREREGISTRATION)
+    receipts = []
+    for candidate_id in (
+        "exact-independent-h4-global-v16",
+        "exact-edge-h4-global-v16",
+        "exact-crossbound-h4-factorized-v16",
+        "exact-crossbound-h4-global-v16",
+    ):
+        for seed in (311, 367, 421):
+            receipts.append(
+                _qualified_receipt(
+                    candidate_id,
+                    exact=0.80,
+                    selected=0.85,
+                    worst_exact=0.60,
+                    worst_selected=0.60,
+                    seed=seed,
+                )
+            )
+    reproduced = auditor["_reproduce_selection"](
+        config,
+        {"candidate_receipts": receipts},
+    )
+    assert not reproduced["authorized"]
+    assert reproduced["primary_id"] is None
+    assert not reproduced["comparative_checks"][
+        "mean_exact_array_accuracy_delta"
+    ]
+    assert not reproduced["comparative_checks"][
+        "mean_selected_set_exact_accuracy_delta"
+    ]

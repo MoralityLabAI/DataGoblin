@@ -28,6 +28,13 @@ source_evidence:
   v2_heldout_evaluation_sha256: 8b611984c3366b8d154901345de0c6348ef6127069779ea878a7e9a54f6e6f41
   v2_final_audit_sha256: cf736bb5c68cceaf3d83a7f10e6303307ec6254b22b771610cd379b6551c2f52
   v2_heldout_confirmation_spent: true
+  disposable_smoke_burned:
+    dataset_manifest_sha256: 6883b90823164b71e3eeaf35f4942c88184558353f6fb1ef2f4889e3e51ff311
+    generation_report_sha256: ca0e33e433cd0352254c2c8dfa524399a4d0c17ad66e35289dbc756760ec479d
+    corrected_smoke_run_receipt_sha256: f6701a8f5bd34af7ef7c1b3f406ef453b92d630ec6bef4b81374f650fd833aa8
+    official_attempt_stopped_before_training: true
+    heldout_labels_opened: false
+    reason: disposable_smoke_and_first_official_generation_were_byte_identical
   development_only_diagnosis:
     candidate_status_count: 48
     correctly_dominated_control: 12
@@ -100,8 +107,8 @@ surface:
     receipt_parameter_equivalence: 5
     receipt_cross_neighbor_frontier: 6
     receipt_safety_sentinel: 4
-  train_seed: 17011
-  heldout_seed: 17317
+  train_seed: 19001
+  heldout_seed: 19333
   train_lineage_count: 6
   heldout_lineage_count: 6
   train_context_prefix: adapter_receipt_sorter_v16_development
@@ -122,6 +129,18 @@ surface:
     - 8889d3f694cc4796f8d39775e2b4d82f47c5bf6befddc1eea10507cfd97e8bc2
     - a1016408a58cdcc160d7611b369cac691dde649221a501c1c00d6385d88863b5
     - cce8f6c8476ecdd98a787bbeb686e73edd013a63928737737a0f6b3021a2f17a
+    - 67f7f71465c9a796ac96b74c60d01b8a42f28c698359c0a757fdfa6834c0f6dd
+    - 80609c08ef943b58fd2c6bcdc8eef5a19eb85032c00560f2a598e5ef1ddc871e
+    - a930391e53c2a30ff1535de1fd16b9b377dcd7cb017b8cca9ed499bacd202776
+    - d5432877f95ef7b214476a6f4744bd8277b1e5fc781b3e2a429177b4c4089058
+    - ec781ae042fc697da341ebbdfefaebe974f62d49498da999b92c38680a680496
+    - f45029398ead0f3f83751a4d563f006bc6d3b153fb6460b59ebd57dfd30f6e44
+    - 0a51f9bd1befc0a8ce05d77fa664c5911fc7ecdb36818520a6f8e581bab8e12e
+    - 0f0e5c8f4217a18abef1126f5aa083e0969e683b25fabb7f1e43584b1f8cac20
+    - 15e05d9c6f59dfa69462433c2a7735a528b29151c13bbdeea956e25039f44094
+    - 87308be88256352df3cf20971b9dff7d9bcfaf7d2f495308af036d1fc95d701e
+    - 9e6d2352e84a14af00e732bfbcc62173e6784c4373c1e4836cfebdeb75c7f50c
+    - d746b1a8564cee03e5d91f9f567441ad9e3a6dd4ea15cb98ffc0b8ca47705c01
 
 dataset_contract:
   schema_version: curation-taste-array-confirmation.v3

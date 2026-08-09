@@ -35,9 +35,9 @@ dataset:
   selection: >
     Six development and six sealed confirmation lineages each mix six
     preregistered receipt mechanisms and sizes four through six. The firewall
-    binds all ten v15 lineages plus the transitive v1-v14 receipt, uses new
-    seeds, keeps architecture identity out of features, and seals targets
-    before any official capped run.
+    binds all ten v15 lineages, all 12 burned smoke lineages, and the transitive
+    v1-v14 receipt; uses new seeds; keeps architecture identity out of features;
+    and seals targets before any official capped run.
 
 scoring:
   deterministic:
@@ -62,6 +62,7 @@ scoring:
     - lineage_contamination_zero
     - gate_first_selection_reproduced
     - primary_only_confirmation_packet
+    - label_blind_prejoin_packet_audit
     - confirmation_targets_unseen
     - hard_caps_enforced
     - cleanup_passed
@@ -128,4 +129,5 @@ provenance:
   contamination_preflight_manifest_sha256: pending_official_generation
   source_v2_development_evaluation_sha256: fd77ffa5ee83c88815eea2cfb577085eb6f704147bfa93f00df20f30dc143641
   source_v2_final_audit_sha256: cf736bb5c68cceaf3d83a7f10e6303307ec6254b22b771610cd379b6551c2f52
+  burned_smoke_dataset_manifest_sha256: 6883b90823164b71e3eeaf35f4942c88184558353f6fb1ef2f4889e3e51ff311
   metric_robustness_receipt: 2ff88579e010953378c160ec10c25e94f5093585e697a1fabb726fec72899087
