@@ -1,0 +1,108 @@
+schema_version: "1.0"
+review_id: datagoblin-ldt-set-metric-robustness-v10-holdout
+eval_id: datagoblin-ldt-array-v10
+construct: candidate-ID-aligned exact recovery of an array status vector and its derived selected set
+robustness_claim: >
+  The unchanged exact status-vector and exact selected-set metrics remain
+  invariant, sensitive, monotonic, attack-resistant, and quiet on clean
+  controls when evaluated once on an environment-owned sequestered probe pack
+  whose concrete assignments and generation seed were unavailable to the
+  metric author when the implementation was frozen.
+evidence_scope: held_out
+independent_unit: probe_family_id
+metrics:
+  - id: exact_status_vector_accuracy
+    description: >
+      Per-array binary equality of every candidate-ID-aligned predicted status
+      with the oracle status; arrays, not candidates, are the aggregation unit.
+  - id: exact_selected_set_accuracy
+    description: >
+      Per-array binary equality of the candidate IDs whose aligned statuses are
+      SELECTED; the selected set is derived from the status assignment.
+thresholds:
+  min_independent_families_per_type: 2
+  min_invariance_pass_rate: 1.0
+  min_sensitivity_pass_rate: 1.0
+  max_attack_escape_rate: 0.0
+  max_false_positive_rate: 0.0
+  max_monotonicity_violation_rate: 0.0
+hook_policy:
+  require_matched_control: true
+probes:
+  - probe_id: v10-holdout-invariance-cycle-01
+    probe_family_id: seeded-cyclic-order
+    probe_type: invariance
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: stable
+    tolerance: 0.0
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-cyclic-order
+  - probe_id: v10-holdout-invariance-remap-01
+    probe_family_id: seeded-bijective-id-remap
+    probe_type: invariance
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: stable
+    tolerance: 0.0
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-bijective-id-remap
+  - probe_id: v10-holdout-sensitivity-unsafe-01
+    probe_family_id: seeded-selected-to-unsafe
+    probe_type: sensitivity
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 1.0
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-selected-to-unsafe
+  - probe_id: v10-holdout-sensitivity-unresolved-01
+    probe_family_id: seeded-unresolved-to-selected
+    probe_type: sensitivity
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 1.0
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-unresolved-to-selected
+  - probe_id: v10-holdout-monotonicity-mixed-01
+    probe_family_id: seeded-compounded-mixed-membership
+    probe_type: monotonicity
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 0.0
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-compounded-mixed-membership
+  - probe_id: v10-holdout-monotonicity-swap-01
+    probe_family_id: seeded-expanded-selection-swap
+    probe_type: monotonicity
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: decrease
+    required_delta: 0.0
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-expanded-selection-swap
+  - probe_id: v10-holdout-anti-gaming-decoy-01
+    probe_family_id: seeded-high-cardinality-decoy
+    probe_type: anti_gaming
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: detect_violation
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-high-cardinality-decoy
+  - probe_id: v10-holdout-anti-gaming-inventory-01
+    probe_family_id: seeded-inventory-substitution
+    probe_type: anti_gaming
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: detect_violation
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-inventory-substitution
+  - probe_id: v10-holdout-clean-shuffle-01
+    probe_family_id: seeded-exact-shuffle-control
+    probe_type: clean_control
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: no_violation
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-exact-shuffle-control
+  - probe_id: v10-holdout-clean-remap-01
+    probe_family_id: seeded-exact-remap-control
+    probe_type: clean_control
+    split: held_out
+    metric_ids: [exact_status_vector_accuracy, exact_selected_set_accuracy]
+    expected_behavior: no_violation
+    source_ref: custody://datagoblin-v10-metric-holdout/seeded-exact-remap-control
+mechanistic_hooks: []
