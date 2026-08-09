@@ -80,6 +80,15 @@ def _qualified(
                 "minimum_worst_fold_selected_set_exact_accuracy"
             ]
         )
+        and min(
+            float(fold["exact_array_accuracy"]) for fold in folds
+        )
+        >= float(
+            contract.get(
+                "minimum_worst_fold_exact_array_accuracy",
+                float("-inf"),
+            )
+        )
         and float(calibration["expected_calibration_error"])
         <= float(contract["maximum_oof_expected_calibration_error"])
     )
@@ -163,7 +172,15 @@ def select(
     schema_version = str(preregistration["schema_version"])
     if (
         schema_version
-        not in {"9.0", "10.0", "11.0", "12.0", "13.0", "14.0"}
+        not in {
+            "9.0",
+            "10.0",
+            "11.0",
+            "12.0",
+            "13.0",
+            "14.0",
+            "15.0",
+        }
         or preregistration["status"]
         != "frozen_before_dataset_generation"
     ):
@@ -218,13 +235,13 @@ def select(
         )
 
     contract = preregistration["development_selection"]
-    gate_first = schema_version == "14.0"
+    gate_first = schema_version in {"14.0", "15.0"}
     if gate_first and (
         contract.get("selection_semantics")
         != "gate_then_rank_per_architecture"
         or not bool(contract.get("retain_rank_only_diagnostic_if_none"))
     ):
-        raise ValueError("v14 gate-first selection contract is incomplete")
+        raise ValueError("gate-first selection contract is incomplete")
     selected_receipts = []
     candidate_selection = {}
     for candidate_id, receipts in sorted(by_candidate.items()):

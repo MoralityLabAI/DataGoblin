@@ -1,0 +1,121 @@
+version: '1.0'
+eval_id: datagoblin-ldt-edge-exact-correction-v15-development-review
+claim: >
+  On fresh development lineages, edge-difference candidate messages improve
+  exact whole-array recovery over the independent exact-global control, and
+  the edge-conditioned global decoder has at least one seed that clears every
+  frozen gate without consuming sealed confirmation labels.
+mode: pairwise
+adapter: generic
+
+candidates:
+  - id: exact-independent-h4-global-v15
+    model: local-content-free-ldt
+    model_family: exact-selected-count-independent-array
+    blinded_label: candidate-a
+  - id: exact-edge-h4-factorized-v15
+    model: local-content-free-ldt
+    model_family: exact-selected-count-edge-array
+    blinded_label: candidate-b
+  - id: exact-edge-h4-global-v15
+    model: local-content-free-ldt
+    model_family: exact-selected-count-edge-array
+    blinded_label: candidate-c
+
+dataset:
+  path: external-public-fixture/train_arrays.jsonl
+  size: 24
+  unit: tournament-array
+  held_out: false
+  contamination_check: completed
+  selection: >
+    A deterministic contract preflight must find zero overlap with all 104
+    forbidden v1-v14 lineage hashes and zero development/confirmation overlap.
+    Six development lineages, four sealed confirmation lineages, three unused
+    training seeds, gate-first selection, frozen size strata, and both exact
+    gates are fixed before official generation.
+
+scoring:
+  deterministic:
+    - output_schema_valid
+    - task_completion
+    - exact_status_vector_accuracy
+    - exact_selected_set_accuracy
+    - worst_lineage_exact_status_vector_accuracy
+    - worst_lineage_selected_set_exact_accuracy
+    - status_macro_f1
+    - preference_macro_f1
+    - abstain_recall
+    - safety_gate_accuracy
+    - swap_consistency
+    - expected_calibration_error
+    - array_size_support_frozen
+    - lineage_contamination_zero
+    - edge_encoder_ablation_matched
+    - edge_decoder_ablation_matched
+    - gate_first_selection_reproduced
+    - primary_only_confirmation_packet
+    - confirmation_targets_unseen
+    - hard_caps_enforced
+    - cleanup_passed
+  subjective_dimensions: []
+  subjective_omission: >
+    No LLM judge is used. Correctness and completeness are exhausted by exact
+    environment-owned targets and deterministic schema, architecture, custody,
+    resource, selection, and metric checks; style judgments are outside this
+    claim.
+  llm_judges: []
+
+pairwise:
+  blind_identity: true
+  swap_positions: false
+  randomize_order: false
+  random_seed: 15167
+  allow_tie: true
+  allow_uncertain: true
+
+escalation:
+  deterministic_conflict: block
+  missing_candidate_seed_cell: block
+  missing_lineage_fold: block
+  size_support_mismatch: block
+  rank_only_diagnostic_selected: preserve_confirmation
+  post_freeze_threshold_change: reject
+
+decision_rule:
+  primary_candidate: exact-edge-h4-global-v15
+  baseline_candidate: exact-independent-h4-global-v15
+  matched_decoder_candidate: exact-edge-h4-factorized-v15
+  minimum_win_rate: 0.5
+  confidence: 0.95
+  reliability:
+    cross_judge_required: false
+    max_hard_fail_selection_rate: 0.0
+    min_deterministic_coverage: 1.0
+  deterministic_primary_gates:
+    selection_semantics: gate_then_rank_per_architecture
+    required_mean_safety_gate_accuracy: 1.0
+    required_mean_swap_consistency: 1.0
+    minimum_mean_preference_macro_f1: 0.75
+    minimum_mean_abstain_recall: 0.75
+    minimum_mean_status_macro_f1: 0.80
+    minimum_mean_exact_status_vector_accuracy: 0.65
+    minimum_mean_exact_selected_set_accuracy: 0.75
+    minimum_worst_fold_exact_status_vector_accuracy: 0.50
+    minimum_worst_fold_selected_set_exact_accuracy: 0.50
+    maximum_oof_expected_calibration_error: 0.20
+    confirmation_join_requires_qualified_primary: true
+    confirmation_packet_candidate_count: 1
+  pairwise_win_rate_is_diagnostic_only: true
+
+data_contract:
+  judgments: not-applicable-no-subjective-judge.jsonl
+  deterministic: v15-deterministic-review.jsonl
+
+provenance:
+  manifest_frozen_at: '2026-08-09T00:00:00-04:00'
+  code_revision: git-commit-containing-this-manifest
+  evidence_mode: development
+  contamination_preflight_manifest_sha256: 5ef4f03ce8c220b97c74fcb77be80b92ab3a8865687bd4aa6032752db0f0d3cc
+  source_v14_evidence_audit_sha256: d475fdcceef848094fb4944d7181ca4345923f756f61efac0ba786d4e2882883
+  metric_robustness_receipt: 2ff88579e010953378c160ec10c25e94f5093585e697a1fabb726fec72899087

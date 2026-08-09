@@ -1060,7 +1060,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     ):
         raise ValueError("confirmation trainer is incomplete or contaminated")
     if (
-        schema_version in {"8.0", "9.0", "14.0"}
+        schema_version in {"8.0", "9.0", "14.0", "15.0"}
         and not trainer.get("development_selection", {}).get(
             "confirmation_join_authorized",
             False,
@@ -1089,7 +1089,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         tuple[str, int],
         list[Mapping[str, Any]],
     ] = {}
-    direct_array_schema = schema_version in {"9.0", "14.0"}
+    direct_array_schema = schema_version in {"9.0", "14.0", "15.0"}
     if direct_array_schema:
         if args.array_predictions is None:
             raise ValueError(
@@ -1123,7 +1123,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError(
             "confirmation receipts and array predictions differ"
         )
-    if schema_version == "14.0":
+    if schema_version in {"14.0", "15.0"}:
         development = trainer["development_selection"]
         retained_key = (
             str(development["primary_candidate_id"]),
@@ -1245,7 +1245,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "seed": seed,
             **scored,
         }
-        if schema_version in {"7.0", "8.0", "9.0", "14.0"}:
+        if schema_version in {"7.0", "8.0", "9.0", "14.0", "15.0"}:
             run_reports[key]["slices"] = {
                 "by_game": _slice_reports(
                     rows,
@@ -1385,7 +1385,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     )
     target_independent_boundary = preregistration.get(
         "schema_version"
-    ) in {"7.0", "8.0", "9.0", "14.0"}
+    ) in {"7.0", "8.0", "9.0", "14.0", "15.0"}
     report = {
         "schema_version": "ldt-array-confirmation-heldout-evaluation.v3",
         "experiment_id": trainer["experiment_id"],

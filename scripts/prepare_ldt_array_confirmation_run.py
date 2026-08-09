@@ -68,6 +68,7 @@ def prepare(
         "12.0",
         "13.0",
         "14.0",
+        "15.0",
     }:
         feature_views = {
             str(model["feature_view"])
@@ -107,6 +108,7 @@ def prepare(
             "12.0",
             "13.0",
             "14.0",
+            "15.0",
         }:
             support = manifest.get("development_support_audit")
             if not support or not all(
@@ -636,6 +638,208 @@ def prepare(
                         heldout["minimum_status_macro_f1"]
                     ),
                 }
+        if schema_version == "15.0":
+            models = preregistration["models"]["candidates"]
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in models
+            ]
+            by_id = {row["candidate_id"]: row for row in listwise}
+            comparison = preregistration["architecture_comparison"]
+            pair_id = str(comparison["pair_control_id"])
+            independent_id = str(
+                comparison["independent_global_control_id"]
+            )
+            edge_factorized_id = str(comparison["edge_factorized_id"])
+            edge_global_id = str(comparison["edge_global_primary_id"])
+            if set(by_id) != {
+                pair_id,
+                independent_id,
+                edge_factorized_id,
+                edge_global_id,
+            }:
+                raise ValueError("v15 architecture IDs differ from contract")
+            reducer = by_id[pair_id]
+            independent = by_id[independent_id]
+            edge_factorized = by_id[edge_factorized_id]
+            edge_global = by_id[edge_global_id]
+            exact = [independent, edge_factorized, edge_global]
+            if (
+                bool(reducer["enabled"])
+                or reducer["family"] != "deterministic_pair_reducer"
+                or independent["candidate_encoder"]
+                != "independent_candidate"
+                or int(independent["message_steps"]) != 0
+                or independent["exact_array_likelihood"]["decoder"]
+                != "global_selected_count_map"
+                or any(
+                    row["candidate_encoder"]
+                    != "edge_difference_message"
+                    or int(row["message_steps"]) != 1
+                    or tuple(row["edge_statistics"]) != EDGE_STATISTICS
+                    for row in (edge_factorized, edge_global)
+                )
+                or {
+                    edge_factorized["exact_array_likelihood"]["decoder"],
+                    edge_global["exact_array_likelihood"]["decoder"],
+                }
+                != {"factorized", "global_selected_count_map"}
+                or any(
+                    not bool(row["enabled"])
+                    or row["family"]
+                    != "exact_globally_normalized_array_status"
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0 < float(row["learning_rate"]) <= 0.1
+                    for row in exact
+                )
+            ):
+                raise ValueError("v15 edge-exact architecture matrix is incomplete")
+            exact_specs = [
+                dict(row["exact_array_likelihood"]) for row in exact
+            ]
+            if any(
+                int(spec["max_candidates"]) != 6
+                or spec["loss_family"]
+                != "exact_globally_normalized_status_vector_nll"
+                or float(spec["loss_weight"]) != 1.0
+                or spec["normalization"]
+                != "exact_selected_subset_marginalization"
+                or spec["represented_status_vectors"]
+                != "all_four_status_assignments"
+                or not bool(spec["shared_state_gradient"])
+                or spec["class_balancing"]
+                != "none_proper_likelihood"
+                for spec in exact_specs
+            ):
+                raise ValueError("v15 exact-array objective differs")
+            comparable_fields = (
+                "family",
+                "candidate_encoder",
+                "message_steps",
+                "edge_statistics",
+                "hidden_width",
+                "loop_count",
+                "epochs",
+                "learning_rate",
+            )
+            if (
+                any(
+                    edge_factorized[field] != edge_global[field]
+                    for field in comparable_fields
+                )
+                or any(
+                    edge_factorized["exact_array_likelihood"][field]
+                    != edge_global["exact_array_likelihood"][field]
+                    for field in (
+                        "max_candidates",
+                        "loss_family",
+                        "loss_weight",
+                        "normalization",
+                        "represented_status_vectors",
+                        "shared_state_gradient",
+                        "class_balancing",
+                    )
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"]) != 0.0
+                    or not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    for model in models
+                )
+            ):
+                raise ValueError("v15 edge decoder ablation is not matched")
+            metric_gate = preregistration.get("metric_gate", {})
+            if (
+                metric_gate.get("heldout_status")
+                != "supported_on_declared_holdout"
+                or set(metric_gate.get("accepted_metrics", ()))
+                != {
+                    "exact_status_vector_accuracy",
+                    "exact_selected_set_accuracy",
+                }
+            ):
+                raise ValueError("v15 metric robustness gate is incomplete")
+            selection = preregistration["development_selection"]
+            heldout = preregistration["heldout_evaluation"]
+            if (
+                selection.get("selection_semantics")
+                != "gate_then_rank_per_architecture"
+                or not bool(
+                    selection.get("retain_rank_only_diagnostic_if_none")
+                )
+                or set(selection.get("primary_candidate_ids", ()))
+                != {edge_global_id}
+                or not bool(heldout.get("primary_only_confirmation_packet"))
+                or float(
+                    heldout["minimum_exact_status_vector_accuracy"]
+                )
+                != float(selection["minimum_mean_exact_array_accuracy"])
+                or float(heldout["minimum_selected_set_exact_accuracy"])
+                != float(
+                    selection[
+                        "minimum_mean_selected_set_exact_accuracy"
+                    ]
+                )
+                or float(heldout["minimum_safety_gate_accuracy"])
+                != float(
+                    selection["required_mean_safety_gate_accuracy"]
+                )
+                or float(heldout["minimum_swap_consistency"])
+                != float(selection["required_mean_swap_consistency"])
+                or float(heldout["minimum_preference_macro_f1"])
+                != float(selection["minimum_mean_preference_macro_f1"])
+                or float(heldout["minimum_abstain_recall"])
+                != float(selection["minimum_mean_abstain_recall"])
+                or float(heldout["minimum_status_macro_f1"])
+                != float(selection["minimum_mean_status_macro_f1"])
+            ):
+                raise ValueError("v15 gate-first confirmation contract is incomplete")
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoders": {
+                    "independent_candidate": (
+                        IndependentCandidateEncoder().receipt()
+                    ),
+                    "edge_difference_message": (
+                        EdgeDifferenceCandidateEncoder().receipt()
+                    ),
+                },
+                "edge_decoder_ablation_matched": True,
+                "independent_global_control_present": True,
+                "exact_array_shared_state_gradient": True,
+                "metric_gate": metric_gate,
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+            }
+            feature_independence_audit["selection_policy"] = {
+                "semantics": "gate_then_rank_per_architecture",
+                "primary_candidate_ids": [edge_global_id],
+                "primary_only_confirmation_packet": True,
+                "exact_status_vector_gate": float(
+                    heldout["minimum_exact_status_vector_accuracy"]
+                ),
+                "exact_selected_set_gate": float(
+                    heldout["minimum_selected_set_exact_accuracy"]
+                ),
+                "safety_gate": float(
+                    heldout["minimum_safety_gate_accuracy"]
+                ),
+                "swap_gate": float(heldout["minimum_swap_consistency"]),
+                "preference_macro_f1_gate": float(
+                    heldout["minimum_preference_macro_f1"]
+                ),
+                "abstain_recall_gate": float(
+                    heldout["minimum_abstain_recall"]
+                ),
+                "status_macro_f1_gate": float(
+                    heldout["minimum_status_macro_f1"]
+                ),
+            }
         if schema_version == "13.0":
             models = preregistration["models"]["candidates"]
             listwise = [

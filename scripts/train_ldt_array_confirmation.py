@@ -631,9 +631,13 @@ def _reduced_status_predictions(
 
 def _candidate_encoder(listwise_spec: Mapping[str, Any]) -> Any:
     family = str(listwise_spec.get("family"))
-    if family == "edge_difference_permutation_equivariant_status":
+    encoder_name = str(listwise_spec.get("candidate_encoder", ""))
+    if encoder_name == "edge_difference_message" or (
+        not encoder_name
+        and family == "edge_difference_permutation_equivariant_status"
+    ):
         return EdgeDifferenceCandidateEncoder()
-    if family in {
+    if encoder_name in {"", "independent_candidate", "none"} and family in {
         "deterministic_pair_reducer",
         "exact_composition_normalized_array_status",
         "exact_globally_normalized_array_status",
@@ -761,6 +765,7 @@ def train(args: argparse.Namespace) -> int:
             "12.0",
             "13.0",
             "14.0",
+            "15.0",
         }
         (
             _,

@@ -330,11 +330,20 @@ def generate_structured_array_dataset(
     schema_version = str(config["schema_version"])
     if (
         schema_version
-        not in {"8.0", "9.0", "10.0", "11.0", "12.0", "13.0", "14.0"}
+        not in {
+            "8.0",
+            "9.0",
+            "10.0",
+            "11.0",
+            "12.0",
+            "13.0",
+            "14.0",
+            "15.0",
+        }
         or config["status"] != "frozen_before_dataset_generation"
     ):
         raise ValueError(
-            "structured-array preregistration is not frozen v8-v13"
+            "structured-array preregistration is not frozen v8-v15"
         )
     if (
         config["independent_builder"]["implementation_id"]
@@ -436,6 +445,26 @@ def generate_structured_array_dataset(
     _write_jsonl(public_paths["heldout_reports"], heldout_reports)
 
     sizes = {int(row["candidate_count"]) for row in all_arrays}
+    train_size_counts = Counter(
+        int(row["candidate_count"]) for row in train_arrays
+    )
+    heldout_size_counts = Counter(
+        int(row["candidate_count"]) for row in heldout_arrays
+    )
+    expected_train_size_counts = {
+        int(size): int(count)
+        for size, count in contract.get(
+            "required_train_arrays_by_size",
+            train_size_counts,
+        ).items()
+    }
+    expected_heldout_size_counts = {
+        int(size): int(count)
+        for size, count in contract.get(
+            "required_heldout_arrays_by_size",
+            heldout_size_counts,
+        ).items()
+    }
     independent_names = ConfirmationPairEncoder.fit(
         train_pairs
     ).feature_names("independent")
@@ -471,6 +500,11 @@ def generate_structured_array_dataset(
         ),
         "required_array_sizes_present": sizes
         == {int(value) for value in contract["require_array_sizes"]},
+        "array_size_counts_match_preregistration": (
+            dict(train_size_counts) == expected_train_size_counts
+            and dict(heldout_size_counts)
+            == expected_heldout_size_counts
+        ),
         "report_hash_bindings_complete": _report_bindings_complete(
             all_pairs,
             all_reports,
