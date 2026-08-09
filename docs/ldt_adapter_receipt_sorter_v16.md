@@ -1,8 +1,10 @@
 # Adapter-receipt LDT sorter v16
 
-V16 is a frozen corrective sorter experiment. No official development or
-heldout result is recorded yet. It responds to the valid negative v2 adapter
-tournament without reopening or fitting to its spent heldout labels.
+V16 is a completed development-only corrective sorter experiment. Its official
+12-cell tournament produced a valid negative and stopped before confirmation:
+the fresh receipt surface was saturated by every architecture, so the
+cross-bound primary could not establish the preregistered improvement over the
+same-data edge control. No v16 heldout label was opened.
 
 ## Development-only diagnosis
 
@@ -102,13 +104,63 @@ or reason to change a threshold.
 
 ## Official sequence
 
-After committing the frozen harness, generate a new external fixture, run all
-12 candidate/seed shards under the WSL cgroup wrapper, merge the complete
-matrix, apply gate-first and comparative selection, and freeze the one-primary
-packet. The independent evaluator may open the sealed labels once only after
-the no-label bindings pass. The separately frozen auditor must then reproduce
-the selection, resource and custody checks, exact metrics, and operational
-conclusion.
+The official fixture was generated from commit `6dd1bbf` with the superseding
+seeds. Its manifest hash is
+`d052540df03752542853a1fff6586575c11fd9458879300b6a48d0db594e30c2`,
+which differs from the burned manifest and has zero direct overlap with its 12
+public lineage groups. The manifest records six development and six sealed
+heldout groups, zero cross-split groups, zero prior overlap, and all 22 explicit
+forbidden groups. Development support is complete; the heldout support receipt
+is complete without disclosing row or class counts.
+
+All three seeds for every architecture individually cleared the development
+gates. Gate-first ranking selected seed 311 in each arm:
+
+| Architecture | Parameters | Mean exact vector | Mean exact selected set | Worst exact vector | Worst exact selected set | ECE |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Independent global | 416 | 1.00 | 1.00 | 1.00 | 1.00 | 0.0191 |
+| Edge global | 768 | 1.00 | 1.00 | 1.00 | 1.00 | 0.0191 |
+| Cross-bound factorized | 620 | 1.00 | 1.00 | 1.00 | 1.00 | 0.0191 |
+| Cross-bound global | 620 | 1.00 | 1.00 | 1.00 | 1.00 | 0.0191 |
+
+The primary-minus-edge deltas were therefore 0.00 for both mean exact metrics,
+below the frozen +0.05 requirements. Both worst-fold noninferiority checks
+passed, but neither mean-improvement check did. The selector emitted no primary
+candidate, no confirmation packet, and no authorization to join heldout labels.
+
+All 12 shards completed under cgroup-verified 2 GB RAM, 50% CPU, 50 MB/s I/O,
+zero-swap, offline limits. They produced 504 checkpoints and 1,594,800 trainer
+steps. Maximum observed telemetry was 83.44 MB RAM, 50.061% sampled CPU, and
+13.98 MB/s I/O; all cap and PID-scoped cleanup receipts passed, and no label
+file was staged. The small sampled CPU overshoot reflects interval telemetry,
+not the authoritative cgroup limit: the guard verified `cpu.max` before every
+candidate process.
+
+The first label-blind packet audit is preserved as a failed verifier receipt.
+It incorrectly treated sampled CPU utilization as the hard-cap authority, so
+11 otherwise valid cells failed an exact `<= 50` comparison. No model outcome,
+threshold, selection, or label was changed. Commit `1788aae` aligned the audit
+with the existing v14/v15 rule: require the environment-owned cgroup receipt
+and finite nonnegative telemetry. The superseding audit passed every integrity
+check while returning `heldout_join_authorized: false` and a zero join budget.
+
+Official evidence hashes:
+
+- generation report: `5e9b452525cd37929f5dee858670b93deb87106423d357081c1f04ac6e82b830`;
+- trainer plan: `795a725fbd5ca44f4f3cd3eb18dfbbb8779cab86012f2494cff213e76261ee45`;
+- merged trainer summary: `90cbd10ea54fe8cc984b35e231f968cb4de5b9b51700424149035ba8188fd5ea`;
+- merged pair predictions: `bbcdb55a5ff2a8e5343904037dd417da8c5708220eb311cde40744e4f1203d81`;
+- merged array predictions: `6a67f038ba289cd5f9e5c4df5c29e2b38eccae19eec0fc127d622d23c33191c3`;
+- selection receipt: `f6c5792851fab94cd73fb6617becda6fa404ce8f08561b40a67aa6161dbf4975`;
+- preserved packet audit r1: `8ec8a946346677909084e6e610326962cb44b4762838c5b4ec6fba38cf5114f2`;
+- superseding packet audit r2: `7490c2ce512408d16884fa22827c87eca81de1d6458ab73fedd41f9c36209c35`.
+
+The task result is development saturation, measurement reliability is supported
+by the superseding label-blind audit, the architecture-advantage claim is not
+supported, and the operational decision is no confirmation join and no
+promotion. A future sorter comparison needs a newly preregistered,
+discriminating development surface and fresh lineages; lowering v16's gates or
+opening its sealed labels would not repair this measurement ceiling.
 
 No generated fixture, labels, predictions, model state, checkpoint, or run
 directory belongs in the repository.
