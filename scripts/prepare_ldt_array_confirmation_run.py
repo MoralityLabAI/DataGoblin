@@ -66,6 +66,7 @@ def prepare(
         "10.0",
         "11.0",
         "12.0",
+        "13.0",
     }:
         feature_views = {
             str(model["feature_view"])
@@ -97,7 +98,14 @@ def prepare(
             "typed_or_lattice_views_present": False,
             "audit_split": "development_only",
         }
-        if schema_version in {"8.0", "9.0", "10.0", "11.0", "12.0"}:
+        if schema_version in {
+            "8.0",
+            "9.0",
+            "10.0",
+            "11.0",
+            "12.0",
+            "13.0",
+        }:
             support = manifest.get("development_support_audit")
             if not support or not all(
                 int(count) >= int(
@@ -536,6 +544,152 @@ def prepare(
                 ),
                 "exact_array_decoder_ablation_matched": True,
                 "exact_array_shared_state_gradient": True,
+                "metric_gate": metric_gate,
+                "direct_array_targets": "development_only",
+                "heldout_array_targets_available": False,
+            }
+        if schema_version == "13.0":
+            models = preregistration["models"]["candidates"]
+            listwise = [
+                {
+                    "candidate_id": str(model["model_id"]),
+                    **dict(model["listwise_status"]),
+                }
+                for model in models
+            ]
+            reducers = [row for row in listwise if not bool(row["enabled"])]
+            recurrent = [
+                row
+                for row in listwise
+                if row["family"]
+                == "looped_permutation_equivariant_status"
+            ]
+            selected_count = [
+                row
+                for row in listwise
+                if row["family"]
+                == "exact_globally_normalized_array_status"
+            ]
+            composition = [
+                row
+                for row in listwise
+                if row["family"]
+                == "exact_composition_normalized_array_status"
+            ]
+            enabled = recurrent + selected_count + composition
+            if (
+                len(reducers) != 1
+                or reducers[0]["family"] != "deterministic_pair_reducer"
+                or len(recurrent) != 1
+                or len(selected_count) != 1
+                or len(composition) != 2
+                or any(
+                    not bool(row["enabled"])
+                    or row["candidate_encoder"] != "independent_candidate"
+                    or int(row["message_steps"]) != 0
+                    or not 1 <= int(row["hidden_width"]) <= 16
+                    or not 1 <= int(row["loop_count"]) <= 4
+                    or not 1 <= int(row["epochs"]) <= 600
+                    or not 0.0 < float(row["learning_rate"]) <= 0.1
+                    for row in enabled
+                )
+            ):
+                raise ValueError(
+                    "v13 composition architecture matrix is incomplete"
+                )
+            selected_spec = dict(
+                selected_count[0]["exact_array_likelihood"]
+            )
+            if (
+                int(selected_spec["max_candidates"]) != 6
+                or selected_spec["loss_family"]
+                != "exact_globally_normalized_status_vector_nll"
+                or selected_spec["decoder"]
+                != "global_selected_count_map"
+                or selected_spec["normalization"]
+                != "exact_selected_subset_marginalization"
+                or not bool(selected_spec["shared_state_gradient"])
+            ):
+                raise ValueError("v13 selected-count control is invalid")
+            composition_specs = [
+                dict(row["composition_likelihood"])
+                for row in composition
+            ]
+            comparable_fields = (
+                "family",
+                "candidate_encoder",
+                "message_steps",
+                "hidden_width",
+                "loop_count",
+                "epochs",
+                "learning_rate",
+            )
+            decoders = {
+                str(spec["decoder"])
+                for spec in composition_specs
+            }
+            if (
+                any(
+                    composition[0][field] != composition[1][field]
+                    for field in comparable_fields
+                )
+                or decoders != {"factorized", "global_composition_map"}
+                or any(
+                    int(spec["max_candidates"]) != 6
+                    or int(spec["composition_parameter_count"]) != 210
+                    or spec["loss_family"]
+                    != "exact_status_composition_vector_nll"
+                    or float(spec["loss_weight"]) != 1.0
+                    or spec["normalization"]
+                    != "exact_all_status_assignment_enumeration"
+                    or spec["represented_status_vectors"]
+                    != "all_four_status_assignments"
+                    or not bool(spec["shared_state_gradient"])
+                    or spec["class_balancing"]
+                    != "none_proper_likelihood"
+                    for spec in composition_specs
+                )
+                or any(
+                    composition_specs[0][field]
+                    != composition_specs[1][field]
+                    for field in (
+                        "max_candidates",
+                        "composition_parameter_count",
+                        "loss_family",
+                        "loss_weight",
+                        "normalization",
+                        "represented_status_vectors",
+                        "shared_state_gradient",
+                        "class_balancing",
+                    )
+                )
+                or any(
+                    float(model["array_consistency_loss_weight"]) != 0.0
+                    or not bool(model["paired_swap_batches"])
+                    or not bool(model["antisymmetric_inference"])
+                    for model in models
+                )
+            ):
+                raise ValueError("v13 composition decoder ablation is not matched")
+            metric_gate = preregistration.get("metric_gate", {})
+            if (
+                metric_gate.get("heldout_status")
+                != "supported_on_declared_holdout"
+                or set(metric_gate.get("accepted_metrics", ()))
+                != {
+                    "exact_status_vector_accuracy",
+                    "exact_selected_set_accuracy",
+                }
+            ):
+                raise ValueError("v13 metric robustness gate is incomplete")
+            feature_independence_audit["listwise_status"] = {
+                "candidates": listwise,
+                "candidate_encoder": (
+                    IndependentCandidateEncoder().receipt()
+                ),
+                "selected_count_control_present": True,
+                "composition_decoder_ablation_matched": True,
+                "composition_shared_state_gradient": True,
                 "metric_gate": metric_gate,
                 "direct_array_targets": "development_only",
                 "heldout_array_targets_available": False,

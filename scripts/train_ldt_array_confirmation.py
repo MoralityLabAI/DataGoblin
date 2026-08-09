@@ -61,6 +61,10 @@ from datagoblin.experiments.ldt_set_metric_robustness_v10 import (
     EXACT_STATUS_VECTOR_ACCURACY,
     score_exact_set_metrics,
 )
+from datagoblin.experiments.ldt_status_composition_v13 import (
+    ExactCompositionStatusModel,
+    predict_composition_statuses,
+)
 
 
 def _write_json(path: Path, value: Any) -> None:
@@ -631,6 +635,7 @@ def _candidate_encoder(listwise_spec: Mapping[str, Any]) -> Any:
         return EdgeDifferenceCandidateEncoder()
     if family in {
         "deterministic_pair_reducer",
+        "exact_composition_normalized_array_status",
         "exact_globally_normalized_array_status",
         "looped_cardinality_permutation_equivariant_status",
         "looped_permutation_equivariant_status",
@@ -669,6 +674,13 @@ def _make_status_model(
             max_candidates=int(exact_array["max_candidates"]),
             decoder=str(exact_array["decoder"]),
         )
+    if family == "exact_composition_normalized_array_status":
+        composition = dict(listwise_spec["composition_likelihood"])
+        return ExactCompositionStatusModel(
+            **common,
+            max_candidates=int(composition["max_candidates"]),
+            decoder=str(composition["decoder"]),
+        )
     if family == "edge_difference_permutation_equivariant_status":
         set_loss = dict(listwise_spec["set_coupled_loss"])
         return SetCoupledLoopedStatusModel(
@@ -702,6 +714,8 @@ def _train_direct_status_model(
     }
     if isinstance(model, ExactArrayLikelihoodModel):
         return train_status_model(model, encoder, arrays, **common)
+    if isinstance(model, ExactCompositionStatusModel):
+        return train_status_model(model, encoder, arrays, **common)
     if isinstance(model, SetCoupledLoopedStatusModel):
         return train_edge_status_model(model, encoder, arrays, **common)
     return train_status_model(model, encoder, arrays, **common)
@@ -716,6 +730,8 @@ def _predict_direct_statuses(
         return predict_cardinality_statuses(model, encoder, row)
     if isinstance(model, ExactArrayLikelihoodModel):
         return predict_exact_array_statuses(model, encoder, row)
+    if isinstance(model, ExactCompositionStatusModel):
+        return predict_composition_statuses(model, encoder, row)
     return predict_array_statuses(model, encoder, row)
 
 
@@ -743,6 +759,7 @@ def train(args: argparse.Namespace) -> int:
             "10.0",
             "11.0",
             "12.0",
+            "13.0",
         }
         (
             _,

@@ -1,0 +1,20 @@
+name: datagoblin_ldt_deterministic_development
+purpose: >
+  Preflight a development-only, deterministic LDT array tournament whose
+  confirmation split remains sealed. This policy cannot support release,
+  deployment, corpus promotion, or a held-out generalization claim.
+thresholds:
+  min_dataset_size: 24
+  min_judge_families: 0
+  min_repetitions_if_stochastic: 3
+  min_subjective_dimensions: 0
+  require_held_out: false
+  require_contamination_check: true
+  require_deterministic_or_justification: true
+  require_blind_identity: false
+  require_swap_positions: false
+  require_randomize_order: false
+  require_allow_tie: true
+  require_allow_uncertain: false
+  require_decision_rule: true
+  require_escalation: true
