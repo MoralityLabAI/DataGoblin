@@ -330,7 +330,7 @@ def generate_structured_array_dataset(
     schema_version = str(config["schema_version"])
     if (
         schema_version
-        not in {"8.0", "9.0", "10.0", "11.0", "12.0", "13.0"}
+        not in {"8.0", "9.0", "10.0", "11.0", "12.0", "13.0", "14.0"}
         or config["status"] != "frozen_before_dataset_generation"
     ):
         raise ValueError(

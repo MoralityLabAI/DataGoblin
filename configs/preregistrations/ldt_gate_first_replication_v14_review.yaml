@@ -1,0 +1,109 @@
+version: '1.0'
+eval_id: datagoblin-ldt-gate-first-replication-v14-development-review
+claim: >
+  On fresh development lineages, the exact selected-count global model has at
+  least one seed that clears every frozen gate, and gate-first selection retains
+  a qualified primary without consuming sealed confirmation labels.
+mode: pairwise
+adapter: generic
+
+candidates:
+  - id: exact-array-h4-factorized-v14
+    model: local-content-free-ldt
+    model_family: exact-selected-count-array
+    blinded_label: candidate-a
+  - id: exact-array-h4-global-map-v14
+    model: local-content-free-ldt
+    model_family: exact-selected-count-array
+    blinded_label: candidate-b
+
+dataset:
+  path: external-public-fixture/train_arrays.jsonl
+  size: 24
+  unit: tournament-array
+  held_out: false
+  contamination_check: completed
+  selection: >
+    A deterministic contract preflight found zero overlap with all 94 forbidden
+    v1-v13 lineage hashes and zero development/confirmation overlap. Six
+    development lineages, four sealed confirmation lineages, three unused
+    training seeds, gate-first selection, and both exact gates are frozen before
+    official generation.
+
+scoring:
+  deterministic:
+    - output_schema_valid
+    - task_completion
+    - exact_status_vector_accuracy
+    - exact_selected_set_accuracy
+    - worst_lineage_selected_set_exact_accuracy
+    - status_macro_f1
+    - preference_macro_f1
+    - abstain_recall
+    - safety_gate_accuracy
+    - swap_consistency
+    - expected_calibration_error
+    - lineage_contamination_zero
+    - gate_first_selection_reproduced
+    - primary_only_confirmation_packet
+    - confirmation_targets_unseen
+    - hard_caps_enforced
+    - cleanup_passed
+  subjective_dimensions: []
+  subjective_omission: >
+    No LLM judge is used. Correctness and completeness are exhausted by exact
+    environment-owned targets and deterministic schema, selection, custody,
+    resource, and metric checks; style and epistemic-honesty judgments are
+    outside this claim.
+  llm_judges: []
+
+pairwise:
+  blind_identity: true
+  swap_positions: false
+  randomize_order: false
+  random_seed: 14061
+  allow_tie: true
+  allow_uncertain: true
+
+escalation:
+  deterministic_conflict: block
+  missing_candidate_seed_cell: block
+  missing_lineage_fold: block
+  rank_only_diagnostic_selected: preserve_confirmation
+  post_freeze_threshold_change: reject
+
+decision_rule:
+  primary_candidate: exact-array-h4-global-map-v14
+  baseline_candidate: exact-array-h4-factorized-v14
+  minimum_win_rate: 0.5
+  confidence: 0.95
+  reliability:
+    cross_judge_required: false
+    max_hard_fail_selection_rate: 0.0
+    min_deterministic_coverage: 1.0
+  deterministic_primary_gates:
+    selection_semantics: gate_then_rank_per_architecture
+    required_mean_safety_gate_accuracy: 1.0
+    required_mean_swap_consistency: 1.0
+    minimum_mean_preference_macro_f1: 0.75
+    minimum_mean_abstain_recall: 0.75
+    minimum_mean_status_macro_f1: 0.80
+    minimum_mean_exact_status_vector_accuracy: 0.65
+    minimum_mean_exact_selected_set_accuracy: 0.75
+    minimum_worst_fold_selected_set_exact_accuracy: 0.50
+    maximum_oof_expected_calibration_error: 0.20
+    confirmation_join_requires_qualified_primary: true
+    confirmation_packet_candidate_count: 1
+  pairwise_win_rate_is_diagnostic_only: true
+
+data_contract:
+  judgments: not-applicable-no-subjective-judge.jsonl
+  deterministic: v14-deterministic-review.jsonl
+
+provenance:
+  manifest_frozen_at: '2026-08-09T00:00:00-04:00'
+  code_revision: git-commit-containing-this-manifest
+  evidence_mode: development
+  contamination_preflight_manifest_sha256: c7ff56bba188d265c8938b8722cecdd9cb715a06d34a45f40039be2f64ee5c49
+  source_v13_evidence_audit_sha256: a31c25413cada5f50e5a16adc4c7ee62166bd4fb20a62decbcd5ce0e95275997
+  metric_robustness_receipt: 2ff88579e010953378c160ec10c25e94f5093585e697a1fabb726fec72899087

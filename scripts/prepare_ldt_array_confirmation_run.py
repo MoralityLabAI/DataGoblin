@@ -67,6 +67,7 @@ def prepare(
         "11.0",
         "12.0",
         "13.0",
+        "14.0",
     }:
         feature_views = {
             str(model["feature_view"])
@@ -105,6 +106,7 @@ def prepare(
             "11.0",
             "12.0",
             "13.0",
+            "14.0",
         }:
             support = manifest.get("development_support_audit")
             if not support or not all(
@@ -430,7 +432,7 @@ def prepare(
                 "direct_array_targets": "development_only",
                 "heldout_array_targets_available": False,
             }
-        if schema_version == "12.0":
+        if schema_version in {"12.0", "14.0"}:
             models = preregistration["models"]["candidates"]
             listwise = [
                 {
@@ -548,6 +550,92 @@ def prepare(
                 "direct_array_targets": "development_only",
                 "heldout_array_targets_available": False,
             }
+            if schema_version == "14.0":
+                selection = preregistration["development_selection"]
+                heldout = preregistration["heldout_evaluation"]
+                exact_global_ids = {
+                    str(row["candidate_id"])
+                    for row in exact
+                    if row["exact_array_likelihood"]["decoder"]
+                    == "global_selected_count_map"
+                }
+                if (
+                    selection.get("selection_semantics")
+                    != "gate_then_rank_per_architecture"
+                    or not bool(
+                        selection.get(
+                            "retain_rank_only_diagnostic_if_none"
+                        )
+                    )
+                    or set(selection.get("primary_candidate_ids", ()))
+                    != exact_global_ids
+                    or not bool(
+                        heldout.get("primary_only_confirmation_packet")
+                    )
+                    or float(
+                        heldout[
+                            "minimum_exact_status_vector_accuracy"
+                        ]
+                    )
+                    != float(
+                        selection["minimum_mean_exact_array_accuracy"]
+                    )
+                    or float(
+                        heldout["minimum_selected_set_exact_accuracy"]
+                    )
+                    != float(
+                        selection[
+                            "minimum_mean_selected_set_exact_accuracy"
+                        ]
+                    )
+                    or float(heldout["minimum_safety_gate_accuracy"])
+                    != float(
+                        selection["required_mean_safety_gate_accuracy"]
+                    )
+                    or float(heldout["minimum_swap_consistency"])
+                    != float(selection["required_mean_swap_consistency"])
+                    or float(heldout["minimum_preference_macro_f1"])
+                    != float(
+                        selection["minimum_mean_preference_macro_f1"]
+                    )
+                    or float(heldout["minimum_abstain_recall"])
+                    != float(selection["minimum_mean_abstain_recall"])
+                    or float(heldout["minimum_status_macro_f1"])
+                    != float(selection["minimum_mean_status_macro_f1"])
+                ):
+                    raise ValueError(
+                        "v14 gate-first confirmation contract is incomplete"
+                    )
+                feature_independence_audit["selection_policy"] = {
+                    "semantics": (
+                        "gate_then_rank_per_architecture"
+                    ),
+                    "primary_candidate_ids": sorted(exact_global_ids),
+                    "primary_only_confirmation_packet": True,
+                    "exact_status_vector_gate": float(
+                        heldout[
+                            "minimum_exact_status_vector_accuracy"
+                        ]
+                    ),
+                    "exact_selected_set_gate": float(
+                        heldout["minimum_selected_set_exact_accuracy"]
+                    ),
+                    "safety_gate": float(
+                        heldout["minimum_safety_gate_accuracy"]
+                    ),
+                    "swap_gate": float(
+                        heldout["minimum_swap_consistency"]
+                    ),
+                    "preference_macro_f1_gate": float(
+                        heldout["minimum_preference_macro_f1"]
+                    ),
+                    "abstain_recall_gate": float(
+                        heldout["minimum_abstain_recall"]
+                    ),
+                    "status_macro_f1_gate": float(
+                        heldout["minimum_status_macro_f1"]
+                    ),
+                }
         if schema_version == "13.0":
             models = preregistration["models"]["candidates"]
             listwise = [

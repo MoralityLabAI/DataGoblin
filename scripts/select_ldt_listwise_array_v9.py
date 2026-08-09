@@ -116,6 +116,17 @@ def _rank(receipt: Mapping[str, Any]) -> tuple[float, ...]:
     )
 
 
+def _select_seed(
+    receipts: Sequence[dict[str, Any]],
+    contract: Mapping[str, Any],
+    *,
+    gate_first: bool,
+) -> tuple[dict[str, Any], list[int]]:
+    qualified = [row for row in receipts if _qualified(row, contract)]
+    pool = qualified if gate_first and qualified else list(receipts)
+    return min(pool, key=_rank), sorted(int(row["seed"]) for row in qualified)
+
+
 def _selected_rows(
     rows: Sequence[Mapping[str, Any]],
     selected_keys: set[tuple[str, int]],
@@ -151,7 +162,8 @@ def select(
     preregistration = load_structured(preregistration_path)
     schema_version = str(preregistration["schema_version"])
     if (
-        schema_version not in {"9.0", "10.0", "11.0", "12.0", "13.0"}
+        schema_version
+        not in {"9.0", "10.0", "11.0", "12.0", "13.0", "14.0"}
         or preregistration["status"]
         != "frozen_before_dataset_generation"
     ):
@@ -206,10 +218,21 @@ def select(
         )
 
     contract = preregistration["development_selection"]
+    gate_first = schema_version == "14.0"
+    if gate_first and (
+        contract.get("selection_semantics")
+        != "gate_then_rank_per_architecture"
+        or not bool(contract.get("retain_rank_only_diagnostic_if_none"))
+    ):
+        raise ValueError("v14 gate-first selection contract is incomplete")
     selected_receipts = []
     candidate_selection = {}
     for candidate_id, receipts in sorted(by_candidate.items()):
-        selected = min(receipts, key=_rank)
+        selected, qualified_seeds = _select_seed(
+            receipts,
+            contract,
+            gate_first=gate_first,
+        )
         selected_receipts.append(selected)
         folds = selected["cv_fold_metrics"]
         candidate_selection[candidate_id] = {
@@ -242,10 +265,32 @@ def select(
                 selected["trainable_parameters"]
             ),
         }
+        if gate_first:
+            candidate_selection[candidate_id].update(
+                {
+                    "selection_lane": (
+                        "qualified"
+                        if qualified_seeds
+                        else "diagnostic_only"
+                    ),
+                    "observed_qualified_seeds": qualified_seeds,
+                }
+            )
+    primary_scope = (
+        {
+            str(candidate_id)
+            for candidate_id in contract["primary_candidate_ids"]
+        }
+        if gate_first
+        else set(by_candidate)
+    )
+    if not primary_scope or not primary_scope.issubset(by_candidate):
+        raise ValueError("development primary candidate scope is invalid")
     qualified = [
         receipt
         for receipt in selected_receipts
-        if _qualified(receipt, contract)
+        if str(receipt["candidate_id"]) in primary_scope
+        and _qualified(receipt, contract)
     ]
     primary = min(qualified, key=_rank) if qualified else None
     selected_keys = {
@@ -322,6 +367,16 @@ def select(
             selected_array_path
         ),
     }
+    if gate_first:
+        selection.update(
+            {
+                "selection_semantics": (
+                    "gate_then_rank_per_architecture"
+                ),
+                "primary_candidate_scope": sorted(primary_scope),
+                "rank_only_diagnostic_never_authorizes_confirmation": True,
+            }
+        )
     selected_summary = {
         **trainer,
         "candidate_receipts": selected_receipts,
@@ -341,6 +396,62 @@ def select(
     selection["selected_trainer_summary_sha256"] = sha256_file(
         selected_summary_path
     )
+    if gate_first and primary is not None:
+        primary_key = {
+            (str(primary["candidate_id"]), int(primary["seed"]))
+        }
+        primary_pairs = _selected_rows(
+            pair_predictions,
+            primary_key,
+            id_key="example_id",
+        )
+        primary_arrays = _selected_rows(
+            array_predictions,
+            primary_key,
+            id_key="array_id",
+        )
+        primary_pair_path = (
+            out_dir / "heldout_pair_predictions.primary.jsonl"
+        )
+        primary_array_path = (
+            out_dir / "heldout_array_predictions.primary.jsonl"
+        )
+        _write_jsonl(primary_pair_path, primary_pairs)
+        _write_jsonl(primary_array_path, primary_arrays)
+        primary_summary = {
+            **trainer,
+            "candidate_receipts": [primary],
+            "predictions_sha256": sha256_file(primary_pair_path),
+            "array_predictions_sha256": sha256_file(
+                primary_array_path
+            ),
+            "development_selection": selection,
+            "source_trainer_summary_sha256": selection[
+                "source_trainer_summary_sha256"
+            ],
+            "confirmation_packet_candidate_count": 1,
+        }
+        primary_summary_path = (
+            out_dir / "trainer_summary.primary.json"
+        )
+        dump_structured(primary_summary_path, primary_summary)
+        selection["confirmation_packet"] = {
+            "candidate_id": str(primary["candidate_id"]),
+            "seed": int(primary["seed"]),
+            "candidate_count": 1,
+            "pair_predictions_sha256": sha256_file(
+                primary_pair_path
+            ),
+            "array_predictions_sha256": sha256_file(
+                primary_array_path
+            ),
+            "trainer_summary_sha256": sha256_file(
+                primary_summary_path
+            ),
+            "private_labels_read": False,
+        }
+    elif gate_first:
+        selection["confirmation_packet"] = None
     dump_structured(out_dir / "selection_receipt.json", selection)
     return selection
 

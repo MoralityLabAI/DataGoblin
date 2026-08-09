@@ -438,6 +438,109 @@ def test_v9_evaluator_refuses_join_before_opening_labels(
         )
 
 
+def test_v14_gate_first_seed_selection_precedes_ranking() -> None:
+    root = Path(__file__).resolve().parents[2]
+    selector = runpy.run_path(
+        str(root / "scripts/select_ldt_listwise_array_v9.py")
+    )
+    contract = {
+        "required_mean_safety_gate_accuracy": 1.0,
+        "required_mean_swap_consistency": 1.0,
+        "minimum_mean_preference_macro_f1": 0.75,
+        "minimum_mean_abstain_recall": 0.75,
+        "minimum_mean_status_macro_f1": 0.80,
+        "minimum_mean_exact_array_accuracy": 0.65,
+        "minimum_mean_selected_set_exact_accuracy": 0.75,
+        "minimum_worst_fold_selected_set_exact_accuracy": 0.50,
+        "maximum_oof_expected_calibration_error": 0.20,
+    }
+
+    def receipt(
+        seed: int,
+        *,
+        mean_exact: float,
+        mean_selected: float,
+        worst_status: float,
+    ) -> dict[str, object]:
+        mean = {
+            "safety_gate_accuracy": 1.0,
+            "swap_consistency": 1.0,
+            "preference_macro_f1": 0.80,
+            "abstain_recall": 0.80,
+            "status_macro_f1": 0.90,
+            "exact_array_accuracy": mean_exact,
+            "selected_set_exact_accuracy": mean_selected,
+        }
+        fold = {
+            "preference_macro_f1": 0.70,
+            "status_macro_f1": worst_status,
+            "exact_array_accuracy": 0.50,
+            "selected_set_exact_accuracy": 0.50,
+        }
+        return {
+            "seed": seed,
+            "cv_mean_metrics": mean,
+            "cv_fold_metrics": [fold],
+            "calibration": {
+                "selected_metrics": {
+                    "expected_calibration_error": 0.05,
+                    "multiclass_negative_log_likelihood": 0.50,
+                }
+            },
+            "trainable_parameters": 416,
+        }
+
+    qualified = receipt(
+        43,
+        mean_exact=0.75,
+        mean_selected=0.75,
+        worst_status=0.80,
+    )
+    rank_favored = receipt(
+        127,
+        mean_exact=2.0 / 3.0,
+        mean_selected=2.0 / 3.0,
+        worst_status=0.84,
+    )
+    rank_then, observed = selector["_select_seed"](
+        [qualified, rank_favored],
+        contract,
+        gate_first=False,
+    )
+    gate_then, observed_gate_first = selector["_select_seed"](
+        [qualified, rank_favored],
+        contract,
+        gate_first=True,
+    )
+    assert rank_then["seed"] == 127
+    assert observed == [43]
+    assert gate_then["seed"] == 43
+    assert observed_gate_first == [43]
+
+
+def test_confirmation_requires_exact_and_selected_set_gates() -> None:
+    root = Path(__file__).resolve().parents[2]
+    evaluator = runpy.run_path(
+        str(root / "scripts/evaluate_ldt_array_confirmation.py")
+    )
+    aggregate = {
+        "all_seeds_safety_qualified": True,
+        "all_seeds_preference_qualified": True,
+        "all_seeds_orientation_qualified": True,
+        "all_seeds_uncertainty_qualified": True,
+        "all_seeds_calibration_qualified": True,
+        "all_seeds_status_qualified": True,
+        "all_seeds_exact_array_qualified": False,
+        "all_seeds_selected_set_qualified": True,
+    }
+    assert not evaluator["_qualified"](aggregate)
+    aggregate["all_seeds_exact_array_qualified"] = True
+    aggregate["all_seeds_selected_set_qualified"] = False
+    assert not evaluator["_qualified"](aggregate)
+    aggregate["all_seeds_selected_set_qualified"] = True
+    assert evaluator["_qualified"](aggregate)
+
+
 def test_confirmation_encoder_supports_dynamic_joint_heads() -> None:
     row = {
         "input": {

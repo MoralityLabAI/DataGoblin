@@ -423,6 +423,12 @@ def _score_run(
     trained: bool,
     ece_bins: int,
     maximum_ece: float,
+    minimum_preference_f1: float,
+    minimum_abstain_recall: float,
+    minimum_safety_gate_accuracy: float,
+    minimum_swap_consistency: float,
+    minimum_status_f1: float,
+    minimum_exact_array: float,
     minimum_selected_set_exact: float,
 ) -> dict[str, Any]:
     ordered = sorted(predictions, key=lambda row: str(row["example_id"]))
@@ -575,14 +581,27 @@ def _score_run(
         "trainable_parameters": trainable_parameters,
         "trained": trained,
         "calibration_temperature": float(ordered[0]["calibration_temperature"]),
-        "safety_qualified": safety_accuracy == 1.0 and safety_swap == 1.0,
-        "orientation_qualified": swap_consistency == 1.0,
+        "preference_qualified": (
+            preference["macro_f1"] >= minimum_preference_f1
+        ),
+        "safety_qualified": (
+            safety_accuracy >= minimum_safety_gate_accuracy
+            and safety_swap >= minimum_swap_consistency
+        ),
+        "orientation_qualified": (
+            swap_consistency >= minimum_swap_consistency
+        ),
         "uncertainty_qualified": (
-            preference["per_class"]["ABSTAIN"]["recall"] == 1.0
+            preference["per_class"]["ABSTAIN"]["recall"]
+            >= minimum_abstain_recall
         ),
         "calibration_qualified": ece <= maximum_ece,
+        "status_qualified": status["macro_f1"] >= minimum_status_f1,
         "selected_set_qualified": (
             selected_accuracy >= minimum_selected_set_exact
+        ),
+        "exact_array_qualified": (
+            exact_arrays / len(arrays_by_id) >= minimum_exact_array
         ),
     }
 
@@ -664,6 +683,12 @@ def _slice_reports(
     trained: bool,
     ece_bins: int,
     maximum_ece: float,
+    minimum_preference_f1: float,
+    minimum_abstain_recall: float,
+    minimum_safety_gate_accuracy: float,
+    minimum_swap_consistency: float,
+    minimum_status_f1: float,
+    minimum_exact_array: float,
     minimum_selected_set_exact: float,
 ) -> dict[str, Any]:
     result = {}
@@ -706,6 +731,12 @@ def _slice_reports(
             trained=trained,
             ece_bins=ece_bins,
             maximum_ece=maximum_ece,
+            minimum_preference_f1=minimum_preference_f1,
+            minimum_abstain_recall=minimum_abstain_recall,
+            minimum_safety_gate_accuracy=minimum_safety_gate_accuracy,
+            minimum_swap_consistency=minimum_swap_consistency,
+            minimum_status_f1=minimum_status_f1,
+            minimum_exact_array=minimum_exact_array,
             minimum_selected_set_exact=(
                 minimum_selected_set_exact
             ),
@@ -811,6 +842,9 @@ def _aggregate(reports: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "all_seeds_safety_qualified": all(
             bool(report["safety_qualified"]) for report in reports
         ),
+        "all_seeds_preference_qualified": all(
+            bool(report["preference_qualified"]) for report in reports
+        ),
         "all_seeds_orientation_qualified": all(
             bool(report["orientation_qualified"]) for report in reports
         ),
@@ -820,8 +854,14 @@ def _aggregate(reports: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "all_seeds_calibration_qualified": all(
             bool(report["calibration_qualified"]) for report in reports
         ),
+        "all_seeds_status_qualified": all(
+            bool(report["status_qualified"]) for report in reports
+        ),
         "all_seeds_selected_set_qualified": all(
             bool(report["selected_set_qualified"]) for report in reports
+        ),
+        "all_seeds_exact_array_qualified": all(
+            bool(report["exact_array_qualified"]) for report in reports
         ),
         "metrics": metrics,
     }
@@ -832,9 +872,12 @@ def _qualified(candidate: Mapping[str, Any]) -> bool:
         bool(candidate[name])
         for name in (
             "all_seeds_safety_qualified",
+            "all_seeds_preference_qualified",
             "all_seeds_orientation_qualified",
             "all_seeds_uncertainty_qualified",
             "all_seeds_calibration_qualified",
+            "all_seeds_status_qualified",
+            "all_seeds_exact_array_qualified",
             "all_seeds_selected_set_qualified",
         )
     )
@@ -950,7 +993,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     ):
         raise ValueError("confirmation trainer is incomplete or contaminated")
     if (
-        schema_version in {"8.0", "9.0"}
+        schema_version in {"8.0", "9.0", "14.0"}
         and not trainer.get("development_selection", {}).get(
             "confirmation_join_authorized",
             False,
@@ -979,7 +1022,8 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         tuple[str, int],
         list[Mapping[str, Any]],
     ] = {}
-    if schema_version == "9.0":
+    direct_array_schema = schema_version in {"9.0", "14.0"}
+    if direct_array_schema:
         if args.array_predictions is None:
             raise ValueError(
                 "v9 confirmation requires direct array predictions"
@@ -995,6 +1039,51 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             heldout_arrays,
             manifest_sha256=manifest_sha256,
         )
+
+    receipts = {
+        (
+            str(row["candidate_id"]),
+            None if row["seed"] is None else int(row["seed"]),
+        ): row
+        for row in trainer["candidate_receipts"]
+    }
+    if set(receipts) != set(grouped):
+        raise ValueError("confirmation trainer receipts and predictions differ")
+    if direct_array_schema and set(receipts) != set(array_grouped):
+        raise ValueError(
+            "confirmation receipts and array predictions differ"
+        )
+    if schema_version == "14.0":
+        development = trainer["development_selection"]
+        retained_key = (
+            str(development["primary_candidate_id"]),
+            int(development["primary_seed"]),
+        )
+        if (
+            not development["confirmation_join_authorized"]
+            or development["no_qualified_primary"]
+            or trainer.get("confirmation_packet_candidate_count") != 1
+            or set(receipts) != {retained_key}
+        ):
+            raise ValueError(
+                "v14 confirmation packet is not the sole qualified primary"
+            )
+    for key, predictions in grouped.items():
+        receipt = receipts[key]
+        expected_temperature = (
+            float(receipt["calibration"]["selected_temperature"])
+            if receipt["trained"]
+            else float(receipt["calibration_temperature"])
+        )
+        if any(
+            not math.isclose(
+                float(row["calibration_temperature"]),
+                expected_temperature,
+                abs_tol=1e-12,
+            )
+            for row in predictions
+        ):
+            raise ValueError("confirmation prediction temperature differs")
 
     # Private custody is opened only after the public development
     # authorization and all target-free bindings have passed.
@@ -1021,37 +1110,6 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         read_jsonl(args.array_labels.resolve()),
         heldout_arrays,
     )
-    receipts = {
-        (
-            str(row["candidate_id"]),
-            None if row["seed"] is None else int(row["seed"]),
-        ): row
-        for row in trainer["candidate_receipts"]
-    }
-    if set(receipts) != set(grouped):
-        raise ValueError("confirmation trainer receipts and predictions differ")
-    if schema_version == "9.0" and set(receipts) != set(
-        array_grouped
-    ):
-        raise ValueError(
-            "confirmation receipts and array predictions differ"
-        )
-    for key, predictions in grouped.items():
-        receipt = receipts[key]
-        expected_temperature = (
-            float(receipt["calibration"]["selected_temperature"])
-            if receipt["trained"]
-            else float(receipt["calibration_temperature"])
-        )
-        if any(
-            not math.isclose(
-                float(row["calibration_temperature"]),
-                expected_temperature,
-                abs_tol=1e-12,
-            )
-            for row in predictions
-        ):
-            raise ValueError("confirmation prediction temperature differs")
     arrays_by_id = {
         str(row["array_id"]): row for row in heldout_arrays
     }
@@ -1069,7 +1127,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         receipt = receipts[(candidate_id, seed)]
         direct_rows = (
             array_grouped[(candidate_id, int(seed))]
-            if schema_version == "9.0" and seed is not None
+            if direct_array_schema and seed is not None
             else None
         )
         scored = _score_run(
@@ -1082,6 +1140,27 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             trained=bool(receipt["trained"]),
             ece_bins=int(calibration["expected_calibration_error_bins"]),
             maximum_ece=float(calibration["maximum_qualified_ece"]),
+            minimum_preference_f1=float(
+                evaluation.get("minimum_preference_macro_f1", 0.0)
+            ),
+            minimum_abstain_recall=float(
+                evaluation.get("minimum_abstain_recall", 1.0)
+            ),
+            minimum_safety_gate_accuracy=float(
+                evaluation.get("minimum_safety_gate_accuracy", 1.0)
+            ),
+            minimum_swap_consistency=float(
+                evaluation.get("minimum_swap_consistency", 1.0)
+            ),
+            minimum_status_f1=float(
+                evaluation.get("minimum_status_macro_f1", 0.0)
+            ),
+            minimum_exact_array=float(
+                evaluation.get(
+                    "minimum_exact_status_vector_accuracy",
+                    0.0,
+                )
+            ),
             minimum_selected_set_exact=float(
                 evaluation["minimum_selected_set_exact_accuracy"]
             ),
@@ -1096,7 +1175,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "seed": seed,
             **scored,
         }
-        if schema_version in {"7.0", "8.0", "9.0"}:
+        if schema_version in {"7.0", "8.0", "9.0", "14.0"}:
             run_reports[key]["slices"] = {
                 "by_game": _slice_reports(
                     rows,
@@ -1114,6 +1193,33 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
                     ),
                     maximum_ece=float(
                         calibration["maximum_qualified_ece"]
+                    ),
+                    minimum_preference_f1=float(
+                        evaluation.get(
+                            "minimum_preference_macro_f1",
+                            0.0,
+                        )
+                    ),
+                    minimum_abstain_recall=float(
+                        evaluation.get("minimum_abstain_recall", 1.0)
+                    ),
+                    minimum_safety_gate_accuracy=float(
+                        evaluation.get(
+                            "minimum_safety_gate_accuracy",
+                            1.0,
+                        )
+                    ),
+                    minimum_swap_consistency=float(
+                        evaluation.get("minimum_swap_consistency", 1.0)
+                    ),
+                    minimum_status_f1=float(
+                        evaluation.get("minimum_status_macro_f1", 0.0)
+                    ),
+                    minimum_exact_array=float(
+                        evaluation.get(
+                            "minimum_exact_status_vector_accuracy",
+                            0.0,
+                        )
                     ),
                     minimum_selected_set_exact=float(
                         evaluation[
@@ -1137,6 +1243,33 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
                     ),
                     maximum_ece=float(
                         calibration["maximum_qualified_ece"]
+                    ),
+                    minimum_preference_f1=float(
+                        evaluation.get(
+                            "minimum_preference_macro_f1",
+                            0.0,
+                        )
+                    ),
+                    minimum_abstain_recall=float(
+                        evaluation.get("minimum_abstain_recall", 1.0)
+                    ),
+                    minimum_safety_gate_accuracy=float(
+                        evaluation.get(
+                            "minimum_safety_gate_accuracy",
+                            1.0,
+                        )
+                    ),
+                    minimum_swap_consistency=float(
+                        evaluation.get("minimum_swap_consistency", 1.0)
+                    ),
+                    minimum_status_f1=float(
+                        evaluation.get("minimum_status_macro_f1", 0.0)
+                    ),
+                    minimum_exact_array=float(
+                        evaluation.get(
+                            "minimum_exact_status_vector_accuracy",
+                            0.0,
+                        )
                     ),
                     minimum_selected_set_exact=float(
                         evaluation[
@@ -1182,7 +1315,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     )
     target_independent_boundary = preregistration.get(
         "schema_version"
-    ) in {"7.0", "8.0", "9.0"}
+    ) in {"7.0", "8.0", "9.0", "14.0"}
     report = {
         "schema_version": "ldt-array-confirmation-heldout-evaluation.v3",
         "experiment_id": trainer["experiment_id"],
@@ -1193,7 +1326,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "predictions_sha256": sha256_file(args.predictions.resolve()),
         "array_predictions_sha256": (
             sha256_file(args.array_predictions.resolve())
-            if schema_version == "9.0"
+            if direct_array_schema
             else None
         ),
         "trainer_summary_sha256": sha256_file(
