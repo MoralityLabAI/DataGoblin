@@ -118,6 +118,9 @@ and
 [`docs/ldt_set_metric_holdout_v10.md`](docs/ldt_set_metric_holdout_v10.md), and
 the tournament report in
 [`docs/ldt_edge_set_array_v10.md`](docs/ldt_edge_set_array_v10.md).
+The fresh v11 cardinality-readout and joint-MAP decoder ablation also remained
+below the exact-set gate; see
+[`docs/ldt_cardinality_decoder_v11.md`](docs/ldt_cardinality_decoder_v11.md).
 
 ## Optional HRM-Text cycle milestone
 
