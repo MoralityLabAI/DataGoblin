@@ -278,6 +278,106 @@ def test_v14_evaluator_refuses_unauthorized_join_before_labels(
         )
 
 
+def test_v14_evaluator_binds_array_source_to_frozen_candidate_spec() -> None:
+    evaluator = runpy.run_path(
+        str(ROOT / "scripts/evaluate_ldt_array_confirmation.py")
+    )
+    config = load_structured(PREREGISTRATION)
+    expected_sources = evaluator["_expected_array_prediction_sources"](
+        config
+    )
+    candidate_id = "exact-array-h4-global-map-v14"
+    assert expected_sources[candidate_id] == (
+        "exact_likelihood_global_selected_count_map"
+    )
+
+    candidates = [{"candidate_id": f"candidate-{index}"} for index in range(4)]
+    heldout_array = {
+        "array_id": "heldout-array",
+        "lineage_group_sha256": "a" * 64,
+        "candidate_count": len(candidates),
+        "candidates": candidates,
+    }
+    statuses = ["SELECTED", "UNSAFE", "DOMINATED", "UNRESOLVED"]
+    status_probabilities = [
+        {
+            "UNSAFE": 0.50,
+            "DOMINATED": 0.05,
+            "UNRESOLVED": 0.05,
+            "SELECTED": 0.40,
+        },
+        {
+            "UNSAFE": 0.60,
+            "DOMINATED": 0.05,
+            "UNRESOLVED": 0.05,
+            "SELECTED": 0.30,
+        },
+        {
+            "UNSAFE": 0.10,
+            "DOMINATED": 0.70,
+            "UNRESOLVED": 0.10,
+            "SELECTED": 0.10,
+        },
+        {
+            "UNSAFE": 0.10,
+            "DOMINATED": 0.10,
+            "UNRESOLVED": 0.70,
+            "SELECTED": 0.10,
+        },
+    ]
+    prediction = {
+        "schema_version": "ldt-listwise-array-prediction.v9",
+        "candidate_id": candidate_id,
+        "seed": 107,
+        "array_id": heldout_array["array_id"],
+        "lineage_group_sha256": heldout_array["lineage_group_sha256"],
+        "candidate_count": len(candidates),
+        "candidate_input_sha256": evaluator["sha256_json"](candidates),
+        "dataset_manifest_sha256": "b" * 64,
+        "prediction_source": expected_sources[candidate_id],
+        "statuses": statuses,
+        "status_probabilities": status_probabilities,
+        "authority": "MODEL_RECOMMENDATION_ONLY",
+    }
+    grouped = evaluator["_validate_array_predictions"](
+        [prediction],
+        [heldout_array],
+        manifest_sha256="b" * 64,
+        expected_prediction_sources=expected_sources,
+    )
+    assert list(grouped) == [(candidate_id, 107)]
+
+    mismatched = dict(prediction)
+    mismatched["prediction_source"] = (
+        "exact_likelihood_factorized_status_argmax"
+    )
+    with pytest.raises(ValueError, match="binding mismatch"):
+        evaluator["_validate_array_predictions"](
+            [mismatched],
+            [heldout_array],
+            manifest_sha256="b" * 64,
+            expected_prediction_sources=expected_sources,
+        )
+
+    wrong_selected_set = dict(prediction)
+    wrong_selected_set["statuses"] = [
+        "UNSAFE",
+        "SELECTED",
+        "DOMINATED",
+        "UNRESOLVED",
+    ]
+    with pytest.raises(
+        ValueError,
+        match="global selected-count decoder output is inconsistent",
+    ):
+        evaluator["_validate_array_predictions"](
+            [wrong_selected_set],
+            [heldout_array],
+            manifest_sha256="b" * 64,
+            expected_prediction_sources=expected_sources,
+        )
+
+
 def test_v14_public_auditor_reproduces_both_exact_gates() -> None:
     auditor = runpy.run_path(
         str(ROOT / "scripts/audit_ldt_gate_first_replication_v14.py")

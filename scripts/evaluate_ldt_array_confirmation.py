@@ -253,6 +253,7 @@ def _validate_array_predictions(
     heldout_arrays: Sequence[Mapping[str, Any]],
     *,
     manifest_sha256: str,
+    expected_prediction_sources: Mapping[str, str],
 ) -> dict[tuple[str, int], list[Mapping[str, Any]]]:
     public = {
         str(row["array_id"]): row for row in heldout_arrays
@@ -291,17 +292,18 @@ def _validate_array_predictions(
         seen.add(key)
         row = public[array_id]
         count = int(row["candidate_count"])
+        expected_prediction_source = expected_prediction_sources.get(
+            candidate_id
+        )
         if (
             prediction["lineage_group_sha256"]
             != row["lineage_group_sha256"]
             or int(prediction["candidate_count"]) != count
             or prediction["candidate_input_sha256"]
             != sha256_json(row["candidates"])
+            or expected_prediction_source is None
             or prediction["prediction_source"]
-            not in {
-                "deterministic_pair_reducer",
-                "direct_listwise_status_head",
-            }
+            != expected_prediction_source
         ):
             raise ValueError(
                 "listwise array prediction binding mismatch"
@@ -318,11 +320,7 @@ def _validate_array_predictions(
             raise ValueError(
                 "listwise array prediction status count differs"
             )
-        for status, distribution in zip(
-            statuses,
-            probabilities,
-            strict=True,
-        ):
+        for distribution in probabilities:
             if set(distribution) != set(ARRAY_STATUSES):
                 raise ValueError(
                     "listwise status probability classes differ"
@@ -342,17 +340,61 @@ def _validate_array_predictions(
                     1.0,
                     abs_tol=1e-6,
                 )
-                or status
-                != max(
-                    ARRAY_STATUSES,
-                    key=lambda label: float(
-                        distribution[label]
-                    ),
-                )
             ):
                 raise ValueError(
                     "listwise status probabilities are invalid"
                 )
+        if expected_prediction_source == (
+            "exact_likelihood_global_selected_count_map"
+        ):
+            selected_count = statuses.count("SELECTED")
+            nonselected_statuses = [
+                label for label in ARRAY_STATUSES if label != "SELECTED"
+            ]
+            best_nonselected = [
+                max(
+                    nonselected_statuses,
+                    key=lambda label: float(distribution[label]),
+                )
+                for distribution in probabilities
+            ]
+            selected_delta = [
+                math.log(max(float(distribution["SELECTED"]), 1e-12))
+                - math.log(
+                    max(float(distribution[nonselected]), 1e-12)
+                )
+                for distribution, nonselected in zip(
+                    probabilities,
+                    best_nonselected,
+                    strict=True,
+                )
+            ]
+            ranked = sorted(
+                range(count),
+                key=lambda index: (-selected_delta[index], index),
+            )
+            expected_statuses = list(best_nonselected)
+            for index in ranked[:selected_count]:
+                expected_statuses[index] = "SELECTED"
+            if statuses != expected_statuses:
+                raise ValueError(
+                    "global selected-count decoder output is inconsistent"
+                )
+        elif any(
+            status
+            != max(
+                ARRAY_STATUSES,
+                key=lambda label: float(distribution[label]),
+            )
+            for status, distribution in zip(
+                statuses,
+                probabilities,
+                strict=True,
+            )
+        ):
+            raise ValueError(
+                "factorized status decoder output is inconsistent"
+            )
         grouped[(candidate_id, seed)].append(prediction)
     expected_ids = set(public)
     for key, rows in grouped.items():
@@ -365,6 +407,31 @@ def _validate_array_predictions(
     if not grouped:
         raise ValueError("listwise array predictions are empty")
     return grouped
+
+
+def _expected_array_prediction_sources(
+    preregistration: Mapping[str, Any],
+) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for candidate in preregistration["models"]["candidates"]:
+        candidate_id = str(candidate["model_id"])
+        if candidate_id in result:
+            raise ValueError("duplicate preregistered candidate ID")
+        listwise = candidate["listwise_status"]
+        fallback = (
+            "direct_listwise_status_head"
+            if bool(listwise["enabled"])
+            else "deterministic_pair_reducer"
+        )
+        prediction_source = str(
+            listwise.get("prediction_source", fallback)
+        )
+        if not prediction_source:
+            raise ValueError("preregistered prediction source is empty")
+        result[candidate_id] = prediction_source
+    if not result:
+        raise ValueError("preregistration has no candidate prediction sources")
+    return result
 
 
 def _expected_calibration_error(
@@ -1038,6 +1105,9 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             read_jsonl(args.array_predictions.resolve()),
             heldout_arrays,
             manifest_sha256=manifest_sha256,
+            expected_prediction_sources=(
+                _expected_array_prediction_sources(preregistration)
+            ),
         )
 
     receipts = {
