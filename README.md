@@ -121,6 +121,9 @@ the tournament report in
 The fresh v11 cardinality-readout and joint-MAP decoder ablation also remained
 below the exact-set gate; see
 [`docs/ldt_cardinality_decoder_v11.md`](docs/ldt_cardinality_decoder_v11.md).
+V12 then trained an exact globally normalized array likelihood; its matched
+global decoder improved exactness in every seed but still missed promotion.
+See [`docs/ldt_exact_array_likelihood_v12.md`](docs/ldt_exact_array_likelihood_v12.md).
 
 ## Optional HRM-Text cycle milestone
 
