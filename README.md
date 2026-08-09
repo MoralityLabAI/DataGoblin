@@ -124,6 +124,11 @@ below the exact-set gate; see
 V12 then trained an exact globally normalized array likelihood; its matched
 global decoder improved exactness in every seed but still missed promotion.
 See [`docs/ldt_exact_array_likelihood_v12.md`](docs/ldt_exact_array_likelihood_v12.md).
+V13 expanded that likelihood to the complete four-status composition. Global
+decoding helped its matched factorized head, but the richer model lost to the
+selected-count control and exposed a rank-then-qualify seed-selection caveat;
+confirmation remains sealed. See
+[`docs/ldt_status_composition_v13.md`](docs/ldt_status_composition_v13.md).
 
 ## Optional HRM-Text cycle milestone
 
