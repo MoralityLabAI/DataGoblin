@@ -25,7 +25,7 @@ if (Test-Path -LiteralPath $out) { throw "Architecture candidate output already 
 
 function Convert-ToWslPath([string]$WindowsPath) {
   $full = [IO.Path]::GetFullPath($WindowsPath)
-  if ($full -notmatch '^([a-zA-Z]):\(.*)$') { throw "unsupported Windows path: $full" }
+  if ($full -notmatch '^([a-zA-Z]):\\(.*)$') { throw "unsupported Windows path: $full" }
   $drive = $Matches[1].ToLowerInvariant()
   $tail = $Matches[2].Replace('\', '/')
   return "/mnt/$drive/$tail"
