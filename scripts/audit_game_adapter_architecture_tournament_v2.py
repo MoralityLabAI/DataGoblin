@@ -184,10 +184,13 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         and sorted(heldout.get("advancing_candidates", ())) == sorted(advancing),
         "no_universal_winner": heldout.get("winner") is None
         and heldout.get("universal_scalar_winner") is False,
-        "reported_final_checks_pass": all(heldout.get("final_checks", {}).values()),
+        "reported_confirmation_matches_final_checks": bool(
+            heldout.get("confirmed_for_next_preregistration_only")
+        )
+        == all(heldout.get("final_checks", {}).values()),
     }
     passed = all(checks.values())
-    expected_confirmation = passed and bool(advancing)
+    expected_confirmation = passed and all(heldout.get("final_checks", {}).values())
     checks["confirmation_conclusion_consistent"] = bool(
         heldout.get("confirmed_for_next_preregistration_only")
     ) == expected_confirmation and bool(receipt.get("confirmed_for_next_preregistration_only")) == expected_confirmation
@@ -205,7 +208,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         "reproduced_advancing_candidates": sorted(advancing),
         "conclusion": (
             "confirmed_for_next_preregistration_only"
-            if passed and advancing
+            if passed and expected_confirmation
             else "not_confirmed_no_promotion"
         ),
     }
