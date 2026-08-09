@@ -139,9 +139,11 @@ model. The sole edge-global primary independently confirmed at 0.8125 on both
 exact metrics, authorizing only a separately frozen downstream adapter
 tournament. See
 [`docs/ldt_edge_exact_correction_v15.md`](docs/ldt_edge_exact_correction_v15.md).
-The separately frozen downstream gate now compares an unchanged deterministic
+The separately frozen downstream gate compared an unchanged deterministic
 control, a rank-4 low-rank surrogate, and matched one-pass/four-loop recurrent
-surrogates on fresh four-game fixtures. It has no recorded result yet; see
+surrogates on fresh four-game fixtures. The low-rank surrogate independently
+qualified, but the v15 shadow sorter scored 0/12 on both exact array gates, so
+the tournament correctly issued no promotion; see
 [`docs/game_adapter_architecture_tournament_v2.md`](docs/game_adapter_architecture_tournament_v2.md).
 
 ## Optional HRM-Text cycle milestone
