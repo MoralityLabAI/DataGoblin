@@ -1,0 +1,283 @@
+{
+  "checked_at": "2026-11-19",
+  "audit_scope": "Primary dataset cards and author papers; no corpus was downloaded, retokenized or deduplicated by this audit. All advertised token counts use source tokenizers and all proposed Aleph quotas require fresh accounting.",
+  "datasets": [
+    {
+      "id": "HuggingFaceFW/fineweb-edu",
+      "role": "general educational pretraining",
+      "advertised_size": "1.3T tokens; separate score-2 version 5.4T; snapshots through first half of 2025 in v1.4.0",
+      "license": "ODC-By-1.0 collection; original web rights remain",
+      "priority": "shortlist",
+      "source": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu",
+      "notes": "Classifier-selected English pages. Sample across shards/domains. SmolLM-Corpus contains a 220B deduplicated derivative; do not count derivatives as new source diversity.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceFW/fineweb-2",
+      "role": "multilingual pretraining",
+      "advertised_size": "5B documents; more than 3T words; over 1000 languages",
+      "license": "ODC-By-1.0 collection",
+      "priority": "reserve",
+      "source": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-2",
+      "notes": "Card directs English users to original FineWeb. Avoid spreading a 20B English research model across all languages. Word counts are not tokenizer counts.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceFW/finepdfs",
+      "role": "PDF text reservoir",
+      "advertised_size": "about 3T tokens across 475M documents and 1733 languages",
+      "license": "ODC-By-1.0 collection; Common Crawl terms",
+      "priority": "reserve",
+      "source": "https://huggingface.co/datasets/HuggingFaceFW/finepdfs",
+      "notes": "Useful source diversity beyond HTML. OCR fidelity, multilingual fragments and duplicated PDF editions require checks.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceFW/finepdfs-edu",
+      "role": "educational PDF pretraining",
+      "advertised_size": "350B+ tokens; 69 languages; English viewer reports 23M rows",
+      "license": "ODC-By-1.0 collection; Common Crawl terms",
+      "priority": "shortlist",
+      "source": "https://huggingface.co/datasets/HuggingFaceFW/finepdfs-edu",
+      "notes": "Globally deduplicated; top 10% of educational scores. Card notes graduate technical material was poorly correlated with target benchmarks, so retain a separate technical-paper lane. Language switching remains common.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "mlfoundations/dclm-baseline-1.0",
+      "role": "general English web baseline",
+      "advertised_size": "4T tokens; 3B documents",
+      "license": "CC-BY-4.0 collection; card describes research use",
+      "priority": "alternate",
+      "source": "https://huggingface.co/datasets/mlfoundations/dclm-baseline-1.0",
+      "notes": "Broad English competence; weaker specialty fit for math/code. Overlap with other Common Crawl corpora must be measured.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "allenai/dolma3_mix-6T",
+      "role": "mixed pretraining baseline",
+      "advertised_size": "approximately 6T tokens; 150B analysis sample available",
+      "license": "ODC-By-1.0 collection; source-specific rights",
+      "priority": "alternate",
+      "source": "https://huggingface.co/datasets/allenai/dolma3_mix-6T",
+      "notes": "Current card recommends this mix for new from-scratch work; separate dolma3_mix-6T-1025-7B is for reproduction only. Contains web, publications and code, so account for overlap with individually selected components.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "common-pile/comma_v0.1_training_dataset",
+      "role": "openly licensed mixed corpus",
+      "advertised_size": "463.6B source tokens in main-stage table; 1034.4B exposures after sampling weights",
+      "license": "Public-domain and source-specific open licenses; preserve per-source metadata",
+      "priority": "shortlist",
+      "source": "https://huggingface.co/datasets/common-pile/comma_v0.1_training_dataset",
+      "notes": "Prefer per-source filtered versions to retain provenance and choose technical subsets. Includes 67.8B Stack-Edu, 43.3B peS2o, 23.9B StackExchange and 6B arXiv in Comma-tokenizer counts. Aggregate model-training exposures must not be mistaken for unique data.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "allenai/peS2o",
+      "role": "scientific papers and abstracts",
+      "advertised_size": "v2: 38.97M documents; 42.01B whitespace-separated tokens",
+      "license": "ODC-By-1.0 collection; source paper rights",
+      "priority": "shortlist",
+      "source": "https://huggingface.co/datasets/allenai/peS2o",
+      "notes": "Knowledge cutoff 2023-01-03. Training split includes 8.24M full papers and 30.57M abstracts. Select CS/math/stats and practical methods; supplement recent primary papers separately. Whitespace counts cannot be plugged into the Aleph training budget.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceTB/stack-edu",
+      "role": "educational code",
+      "advertised_size": "125B tokens across 15 languages",
+      "license": "Original code licenses; inherited Software Heritage access requirements",
+      "priority": "shortlist_conditional_on_access",
+      "source": "https://huggingface.co/datasets/HuggingFaceTB/stack-edu",
+      "notes": "Contains SWH identifiers rather than source bytes. Metadata includes permissive and no_license rows. Fetch permitted files, validate access and record per-file rights. Strong Python/Rust/C++/shell fit depending on available subsets.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "bigcode/the-stack-v2",
+      "role": "broad code reservoir",
+      "advertised_size": "full 67.5TB; dedup 32.1TB; train-full roughly 900B tokens",
+      "license": "Original repository licenses; bulk-download agreement with Software Heritage/INRIA required by current card",
+      "priority": "reserve",
+      "source": "https://huggingface.co/datasets/bigcode/the-stack-v2",
+      "notes": "Current v2.2.0 removes opt-outs through 2026-07-29. Pin the approved release. More data is unnecessary for this budget; prefer selected educational repositories and associated tests/docs.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "OpenCoder-LLM/opc-annealing-corpus",
+      "role": "algorithm code plus synthetic rewrite/QA",
+      "advertised_size": "viewer estimates 15.57M rows; exact Aleph token count unmeasured",
+      "license": "ODC-By collection; check source code terms",
+      "priority": "alternate",
+      "source": "https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus",
+      "notes": "Three subsets: algorithmic_corpus, synthetic_code_snippet, synthetic_qa. Seeds derive from Stack v2, creating overlap with Stack-Edu and other code corpora. No universal execution-validity claim.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceTB/finemath",
+      "role": "informal educational mathematics",
+      "advertised_size": "3+: 34B tokens / 21.4M docs; 4+: 9.6B / 6.7M; InfiMM 3+: 20.5B; InfiMM 4+: 8.5B",
+      "license": "ODC-By-1.0 collection",
+      "priority": "shortlist",
+      "source": "https://huggingface.co/datasets/HuggingFaceTB/finemath",
+      "notes": "Prefer 4+ for the initial quota. 4+ is contained in 3+, so summing both double counts. Preserves Markdown/LaTeX and explanatory solutions, not kernel verification.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "open-web-math/open-web-math",
+      "role": "mathematical web pretraining",
+      "advertised_size": "14.7B tokens; 6.3M documents",
+      "license": "ODC-By-1.0 collection; underlying licenses unchanged",
+      "priority": "alternate",
+      "source": "https://huggingface.co/datasets/open-web-math/open-web-math",
+      "notes": "Older reproducible baseline with preserved math markup. Overlap with FineMath/Nemotron/MegaMath and StackExchange requires cross-corpus deduplication.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "IFM/MegaMath",
+      "role": "web/math-code/synthetic pretraining",
+      "advertised_size": "371.6B total: 279B web, 28.1B code, 64.5B synthetic",
+      "license": "ODC-By collection; source code rights remain",
+      "priority": "alternate",
+      "source": "https://huggingface.co/datasets/IFM/MegaMath",
+      "notes": "Former LLM360 location redirects to IFM. Synthetic categories include text/code interleaves. Treat constituent sources and generated derivatives as related records; size alone provides no Aleph-specific advantage.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nvidia/Nemotron-CC-v2",
+      "role": "filtered web and synthetic web/QA",
+      "advertised_size": "card release-wide table: 6.5858T; 3359.8B English CC, 1257.3B synthetic CC among components",
+      "license": "NVIDIA Data Agreement for Model Training; gated acceptance",
+      "priority": "alternate_conditional_on_access",
+      "source": "https://huggingface.co/datasets/nvidia/Nemotron-CC-v2",
+      "notes": "Release-wide table spans related component datasets; do not label all 6.5858T as this repository's own original web rows. Training-use agreement and generated-data model terms are documented in the card. Avoid adding the same math/code components twice.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nvidia/Nemotron-CC-Math-v1",
+      "role": "math pretraining with improved extraction",
+      "advertised_size": "3plus: 133B / 101.15M docs; 4plus: 52B / 45.10M; related MIND v1 synthetic: 73B / 88.73M",
+      "license": "NVIDIA Data Agreement for Model Training; gated acceptance",
+      "priority": "shortlist_conditional_on_access",
+      "source": "https://huggingface.co/datasets/nvidia/Nemotron-CC-Math-v1",
+      "notes": "Lynx HTML extraction, Phi-4 cleaning, FineMath scoring, MinHash dedup, benchmark decontamination. 8B midtraining evidence does not measure 1B Aleph effects. Prefer 4plus; do not sum contained subsets.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceTB/smollm-corpus:cosmopedia-v2",
+      "role": "synthetic textbook/blog/story pretraining",
+      "advertised_size": "39,134,000 samples; source fields count with the Mistral 7B tokenizer",
+      "license": "ODC-By collection; seed provenance varies",
+      "priority": "shortlist_small_quota",
+      "source": "https://huggingface.co/datasets/HuggingFaceTB/smollm-corpus",
+      "notes": "Generated by Mixtral 8x7B. Convenient short educational text; factual correctness is not mechanically verified. Do not treat all rows as new independent concepts.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "SYNTH-Initiative/SYNTH",
+      "role": "synthetic generalist reasoning pretraining",
+      "advertised_size": "79,648,272 samples; 41B words; about 75B Pleias-tokenizer tokens",
+      "license": "CDLA-Permissive-2.0 collection; CC-BY-SA Wikipedia/Wikibooks seeds retained",
+      "priority": "shortlist_small_quota",
+      "source": "https://huggingface.co/datasets/SYNTH-Initiative/SYNTH",
+      "notes": "About 20% non-English; 58,698 Wikipedia articles amplified. Filter English/domain/task types. Preserve original seed IDs. Source claims for models below 350M parameters trained on 100B to 200B tokens do not establish 20B Aleph performance.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "HuggingFaceFW/finephrase",
+      "role": "synthetic FAQ/math/table/tutorial rewrites",
+      "advertised_size": "1,354,044,711 samples; 486,367,076,933 completion tokens from 339,347,842 source documents",
+      "license": "ODC-By collection; source FineWeb-Edu terms",
+      "priority": "shortlist_pilot",
+      "source": "https://huggingface.co/datasets/HuggingFaceFW/finephrase/blob/main/README.md",
+      "notes": "SmolLM2-1.7B outputs. IMPORTANT top-level text is original source, generated output is rollout_results[0].text. Teacher hallucinations and truncation documented. Group all rewrites with original for split/dedup; programmatically verify arithmetic/table tasks.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nvidia/OpenMathReasoning",
+      "role": "math solution/selection late training",
+      "advertised_size": "306K unique solved problems; 3.2M CoT; 1.7M TIR; 566K GenSelect; 193K additional unsolved problems only",
+      "license": "CC-BY-4.0 collection; AoPS/source provenance",
+      "priority": "shortlist_selected",
+      "source": "https://huggingface.co/datasets/nvidia/OpenMathReasoning",
+      "notes": "Card corrects the earlier 540K unique claim. Some expected answers come from model majority vote. Keep extracted-ground-truth/TIR verification distinct. Multiple trajectories per problem are correlated. Strong fit to verifier-backed selection if rechecked.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nvidia/OpenCodeReasoning",
+      "role": "code SFT solutions",
+      "advertised_size": "735,255 Python solutions; 28,319 unique questions",
+      "license": "CC-BY-4.0 collection; component licenses",
+      "priority": "alternate",
+      "source": "https://huggingface.co/datasets/nvidia/OpenCodeReasoning",
+      "notes": "R1 distillation from TACO/APPS/CodeContests/Codeforces. Some questions require joining original datasets. For research-operator behavior prefer version 2's execution and critique fields.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nvidia/OpenCodeReasoning-2",
+      "role": "code solutions plus critique",
+      "advertised_size": "1,398,166 Python + 1,174,475 C++ rows; 34,799 unique questions",
+      "license": "CC-BY-4.0 collection; underlying source terms",
+      "priority": "shortlist_selected",
+      "source": "https://huggingface.co/datasets/nvidia/OpenCodeReasoning-2/raw/main/README.md",
+      "notes": "R1 generation, QwQ critique, pass_rate in [0, 1] or sentinel -1. -1 means too few tests or validation failure. Question is '-' and must be joined by source/split/index. Judge's right/wrong and measured execution are different supervision signals. Release 2025-05-15.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "open-thoughts/OpenThoughts3-1.2M",
+      "role": "long math/code/science SFT traces",
+      "advertised_size": "1.2M rows; author-reported pipeline of approximately 75K sampled questions with 16 answers each (paper Figure 4); ~59.8GB uncompressed card bytes",
+      "license": "Apache-2.0 collection; preserve seed source metadata",
+      "priority": "reserve_or_small_pilot",
+      "source": "https://huggingface.co/datasets/open-thoughts/OpenThoughts3-1.2M/raw/main/README.md",
+      "notes": "850K math, 250K code, 100K science rows, QwQ-32B annotations. Approximate 75K sampled-question figure is explicitly reported in Figure 4, not inferred by dividing rows by 16. Released root count remains unaudited. Evidence is 7B posttraining; long traces can exceed the Aleph 4K window. Retain complete bounded task units rather than blind truncation.",
+      "additional_sources": [
+        {
+          "url": "https://arxiv.org/pdf/2506.04178v1",
+          "location": "Figure 4, printed page 11 (PDF zero-based page 10)",
+          "claim": "Figure explicitly shows 75k -> X16 -> 1.2M; preceding domain counts are rounded 53k math, 16k code, 6k science. These are author-reported pipeline counts; this audit has not counted distinct released question strings."
+        },
+        {
+          "url": "https://huggingface.co/datasets/open-thoughts/OpenThoughts3-1.2M/raw/main/README.md",
+          "location": "OpenThoughts3 Data Curation and Scaling Recipe, steps 4 and 5",
+          "claim": "Downsample to 75k questions; annotate each question 16x with QwQ-32B."
+        }
+      ],
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "open-r1/OpenR1-Math-220k",
+      "role": "math SFT with correctness fields",
+      "advertised_size": "225,129 all; 93,733 default; 131,396 extended; 2 to 4 generated traces per problem",
+      "license": "Apache-2.0 collection; Numina source provenance",
+      "priority": "alternate_selected",
+      "source": "https://huggingface.co/datasets/open-r1/OpenR1-Math-220k/raw/main/README.md",
+      "notes": "Most evaluated with MathVerify; 12% Llama judge. At least one correct answer per problem does not mean every trace is correct. Match the correctness field by trace index. Authors report default outperformed extended SFT. Long 16K generation limit affects 4K packing.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    }
+  ],
+  "source_revision_note": "Dataset cards checked on the audit date; data-file revisions must be pinned at intake."
+}

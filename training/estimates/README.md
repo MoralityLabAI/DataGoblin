@@ -1,11 +1,11 @@
-# Aleph 1B: 10B-token and 700 H100 GPU-hour planning envelope
+# Aleph 1B: 10B / 20B / 30B tokens and 700 H100 GPU-hours
 
 **Date:** 2026-11-19. **Status:** analytic, not a quoted price or measured run. The Goodfire/Silico grant is separate from Spiral.
 
 ## Proposed target
 
 - 1,007,141,013 unique neural parameters in the specified four-operator architecture.
-- 10,000,000,000 processed, non-padding token exposures. Count repeated token presentation; also track distinct source tokens.
+- Original reference: 10B processed non-padding tokens. The [current data study](../reports/2026-11-19_data_landscape.md) proposes a 20B endpoint and conditional 30B continuation. Count repeated presentations and track distinct retained tokens separately.
 - 8 H100 SXM GPUs as a benchmark target; DDP and 4-operator × 2 data replica layouts both require real throughput tests.
 - 2 recurrent rounds as default, 3 as alternative.
 - **700 aggregate H100 GPU-hours** as a scenario. This is 87.5 hours with all 8 GPUs allocated continuously.
@@ -38,7 +38,7 @@ These estimates cover one training campaign and no independent full-scale contro
 | Category | Reserved GPU-hours |
 | --- | ---: |
 | Architecture/compilation preflight | 35 |
-| 10B-token main training | 400 |
+| Main training allocation, subject to measured token capacity | 400 |
 | Independent mechanistic analysis and steering controls | 150 |
 | Final evaluation/export | 45 |
 | Recovery and stalled/failed jobs | 70 |
@@ -55,3 +55,25 @@ Define all step limits in *processed token exposures*. Store consumed cost separ
 ## Preserved source estimates
 
 The [2026-11-19 research bundle](../SOURCES.md) holds the original `aleph_compute.py`, full case JSON, exact parameter ledger, 48-paper catalog and original experiment specification. The script here is a compact reimplementation with explicit 700h accounting. Original file checksums are recorded in `../SOURCES.md`.
+
+## Larger token endpoints
+
+The [machine-readable extension](aleph_20b_30b_estimates.json) contains 24 analytical cases, including the 10B reference. The calculator's 10B default is preserved. Reproduce a larger endpoint from repository root:
+
+```bash
+python training/estimates/aleph_compute.py --tokens 20000000000 --mfu 0.30
+python training/estimates/aleph_compute.py --tokens 30000000000 --mfu 0.30
+```
+
+| Tokens | Rounds | GPU-hours at 20% MFU | GPU-hours at 30% MFU | GPU-hours at 45% MFU | 8-GPU wall hours at 30% |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 20B | 2 | 478.2 | 318.8 | 212.6 | 39.9 |
+| 30B | 2 | 717.4 | 478.2 | 318.8 | 59.8 |
+| 20B | 3 | 691.5 | 461.0 | 307.3 | 57.6 |
+| 30B | 3 | 1,037.3 | 691.5 | 461.0 | 86.4 |
+
+With 400 GPU-hours allocated to training, two-round 20B requires about 23.9% active MFU under this model. Two-round 30B requires about 35.9%, or a changed campaign allocation. Whole-job throughput requirements are 50M and 75M tokens per GPU-hour respectively. The separate 300-hour allocation covers the rest of the campaign.
+
+The $1,560 balance divided by 700 GPU-hours implies about $2.23 per hour before ancillary charges. That conversion is unverified. At an illustrative $4 per hour, the same balance covers 390 hours. The rate columns in the JSON are arithmetic scenarios.
+
+The 25% allowance is applied to analytical active-step time. Observed whole-job GPU occupancy already includes its measured overhead; apply no second allowance to that measured total. Teacher generation, CPU verification and external mechanistic analyses require their own cost records.

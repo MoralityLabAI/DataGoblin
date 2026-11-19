@@ -83,7 +83,7 @@ def main() -> None:
     p.add_argument("--total-cap", type=float, default=700)
     args = p.parse_args()
     assert 0 < args.mfu <= 1 and args.gpus > 0 and args.tokens > 0
-    assert 0 <= args.overhead and 0 <= args.prefix_fraction <= 1
+    assert args.overhead >= 0 and 0 <= args.prefix_fraction <= 1
     results = {
         "assumptions": vars(args),
         "reference": "Proposed Data Goblin Aleph 1B architecture, 2026-11-19",

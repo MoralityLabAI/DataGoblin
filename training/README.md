@@ -6,6 +6,8 @@ This directory records the proposed **Data Goblin Aleph 1B** architecture and an
 
 ## Reports
 
+- [Data landscape and 20B / 30B token plans](reports/2026-11-19_data_landscape.md). Current planning recommendation: 20B tokens with two recurrent rounds, with a conditional 30B continuation after throughput and development measurements.
+- [Data catalogs and proposed mixture](data/README.md). Public sources, owned corpus receipts, repeat limits and admission requirements.
 - [Organelle Gym Research Design (13-page PDF text)](reports/2026-11-19_organelle_gym_pdf_text.md). Source PDF SHA-256: `e921b5be770e8f6171925f571ae64ce35f62c443c48cf54a90700e8bc1a0bcf1`.
 - [Aleph 1B Research Dossier (32-page PDF text)](reports/2026-11-19_aleph_1b_dossier_pdf_text.md). Source PDF SHA-256: `5aa18ac872ef3d856cb5c898b6b6d49c6f8c4c5b799e0d4da505afb25db9ce91`.
 - [Dyadic HRM companion proposal](hrm_text_dyadic_companion.md). New design note, proposed and untested.
@@ -20,7 +22,7 @@ The text reports are searchable transcriptions of the archived PDFs. They preser
 
 ## Scope and boundaries
 
-- **Primary target:** approximately 1.007B unique neural weights, 10B processed non-padding token exposures, with learned communication among four recurrent operators. The reference design uses 2 synchronous rounds and explores 3.
+- **Primary model:** approximately 1.007B unique neural weights with learned communication among four recurrent operators. The original 10B endpoint remains an intermediate checkpoint; the latest data study proposes 20B processed non-padding tokens with a conditional 30B continuation. The reference design uses 2 synchronous rounds and explores 3.
 - **Scientific hypothesis:** causal, independently checked feedback about messages between recurrent modules improves held-out task composition over a capacity-matched task-trained router.
 - **Companion:** an independently loaded `sapientinc/HRM-Text-1B` checkpoint, invoked on selected reasoning decisions. The dyad is a two-model system, not a claim that both fit in 1B parameters.
 - **Compute:** 700 H100 GPU-hours is a scenario, not an established Silico entitlement or billing conversion. The 2026-11-19 reported remainder was $1,560 equivalent in Silico RUs.
@@ -28,3 +30,7 @@ The text reports are searchable transcriptions of the archived PDFs. They preser
 - **Research authority:** proposals, VPD/BPD attribution and model votes remain hypotheses. Environment-owned verifiers produce the authoritative task measurements. Keep sealed evaluation splits out of the training and selection path.
 
 Training, downloads, paid jobs, and checkpoint edits require a separately declared capped runner and explicit authorization. The files in this folder are design and estimate artifacts.
+
+## Reading the archived plans
+
+The original PDF transcriptions preserve earlier alternatives, including smaller runs and a 10B flagship endpoint. The current [data report](reports/2026-11-19_data_landscape.md) evaluates the user's later 20B/30B direction. Its quotas are proposals whose admitted source capacity and provider billing still need measurement. The earlier reports remain available as the design history.

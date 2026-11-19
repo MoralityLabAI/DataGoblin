@@ -1,0 +1,305 @@
+{
+  "audit_date": "2026-11-19",
+  "corpus_lanes": [
+    {
+      "repository": "MoralityLabAI/AICourt",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "receipt_path": "results/court-balance-ensemble-2000.json",
+      "training_ready": false,
+      "id": "aicourt_deterministic_2000",
+      "status": "reported_prior_generation",
+      "records": 2000,
+      "record_unit": "episodes",
+      "reported_mean_tokens": 18822.8245,
+      "derived_approximate_total_tokens": 37645649,
+      "tokenizer": "cl100k_base",
+      "token_scope": "serialized complete canonical JSONL episode, including metadata",
+      "count_method": "2000 times reported rounded mean; no raw-shard recount in this audit",
+      "raw_shards_accessed": false,
+      "policy": "seeded deterministic heuristic",
+      "overlap_note": "Cohort and environment-version overlap with the 200-episode receipt remains unresolved; use a joined episode registry before totaling."
+    },
+    {
+      "repository": "MoralityLabAI/AICourt",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "receipt_path": "results/court-corpus-validation.json",
+      "training_ready": false,
+      "id": "aicourt_200_validation",
+      "status": "reported_prior_validation",
+      "records": 200,
+      "record_unit": "episodes",
+      "reported_tokens": 3753256,
+      "tokenizer": "cl100k_base",
+      "token_scope": "canonical serialized log",
+      "count_method": "exact count stated by receipt, not rerun",
+      "raw_shards_accessed": false
+    },
+    {
+      "repository": "MoralityLabAI/AICourt",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "receipt_path": "CAMPAIGN.md",
+      "training_ready": false,
+      "id": "aicourt_model_campaign",
+      "status": "planned_target",
+      "target_tokens_min": 8000000,
+      "target_tokens_max": 8500000,
+      "tokenizer": "o200k_base",
+      "token_scope": "leakage-safe primary SFT message content",
+      "measured_completion_tokens": null,
+      "raw_shards_accessed": false
+    },
+    {
+      "repository": "MoralityLabAI/Control-Harness",
+      "commit": "5d9556097e5d0df9e61b5fd6b258d1c27bbfd382",
+      "receipt_path": "results/mesh_escape_pit/corpus_v1_progress.json",
+      "training_ready": false,
+      "id": "mesh_blue_first_tranche",
+      "status": "reported_external_materialized",
+      "records": 40029,
+      "unique_canonical_transition_clusters": 40029,
+      "sealed_shards": 5,
+      "reported_tokens": 4999622,
+      "tokenizer": "mesh_whitespace_v1",
+      "token_scope": "record.training_text maximal non-whitespace spans",
+      "count_method": "exact whitespace count in archived receipt; actual shards not recounted",
+      "raw_shards_accessed": false
+    },
+    {
+      "repository": "MoralityLabAI/Control-Harness",
+      "commit": "5d9556097e5d0df9e61b5fd6b258d1c27bbfd382",
+      "receipt_path": "results/mesh_escape_pit/corpus_plans_v1/plan-1000000000.json",
+      "training_ready": false,
+      "id": "mesh_blue_capacity",
+      "status": "unmaterialized_capacity_plan",
+      "requested_tokens": 1000000000,
+      "canonical_transitions": 232960,
+      "estimated_cluster_adjusted_effective_token_upper_bound": 29104302,
+      "tokenizer": "mesh_whitespace_v1",
+      "count_method": "generator plan estimate from sample; no independent verification of full capacity",
+      "materialized": false
+    },
+    {
+      "repository": "MoralityLabAI/TRMStoryworld",
+      "commit": "a1a4141adb6401a21d322479a96cddfe858c8961",
+      "receipt_path": "zip_this/qblot_export/trm_rollout_corpus_existing_manifest.json",
+      "training_ready": false,
+      "id": "trm_storyworld_existing",
+      "data_path": "zip_this/qblot_export/trm_rollout_corpus_existing.jsonl",
+      "status": "committed_corpus_manifest",
+      "records": 2089,
+      "base_records": 2064,
+      "adapter_records": 25,
+      "bytes": 2311212,
+      "reported_tokens": null,
+      "tokenizer": null,
+      "count_method": "manifest row count and Git blob byte size"
+    },
+    {
+      "id": "own_lean_historical",
+      "status": "historical_conversation_report_only",
+      "audit_date": "2026-11-10",
+      "reported_nongiant_tokens": 978885,
+      "reported_numeric_certificate_tokens": 22796896,
+      "reported_candidate_theorem_tasks": 2139,
+      "reported_ci_covered_tasks": 1607,
+      "tokenizer": null,
+      "count_method": "prior assistant audit summary; original artifact not recovered, current trees have grown",
+      "training_ready": false
+    },
+    {
+      "id": "own_lean_current_tree",
+      "status": "current_metadata_count",
+      "repositories": [
+        "patrickdugan/OntologicalProofs",
+        "patrickdugan/MathCan",
+        "MoralityLabAI/EvalMath",
+        "patrickdugan/semaev-index-calculus"
+      ],
+      "files": 679,
+      "bytes": 80613571,
+      "giant_files_gt_1m": 7,
+      "giant_bytes_gt_1m": 74515825,
+      "nongiant_files": 672,
+      "nongiant_bytes": 6097746,
+      "tokens": null,
+      "tokenizer": null,
+      "count_method": "all .lean Git tree blob sizes; includes fixtures/heldout files; content not tokenized or kernel rebuilt",
+      "training_ready": false
+    }
+  ],
+  "lean_source_metadata": [
+    {
+      "repo": "patrickdugan/OntologicalProofs",
+      "commit": "1c209654bf03b6eef62324edc10a9393987c6b33",
+      "files": 399,
+      "bytes": 2176267,
+      "files_gt_1m": 0,
+      "bytes_gt_1m": 0,
+      "token_count": null,
+      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/MathCan",
+      "commit": "9b2e9f5a258b2a0bfa31489333e1e5b9b86b7566",
+      "files": 122,
+      "bytes": 560412,
+      "files_gt_1m": 0,
+      "bytes_gt_1m": 0,
+      "token_count": null,
+      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "license_files": []
+    },
+    {
+      "repo": "MoralityLabAI/EvalMath",
+      "commit": "bed334f032d31d777bad0e5152e732f57252092b",
+      "files": 34,
+      "bytes": 802097,
+      "files_gt_1m": 0,
+      "bytes_gt_1m": 0,
+      "token_count": null,
+      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "repo": "patrickdugan/semaev-index-calculus",
+      "commit": "3c630e179ae837dad839949dcb03cf4fdb41815e",
+      "files": 124,
+      "bytes": 77074795,
+      "files_gt_1m": 7,
+      "bytes_gt_1m": 74515825,
+      "token_count": null,
+      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "license_files": []
+    }
+  ],
+  "sources": [
+    {
+      "repo": "MoralityLabAI/AICourt",
+      "path": "results/court-corpus-validation.json",
+      "class": "canonical_log_receipt",
+      "notes": "Earlier 200-episode receipt: 3,753,256 cl100k_base tokens over serialized logs. Aleph training projection remains uncounted.",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "url": "https://github.com/MoralityLabAI/AICourt/blob/dad297ef6c103f57bf0bbcd90614c4c110b4c504/results/court-corpus-validation.json",
+      "blob_sha": "8826e9eca74708d0ee7770529137a0cd76074ce6"
+    },
+    {
+      "repo": "MoralityLabAI/AICourt",
+      "path": "results/court-balance-ensemble-2000.json",
+      "class": "deterministic_game_ensemble",
+      "notes": "2,000 heuristic-policy episodes with a reported mean of 18,822.8245 cl100k_base tokens. Derived volume is about 37.65M; raw shards remain external.",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "url": "https://github.com/MoralityLabAI/AICourt/blob/dad297ef6c103f57bf0bbcd90614c4c110b4c504/results/court-balance-ensemble-2000.json",
+      "blob_sha": "081cbb7c0ba538884e0624e97ce6164735b9e1e0"
+    },
+    {
+      "repo": "MoralityLabAI/AICourt",
+      "path": "BALANCE_REPORT.md",
+      "class": "report",
+      "notes": "Documents the 2,000-episode mechanics ensemble and serialized cl100k_base token method.",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "url": "https://github.com/MoralityLabAI/AICourt/blob/dad297ef6c103f57bf0bbcd90614c4c110b4c504/BALANCE_REPORT.md",
+      "blob_sha": "1e4bf75cd317d7e6a96f95727ea563d578b6ded8"
+    },
+    {
+      "repo": "MoralityLabAI/AICourt",
+      "path": "CAMPAIGN.md",
+      "class": "target_only",
+      "notes": "Campaign target: 8.0–8.5M o200k_base tokens. Completed production volume remains unverified.",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "url": "https://github.com/MoralityLabAI/AICourt/blob/dad297ef6c103f57bf0bbcd90614c4c110b4c504/CAMPAIGN.md",
+      "blob_sha": "caa54641d5ca1aa46c4f5f09edf2752ee469b7d7"
+    },
+    {
+      "repo": "MoralityLabAI/AICourt",
+      "path": "MODEL_AGENT_PILOT.md",
+      "class": "small_model_agent_pilot",
+      "notes": "Three model-agent episodes with 18 seats. External shards and tokenizer count remain unexamined.",
+      "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
+      "url": "https://github.com/MoralityLabAI/AICourt/blob/dad297ef6c103f57bf0bbcd90614c4c110b4c504/MODEL_AGENT_PILOT.md",
+      "blob_sha": "ac764d0823885a86bd43604e6dcdc09f006b6417"
+    },
+    {
+      "repo": "MoralityLabAI/Control-Harness",
+      "path": "results/mesh_escape_pit/corpus_v1_progress.json",
+      "class": "external_materialized_receipt",
+      "notes": "40,029 records and 4,999,622 mesh_whitespace_v1 units across five sealed shards. Aleph token count remains unmeasured.",
+      "commit": "5d9556097e5d0df9e61b5fd6b258d1c27bbfd382",
+      "url": "https://github.com/MoralityLabAI/Control-Harness/blob/5d9556097e5d0df9e61b5fd6b258d1c27bbfd382/results/mesh_escape_pit/corpus_v1_progress.json",
+      "blob_sha": "d0bfe887e19a3f3457bfaf3f10dc5ca391ce5b28"
+    },
+    {
+      "repo": "MoralityLabAI/Control-Harness",
+      "path": "results/mesh_escape_pit/corpus_plans_v1/plan-1000000000.json",
+      "class": "unmaterialized_plan",
+      "notes": "1B requested units; 232,960 canonical transitions. Estimated cluster-adjusted capacity is 29,104,302 whitespace units; materialized=false.",
+      "commit": "5d9556097e5d0df9e61b5fd6b258d1c27bbfd382",
+      "url": "https://github.com/MoralityLabAI/Control-Harness/blob/5d9556097e5d0df9e61b5fd6b258d1c27bbfd382/results/mesh_escape_pit/corpus_plans_v1/plan-1000000000.json",
+      "blob_sha": "318233a387d3d2094a72ea11114bdd5f6f417cc4"
+    },
+    {
+      "repo": "MoralityLabAI/Control-Harness",
+      "path": "control_observability_pilot/README.md",
+      "class": "synthetic_pilot",
+      "notes": "6,400 records forming 3,200 counterfactual pairs in a finite synthetic authorization task.",
+      "commit": "5d9556097e5d0df9e61b5fd6b258d1c27bbfd382",
+      "url": "https://github.com/MoralityLabAI/Control-Harness/blob/5d9556097e5d0df9e61b5fd6b258d1c27bbfd382/control_observability_pilot/README.md",
+      "blob_sha": "71fbb842e54fad172c25d3a4051f32ef7d183725"
+    },
+    {
+      "repo": "MoralityLabAI/TRMStoryworld",
+      "path": "zip_this/qblot_export/trm_rollout_corpus_existing_manifest.json",
+      "class": "committed_generated_corpus",
+      "notes": "2,089 rows, including 2,064 base and 25 adapter rows. JSONL size is 2,311,212 bytes; tokens remain uncounted.",
+      "commit": "a1a4141adb6401a21d322479a96cddfe858c8961",
+      "url": "https://github.com/MoralityLabAI/TRMStoryworld/blob/a1a4141adb6401a21d322479a96cddfe858c8961/zip_this/qblot_export/trm_rollout_corpus_existing_manifest.json",
+      "blob_sha": "602e267336c8e71b212fb81645af86ada1acee28"
+    },
+    {
+      "repo": "MoralityLabAI/LoopedTransformers",
+      "path": "experiments/lean_reasoner/README.md",
+      "class": "verified_finite_lean_generator",
+      "notes": "1,280 theorems; 768 training theorems and 2,333 training proof states. Preserve validation and test partitions. Lean 4.19.0 audit.",
+      "commit": "faddf809f9a85b64c9b36869963df1c480053675",
+      "url": "https://github.com/MoralityLabAI/LoopedTransformers/blob/faddf809f9a85b64c9b36869963df1c480053675/experiments/lean_reasoner/README.md",
+      "blob_sha": "4e6178ba0cc62dcc31beaee2d3076d8643047a2b"
+    },
+    {
+      "repo": "MoralityLabAI/LoopedTransformers",
+      "path": "experiments/bpd_lean_curriculum_v2/KERNEL_AUDIT.md",
+      "class": "verified_positive_negative_lean",
+      "notes": "384 proof/refutation cases: 256 train, 64 dev, 64 test. Independent Lean 4.19.0 audit records empty axiom inventories for all cases.",
+      "commit": "faddf809f9a85b64c9b36869963df1c480053675",
+      "url": "https://github.com/MoralityLabAI/LoopedTransformers/blob/faddf809f9a85b64c9b36869963df1c480053675/experiments/bpd_lean_curriculum_v2/KERNEL_AUDIT.md",
+      "blob_sha": "ccb91bf8b4936d2a02b197fceee347edb0b4ed42"
+    },
+    {
+      "repo": "MoralityLabAI/LoopedTransformers",
+      "path": "experiments/lean_ram17/RAM17_RESULT_20261116.json",
+      "class": "verified_negative_collection_result",
+      "notes": "63 roots, 326 candidate compilations, 20 accepted actions: 18 train and two dev. Induction produced zero actions; training admission failed.",
+      "commit": "faddf809f9a85b64c9b36869963df1c480053675",
+      "url": "https://github.com/MoralityLabAI/LoopedTransformers/blob/faddf809f9a85b64c9b36869963df1c480053675/experiments/lean_ram17/RAM17_RESULT_20261116.json",
+      "blob_sha": "913a6f19d29b886bc52a0e5d0050e76551fb1d72"
+    },
+    {
+      "repo": "MoralityLabAI/LoopedTransformers",
+      "path": "experiments/lean_ram18/README.md",
+      "class": "conditional_plan",
+      "notes": "Training and development collection remain conditional on source admission; this README supplies no completed collection total.",
+      "commit": "faddf809f9a85b64c9b36869963df1c480053675",
+      "url": "https://github.com/MoralityLabAI/LoopedTransformers/blob/faddf809f9a85b64c9b36869963df1c480053675/experiments/lean_ram18/README.md",
+      "blob_sha": "a247c04c7fe58858b1286179679dc3d282f7056f"
+    }
+  ],
+  "caveats": [
+    "Counts use incompatible tokenizers/serialization; never sum as Aleph tokens.",
+    "Git tree counts include fixtures/tests and lack declaration audit.",
+    "External receipt is evidence of a prior materialization; actual raw shards not reread.",
+    "Repository code license does not automatically license model outputs/third-party data.",
+    "Reserve all legacy heldout families for independent evaluation or explicitly retire them before training."
+  ],
+  "scope_note": "Metadata and aggregate receipts only. External shards were not retrieved. Held-out source files are included in tree sizes but excluded from any proposed training release."
+}
