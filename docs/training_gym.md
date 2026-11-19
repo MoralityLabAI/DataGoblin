@@ -1,5 +1,8 @@
 # Architecture training gym
 
+The [RLT research track](rlt_research_track.md) defines matched recurrent-feedback comparisons and an
+offline rule-revision fixture generator and scorer.
+
 The training gym compares parameter-efficient and recurrent candidates under a frozen evaluation contract. Version 1
 is an offline deterministic scaffold. It does not train a checkpoint, rank real architectures, or establish alignment.
 
