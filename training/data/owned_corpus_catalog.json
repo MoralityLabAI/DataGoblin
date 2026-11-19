@@ -108,70 +108,230 @@
     },
     {
       "id": "own_lean_current_tree",
-      "status": "current_metadata_count",
+      "status": "superseded_by_complete_224_repository_default_branch_scan",
       "repositories": [
-        "patrickdugan/OntologicalProofs",
-        "patrickdugan/MathCan",
         "MoralityLabAI/EvalMath",
-        "patrickdugan/semaev-index-calculus"
+        "MoralityLabAI/LoopedTransformers",
+        "MoralityLabAI/BPD",
+        "MoralityLabAI/HybridTRMLDT",
+        "MoralityLabAI/complicency-bench",
+        "MoralityLabAI/Compactification-Theory",
+        "patrickdugan/OntologicalProofs",
+        "patrickdugan/leanp2p",
+        "patrickdugan/semaev-index-calculus",
+        "patrickdugan/MathCan",
+        "patrickdugan/btc-verified",
+        "patrickdugan/neoplatonic-lean",
+        "patrickdugan/TradeLayer-Rust",
+        "patrickdugan/bitcoin-rs",
+        "patrickdugan/beyond-bayes",
+        "patrickdugan/bitcoin-liquidity-formal",
+        "patrickdugan/UTXO-Ref",
+        "patrickdugan/tensor-lab",
+        "patrickdugan/BitAgent",
+        "patrickdugan/SystemicRiskBench",
+        "patrickdugan/cryptanalytic-discovery-lab"
       ],
-      "files": 679,
-      "bytes": 80613571,
+      "files": 1219,
+      "bytes": 84889171,
       "giant_files_gt_1m": 7,
       "giant_bytes_gt_1m": 74515825,
-      "nongiant_files": 672,
-      "nongiant_bytes": 6097746,
+      "nongiant_files": 1212,
+      "nongiant_bytes": 10373346,
       "tokens": null,
       "tokenizer": null,
-      "count_method": "all .lean Git tree blob sizes; includes fixtures/heldout files; content not tokenized or kernel rebuilt",
+      "count_method": "All 36 MoralityLabAI plus 188 patrickdugan default-branch recursive Git trees; two empty repositories have no Git history; source bytes, not model tokens; see training/reports/2026-11-19_all_repos_lean_retotal.md",
       "training_ready": false
     }
   ],
   "lean_source_metadata": [
     {
+      "repo": "MoralityLabAI/EvalMath",
+      "files": 34,
+      "bytes": 802097,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "MoralityLabAI/LoopedTransformers",
+      "files": 93,
+      "bytes": 187772,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "MoralityLabAI/BPD",
+      "files": 20,
+      "bytes": 48213,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "MoralityLabAI/HybridTRMLDT",
+      "files": 10,
+      "bytes": 17646,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "MoralityLabAI/complicency-bench",
+      "files": 2,
+      "bytes": 9416,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "MoralityLabAI/Compactification-Theory",
+      "files": 4,
+      "bytes": 7362,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
       "repo": "patrickdugan/OntologicalProofs",
-      "commit": "1c209654bf03b6eef62324edc10a9393987c6b33",
       "files": 399,
       "bytes": 2176267,
-      "files_gt_1m": 0,
-      "bytes_gt_1m": 0,
+      "commit": null,
       "token_count": null,
-      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/leanp2p",
+      "files": 236,
+      "bytes": 2639097,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/semaev-index-calculus",
+      "files": 124,
+      "bytes": 77074795,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
       "license_files": []
     },
     {
       "repo": "patrickdugan/MathCan",
-      "commit": "9b2e9f5a258b2a0bfa31489333e1e5b9b86b7566",
       "files": 122,
       "bytes": 560412,
-      "files_gt_1m": 0,
-      "bytes_gt_1m": 0,
+      "commit": null,
       "token_count": null,
-      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
       "license_files": []
     },
     {
-      "repo": "MoralityLabAI/EvalMath",
-      "commit": "bed334f032d31d777bad0e5152e732f57252092b",
-      "files": 34,
-      "bytes": 802097,
-      "files_gt_1m": 0,
-      "bytes_gt_1m": 0,
+      "repo": "patrickdugan/btc-verified",
+      "files": 79,
+      "bytes": 495226,
+      "commit": null,
       "token_count": null,
-      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
-      "license_files": [
-        "LICENSE"
-      ]
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
     },
     {
-      "repo": "patrickdugan/semaev-index-calculus",
-      "commit": "3c630e179ae837dad839949dcb03cf4fdb41815e",
-      "files": 124,
-      "bytes": 77074795,
-      "files_gt_1m": 7,
-      "bytes_gt_1m": 74515825,
+      "repo": "patrickdugan/neoplatonic-lean",
+      "files": 21,
+      "bytes": 83118,
+      "commit": null,
       "token_count": null,
-      "method": "Git recursive tree metadata only; includes tests/fixtures; no source rebuild or tokenizer run",
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/TradeLayer-Rust",
+      "files": 17,
+      "bytes": 301949,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/bitcoin-rs",
+      "files": 16,
+      "bytes": 81643,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/beyond-bayes",
+      "files": 10,
+      "bytes": 31564,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/bitcoin-liquidity-formal",
+      "files": 7,
+      "bytes": 21812,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/UTXO-Ref",
+      "files": 7,
+      "bytes": 277212,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/tensor-lab",
+      "files": 7,
+      "bytes": 37624,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/BitAgent",
+      "files": 7,
+      "bytes": 18532,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/SystemicRiskBench",
+      "files": 3,
+      "bytes": 15295,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
+      "license_files": []
+    },
+    {
+      "repo": "patrickdugan/cryptanalytic-discovery-lab",
+      "files": 1,
+      "bytes": 2119,
+      "commit": null,
+      "token_count": null,
+      "method": "2026-11-19 recursive default-branch tree scan; repository HEAD may move; exact totals in recount report",
       "license_files": []
     }
   ],
@@ -301,5 +461,27 @@
     "Repository code license does not automatically license model outputs/third-party data.",
     "Reserve all legacy heldout families for independent evaluation or explicitly retire them before training."
   ],
-  "scope_note": "Metadata and aggregate receipts only. External shards were not retrieved. Held-out source files are included in tree sizes but excluded from any proposed training release."
+  "scope_note": "Metadata and aggregate receipts only. External shards were not retrieved. Held-out source files are included in tree sizes but excluded from any proposed training release.",
+  "lean_retotal": {
+    "audit_date": "2026-11-19",
+    "org_repositories_scanned": 36,
+    "personal_repositories_scanned": 188,
+    "total_repositories_scanned": 224,
+    "repositories_with_lean": 21,
+    "org_lean_files": 163,
+    "org_bytes": 1072506,
+    "personal_lean_files": 1056,
+    "personal_bytes": 83816665,
+    "total_lean_files": 1219,
+    "total_lean_bytes": 84889171,
+    "giant_certificate_files": 7,
+    "giant_certificate_bytes": 74515825,
+    "non_giant_files": 1212,
+    "non_giant_bytes": 10373346,
+    "empty_git_repositories": [
+      "patrickdugan/Aleph",
+      "patrickdugan/my-near-rust-contract"
+    ],
+    "report": "training/reports/2026-11-19_all_repos_lean_retotal.md"
+  }
 }
