@@ -1,5 +1,8 @@
 # Data Goblin Aleph: data landscape and 20B / 30B token plans
 
+> **Lean inventory correction (19 November 2026):** The four-repository metadata inventory below has been superseded by the [complete 224-repository recount](2026-11-19_all_repos_lean_retotal.md): **1,219 tracked .lean files, 84,889,171 bytes**, including 163 files in six MoralityLabAI repositories. Excluding seven giant Semaev certificate files gives **1,212 files and 10,373,346 bytes**. Those are source byte counts, not deduplicated or tokenizer-measured training tokens.
+
+
 **As of 19 November 2026, Asia/Singapore.** This report audits source cards, repository trees and existing aggregate receipts. Public corpora were not downloaded or retokenized. External game shards remain unexamined. Proposed quotas count processed non-padding tokens and include repeated presentations.
 
 ## Recommended training target
