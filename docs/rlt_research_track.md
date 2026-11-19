@@ -329,3 +329,45 @@ The evaluator is an importable function so the operator's hard cap and progress
 guard are installed before running it. Per-item native scores are checked against
 the original run. The study replays previously viewed slices with one training
 seed. A held-out replication requires independent documents and fits.
+
+## Held-out replication across seeds
+
+The replication refits all three schedules with seeds 149 and 191 on the original
+training fixture, with 512 AdamW updates at four visits per arm. Fit initialization
+and the training batch plan are shared within each seed. The original seed 131
+participates in held-out evaluation alongside the new fits. The two additional
+fits vary model initialization and batch order while retaining the task mix and
+optimization budget.
+
+Freeze 128 fresh 96-byte windows for each text corpus from bounded dataset-viewer
+slices starting at row 1000. Reject document hashes already observed in either
+corpus and reject candidates whose saved excerpts contain a previously scored
+or training window. The manifest binds the fetched slices and resulting windows.
+The byte check covers the saved excerpts. The replicas share the new documents,
+so report effects by seed and corpus.
+
+The crossover uses native clocks and four depths. At one visit it scores a single
+runtime because the schedules coincide. At four, eight and sixteen visits it
+crosses all training and runtime rules. Use the per-seed one-visit training
+contrast, native RLT versus direct loss, RLT-to-direct swap cost, and matched
+damping on the RLT-trained weights. Keep the raw, paired document losses and
+training receipt hashes with the conclusions.
+
+For the tied parameters of the repeated block, let `S_k` be the parameter
+sensitivity of the carried state. If the schedule is fixed, differentiation gives
+
+    S_(k+1) = [(1-eta_k)I + eta_k F_(x,k)] S_k + eta_k F_(theta,k).
+
+When the candidate derivatives have norm bounds `L` and `B`, the carried-state
+bound from parameter injection alone is
+`B [product_k (1 + (L-1) eta_k) - 1] / (L-1)`. This follows by telescoping the
+geometric weights on the injected derivatives. At `L=1`, it is `B sum_k eta_k`.
+Direct then has a linear bound in the visit count and RLT has a harmonic bound.
+Any parameter sensitivity in the initial state adds its separately propagated
+term. Endpoint and tied-readout gradients also enter the training objective
+directly. The first endpoint and its gradient are identical for matched
+initialization, batch, and clocks. The initial-gradient probe aggregates the
+three later endpoint losses separately and measures their angle with the first.
+
+    python -m datagoblin.training_gym.rlt_lm_replication freeze --root ORIGINAL_PILOT --sources FRESH_SNAPSHOTS --out HOLDOUT
+    python -m datagoblin.training_gym.rlt_lm_replication score --run REPLICATION_EVAL --holdout HOLDOUT --out EVIDENCE.json
