@@ -371,3 +371,58 @@ three later endpoint losses separately and measures their angle with the first.
 
     python -m datagoblin.training_gym.rlt_lm_replication freeze --root ORIGINAL_PILOT --sources FRESH_SNAPSHOTS --out HOLDOUT
     python -m datagoblin.training_gym.rlt_lm_replication score --run REPLICATION_EVAL --holdout HOLDOUT --out EVIDENCE.json
+
+## Released Sudoku HRM and an LDT stopping boundary
+
+This checkpoint test uses the released 27M-parameter Sudoku Extreme HRM. It
+retains the checkpoint's 16 supervised segments, two slow visits per segment,
+two fast visits per slow visit, and its separate recurrent states. Feedback can
+act on the slow state across the two visits within each segment or across all
+32 visits. The two-visit schedule repeats `[1/2, 1]`. Global RLT uses the
+remaining slow-visit count across the full rollout. Global matched damping
+controls for global RLT's coefficient sum and terminal full update. It has a
+coefficient sum of about 4.06 across 32 visits. The segment-reset comparison
+uses a sum of 24, and direct uses 32. Comparison between global and segment
+scopes therefore changes the schedule and the total interpolation dose.
+[Released checkpoint and config](https://huggingface.co/sapientinc/HRM-checkpoint-sudoku-extreme/tree/fbb4eb8)
+
+The squared norm of an interpolated state has an exact decomposition. For
+`h' = (1-eta)h + eta h_hat`, it is the weighted average of the two squared
+norms minus `eta (1-eta) ||h_hat-h||²`. Even when the post-normalized endpoint
+has unit RMS, interpolation can reduce the magnitude of the state injected
+into the next fast stack. Tracking both the prediction and carried-state RMS
+helps detect this change.
+
+The CPU-only Torch preflight reproduced the upstream slow state, fast state,
+and logits at every segment for a reference puzzle. The Torch process crossed
+the 256 MiB private-commit target, so the benchmark uses a bounded NumPy
+backend with bfloat16 rounding at operation boundaries. Its weights are decoded
+from the pinned release ZIP with a restricted layout reader. A cross-backend
+gate checks segment predictions and final boards against the two saved CPU
+reference rollouts before the benchmark is scored. The official model uses GPU
+FlashAttention, so this check pertains to the CPU reference implementation.
+[Upstream HRM source](https://github.com/sapientinc/HRM)
+
+The fixed holdout is a deterministic 24-puzzle slice of the public Sudoku
+Extreme test split. All arms execute the full planned budget during inference.
+Record both exact match and Sudoku validity at each supervised segment. The
+strict upstream LDT boundary independently certifies a proposed grid by checking
+its givens, rows, columns and boxes. A verified stopping replay accepts the first
+valid grid. Compare retained scores and estimated stack calls with full-budget
+inference, keeping the checker calls explicit. This check evaluates a proposed
+solution without a search for candidates. [Official test split](https://huggingface.co/datasets/sapientinc/sudoku-extreme)
+
+For a fixed forecast sequence, the verified exit time is the first segment
+whose grid passes the checker, or the budget if every segment fails. The gate
+accepts a valid solution whenever any prefix contains one. The model still
+generates candidates, and the checker carries responsibility for acceptance.
+Earlier acceptance is useful even for trajectories that later leave a valid
+grid. Exact equality to a dataset label remains a separate metric when a
+valid solution could differ from the stored label.
+
+    python scripts/run_rlt_hrm_sudoku_windows.py --run PINNED_RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python -m datagoblin.training_gym.rlt_hrm_sudoku --run PINNED_RUN --out EVIDENCE.json --upstream-ldt HYBRID_TRM_LDT_ROOT
+
+The run directory contains the public checkpoint, release config and provenance,
+the frozen holdout, and the archived CPU-reference predictions. Keep generated
+weights and private evaluation files outside the repository.
