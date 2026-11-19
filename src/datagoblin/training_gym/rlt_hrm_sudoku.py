@@ -42,7 +42,7 @@ def sudoku_valid(givens: str, proposed: str) -> bool:
     return all({proposed[i] for i in unit} == DIGITS for unit in UNITS)
 
 
-def report(root: Path, out: Path, upstream_ldt: Path):
+def report(root: Path, out: Path, upstream_ldt: Path, *, arms=ARMS, model="hrm"):
     resources = load_structured(root / "resources.json")
     if (root / "active.lock").exists() or resources["segments"][-1]["status"] != "complete":
         raise ValueError("inference must finish before reporting")
@@ -66,7 +66,7 @@ def report(root: Path, out: Path, upstream_ldt: Path):
         top = hybrid.CandidateState({
             str(i): DIGITS if digit == "0" else frozenset({digit}) for i, digit in enumerate(givens)
         })
-        for arm in ARMS:
+        for arm in arms:
             prediction_path = root / "predictions" / f"{item['id']}-{arm}.json"
             record = load_structured(prediction_path)
             if record["id"] != item["id"] or record["arm"] != arm or len(record["steps"]) != segments:
@@ -105,7 +105,7 @@ def report(root: Path, out: Path, upstream_ldt: Path):
             })
     summaries = {}
     calls = protocol["h_cycles"] * (1 + protocol["l_cycles"])
-    for arm in ARMS:
+    for arm in arms:
         rows = [r for r in cases if r["arm"] == arm]
         summaries[arm] = {
             "items": len(rows), "final_cell_errors": sum(r["final_cell_errors"] for r in rows),
@@ -118,7 +118,7 @@ def report(root: Path, out: Path, upstream_ldt: Path):
             "gate_replay_stack_calls": sum(r["gate_checks"] for r in rows) * calls,
         }
     dump_structured(out, {
-        "schema": "datagoblin.rlt-hrm-sudoku-checkpoint.v1", "protocol": protocol, "resources": resources,
+        "schema": f"datagoblin.rlt-{model}-sudoku-checkpoint.v1", "protocol": protocol, "resources": resources,
         "upstream_ldt_sha256": ldt_hash, "puzzle_count": len(holdout["puzzles"]), "summary": summaries, "cases": cases,
     })
 

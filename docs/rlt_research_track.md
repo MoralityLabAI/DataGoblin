@@ -426,3 +426,50 @@ valid solution could differ from the stored label.
 The run directory contains the public checkpoint, release config and provenance,
 the frozen holdout, and the archived CPU-reference predictions. Keep generated
 weights and private evaluation files outside the repository.
+
+## Attention TRM on the same Sudoku holdout
+
+The checkpoint sweep applies five inference rules to one frozen, public
+community attention TRM checkpoint. It uses the upstream Sudoku attention
+recipe with 16 supervised segments, three answer updates per segment, and six
+reasoning updates before each answer update. A shared two-layer stack proposes
+both kinds of update. All arms execute 21 stack calls per segment, and both
+states carry across supervised segments. [Upstream TRM](https://github.com/SamsungSAILMontreal/TinyRecursiveModels/tree/c01103738605ba39d1430519b1ee0c62f4c707f8)
+· [Checkpoint](https://huggingface.co/yagizdevre/trm-sudoku-extreme-att/tree/56e0d4ac6d91671c60cc1314bfef6c3f620693f2)
+
+Answer-state RLT resets its clock across each group of three answer updates.
+Its coefficients are `[1/3, 1/2, 1]`; the matching control uses
+`[5/12, 5/12, 1]`. Reasoning-state RLT resets its clock for each group of six
+reasoning updates. Its control matches the coefficient sum and the final full
+update in that group. In both placement comparisons the other state uses direct
+feedback. The schedules have the same stack calls. Since both states enter
+the shared stack, changing either carried state can affect both trajectories.
+
+For a scalar affine endpoint with fixed slope `lambda`, one answer update
+has gain `1 + eta (lambda - 1)`. Across three answer updates, the RLT gain
+minus the matched-damping gain is exactly `-lambda (lambda - 1)² / 144`.
+Matching the coefficient sums cancels the first-order terms. This calculation
+isolates the temporal schedule with a fixed endpoint derivative. In the
+coupled loop, collect six direct fast visits as `z' = A z + B y`, and write
+the slow endpoint as `C z' + D y`. The complete cycle matrix has the form
+`M(eta) = M0 + eta M1`, where `M0 = [[A, B], [0, I]]` and
+`M1 = [[0, 0], [CA, CB + D - I]]`. Swapping two coefficients changes the
+product by `M(b)M(a) - M(a)M(b) = (b-a)(M1 M0 - M0 M1)`. This term depends
+on coefficient order and the cross-state derivatives.
+
+The Windows worker uses one CPU-only Torch thread under a hard 256 MiB
+Job Object and the same host-memory floor as the HRM test. It checks every
+direct segment board against two frozen reference traces before scoring.
+Use the separate reference script included with the run receipts to generate
+these traces. The LDT gate independently validates candidate grids at segment
+boundaries. The checkpoint sees givens alone, while exact-match scoring happens
+after inference. The archived replay counts checks and projected stack calls.
+
+The HRM and TRM sweeps share puzzle IDs and labels. Compare per-segment scores
+with the model-specific layer and token costs. The compute audit estimates
+stack projection and dense attention multiply-accumulates and compares the
+models at a shared ceiling. Observed differences also reflect the two
+checkpoints' distinct training and numerical backends.
+
+    python scripts/run_rlt_trm_sudoku_windows.py --run PINNED_RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400 --torch-cpu CPU_TORCH_ROOT
+    python -m datagoblin.training_gym.rlt_trm_sudoku --run PINNED_RUN --out EVIDENCE.json --upstream-ldt HYBRID_TRM_LDT_ROOT
