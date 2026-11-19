@@ -67,6 +67,7 @@ def local_cell(w, z, message, y, start, clock, phase):
 
 def refine(
     w, edges, start, hops, prior_answer, mode, depth, trace=None, *, placement="reasoning", clock_depths=None,
+    stop_when: Callable[[int, np.ndarray], bool] | None = None,
 ):
     z = start
     y = prior_answer
@@ -91,6 +92,8 @@ def refine(
         if trace is not None:
             trace.append((updated, updated - z, y))
         z = updated
+        if stop_when is not None and stop_when(visit + 1, y):
+            break
     logits = anp.exp(anp.clip(w["scale"], -3, 6)) * y
     probabilities = anp.exp(logits - anp.max(logits, axis=1, keepdims=True))
     return logits, probabilities / anp.sum(probabilities, axis=1, keepdims=True)

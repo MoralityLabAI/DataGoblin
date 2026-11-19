@@ -473,3 +473,32 @@ checkpoints' distinct training and numerical backends.
 
     python scripts/run_rlt_trm_sudoku_windows.py --run PINNED_RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400 --torch-cpu CPU_TORCH_ROOT
     python -m datagoblin.training_gym.rlt_trm_sudoku --run PINNED_RUN --out EVIDENCE.json --upstream-ldt HYBRID_TRM_LDT_ROOT
+
+## Live LDT stopping on rule changes
+
+The graph-conditioned TRM exposes its top answer after each completed visit.
+The strict LDT membrane commits it only after independent exact verification
+in the current evidence epoch. A commitment immediately ends the loop and
+the first turn passes its accepted prefix's answer distribution to the
+second turn. The RLT schedule and depth inputs retain the original budget
+throughout that prefix. If the budget expires without a commit, the verified
+policy abstains. The fixed baseline runs both turns to completion and emits
+its terminal guesses.
+
+The verifier constructs the original route once, then checks a patch by
+resuming from the first affected departure on that route. The second-turn
+gate verifies in a fresh epoch. A separate policy can submit the earlier
+certified answer at visit zero when the patch leaves the graph identical.
+It commits only after checking the new epoch. The verifier's route is
+isolated from the neural proposal and its answer distribution.
+
+The comparison freezes existing answer-placement weights and evaluates
+direct, RLT and matched damping at six and ten visits per turn. The new pack
+contains both actual edits and no-ops on the same lineages. The long cohort
+balances seven-, eight- and nine-hop queries. Exclude lineages from all
+supplied previous packs, including the checkpoint training pack. Report
+per-item exact answers, abstentions, live neural visits, membrane checks and
+independent route hops. The exact route checker can solve this fixture by
+itself, so its work belongs in any claim about the hybrid's cost.
+
+    python scripts/run_rlt_trm_ldt_windows.py --out RUN --checkpoints ANSWER_RUN --previous-pack TRAINING_PACK --previous-pack PRIOR_HOLDOUT --upstream-ldt HYBRID_TRM_LDT_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400

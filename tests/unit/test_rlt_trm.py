@@ -71,3 +71,27 @@ def test_fixed_phase_does_not_change_remaining_time_schedule() -> None:
     )
     assert len(trace) == 10
     np.testing.assert_allclose(trace[0][2], trace[0][0] / 10)
+
+
+def test_live_stop_returns_exact_prefix_and_skips_remaining_visits() -> None:
+    pytest.importorskip("autograd")
+    from datagoblin.training_gym import rlt_trm as pilot
+
+    task, _ = next(episodes(17, "length_ood", 1))
+    start, hops, before, _ = pilot.prepare([task])
+    weights = pilot.init_weights(17)
+    states = []
+    calls = []
+
+    def stop(visit, answer):
+        calls.append((visit, answer.copy()))
+        return visit == 4
+
+    args = (weights, before, start, hops, np.zeros_like(start), "rlt", 10)
+    pilot.refine(*args, states, placement="answer")
+    logits, carry = pilot.refine(*args, placement="answer", stop_when=stop)
+    assert [visit for visit, _ in calls] == [1, 2, 3, 4]
+    for (_, actual), (_, _, expected) in zip(calls, states[:4], strict=True):
+        np.testing.assert_array_equal(actual, expected)
+    np.testing.assert_array_equal(logits, np.exp(weights["scale"]) * states[3][2])
+    np.testing.assert_allclose(carry.sum(axis=1), [1])
