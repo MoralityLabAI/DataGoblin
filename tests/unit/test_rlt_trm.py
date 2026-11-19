@@ -54,3 +54,20 @@ def test_answer_interpolation_preserves_uncoupled_transport() -> None:
     assert probe["answer_gain"][0] == pytest.approx(5 / 6, abs=1e-6)
     assert probe["answer_gain"][-1] == 0
     assert not probe["flipped"]
+
+
+def test_fixed_phase_does_not_change_remaining_time_schedule() -> None:
+    pytest.importorskip("autograd")
+    from datagoblin.training_gym import rlt_trm as pilot
+
+    task, _ = next(episodes(17, "development", 1))
+    start, hops, before, _ = pilot.prepare([task])
+    weights = pilot.init_weights(17)
+    weights["down"][:] = 0
+    trace = []
+    pilot.refine(
+        weights, before, start, hops, np.zeros_like(start), "rlt", 10, trace,
+        placement="answer", clock_depths=(6, 10),
+    )
+    assert len(trace) == 10
+    np.testing.assert_allclose(trace[0][2], trace[0][0] / 10)

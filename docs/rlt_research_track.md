@@ -215,3 +215,45 @@ replay measures coverage and authority. Its checker cost is the same order as so
 fixture outright. The typed boundary design comes from the local HybridTRMLDT worktree.
 
     python scripts/replay_rlt_ldt_boundary.py --pack RULE_PACK --evidence ANSWER_EVIDENCE REASONING_EVIDENCE --upstream HYBRID_TRM_LDT_ROOT --out BOUNDARY_RESULT.json
+
+## Clocks, route witnesses and native HRM slow cycles
+
+The frozen clock audit varies the learned cell's phase input independently of its step-size
+input. With ten actual visits and six training visits, phase can use either `k/10` or
+`k/6`, and step size can use either `1/10` or `1/6`. The query hop count, actual visits,
+and feedback coefficient `1/(10-k)` are held fixed. The reference phase can exceed one.
+The carried-answer intervention compares the inherited answer with a zero answer
+initialization on the second turn. The auditor rejects overlapping evaluation lineages.
+
+    python -m datagoblin.training_gym.rlt_clock_audit --pack FRESH_RULE_PACK --source PLACEMENT_RUN_ROOT --out CLOCK_AUDIT
+
+The LDT checker can reuse a verified prefix via `--reuse-route`. Let `x_0,...,x_K` be
+the verified old walk and `D` the sources whose outgoing edges actually changed.
+Let `j` be the first index below `K` with `x_j` in `D`, or `K` if none exists.
+For each `i<j`, the old outgoing edge and new outgoing edge agree at `x_i`. Induction
+gives the same walk through `x_j` under both graphs. The new endpoint follows from
+exact replay of only `K-j` edges under the patched graph. A no-op or off-path edit can
+therefore transfer the endpoint without traversing edges. On a cycle, the earliest
+occurrence of a changed source is the one that matters. Cache creation and patch
+membership checks carry their own costs. For a witness built solely for reuse, the edge
+savings over multiple recertifications are the sum of their reused prefix lengths minus
+the cost of the initial walk. The environment owns the old witness and
+the final patch, and issues each hard commitment under the current epoch.
+
+There is a scalar limit on what the RLT schedule itself can explain. For a fixed
+positive real eigenvalue `lambda`, the preterminal factors
+`1 + eta_k (lambda-1)` have the same arithmetic mean in RLT and matched damping.
+The factors are positive. By AM-GM the constant preterminal damping maximizes their
+product. Both schedules have the same final factor `lambda`. The comparison bounds
+gain for that one fixed mode. Network-level correctness also depends on changing
+Jacobians, nonlinear routing, and feedback between states.
+
+The published HRM-Text-1B configuration uses two H cycles and three L cycles per H
+cycle. At two slow visits RLT and matched damping both use `[1/2, 1]`. A native-budget
+comparison can identify the effect of interpolation relative to direct feedback.
+A test of the RLT schedule relative to matched damping needs at least three slow
+visits. Preserve the same low-level work per slow visit and log the count of both.
+The slow-state hook must use the previous carried H state, including the actual
+initializer at the first visit. The H block's combined input also contains L state.
+[Published HRM-Text-1B configuration](https://huggingface.co/sapientinc/HRM-Text-1B/raw/main/config.json) ·
+[HRM-Text implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/hrm_text/modeling_hrm_text.py)

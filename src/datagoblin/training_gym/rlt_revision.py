@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +17,7 @@ SPLITS = ("train", "development", "length_ood", "revision_ood")
 NODES = tuple(f"n{i:02d}" for i in range(32))
 
 
-def follow(links: dict[str, str], start: str, steps: int) -> str:
+def follow(links: Mapping[str, str], start: str, steps: int) -> str:
     for _ in range(steps):
         start = links[start]
     return start

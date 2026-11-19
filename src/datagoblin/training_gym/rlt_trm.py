@@ -65,15 +65,18 @@ def local_cell(w, z, message, y, start, clock, phase):
     return anp.dot(anp.tanh(anp.dot(inputs, w["up"]) + w["bias"]), w["down"])
 
 
-def refine(w, edges, start, hops, prior_answer, mode, depth, trace=None, *, placement="reasoning"):
+def refine(
+    w, edges, start, hops, prior_answer, mode, depth, trace=None, *, placement="reasoning", clock_depths=None,
+):
     z = start
     y = prior_answer
     ones = anp.ones_like(start)
+    phase_depth, step_depth = (depth, depth) if clock_depths is None else clock_depths
     for visit in range(depth):
         clock = (
             ones * (hops[:, None] / 10),
-            ones * (visit / depth),
-            ones * (1 / depth),
+            ones * (visit / phase_depth),
+            ones * (1 / step_depth),
             ones * ((hops[:, None] - visit - 1) / 10),
         )
         # Route one edge of latent mass, with scatter-add semantics for the patched graph.
