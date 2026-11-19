@@ -257,3 +257,42 @@ The slow-state hook must use the previous carried H state, including the actual
 initializer at the first visit. The H block's combined input also contains L state.
 [Published HRM-Text-1B configuration](https://huggingface.co/sapientinc/HRM-Text-1B/raw/main/config.json) ·
 [HRM-Text implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/hrm_text/modeling_hrm_text.py)
+
+## Learned two-timescale carry pilot
+
+The binary addition pilot uses separate fast and slow cells. The fast cell advances
+one column of carry information. The slow cell reads carries and updates the answer
+state. The slow state conditions the fast proposal and remains fixed during its two
+inner visits. Both cells start from learned four-row tables indexed by the local
+operand bits. State updates use continuous probabilities. The model has 24 parameters
+and receives neither phase nor normalized step size. Supervision is final-answer bit
+cross-entropy. This retains the fast/slow coupling studied in [HRM](https://arxiv.org/html/2506.21734v4)
+and gives an exact arithmetic verifier.
+
+Fit direct, slow RLT, slow matched damping, fast RLT and fast matched damping with
+the same initialization, examples, and update counts per seed. The selected schedule
+span is the full count of visits to its own state. There are four slow visits in
+training, with two fast visits per slow visit. Use 2, 4, 6 and 8 slow visits at test.
+In the 16-bit challenge, flipping one operand bit at a known anchor initiates or
+clears a long carry. Evaluate the second calculation from a fresh state and from the
+previous slow state, resetting the fast state both times. Report creation and
+cancellation separately. A swap on frozen weights distinguishes a training effect
+from the effect of applying interpolation at inference.
+
+For an ideal carry chain without slow-to-fast coupling, when every fast visit is
+necessary to generate and move the carry to the far bit, its surviving signal is
+the product of the fast feedback coefficients. With 16 fast visits RLT gives
+`1/16!` in that control. This is a transport limitation. The slow endpoint state
+can be interpolated without directly imposing this product on the carry path.
+Learned cross-state dependencies can still couple both trajectories.
+
+    python scripts/run_rlt_hrm_carry_windows.py --out RUN_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python -m datagoblin.training_gym.rlt_hrm_carry_report --run RUN_ROOT --out EVIDENCE.json
+
+The Windows launcher uses one CPU worker, 256 MiB of job commit, and the 3 GiB host
+reserve. The evaluator independently verifies binary predictions using integer
+addition after inference. A typed incremental checker for a future carry task can
+retain certified columns below the first edited bit. It can reuse the old suffix
+once the new carry matches the old carry at the boundary of an unchanged operand
+suffix. That follows from deterministic per-column transitions, as with the graph
+route witness.
