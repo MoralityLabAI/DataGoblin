@@ -7,6 +7,24 @@ import numpy as np
 import pytest
 
 
+def test_reference_clock_and_feedback_pulse_use_separate_controls() -> None:
+    pytest.importorskip("autograd")
+    from datagoblin.training_gym import rlt_pilot as pilot
+
+    weights = pilot.initialize(17)
+    ids = np.asarray([[1, 2, 3, 4]])
+    delta = np.random.default_rng(7).normal(size=(1, 4, pilot.WIDTH)).astype(np.float32) * 0.01
+    base = pilot.logits_and_states(weights, ids, "rlt", 4, all_visits=True)
+    explicit = pilot.logits_and_states(weights, ids, "rlt", 4, all_visits=True, clock_depths=(4, 4))
+    late = pilot.logits_and_states(weights, ids, "rlt", 4, all_visits=True, feedback_pulse=(3, delta))
+    for clean, reference, final_only in zip(base, explicit, late, strict=True):
+        np.testing.assert_array_equal(clean, reference)
+        np.testing.assert_array_equal(clean, final_only)
+    early = pilot.logits_and_states(weights, ids, "rlt", 4, all_visits=True, feedback_pulse=(0, delta))
+    np.testing.assert_array_equal(base[0], early[0])
+    assert not np.allclose(base[-1], early[-1])
+
+
 def test_feedback_controls_and_causal_prefix() -> None:
     pytest.importorskip("autograd")
     from datagoblin.training_gym import rlt_pilot as pilot

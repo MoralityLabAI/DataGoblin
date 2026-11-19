@@ -296,3 +296,36 @@ retain certified columns below the first edited bit. It can reuse the old suffix
 once the new carry matches the old carry at the boundary of an unchanged operand
 suffix. That follows from deterministic per-column transitions, as with the graph
 route witness.
+
+## Frozen language-model crossover
+
+The language-model audit reuses the completed three-arm public-benchmark pilot. It
+crosses training and runtime feedback at 1, 2, 4, 8, and 16 block visits. One visit
+isolates the fitted weights because all feedback rules reduce to the same forward
+pass. At two visits the RLT and matched-damping schedules coincide. Text-window
+losses use the same FineWeb-Edu and OpenWebText documents across all cells. The
+discrete benchmark slices are scored at four and eight visits with native clocks.
+The audit also intervenes independently on phase and step-size feature scales at
+eight and sixteen visits. The executed depth and feedback coefficients remain fixed.
+
+For a lower-is-better score, let `S(a,b)` denote training rule `a` and runtime rule
+`b`. With direct feedback `D` as the reference and `R` the candidate, the training
+term is `S(R,D)-S(D,D)`, the runtime term is `S(D,R)-S(D,D)`, and the interaction
+is `S(R,R)-S(R,D)-S(D,R)+S(D,D)`. The three terms sum to the joint effect. This is
+a decomposition on the frozen matched examples and fitted checkpoints.
+
+An endpoint perturbation at visit `j` enters the next carried state multiplied by
+`eta_j`. Later state Jacobians still act on that perturbation. The audit pairs
+equal input-RMS perturbations at initialization and at early and late feedback
+boundaries, and measures the final raw, normalized, and logit response. Centered
+normalization with `z = P h` and `s = sqrt(zᵀz/d + eps)` has derivative
+`P/s - zzᵀ/(d s³)`. For centered directions perpendicular to `z`, the gain is
+`1/s`. Smaller raw states can therefore exhibit larger normalized responses
+even when interpolation attenuates the raw perturbation.
+
+    python -m datagoblin.training_gym.rlt_lm_audit_report --root ORIGINAL_PILOT --audit CROSSOVER_RUN --resources RESOURCES.json --out EVIDENCE.json
+
+The evaluator is an importable function so the operator's hard cap and progress
+guard are installed before running it. Per-item native scores are checked against
+the original run. The study replays previously viewed slices with one training
+seed. A held-out replication requires independent documents and fits.

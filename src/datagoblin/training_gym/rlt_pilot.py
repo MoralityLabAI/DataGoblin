@@ -70,15 +70,19 @@ def normalize(x):
     return centered / anp.sqrt(anp.mean(centered**2, axis=-1, keepdims=True) + 1e-5)
 
 
-def logits_and_states(weights, ids, mode, depth, *, all_visits=False, delta=None, trace=None):
+def logits_and_states(
+    weights, ids, mode, depth, *, all_visits=False, delta=None, trace=None,
+    clock_depths=None, feedback_pulse=None, final_endpoint=None,
+):
     batch, length = ids.shape
     x = weights["tokens"][ids] + weights["positions"][:length]
     if delta is not None:
         x = x + delta
     causal = np.triu(np.full((length, length), -1e4, dtype=np.float32), k=1)
     outputs = []
+    phase_depth, step_depth = (depth, depth) if clock_depths is None else clock_depths
     for visit in range(depth):
-        clock = np.array([visit / depth, 1 / depth], dtype=np.float32)
+        clock = np.array([visit / phase_depth, 1 / step_depth], dtype=np.float32)
         conditioned = normalize(x) + anp.dot(clock, weights["time"])
         packed = anp.matmul(conditioned, weights["qkv"])
         q, k, v = anp.transpose(anp.reshape(packed, (batch, length, 3, HEADS, WIDTH // HEADS)), (2, 0, 3, 1, 4))
@@ -92,10 +96,14 @@ def logits_and_states(weights, ids, mode, depth, *, all_visits=False, delta=None
         h = attended + anp.matmul(gelu, weights["down"])
         eta = feedback_weight(mode, visit, depth)
         advanced = h if eta == 1 else x + eta * (h - x)
+        if feedback_pulse is not None and visit == feedback_pulse[0]:
+            advanced = advanced + eta * feedback_pulse[1]
         if trace is not None:
             trace.append(tuple(float(np.sqrt(np.mean(t**2))) for t in (advanced, h, advanced - x)))
         if all_visits or visit == depth - 1:
             outputs.append(anp.matmul(normalize(h), weights["tokens"].T))
+        if final_endpoint is not None and visit == depth - 1:
+            final_endpoint.append(h)
         x = advanced
     return outputs
 
@@ -245,6 +253,7 @@ def pending_rows(path):
 
 def continuation(
     weights: dict[str, np.ndarray], mode: str, depth: int, prefix: list[int], target: list[int],
+    *, clock_depths=None,
 ) -> tuple[float, bool]:
     total = 0.0
     greedy_correct = True
@@ -253,7 +262,9 @@ def continuation(
         chunk = target[start : start + OPTION_STRIDE]
         context = history[-WINDOW_CONTEXT:]
         seq = context + chunk
-        logits = logits_and_states(weights, np.asarray([seq[:-1]]), mode, depth)[0][0, len(context) - 1 :]
+        logits = logits_and_states(
+            weights, np.asarray([seq[:-1]]), mode, depth, clock_depths=clock_depths,
+        )[0][0, len(context) - 1 :]
         gold = np.asarray(chunk)
         total += float(target_nll(logits, gold).sum())
         greedy_correct &= bool((logits.argmax(-1) == gold).all())
@@ -261,18 +272,23 @@ def continuation(
     return total, greedy_correct
 
 
-def eval_known(model, mode, depth, name, item):
+def eval_known(model, mode, depth, name, item, *, clock_depths=None):
     if name in TEXT:
         seq = item["bytes"]
-        logits = logits_and_states(model, np.asarray([[BOS, *seq[:-1]]]), mode, depth)[0][0]
+        logits = logits_and_states(
+            model, np.asarray([[BOS, *seq[:-1]]]), mode, depth, clock_depths=clock_depths,
+        )[0][0]
         nll = float(target_nll(logits, np.asarray(seq)).sum())
         return {"nll_nats": nll, "bytes": len(seq)}
     prefix = [BOS, *item["prompt"].encode()]
     if name == "lambada":
         target = list(item["target"].encode())
-        nll, correct = continuation(model, mode, depth, prefix, target)
+        nll, correct = continuation(model, mode, depth, prefix, target, clock_depths=clock_depths)
         return {"correct": correct, "nll_nats": nll, "target_bytes": len(target)}
-    nlls = [continuation(model, mode, depth, prefix, list(choice.encode()))[0] for choice in item["choices"]]
+    nlls = [
+        continuation(model, mode, depth, prefix, list(choice.encode()), clock_depths=clock_depths)[0]
+        for choice in item["choices"]
+    ]
     lengths = [len(c.strip()) for c in item["choices"]]
     raw = min(range(len(nlls)), key=nlls.__getitem__)
     normalized = min(range(len(nlls)), key=lambda i: nlls[i] / max(1, lengths[i]))
