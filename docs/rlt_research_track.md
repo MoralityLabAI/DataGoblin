@@ -84,3 +84,38 @@ curator reward, development and final reporting separate. Before training a cura
 architecture outcomes, repeat promising contrasts from shared checkpoint and optimizer snapshots.
 Freeze promotion criteria before scoring the final split. The fixture CLI produces deterministic
 task and checker evidence. It makes no architecture-promotion decision and requires no checkpoint.
+
+## Small matched workstation pilot
+
+The Windows pilot uses one worker and a hard 256 MiB Job Object commit limit. It admits a run
+only when that allowance fits above 3 GiB of available host memory, then stops if available
+memory drops below the reserve. It uses the existing audited `lcgrt.ramcap` helper from the
+LoopedTransformers checkout. The model is a 32-wide, two-head causal Transformer block with
+tied readout, time and step-size inputs, and four training visits. NumPy and autograd keep the
+runtime small. Each arm receives the same initialization, batch order and 512 AdamW updates.
+All arms use all-visit supervision. The worker evaluates K=2,4,8 only after training all arms.
+
+Use the `rlt-pilot` extra and a local run directory containing the bounded source snapshots in
+`sources/`. Each source JSON includes dataset, config, split, observed repository revision,
+response digests and ordered dataset-viewer rows. Text snapshots also carry full-document
+hashes and bounded excerpts. The launcher freezes the training and evaluation manifests before
+starting the first arm. The reporter checks coverage and initialization and writes item-level
+paired scores, per-loop summaries and the sampled resource trace.
+
+Exit code 75 identifies a RAM pause. The launcher writes an atomic optimizer snapshot before
+exiting the worker. Re-invoke with the same root to continue from its last committed batch
+under the same memory controls. It retains complete evaluation files and redoes an incomplete
+file from its first item. A `STOP` file in the run root cancels waiting and stops the pilot.
+
+    python scripts/fetch_rlt_pilot_data.py RUN_ROOT
+    python scripts/run_rlt_small_pilot_windows.py RUN_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python -m datagoblin.training_gym.rlt_pilot_report RUN_ROOT EVIDENCE_FOLDER
+
+The text result is bits per UTF-8 byte. The text validation windows come from reserved documents
+in the same corpora used for training. HellaSwag uses character-normalized choice likelihood
+and ARC uses raw likelihood as the primary score, with both retained. LAMBADA uses greedy
+last-word byte exact match. Continuation scoring uses a trailing context and fixed stride.
+These are fixed 64-item slices with a byte tokenizer and one training seed. Treat their
+results as feedback and transfer diagnostics. The rule pack uses distinct graph lineages,
+including length and revision-position holdouts. The second-turn input includes the model's own
+first answer, and evaluation labels stay in the separate scorer.
