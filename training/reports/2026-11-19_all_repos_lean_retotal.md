@@ -41,6 +41,21 @@ The remaining **30 organization repositories** had zero `.lean` files in their d
 
 The other **173 personal repositories** contained no tracked `.lean` files in the scanned default branch; two of these are empty Git histories.
 
+## Source organization and proof relevance
+
+A directory-level inspection confirms that file counts cover different types of material:
+
+- **EvalMath:** `lean/FeedbackChannel` has 22 files / 620,535 bytes; `fixtures/bpd_lean_curriculum_v2` has 6 files / 130,108 bytes; `fixtures/external` has 4 files / 38,034 bytes. Some generated fixtures may repeat proofs held in other repositories.
+- **LoopedTransformers:** `experiments/lean_ram03` has 67 files / 115,123 bytes and `experiments/lean_ram02` has 12 / 23,315 bytes. Research and activation-funnel experiment fixtures account for other files. Whole-repository file counts should not be construed as 93 independent theorems.
+- **BPD:** all 20 files / 48,213 bytes are under `mechinterp/bpd`.
+- **HybridTRMLDT:** all 10 files / 17,646 bytes are under `formal/CCA`.
+- **OntologicalProofs:** `Neoplatonic/LTR` holds 382 files / 2,111,181 bytes.
+- **leanp2p:** 81 files / 820,403 bytes under `packages/libp2p`; the top-level `Tests` directory contains 34 files / 769,618 bytes, plus further nested test files. The repository combines implementation and test proofs.
+- **btc-verified:** consensus, serialization, transaction, crypto and chain-state modules appear alongside test and fuzz files.
+- **TradeLayer-Rust:** one `formal/` Lean file contributes 219,438 bytes, with 16 other files under `formal/bitcoin_core_36629`.
+
+The path breakdown supports corpus-lane assignment. It does not establish which declarations are kernel checked, how many `sorry` terms remain, or whether generated files share theorem ancestry.
+
 ## Corrected totals
 
 | Measure | Result |
