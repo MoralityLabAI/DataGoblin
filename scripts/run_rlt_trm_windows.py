@@ -45,6 +45,8 @@ def main():
     parser.add_argument("--pack", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--ramcap-package", type=Path, required=True, help="parent directory of lcgrt")
+    parser.add_argument("--placement", choices=("reasoning", "answer"), default="reasoning")
+    parser.add_argument("--probe-prior", action="store_true")
     args = parser.parse_args()
     pack, out = args.pack.resolve(), args.out.resolve()
     if sys.platform != "win32":
@@ -90,6 +92,7 @@ def main():
         "seeds": pilot.SEEDS, "steps": pilot.STEPS, "modes": pilot.MODES, "batch": pilot.BATCH,
         "train_depth": pilot.TRAIN_DEPTH, "depths": pilot.DEPTHS, "crossover_depth": pilot.TRAIN_DEPTH,
         "lr": pilot.LR, "rule_manifest_sha256": sha256_file(manifest), "numpy": pilot.np.__version__,
+        "placement": args.placement, "probe_prior": args.probe_prior,
         "source_sha256": {
             "runner": sha256_file(Path(__file__)), "model": sha256_file(Path(pilot.__file__)),
             "feedback": sha256_file(Path(rlt_pilot.__file__)), "scorer": sha256_file(Path(rlt_revision.__file__)),
@@ -149,7 +152,7 @@ def main():
                 current = [seed, mode]
                 arm = out / str(seed) / mode
                 arm.mkdir(parents=True, exist_ok=True)
-                result = pilot.train(pack, arm, mode, seed, training, guard)
+                result = pilot.train(pack, arm, mode, seed, training, guard, placement=args.placement)
                 matched.add((result["init_sha256"], result["schedule_sha256"], result["cell_calls"]))
             if len(matched) != 1:
                 raise ValueError("unmatched initialization, batch plan, or compute")
@@ -160,7 +163,9 @@ def main():
         for seed in pilot.SEEDS:
             for mode in pilot.MODES:
                 current = [seed, mode]
-                pilot.evaluate(pack, out / str(seed) / mode, mode, guard)
+                pilot.evaluate(
+                    pack, out / str(seed) / mode, mode, guard, placement=args.placement, probe_prior=args.probe_prior,
+                )
         status, stage = "complete", "complete"
     except ResourcePause as exc:
         status, error = "paused", str(exc)

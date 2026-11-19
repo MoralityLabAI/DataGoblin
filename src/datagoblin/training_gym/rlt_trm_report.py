@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from itertools import combinations, product
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -57,6 +58,8 @@ def _collect(pack: Path, run: Path, out: Path):
                 }.items():
                     if fit[key] != value:
                         raise ValueError(f"training receipt mismatch for {seed}/{mode}/{key}")
+                if fit.get("placement", "reasoning") != protocol.get("placement", "reasoning"):
+                    raise ValueError("training feedback placement differs from protocol")
                 matched.add((fit["init_sha256"], fit["schedule_sha256"], fit["parameters"], fit["cell_calls"]))
                 summary["training"].append(fit)
             if len(matched) != 1:
@@ -81,7 +84,10 @@ def _collect(pack: Path, run: Path, out: Path):
                             raise ValueError("first-turn answers disagree within a patch lineage")
                     guesses[train, runtime] = pred
                     trace_path = stem.with_suffix(".trace.jsonl")
-                    loop = read_rows(trace_path, {"id", "before", "after"})
+                    fields = {"id", "before", "after"}
+                    if protocol.get("probe_prior"):
+                        fields.add("prior_probe")
+                    loop = read_rows(trace_path, fields)
                     if list(loop) != list(tasks)[:8]:
                         raise ValueError("trace sample differs from the protocol")
                     for key, trace in loop.items():
@@ -89,6 +95,13 @@ def _collect(pack: Path, run: Path, out: Path):
                             visits = trace[turn]
                             if len(visits) != depth or NODES[visits[-1]["argmax"]] != pred[key][turn]:
                                 raise ValueError("terminal trace and answer disagree")
+                        if protocol.get("probe_prior"):
+                            probe = trace["prior_probe"]
+                            gains = probe["answer_gain"]
+                            if (len(gains) != depth or not all(math.isfinite(x) and x >= 0 for x in gains)
+                                    or not math.isclose(probe["input_rms"], 0.01, rel_tol=1e-5)
+                                    or not isinstance(probe["flipped"], bool)):
+                                raise ValueError("invalid matched prior perturbation trace")
                         traces.write(canonical_json({**trace, **meta, "hops": tasks[key]["steps"]}) + "\n")
                     summary["cells"].append({**meta, **verified, "trace_sha256": sha256_file(trace_path)})
                 deltas = {pair: [0, 0, 0] for pair in combinations(modes, 2)}

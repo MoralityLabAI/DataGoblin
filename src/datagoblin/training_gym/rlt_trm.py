@@ -65,7 +65,7 @@ def local_cell(w, z, message, y, start, clock, phase):
     return anp.dot(anp.tanh(anp.dot(inputs, w["up"]) + w["bias"]), w["down"])
 
 
-def refine(w, edges, start, hops, prior_answer, mode, depth, trace=None):
+def refine(w, edges, start, hops, prior_answer, mode, depth, trace=None, *, placement="reasoning"):
     z = start
     y = prior_answer
     ones = anp.ones_like(start)
@@ -81,9 +81,10 @@ def refine(w, edges, start, hops, prior_answer, mode, depth, trace=None):
         fraction = 0.5 + 0.5 * anp.tanh(local_cell(w, z, routed, y, start, clock, -1))
         proposed = z + fraction * (routed - z)
         eta = feedback_weight(mode, visit, depth)
-        updated = proposed if eta == 1 else z + eta * (proposed - z)
-        # The answer phase is direct in every arm, and does not route an extra edge.
-        y = updated + 0.1 * local_cell(w, updated, updated, y, start, clock, 1)
+        updated = z + eta * (proposed - z) if placement == "reasoning" and eta != 1 else proposed
+        # The answer phase reads the routed reasoning state without traversing an extra edge.
+        endpoint = updated + 0.1 * local_cell(w, updated, updated, y, start, clock, 1)
+        y = y + eta * (endpoint - y) if placement == "answer" and eta != 1 else endpoint
         if trace is not None:
             trace.append((updated, updated - z, y))
         z = updated
@@ -92,15 +93,17 @@ def refine(w, edges, start, hops, prior_answer, mode, depth, trace=None):
     return logits, probabilities / anp.sum(probabilities, axis=1, keepdims=True)
 
 
-def two_turns(w, data, mode, depth, traces=(None, None)):
+def two_turns(w, data, mode, depth, traces=(None, None), *, placement="reasoning"):
     start, hops, before, after = data
-    first, answer = refine(w, before, start, hops, anp.zeros_like(start), mode, depth, traces[0])
-    second, _ = refine(w, after, start, hops, answer, mode, depth, traces[1])
+    first, answer = refine(
+        w, before, start, hops, anp.zeros_like(start), mode, depth, traces[0], placement=placement,
+    )
+    second, _ = refine(w, after, start, hops, answer, mode, depth, traces[1], placement=placement)
     return first, second
 
 
-def objective(w, data, gold, mode):
-    first, second = two_turns(w, data, mode, TRAIN_DEPTH)
+def objective(w, data, gold, mode, placement):
+    first, second = two_turns(w, data, mode, TRAIN_DEPTH, placement=placement)
     return 0.5 * anp.mean(target_nll(first, gold[:, 0]) + target_nll(second, gold[:, 1]))
 
 
@@ -113,13 +116,15 @@ def load_training(pack):
     return encode_tasks(tasks), targets
 
 
-def train(pack, out, mode, seed, training, guard: Callable[[], None]):
+def train(pack, out, mode, seed, training, guard: Callable[[], None], *, placement="reasoning"):
     receipt_path = out / "train.json"
     weights_path = out / "weights.npz"
     if receipt_path.exists():
         receipt = load_structured(receipt_path)
         if receipt["steps"] != STEPS or receipt["weights_sha256"] != sha256_file(weights_path):
             raise ValueError("trained weights no longer match the run receipt")
+        if receipt.get("placement", "reasoning") != placement:
+            raise ValueError("completed arm used a different feedback placement")
         return receipt
     data, gold = training
     weights = init_weights(seed)
@@ -152,7 +157,7 @@ def train(pack, out, mode, seed, training, guard: Callable[[], None]):
                 raise
             ix = plan[step - 1]
             batch = (data[0][ix], data[1][ix], eye[data[2][ix]], eye[data[3][ix]])
-            loss, grads = differentiate(weights, batch, gold[ix], mode)
+            loss, grads = differentiate(weights, batch, gold[ix], mode, placement)
             norm = math.sqrt(sum(float(np.sum(g**2)) for g in grads.values()))
             if not math.isfinite(loss) or not math.isfinite(norm):
                 raise FloatingPointError("nonfinite refinement loss or gradient")
@@ -178,6 +183,7 @@ def train(pack, out, mode, seed, training, guard: Callable[[], None]):
         "init_sha256": initial, "schedule_sha256": schedule_hash, "weights_sha256": sha256_file(weights_path),
         "updates_sha256": sha256_file(history), "parameters": sum(w.size for w in weights.values()),
         "cell_calls": STEPS * BATCH * TRAIN_DEPTH * 4, "training_manifest_sha256": sha256_file(pack / "manifest.json"),
+        "placement": placement,
     }
     dump_structured(receipt_path, receipt)
     return receipt
@@ -191,7 +197,28 @@ def diagnostic_row(states):
     ]
 
 
-def evaluate(pack, out, trained_mode, guard):
+def probe_answer_prior(w, data, mode, depth, item_id, placement):
+    start, hops, before, after = data
+    _, prior = refine(w, before, start, hops, np.zeros_like(start), mode, depth, placement=placement)
+    rng = np.random.default_rng(int(item_id[:16], 16))
+    direction = rng.normal(size=start.shape).astype(np.float32)
+    direction -= direction.mean()
+    perturbation = 0.01 * direction / np.sqrt(np.mean(direction**2))
+    input_rms = float(np.sqrt(np.mean(perturbation**2)))
+    clean_states, perturbed_states = [], []
+    clean, _ = refine(w, after, start, hops, prior, mode, depth, clean_states, placement=placement)
+    noisy, _ = refine(w, after, start, hops, prior + perturbation, mode, depth, perturbed_states, placement=placement)
+    return {
+        "input_rms": input_rms,
+        "answer_gain": [
+            float(np.sqrt(np.mean((second[2] - first[2]) ** 2)) / input_rms)
+            for first, second in zip(clean_states, perturbed_states, strict=True)
+        ],
+        "flipped": bool(clean.argmax() != noisy.argmax()),
+    }
+
+
+def evaluate(pack, out, trained_mode, guard, *, placement="reasoning", probe_prior=False):
     with np.load(out / "weights.npz", allow_pickle=False) as state:
         weights = dict(state)
     # Native-depth sweep plus a fixed-weight schedule crossover at six visits.
@@ -209,16 +236,18 @@ def evaluate(pack, out, trained_mode, guard):
                 for i in range(0, len(tasks), BATCH):
                     guard()
                     batch = tasks[i : i + BATCH]
-                    first, second = two_turns(weights, prepare(batch), mode, depth)
+                    first, second = two_turns(weights, prepare(batch), mode, depth, placement=placement)
                     for task, p1, p2 in zip(batch, first.argmax(1), second.argmax(1), strict=True):
                         pred.write(canonical_json({"id": task["id"], "before": NODES[p1], "after": NODES[p2]}) + "\n")
                 for task in tasks[:8]:
                     guard()
                     stages: tuple[list, list] = ([], [])
-                    two_turns(weights, prepare([task]), mode, depth, traces=stages)
-                    trace.write(canonical_json(
-                        {"id": task["id"], "before": diagnostic_row(stages[0]), "after": diagnostic_row(stages[1])}
-                    ) + "\n")
+                    data = prepare([task])
+                    two_turns(weights, data, mode, depth, traces=stages, placement=placement)
+                    row = {"id": task["id"], "before": diagnostic_row(stages[0]), "after": diagnostic_row(stages[1])}
+                    if probe_prior:
+                        row["prior_probe"] = probe_answer_prior(weights, data, mode, depth, task["id"], placement)
+                    trace.write(canonical_json(row) + "\n")
         print(
             canonical_json({"trained_mode": trained_mode, "runtime_mode": mode, "evaluated_depth": depth}),
             flush=True,

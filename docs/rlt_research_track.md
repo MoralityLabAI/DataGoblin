@@ -153,3 +153,65 @@ The launcher retains the 256 MiB job cap, 3 GiB physical RAM reserve and single 
 CPU worker, and also monitors system commit headroom. Re-invoke after exit 75 to resume a
 headroom pause from its saved optimizer state. The scorer checks weight, update, prediction
 and pack integrity and emits matched item outcomes, sampled loop traces and run receipts.
+
+## Separate transport from endpoint refinement
+
+The graph pilot supports two placements. Reasoning placement interpolates the one-edge
+proposal. Answer placement runs the same reasoning update directly and applies the coefficient
+only to the continuous answer proposal. All three feedback modes still use two shared-cell
+calls per visit. Use the same frozen pack, model seeds and batch digests across placements.
+Direct feedback must produce identical weights and decisions in both. The prior probe adds
+an item-seeded, zero-mean perturbation of RMS 0.01 to the continuous answer input at the patch
+boundary, then measures visit-wise answer perturbation gain and terminal answer flips.
+
+    python scripts/run_rlt_trm_windows.py --pack RULE_PACK --out ANSWER_RUN --placement answer --probe-prior --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python scripts/run_rlt_trm_windows.py --pack RULE_PACK --out REASONING_RUN --placement reasoning --probe-prior --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+
+For a fixed linear endpoint map with eigenvalue `lambda`, RLT carries that eigenmode through
+K visits with multiplier `product_{j=1..K}(1 + (lambda - 1)/j)`. Direct feedback has
+multiplier `lambda^K`. For real positive `lambda` the RLT multiplier is
+`Gamma(K + lambda) / (Gamma(lambda) Gamma(K + 1))`, of order `K^(lambda - 1)`.
+Thus the same rule attenuates an expanding mode's exponential growth to polynomial growth,
+and slows the decay of a contracting positive mode. These relations require a fixed linear
+map or a common scalar linearization at every visit. Time-dependent and non-normal coupled
+maps require checking the actual product of Jacobians.
+
+### TRM and HRM placement
+
+Write a boundary update as `z' = F(z,y)`, `y' = (1-eta)y + eta G(z',y)`. With
+`A = F_z`, `B = F_y`, `C = G_z'`, and `D = G_y`, its Jacobian is
+
+    [ A       B                           ]
+    [ eta C A (1-eta)I + eta (D + C B)    ]
+
+If `B = 0`, changing the answer schedule leaves the transport trajectory unchanged.
+With feedback from answer to reasoning, `B` couples the two states and transports prior
+errors back into reasoning. For example, the scalar blocks `A=.8, B=.5, C=.6, D=.2`
+give a direct Jacobian with eigenvalue about 1.16 despite each uncoupled self-derivative being
+below one. An answer-only contraction estimate cannot bound this full system.
+
+For TRM, use this equation at the interval between two answer proposals. In HRM, a candidate
+intervention is a slow-state endpoint at a macro boundary. The fast block `F` is then the
+composition of its scheduled low-level visits with that slow state held fixed. Give each
+arm the same number of fast updates and slow proposals. Set `eta` from the remaining slow
+proposals and test changes to the fast budget separately. The matrix motivates probing
+both cross-state gains in a frozen host before a trained HRM intervention. See
+[TRM](https://arxiv.org/html/2510.04871v1) and [HRM](https://arxiv.org/html/2506.21734v4).
+
+### LDT placement and authority
+
+Apply interpolation to the continuous proposal features, then discretize to a typed candidate
+proposal. Use a checked lattice meet for the committed update. A hard candidate set can shrink
+under verified information in a fixed epoch. A rule revision creates a new epoch with its own
+initial candidate set. For example, a certified singleton from before the patch cannot be
+carried through the patch by intersecting it with the new singleton.
+
+The boundary replay feeds each arm's first- and second-turn proposals to the upstream
+`certify_and_apply_verified` entry point after the patch. The checker derives the current
+endpoint from the public graph and rejects previous-epoch proposals. It verifies a current
+proposal before allowing a hard refinement. Counts include acceptance, abstention, epoch
+rejection and checker route hops. Checking costs a full traversal in this fixture, so the
+replay measures coverage and authority. Its checker cost is the same order as solving the
+fixture outright. The typed boundary design comes from the local HybridTRMLDT worktree.
+
+    python scripts/replay_rlt_ldt_boundary.py --pack RULE_PACK --evidence ANSWER_EVIDENCE REASONING_EVIDENCE --upstream HYBRID_TRM_LDT_ROOT --out BOUNDARY_RESULT.json
