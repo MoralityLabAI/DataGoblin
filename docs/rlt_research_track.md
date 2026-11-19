@@ -119,3 +119,37 @@ These are fixed 64-item slices with a byte tokenizer and one training seed. Trea
 results as feedback and transfer diagnostics. The rule pack uses distinct graph lineages,
 including length and revision-position holdouts. The second-turn input includes the model's own
 first answer, and evaluation labels stay in the separate scorer.
+
+## Graph-conditioned TRM refinement pilot
+
+The graph pilot uses a continuous node state and a separate answer state. One shared 12-unit
+nonlinear cell is called first to propose a reasoning update, then to revise the answer. Each
+visit propagates the reasoning state across one edge of the supplied adjacency. Only the
+feedback coefficient on the reasoning state varies. At the patch boundary the reasoning state
+starts again at the query vertex, with the first answer distribution carried into the new turn.
+See [the TRM refinement architecture](https://arxiv.org/html/2510.04871v1) for the source of
+the two-state motif. This graph cell is a 133-parameter mechanism prototype.
+
+Each of two initialization seeds runs 240 updates per arm on identical 12-episode batches at
+K=6. Score the native training/runtime arms at K=4, 6 and 10. At K=6, run all nine
+training/runtime combinations. The frozen rule pack preserves earlier test lineages for
+retrospective comparison. For confirmatory use, freeze a new pack and keep its evaluation
+targets outside the fitting and inference workspace.
+
+For a simplified uniform routing gate with effective coefficient a_k at visit k, the update
+operator is `(1-a_k)I + a_k A`, where A routes one edge. At depth K the coefficient of
+`A^K` is the product of the K effective coefficients. For a unit gate at K=6 that coefficient
+is 1 for direct, 1/720 for RLT, and about 0.00205 for matched damping. Matching the interpolation
+coefficient sum matches the expected number of hops in this linear example. The distribution
+of hop counts can still differ. The fitted cell has a node-dependent gate, and its exact
+answer probabilities also depend on the readout.
+
+Use the `rlt-pilot` extra and the existing frozen rule pack.
+
+    python scripts/run_rlt_trm_windows.py --pack RULE_PACK --out RUN_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python -m datagoblin.training_gym.rlt_trm_report --pack RULE_PACK --run RUN_ROOT --out EVIDENCE_FOLDER
+
+The launcher retains the 256 MiB job cap, 3 GiB physical RAM reserve and single below-normal
+CPU worker, and also monitors system commit headroom. Re-invoke after exit 75 to resume a
+headroom pause from its saved optimizer state. The scorer checks weight, update, prediction
+and pack integrity and emits matched item outcomes, sampled loop traces and run receipts.
