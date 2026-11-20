@@ -7,10 +7,10 @@ It does not verify new mathematical proofs or approve ECDSA security claims.
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 import json
-from pathlib import Path
 import sys
+from collections import defaultdict
+from pathlib import Path
 
 ALLOWED_STATUS = {"scope_limited", "conditional", "unresolved", "pilot_only"}
 ALLOWED_CHECKS = {"formal_scope_audit", "lean_proof", "exact_certificate_check", "model_cost_audit"}
@@ -108,7 +108,10 @@ def main() -> int:
     report = evaluate(tasks, responses)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"graded {report['tasks_graded']} / {report['tasks_expected']} development tasks; score {report['mean_score']}")
+    print(
+        f"graded {report['tasks_graded']} / {report['tasks_expected']} development tasks; "
+        f"score {report['mean_score']}"
+    )
     return 0
 
 
