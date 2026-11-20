@@ -29,3 +29,7 @@ A compact learner can first learn to select a useful action from the visible tas
 Keep generated datasets, model snapshots, teacher replies, and run receipts in ignored `runs/` directories or the experiment archive. Commit the source and frozen protocol that reproduce them. Capture the actual teacher model/session identifier and available token usage with each collection. The offline queue commands prepare files for a separately budgeted teacher runner.
 
 The complete command reference, schemas, artifact descriptions, and extension paths are in [`docs/rlt_rollout_gym.md`](../../docs/rlt_rollout_gym.md).
+
+The [campaign exporter](../../docs/rlt_rollout_gym.md#campaign-collection-and-aleph-export) produces six response-only streams and checks lineage custody across every registered suite. Treat verified first-attempt and repair targets as candidate compact-model supervision. Apply the planned four-presentation limit across all views of a root. Count experiment-plan roots under research and mechanistic interpretation and the other roots under procedural games. For recurrent policy distillation, compare the cost and coverage of first-valid stopping with the final answer policy after an independent checker result. Preserve the frozen reservoir's control label and evaluate any transferred policy on a separate model and held-out roots.
+
+The [21 November campaign](2026-11-21_campaign.md) records the matched CPU results and the tested early-stop policy.

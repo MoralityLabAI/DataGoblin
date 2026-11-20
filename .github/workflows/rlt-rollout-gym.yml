@@ -2,12 +2,14 @@ name: RLT rollout gym
 
 on:
   push:
+    branches: [master]
     paths:
       - "src/datagoblin/training_gym/rlt_gym/**"
       - "src/datagoblin/training_gym/rlt_feedback.py"
       - "src/datagoblin/cli.py"
       - "tests/unit/test_rlt_gym_*.py"
-      - "tests/integration/test_rlt_gym_replay.py"
+      - "tests/integration/test_rlt_gym_*.py"
+      - "schemas/bpd_component_comparison.schema.json"
       - "pyproject.toml"
       - ".github/workflows/rlt-rollout-gym.yml"
   pull_request:
@@ -16,13 +18,18 @@ on:
       - "src/datagoblin/training_gym/rlt_feedback.py"
       - "src/datagoblin/cli.py"
       - "tests/unit/test_rlt_gym_*.py"
-      - "tests/integration/test_rlt_gym_replay.py"
+      - "tests/integration/test_rlt_gym_*.py"
+      - "schemas/bpd_component_comparison.schema.json"
       - "pyproject.toml"
       - ".github/workflows/rlt-rollout-gym.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: rlt-rollout-gym-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   public-fixture:
@@ -47,10 +54,7 @@ jobs:
       - name: Check collection and evidence boundaries
         run: >-
           python -m pytest
-          tests/unit/test_rlt_gym_tasks.py
-          tests/unit/test_rlt_gym_dynamics.py
-          tests/unit/test_rlt_gym_teachers.py
-          tests/integration/test_rlt_gym_replay.py
+          -k rlt_gym
       - name: Check style
         run: ruff check .
       - name: Freeze public synthetic fixtures

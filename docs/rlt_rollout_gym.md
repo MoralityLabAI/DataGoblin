@@ -182,6 +182,31 @@ The route-certificate work in [`rlt_route_certificate.py`](../src/datagoblin/tra
 
 For a new family, add its public input contract and bounded checker before collecting teacher attempts. Pin the generator and external source revision, assign lineage custody, and give OOD its own structural change. Reserve fresh roots for the compact learner's evaluation. The [training collection notes](../training/rlt_gym/README.md) describe how these batches feed the Aleph program.
 
+## Campaign collection and Aleph export
+
+Collect fixed-depth, early-stop, and perturbation runs under separate output directories named `terminal`, `early`, and `pulse`. Reuse the fixed-depth suite, training seed, depth and readout site for the comparison arms. Save each replay at `<arm>-replay.json`. The campaign audit checks early stopping against the exact fixed-depth prefix and compares pulse readouts with their untreated counterparts. It records first-valid visits, losses after a valid visit, format failures, timing and verifier work.
+
+```bash
+python -m datagoblin.training_gym.rlt_gym.campaign CAMPAIGN CAMPAIGN/audit.json
+```
+
+For an existing authenticated Codex CLI, pass the prepared public request file to the bounded collector, then use the standard teacher import. The capture retains exact requested model, command settings, provider events and invocation-level usage. Dollar cost is unknown when a ChatGPT subscription supplies the quota. Manual imports have a separate attribution path.
+
+```bash
+python -m datagoblin.training_gym.rlt_gym.codex_teacher \
+  PACKETS/requests.jsonl CAPTURE --model MODEL --batch-size 28 --max-calls 1
+```
+
+The Aleph exporter takes a JSON spec with `suites` and `sources` arrays. List each frozen suite directory or manifest under `suites`. Each source object names `suite`, `rollouts`, and `receipt` paths. For native episodes the receipt comes from exact replay. For teacher episodes it comes from the standard checked import. Include the optional `capture` directory for an authenticated Codex batch. Paths resolve from the invocation directory.
+
+```bash
+python -m datagoblin.training_gym.rlt_gym.corpus SOURCES.json ALEPH_PACK
+```
+
+The six streams cover checked completion, repair, next-state prediction, pre-verdict outcome prediction, matched-context preferences, and experiment selection and critique. `input` contains the model-facing fields. `target` carries the response-only supervision. Receipts and source attribution are metadata. The exporter checks roots across the full suite registry and excludes train roots that appear in any reserved split. The manifest counts deduplicated examples, roots, verifier outcomes and UTF-8 input and loss payload bytes.
+
+The [component-intervention schema](../schemas/bpd_component_comparison.schema.json) binds task, checkpoint, operator, component, visit and readout to an untreated arm, sham arm, dose-matched random arm and component arm. The adapter contract validates these comparisons and preserves selection and donor provenance. Black-box schedules and reservoir pulses provide observable behavior and work measurements. Component attribution requires its own causal evidence.
+
 ## Artifacts and CI
 
 The native run writes `plan.json`, `rollouts.jsonl`, `summary.json`, `REPORT.md`, `measurements.jsonl`, `resources.json`, model snapshots, and a completion manifest. Episode records are flushed as collection proceeds. An interrupted fit can leave partial evidence without a completion manifest. Replay checks source fingerprints, the frozen suite, model snapshots, matrix completeness, and reproduced trajectories. Timing measurements live outside the canonical rollout stream.
