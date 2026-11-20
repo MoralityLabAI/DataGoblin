@@ -7,14 +7,14 @@ An Aleph tokenizer is not frozen. Token counts always name the exact encoding us
 from __future__ import annotations
 
 import argparse
-from collections import Counter, defaultdict
-from datetime import datetime, timezone
 import hashlib
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
+from collections import Counter, defaultdict
+from datetime import datetime, timezone
+from pathlib import Path
 
 SOURCES = {
     "Compactification-Theory": ("MoralityLabAI/Compactification-Theory", "071cf29e27a71fff858cc3bbb4dc3ea4193c9b53"),
@@ -334,7 +334,8 @@ def audit(root: Path, out: Path, tokens: TokenCounter) -> dict:
         "",
         f"Tokenizer: {tokens.label}. Source-only scan, without Lean compilation or license clearance.",
         "",
-        "| Repository | Tracked source bytes | Counted tokens | Exact-file unique tokens | Lean declarations | Candidate reasoning sections |",
+        "| Repository | Tracked source bytes | Counted tokens | Exact-file unique tokens | "
+        "Lean declarations | Candidate reasoning sections |",
         "|---|---:|---:|---:|---:|---:|",
     ]
     for name in SOURCES:
