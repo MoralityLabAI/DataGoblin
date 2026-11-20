@@ -1,8 +1,9 @@
-"""Collect checked Lean tactic selections from a local OxiBonsai server."""
+"""Collect checked Lean tactic selections with local OxiBonsai inference."""
 
 from __future__ import annotations
 
 import json
+import os
 import random
 import re
 import subprocess
@@ -27,6 +28,69 @@ SPLITS = {"train": 30000, "same_templates": 33000, "held_templates": 36000}
 MAX_TOKENS = 32
 AXIOM_AUDIT = re.compile(r"^'dgBonsaiProof' (?:does not depend on any axioms|depends on axioms: \[(.*)\])$", re.M)
 LEAN_LIMIT = re.compile(r"heartbeat|timed? out|out of memory|maximum recursion depth", re.I)
+CLI_USAGE = re.compile(r"^(\d+) prompt \+ (\d+) generated = \d+ total tokens\b", re.M)
+
+
+def build_prompt(statement: str, menu: dict[int, str], failed: dict[int, str]) -> str:
+    options = "\n".join(f"{i}. {tactic}" for i, tactic in menu.items())
+    prompt = f"Lean 4 theorem:\n{statement}\n\nAfter `repeat' intro`, choose one tactic to close every goal."
+    if failed:
+        failures = "; ".join(f"{i} ({tactic})" for i, tactic in failed.items())
+        prompt += f"\nPrevious choices failed verification: {failures}."
+    return f"{prompt}\n{options}\n\nReply with the tactic number only. /no_think"
+
+
+def parse_choice(content: Any, menu: dict[int, str]) -> int | None:
+    text = content.strip() if isinstance(content, str) else ""
+    text = re.sub(r"^<think>\s*</think>\s*", "", text)
+    number = int(text) if re.fullmatch(r"[1-9][0-9]?", text) else None
+    return number if number in menu else None
+
+
+class DirectOxiBonsai:
+    def __init__(self, binary: Path, checkpoint: Path, tokenizer: Path, timeout: float) -> None:
+        self.binary = binary.resolve(strict=True)
+        self.tokenizer = tokenizer.resolve(strict=True)
+        self.timeout = timeout
+        self.arguments = [
+            str(self.binary), "run", "--model", str(checkpoint.resolve(strict=True)),
+            "--tokenizer", str(self.tokenizer), "--prompt", "-", "--temperature", "0",
+            "--max-tokens", str(MAX_TOKENS), "--max-seq-len", "2048",
+        ]
+        try:
+            version = subprocess.run(
+                [str(self.binary), "--version"], capture_output=True, encoding="utf-8", timeout=10, check=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise OSError("OxiBonsai version check timed out") from exc
+        self.version = version.stdout.strip()
+        if version.returncode or not self.version.startswith(("oxibonsai ", "oxibonsai-cli ")):
+            raise ValueError("--oxibonsai-bin must point to the OxiBonsai CLI executable")
+
+    def choose(self, statement: str, menu: dict[int, str], failed: dict[int, str]) -> dict[str, Any]:
+        prompt = build_prompt(statement, menu, failed)
+        # `run` tokenizes the raw prompt. Its stdin reader drops one trailing newline.
+        framed = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n\n"
+        started = time.perf_counter()
+        try:
+            result = subprocess.run(
+                self.arguments, input=framed, capture_output=True, encoding="utf-8", errors="replace",
+                timeout=self.timeout, check=False, env={**os.environ, "RUST_LOG": "off"},
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise OSError(f"OxiBonsai inference timed out after {self.timeout:g}s") from exc
+        if result.returncode:
+            detail = result.stderr.strip().splitlines()[-1:] or ["no error output"]
+            raise OSError(f"OxiBonsai exited with status {result.returncode}: {detail[0][:300]}")
+        usage_match = CLI_USAGE.search(result.stderr)
+        usage = None
+        if usage_match:
+            usage = {"prompt_tokens": int(usage_match[1]), "completion_tokens": int(usage_match[2])}
+        return {
+            "choice": parse_choice(result.stdout, menu), "request_sha256": sha256_text(framed[:-1]),
+            "response_sha256": sha256_text(result.stdout), "finish_reason": None,
+            "usage": usage, "wall_s": time.perf_counter() - started,
+        }
 
 
 class OxiBonsai:
@@ -61,14 +125,8 @@ class OxiBonsai:
         return models[0]["id"]
 
     def choose(self, statement: str, menu: dict[int, str], failed: dict[int, str]) -> dict[str, Any]:
-        options = "\n".join(f"{i}. {tactic}" for i, tactic in menu.items())
-        prompt = f"Lean 4 theorem:\n{statement}\n\nAfter `repeat' intro`, choose one tactic to close every goal."
-        if failed:
-            failures = "; ".join(f"{i} ({tactic})" for i, tactic in failed.items())
-            prompt += f"\nPrevious choices failed verification: {failures}."
-        prompt += f"\n{options}\n\nReply with the tactic number only. /no_think"
         payload = {
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [{"role": "user", "content": build_prompt(statement, menu, failed)}],
             "temperature": 0.0, "max_tokens": MAX_TOKENS, "stream": False,
         }
         started = time.perf_counter()
@@ -78,16 +136,12 @@ class OxiBonsai:
                 or not isinstance(choices[0].get("message"), dict)):
             raise ValueError("expected one chat completion from OxiBonsai")
         choice = choices[0]
-        content = choice["message"].get("content")
-        text = content.strip() if isinstance(content, str) else ""
-        text = re.sub(r"^<think>\s*</think>\s*", "", text)
-        number = int(text) if re.fullmatch(r"[1-9][0-9]?", text) else None
         usage = reply.get("usage")
         tokens = ("prompt_tokens", "completion_tokens")
         if not isinstance(usage, dict) or any(type(usage.get(k)) is not int or usage[k] < 0 for k in tokens):
             usage = None
         return {
-            "choice": number if number in menu else None, "request_sha256": sha256_json(payload),
+            "choice": parse_choice(choice["message"].get("content"), menu), "request_sha256": sha256_json(payload),
             "response_sha256": sha256_json(reply), "finish_reason": choice.get("finish_reason"),
             "usage": usage, "wall_s": time.perf_counter() - started,
         }
@@ -165,9 +219,15 @@ def probe_library(lean: Path) -> tuple[list[dict[str, str]], str]:
 def run_lean_bonsai(
     out: Path, *, lean: Path, checkpoint: Path, port: int, split: str, fixtures: Path | None,
     seed: int, max_goals: int, attempts: int, request_timeout: float,
+    oxibonsai_bin: Path | None = None, tokenizer: Path | None = None,
 ) -> dict[str, Any]:
-    if not (1 <= max_goals <= 128 and 1 <= attempts <= 8 and 1 <= request_timeout <= 60 and 1 <= port <= 65535):
-        raise ValueError("use 1-128 goals, 1-8 attempts, a 1-60 second request timeout, and a valid port")
+    if (oxibonsai_bin is None) != (tokenizer is None):
+        raise ValueError("direct inference requires both --oxibonsai-bin and --tokenizer")
+    max_timeout = 300 if oxibonsai_bin else 60
+    if not (1 <= max_goals <= 128 and 1 <= attempts <= 8 and 1 <= request_timeout <= max_timeout):
+        raise ValueError(f"use 1-128 goals, 1-8 attempts, and a 1-{max_timeout} second request timeout")
+    if not 1 <= port <= 65535:
+        raise ValueError("invalid OxiBonsai port")
     if out.exists():
         raise ValueError("Lean rollout output already exists")
     goals = fixture_goals(fixtures, split, seed)[:max_goals]
@@ -177,11 +237,23 @@ def run_lean_bonsai(
     if checkpoint_hash != CHECKPOINT_SHA256:
         raise ValueError(f"checkpoint SHA-256 differs from {CHECKPOINT}/Bonsai-8B.gguf")
     lean = lean.resolve(strict=True)
-    engine = OxiBonsai(port, request_timeout)
-    try:
-        model_id = engine.model_id()
-    except HTTPException as exc:
-        raise OSError(f"OxiBonsai preflight failed: {exc}") from exc
+    engine: OxiBonsai | DirectOxiBonsai
+    if oxibonsai_bin is not None and tokenizer is not None:
+        engine = DirectOxiBonsai(oxibonsai_bin, checkpoint, tokenizer, request_timeout)
+        model_id = CHECKPOINT
+        runtime_info = {
+            "transport": "stdio", "checkpoint_binding": "subprocess_argument", "model_id": model_id,
+            "runtime_version": engine.version, "runtime_binary_sha256": sha256_file(engine.binary),
+            "tokenizer_sha256": sha256_file(engine.tokenizer),
+        }
+    else:
+        engine = OxiBonsai(port, request_timeout)
+        try:
+            model_id = engine.model_id()
+        except HTTPException as exc:
+            raise OSError(f"OxiBonsai preflight failed: {exc}") from exc
+        runtime_info = {"transport": "http", "checkpoint_binding": "operator_started_server",
+                        "served_model_id": model_id}
     try:
         version = subprocess.run(
             [str(lean), "--version"], capture_output=True, encoding="utf-8", timeout=20, check=False,
@@ -195,9 +267,9 @@ def run_lean_bonsai(
     out.mkdir(parents=True)
     plan = {
         "schema": "datagoblin.lean-bonsai.v1", "dynamics_kind": "black_box_refinement",
-        "runtime": "cool-japan/oxibonsai", "served_model_id": model_id,
+        "runtime": "cool-japan/oxibonsai", **runtime_info,
         "checkpoint": CHECKPOINT, "checkpoint_file_sha256": checkpoint_hash,
-        "checkpoint_binding": "operator_started_server", "split": split, "seed": seed,
+        "split": split, "seed": seed,
         "goals": goals, "fixture_sha256": sha256_file(fixtures) if fixtures else None,
         "lean_version": version.stdout.strip(), "lean_binary_sha256": sha256_file(lean),
         "library_sha256": sha256_json(parts), "library_probe_sha256": library_probe,

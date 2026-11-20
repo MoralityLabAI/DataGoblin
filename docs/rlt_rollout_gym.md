@@ -183,6 +183,20 @@ PrismML's [1-bit Bonsai-8B](https://huggingface.co/prism-ml/Bonsai-8B-gguf).
 The model chooses a tactic from the grounded Lean gym's library and can try again after a rejection.
 The lexical baseline and Bonsai see the same candidate pool and have the same attempt budget.
 
+Use the direct CPU path on hosts that disallow local sockets. Install the pinned OxiBonsai CLI with
+CPU features and fetch its Qwen3-8B tokenizer once. The collector starts one process per request and
+records the hashes of the runtime binary, tokenizer and exact checkpoint passed to that process.
+
+```bash
+cargo install --git https://github.com/cool-japan/oxibonsai --tag v0.2.3 --locked --no-default-features oxibonsai-cli
+oxibonsai tokenizer download --output models/tokenizer.json
+python -m datagoblin rlt-gym lean-bonsai \
+  --oxibonsai-bin /path/to/oxibonsai --tokenizer models/tokenizer.json \
+  --checkpoint /path/to/Bonsai-8B.gguf --lean /path/to/toolchain/bin/lean \
+  --max-goals 1 --attempts 2 --out runs/lean-bonsai/cpu-smoke
+```
+
+The HTTP path keeps one model process resident for longer batches.
 Build OxiBonsai with CPU support and the server feature, then start one model replica on loopback.
 Use the published `Bonsai-8B.gguf` and the Qwen3-8B `tokenizer.json` documented by OxiBonsai.
 The checkpoint hash check also accepts a local copy with a different filename.

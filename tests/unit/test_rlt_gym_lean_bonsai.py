@@ -27,6 +27,31 @@ def test_bonsai_accepts_only_available_choice_ids(monkeypatch, content, expected
     assert engine.choose("1 = 1", {2: "rfl"}, {1: "simp"})["choice"] == expected
 
 
+def test_bonsai_direct_binds_the_model_and_reads_the_cli_streams(tmp_path, monkeypatch):
+    binary, checkpoint, tokenizer = (tmp_path / name for name in ("oxibonsai", "model.gguf", "tokenizer.json"))
+    for path in (binary, checkpoint, tokenizer):
+        path.touch()
+
+    def run(args, **kwargs):
+        assert args[0] == str(binary)
+        if args[1:] == ["--version"]:
+            return CompletedProcess(args, 0, "oxibonsai 0.2.3\n", "")
+        assert args[1:8] == ["run", "--model", str(checkpoint), "--tokenizer", str(tokenizer), "--prompt", "-"]
+        assert kwargs["env"]["RUST_LOG"] == "off"
+        assert kwargs["timeout"] == 120
+        prompt = kwargs["input"]
+        assert prompt.startswith("<|im_start|>user\nLean 4 theorem:\n1 = 1\n")
+        assert prompt.endswith("<|im_start|>assistant\n<think>\n\n</think>\n\n\n")
+        return CompletedProcess(args, 0, "2\n", "---\n39 prompt + 1 generated = 40 total tokens in 1.10s\n")
+
+    monkeypatch.setattr(bonsai.subprocess, "run", run)
+    engine = bonsai.DirectOxiBonsai(binary, checkpoint, tokenizer, 120)
+    result = engine.choose("1 = 1", {2: "rfl"}, {1: "simp"})
+    assert result["choice"] == 2
+    assert result["usage"] == {"prompt_tokens": 39, "completion_tokens": 1}
+    assert engine.version == "oxibonsai 0.2.3"
+
+
 @pytest.mark.parametrize(("split", "exported"), [("train", True), ("held_templates", False)])
 def test_bonsai_stops_on_verification_and_exports_only_train(tmp_path, monkeypatch, split, exported):
     model = tmp_path / "Bonsai-8B.gguf"

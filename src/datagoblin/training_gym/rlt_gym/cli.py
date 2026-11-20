@@ -81,24 +81,31 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     bonsai = commands.add_parser("lean-bonsai", help="Collect Lean proofs with a local 1-bit OxiBonsai arm")
     bonsai.add_argument("--out", type=Path, required=True)
     bonsai.add_argument("--lean", type=Path, required=True, help="Lean 4 toolchain executable")
-    bonsai.add_argument("--checkpoint", type=Path, required=True, help="PrismML Bonsai-8B.gguf served by OxiBonsai")
-    bonsai.add_argument("--port", type=int, default=8080, help="Loopback OxiBonsai port")
+    bonsai.add_argument("--checkpoint", type=Path, required=True, help="PrismML Bonsai-8B.gguf")
+    transport = bonsai.add_mutually_exclusive_group()
+    transport.add_argument("--oxibonsai-bin", type=Path, help="Run the OxiBonsai CLI directly over stdin/stdout")
+    transport.add_argument("--port", type=int, help="Loopback OxiBonsai server port (default: 8080)")
+    bonsai.add_argument("--tokenizer", type=Path, help="Qwen3-8B tokenizer.json for direct inference")
     bonsai.add_argument("--fixtures", type=Path, help="Existing frozen Lean gym fixtures.json")
     bonsai.add_argument("--split", choices=("train", "same_templates", "held_templates"), default="train")
     bonsai.add_argument("--seed", type=int, default=7, help="Seed for synthetic goals when no fixture is given")
     bonsai.add_argument("--max-goals", type=int, default=4)
     bonsai.add_argument("--attempts", type=int, default=4, help="Equal attempt budget per goal and arm")
-    bonsai.add_argument("--request-timeout", type=float, default=30)
+    bonsai.add_argument("--request-timeout", type=float, help="Seconds per call (HTTP: 30, direct: 120)")
 
 
 def dispatch(args: argparse.Namespace) -> dict[str, Any]:
     if args.rlt_command == "lean-bonsai":
         from .lean_bonsai import run_lean_bonsai
 
+        timeout = args.request_timeout
+        if timeout is None:
+            timeout = 120 if args.oxibonsai_bin else 30
         return run_lean_bonsai(
-            args.out, lean=args.lean, checkpoint=args.checkpoint, port=args.port, split=args.split,
+            args.out, lean=args.lean, checkpoint=args.checkpoint,
+            port=8080 if args.port is None else args.port, split=args.split,
             fixtures=args.fixtures, seed=args.seed, max_goals=args.max_goals, attempts=args.attempts,
-            request_timeout=args.request_timeout,
+            request_timeout=timeout, oxibonsai_bin=args.oxibonsai_bin, tokenizer=args.tokenizer,
         )
 
     from .runner import mine_frontier, replay_run, run_suite
