@@ -1,0 +1,56 @@
+{
+  "version": "semaev-redteam-dev-v1",
+  "status": "development_only_unsealed",
+  "description": "Repository-grounded reasoning checks, not ECDSA security certification or a model evaluation benchmark.",
+  "source_commit": "3c630e179ae837dad839949dcb03cf4fdb41815e",
+  "tasks": [
+    {
+      "id": "GDL-01",
+      "question": "Does the Lean generic discrete-log lower bound certify security against coordinate-based Semaev polynomial attacks? Identify the scope and the next proof obligation.",
+      "source_paths": ["lean/SemaevIC/GenericDLog.lean", "paper/proof_strategies.md"],
+      "gold_status": "scope_limited",
+      "required_obligations": ["non_generic_algorithm_model", "coordinate_reading_gap"],
+      "next_check_kind": "formal_scope_audit"
+    },
+    {
+      "id": "RMP-02",
+      "question": "Which mathematical assumptions still prevent the characteristic-zero S-unit ramp calculation from proving a finite-field ECDSA lower bound?",
+      "source_paths": ["lean/SemaevIC/RampGap.lean", "notes/ideal_ramp_bound.md"],
+      "gold_status": "conditional",
+      "required_obligations": ["s_unit_gap_external_hypothesis", "positive_characteristic_transfer", "ideal_closure_link"],
+      "next_check_kind": "lean_proof"
+    },
+    {
+      "id": "FEX-03",
+      "question": "What permits FreeExtension.lean to infer all-height non-refutation from finite base measurements? Which extra evidence is required for a new degree?",
+      "source_paths": ["lean/SemaevIC/FreeExtension.lean", "lean/README.md"],
+      "gold_status": "conditional",
+      "required_obligations": ["stall_base_verified_per_instance", "new_degree_finite_base", "field_and_encoding_scope"],
+      "next_check_kind": "exact_certificate_check"
+    },
+    {
+      "id": "SEC-04",
+      "question": "Can the split or Dickson tower results be transferred directly to deployed secp256k1? State the missing structural route.",
+      "source_paths": ["paper/secp256k1_note.md", "paper/proof_strategies.md"],
+      "gold_status": "unresolved",
+      "required_obligations": ["secp256k1_isogeny_route", "large_m_splitting_family", "model_to_attack_cost"],
+      "next_check_kind": "formal_scope_audit"
+    },
+    {
+      "id": "TNS-05",
+      "question": "Has the Strategy IV toy tensor-contraction experiment established a finite ECDLP speedup over an automorphism-aware generic algorithm?",
+      "source_paths": ["notes/strategy_iv_contraction_structure_2026-11-05.md", "paper/strategy4_costed_acquisition.md"],
+      "gold_status": "pilot_only",
+      "required_obligations": ["finite_crossover_missing", "online_witness_cost", "matched_generic_baseline"],
+      "next_check_kind": "model_cost_audit"
+    },
+    {
+      "id": "RANK-06",
+      "question": "Does achieving relation-space rank imply efficient acquisition of usable nonzero-tagged equations for recovering a discrete logarithm?",
+      "source_paths": ["paper/strategy4_rank_collapse_audit.md", "paper/strategy4_costed_acquisition.md", "notes/strategy_iv_agent_perspective_2026-11-05.md"],
+      "gold_status": "scope_limited",
+      "required_obligations": ["target_conditioned_rank", "independent_online_tagged_row", "acquisition_cost"],
+      "next_check_kind": "exact_certificate_check"
+    }
+  ]
+}
