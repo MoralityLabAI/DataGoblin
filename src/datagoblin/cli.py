@@ -76,6 +76,9 @@ def _write_json_stdout(value: Any) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="datagoblin")
     sub = parser.add_subparsers(dest="command", required=True)
+    from datagoblin.training_gym.rlt_gym.cli import add_arguments as add_rlt_gym_arguments
+
+    add_rlt_gym_arguments(sub.add_parser("rlt-gym", help="Collect checked RLT rollouts and teacher training traces"))
     sub.add_parser("discover-upstreams")
     status = sub.add_parser("upstream-status")
     status.add_argument("--config", type=Path)
@@ -420,7 +423,11 @@ def _trace_verdict_dataset(args: argparse.Namespace) -> None:
 
 
 def dispatch(args: argparse.Namespace) -> int:
-    if args.command == "discover-upstreams":
+    if args.command == "rlt-gym":
+        from datagoblin.training_gym.rlt_gym.cli import dispatch as dispatch_rlt_gym
+
+        _write_json_stdout(dispatch_rlt_gym(args))
+    elif args.command == "discover-upstreams":
         _write_json_stdout([item.to_jsonable() for item in discover_upstreams(repository_root())])
     elif args.command == "upstream-status":
         if args.config:

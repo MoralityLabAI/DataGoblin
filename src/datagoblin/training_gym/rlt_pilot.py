@@ -19,6 +19,7 @@ from autograd.tracer import getval
 from datagoblin.hashing import sha256_file
 from datagoblin.serialization import canonical_json, dump_structured, load_structured
 
+from .rlt_feedback import feedback_weight as feedback_weight
 from .rlt_pilot_data import (
     BOS,
     CONTEXT,
@@ -43,16 +44,6 @@ TEXT_BATCH = 2
 RULE_BATCH = 2
 WINDOW_CONTEXT = 96
 OPTION_STRIDE = 32
-
-
-def feedback_weight(mode: str, visit: int, depth: int) -> float:
-    if mode == "direct" or visit == depth - 1:
-        return 1.0
-    if mode == "rlt":
-        return 1 / (depth - visit)
-    if mode == "matched_damping":
-        return math.fsum(1 / j for j in range(2, depth + 1)) / (depth - 1)
-    raise ValueError(f"unknown feedback {mode!r}")
 
 
 def initialize(seed: int) -> dict[str, np.ndarray]:

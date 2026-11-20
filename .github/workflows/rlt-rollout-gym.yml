@@ -1,0 +1,84 @@
+name: RLT rollout gym
+
+on:
+  push:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/**"
+      - "src/datagoblin/training_gym/rlt_feedback.py"
+      - "src/datagoblin/cli.py"
+      - "tests/unit/test_rlt_gym_*.py"
+      - "tests/integration/test_rlt_gym_replay.py"
+      - "pyproject.toml"
+      - ".github/workflows/rlt-rollout-gym.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/**"
+      - "src/datagoblin/training_gym/rlt_feedback.py"
+      - "src/datagoblin/cli.py"
+      - "tests/unit/test_rlt_gym_*.py"
+      - "tests/integration/test_rlt_gym_replay.py"
+      - "pyproject.toml"
+      - ".github/workflows/rlt-rollout-gym.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install CPU development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Check collection and evidence boundaries
+        run: >-
+          python -m pytest
+          tests/unit/test_rlt_gym_tasks.py
+          tests/unit/test_rlt_gym_dynamics.py
+          tests/unit/test_rlt_gym_teachers.py
+          tests/integration/test_rlt_gym_replay.py
+      - name: Check style
+        run: ruff check .
+      - name: Freeze public synthetic fixtures
+        run: >-
+          python -m datagoblin rlt-gym make-suite
+          --seed 7 --per-family 1 --out runs/rlt-ci/suite
+      - name: Collect matched CPU rollouts
+        run: >-
+          python -m datagoblin rlt-gym run
+          --suite runs/rlt-ci/suite --seeds 7 19 --depths 1 4
+          --modes direct rlt matched_damping --splits train calibration
+          --max-wall-seconds 90 --out runs/rlt-ci/pilot
+      - name: Replay trajectories and checker receipts
+        run: >-
+          python -m datagoblin rlt-gym replay
+          --suite runs/rlt-ci/suite --run runs/rlt-ci/pilot
+          --out runs/rlt-ci/replay.json
+      - name: Stage seven teacher request fixtures
+        run: >-
+          python -m datagoblin rlt-gym teacher-prepare
+          --suite runs/rlt-ci/suite --provider codex --model ci-request-fixture
+          --split train --max-tasks 7 --max-visits 4
+          --out runs/rlt-ci/teacher-requests
+      - name: Retain collection receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rlt-rollout-gym-python-${{ matrix.python-version }}
+          path: runs/rlt-ci/
+          if-no-files-found: warn
+          retention-days: 7
