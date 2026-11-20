@@ -13,13 +13,16 @@ from run_rlt_trm_windows import COMMIT_CAP, COMMIT_FLOOR, FREE_FLOOR, memory
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase", choices=("prepare", "evaluate", "certify"))
+    parser.add_argument("phase", choices=("prepare", "collect", "fit", "evaluate", "certify"))
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--checkpoints", type=Path)
     parser.add_argument("--torch-cpu", type=Path)
     parser.add_argument("--upstream-ldt", type=Path)
     parser.add_argument("--ramcap-package", type=Path, required=True)
-    parser.add_argument("--grounded", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--grounded", action="store_true")
+    mode.add_argument("--trained", action="store_true")
+    parser.add_argument("--previous-fixture", type=Path)
     args = parser.parse_args()
     if sys.platform != "win32":
         raise SystemExit("requires a Windows Job Object")
@@ -27,6 +30,12 @@ def main():
         parser.error("prepare requires --checkpoints and --torch-cpu")
     if args.phase == "evaluate" and args.upstream_ldt is None:
         parser.error("evaluate requires --upstream-ldt")
+    if args.phase == "collect" and (args.previous_fixture is None or args.upstream_ldt is None):
+        parser.error("collect requires --previous-fixture and --upstream-ldt")
+    if args.phase in ("collect", "fit") and not args.trained:
+        parser.error("collect and fit require --trained")
+    if args.trained and args.phase == "prepare":
+        parser.error("the trained ranker starts at collect")
     root = args.out.resolve()
     deadline = time.monotonic() + 180
     while True:
@@ -84,6 +93,20 @@ def main():
             torch.set_num_threads(1)
             torch.set_num_interop_threads(1)
             export(root, args.checkpoints.resolve(), torch, guard)
+        elif args.phase == "collect":
+            from datagoblin.training_gym.rlt_lean_labels import collect
+
+            collect(root, args.previous_fixture.resolve(), guard)
+        elif args.trained:
+            if args.phase == "fit":
+                from datagoblin.training_gym.rlt_lean_train_rank import fit
+
+                fit(root, guard)
+            else:
+                from datagoblin.training_gym import rlt_lean_rank_eval
+
+                action = rlt_lean_rank_eval.evaluate if args.phase == "evaluate" else rlt_lean_rank_eval.certify
+                action(root, guard)
         else:
             if args.grounded:
                 from datagoblin.training_gym import rlt_lean_grounded as experiment
@@ -96,6 +119,10 @@ def main():
         if job.peak_bytes() > COMMIT_CAP:
             raise RuntimeError("the job recorded a memory request above the cap")
         status = "complete"
+    except SystemExit as exc:
+        if exc.code == 75:
+            status = "paused"
+        raise
     finally:
         receipt = {
             "phase": args.phase, "status": status, "hard_commit_cap_bytes": COMMIT_CAP, "cpu_workers": 1,
@@ -103,6 +130,9 @@ def main():
             "min_available_bytes": free, "min_commit_headroom_bytes": headroom,
         }
         dump_structured(root / f"{args.phase}-resources.json", receipt)
+        if args.trained:
+            with (root / "resource-history.jsonl").open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(canonical_json(receipt) + "\n")
         lock.unlink()
         print(canonical_json(receipt), flush=True)
 

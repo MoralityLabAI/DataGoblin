@@ -554,3 +554,40 @@ separately. The latter establish that the frozen targets are provable.
 
 Use a new run directory with the same \`prepare\`, \`evaluate\` and \`certify\`
 commands above, adding \`--grounded\` to select the fallback experiment.
+
+## Train the grounded ranker on checked outcomes
+
+Freeze three Lean cohorts before collection. Use 108 goals for labels,
+36 new instances of the training templates for one holdout, and 24
+instances of four withheld compositions for transfer. Check every
+grounded candidate independently at the training root. Record kernel
+certificates, failed attempts and inconclusive results. Keep the
+construction proofs out of candidate generation and optimization.
+
+The compact ranker scores the same pool as lexical ordering. Its features
+come from visible goal operations, tactic forms, and retrieved lemma
+operations and positions. Each visit updates a candidate state with a
+shared cell that reads the candidate and the mean states of its pool.
+Direct, RLT, and matched damping share architecture, initialization
+and batch order within each seed. The loss averages the negative
+log-probability of the verified positive set across the planned visits.
+Inconclusive labels are masked. Training uses pools with a known positive
+and negative. Pools without a verified candidate remain useful receipts
+for measuring retrieval coverage.
+
+At inference, run the native portfolio once and compare fallback policies
+on the same stalled goals. Rerank untried candidates once per visit. The
+strict Lean gate commits the first current proof that passes the kernel.
+Log retrieval, scoring, and verification separately. A wider untrained
+pool pass estimates candidate reachability. Standalone compilation audits
+the successful scripts and withheld construction proofs.
+
+    python scripts/run_rlt_lean_ldt_windows.py collect --trained --out RUN --previous-fixture PRIOR_GROUNDED_FIXTURE --upstream-ldt HYBRID_TRM_LDT_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python scripts/run_rlt_lean_ldt_windows.py fit --trained --out RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python scripts/run_rlt_lean_ldt_windows.py evaluate --trained --out RUN --upstream-ldt HYBRID_TRM_LDT_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python scripts/run_rlt_lean_ldt_windows.py certify --trained --out RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+
+Use the optional pilot dependencies for fitting and scoring. Each Windows
+phase uses one CPU worker, a 256 MiB process-tree cap and the same host
+reserve. Completed labels and traces are atomic, and optimizer receipts
+allow a paused training arm to resume at its saved update.
