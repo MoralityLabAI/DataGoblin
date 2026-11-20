@@ -46,3 +46,15 @@ The experiment stores proposal digests, per-puzzle verifier results, per-cycle a
 The paper policy checks one final TRM grid on each case still open after the menu. The stopping policy checks each cycle and commits the earliest verified grid. Per-policy verifier checks and shared-block calls are reconstructed from the full diagnostic replay, which scores every cycle for every case. Timings apply to the diagnostic run. Verifier-call counts exclude operator internals and include the raw proposal check whenever the parser emitted a candidate.
 
 The Windows launcher reserves 1.5 GiB of available physical memory. Its Job Object caps host commit at 256 MiB during preparation, 768 MiB for the CPU GGUF rollout, and 1,280 MiB for the matched fits. The GGUF runner uses one CPU thread and zero GPU layers. The launcher returns exit code 75 if admission times out or the reserve is crossed. Rerunning a phase resumes its saved rollout records or training checkpoints.
+
+## Training pack
+
+The local Aleph development pack contains **511 distinct repair examples across 256 training puzzles**. The exporter replayed all 512 source targets through the original verifier, matched their features, labels and masks to the pinned fitting tensors, and collapsed one duplicate input. It checked train roots against the prompt-shot, validation and both test pools. The archive and fresh Qwen benchmark rollouts remain reserved for evaluation.
+
+```powershell
+python scripts/run_hermes_rlt_repair_windows.py export @common --training-pack $trainingPack
+```
+
+Use a new destination outside the Git tree. `train.jsonl` supplies the typed public puzzle, proposed grid and verified repaired grid. Use the manifest's task rules and each row's `input` as the prompt, and apply response supervision to `target.repaired_grid`. The separate `train.receipts.jsonl` binds inputs and targets to their original proposer rows and the pinned verifier. The manifest records the independent verifier source and file hashes. The 256 MiB export job peaked at 39 MiB of host commit.
+
+The [Aleph data plan](../training/data/README.md) registers RLT as an answer-state arm with direct and matched-damping controls on the same train set. Local verification supports development. A full Aleph corpus build still needs source-rights and tokenizer admission.

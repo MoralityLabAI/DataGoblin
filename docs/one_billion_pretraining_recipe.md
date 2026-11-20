@@ -112,6 +112,11 @@ checked pack binds each goal and candidate to its environment and receipt.
 
 ## Training and promotion
 
+Include the [checked Campsite repair pack](rlt_hermes_repair.md#training-pack)
+in Aleph development under procedural games. Supervise the repaired grid
+and compare direct, answer-state RLT, and matched damping on the same data.
+Score both verified repairs and verification work on held-out puzzle roots.
+
 The text lane uses 512 training windows and 128 held-out windows from
 the pinned byte corpora. The rule lane adds 448 independently replayed
 episodes. It has 256 training episodes and 64 each for development,

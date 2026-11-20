@@ -81,6 +81,8 @@ two text windows per step. It holds the graph draws and total example
 cell calls fixed, with costs and target exposures reported by lane.
 Both controls use the same initial weights as the direct arm.
 
+The [Campsite repair lane](rlt_hermes_repair.md#training-pack) supplies a checked repair objective for the answer-state comparison. Fit direct, RLT and coefficient-matched damping on shared training targets with fixed planned visits. Verify decoded grids at the final visit and at each possible exit. Record repair coverage, state and update RMS, block calls, and verifier calls. The 1B [mixture plan](../training/data/aleph_20b_30b_mix.json) assigns the task to the procedural-games lane.
+
 ## Integrated dry run and pretrain recipe
 
 The integration check should exercise data loading, training, checkpoint

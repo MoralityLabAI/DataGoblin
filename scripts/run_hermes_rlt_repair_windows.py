@@ -27,26 +27,29 @@ def gpu_free():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase", choices=("prepare", "rollout", "fit"))
+    parser.add_argument("phase", choices=("prepare", "rollout", "fit", "export"))
     parser.add_argument("--cpu", "--cpu-fit", action="store_true", help="Use one CPU thread for fit or rollout")
     for name in ("out", "study", "hermes-lite", "ramcap-package"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--model", type=Path)
     parser.add_argument("--llama-server", type=Path)
+    parser.add_argument("--training-pack", type=Path, help="New private directory for the checked training export")
     args = parser.parse_args()
     if sys.platform != "win32":
         raise SystemExit("This launcher uses a Windows Job Object")
     if args.phase == "rollout" and args.model is None:
         parser.error("rollout requires a local model")
-    if args.cpu and args.phase == "prepare":
+    if args.cpu and args.phase not in {"fit", "rollout"}:
         parser.error("--cpu applies to training or inference")
+    if (args.phase == "export") != (args.training_pack is not None):
+        parser.error("export requires --training-pack")
     gguf = args.llama_server is not None
     if gguf and (args.phase != "rollout" or args.model.suffix.lower() != ".gguf"):
         parser.error("--llama-server requires rollout with a local GGUF model")
     root = args.out.resolve()
-    gpu = args.phase != "prepare" and not args.cpu and not gguf
+    gpu = args.phase in {"fit", "rollout"} and not args.cpu and not gguf
     gpu_cap = GPU_BUDGET[args.phase] if gpu else 0
-    host_caps = {"prepare": 256, "fit": 1280, "rollout": 768 if gguf else (1536 if gpu else 3072)}
+    host_caps = {"prepare": 256, "export": 256, "fit": 1280, "rollout": 768 if gguf else (1536 if gpu else 3072)}
     cap = host_caps[args.phase] * MIB
     deadline = time.monotonic() + 180
     while True:
@@ -114,10 +117,15 @@ def main():
 
     try:
         guard()
-        if args.phase != "prepare" and not gguf:
+        if args.phase in {"fit", "rollout"} and not gguf:
             initialize_backend()
         if args.phase == "prepare":
             experiment.prepare(root, args.study.resolve(), args.hermes_lite.resolve(), guard)
+        elif args.phase == "export":
+            from datagoblin.training_gym.rlt_hermes_training import export
+
+            count = export(root, args.training_pack.resolve(), args.study.resolve(), args.hermes_lite.resolve(), guard)
+            print(f"Exported {count} verified train-only Campsite repair examples", flush=True)
         elif gguf:
             experiment.rollout_gguf(root, args.model.resolve(), args.llama_server.resolve(), guard)
         elif args.phase == "rollout":

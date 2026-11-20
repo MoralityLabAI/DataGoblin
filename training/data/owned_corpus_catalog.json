@@ -2,6 +2,26 @@
   "audit_date": "2026-11-19",
   "corpus_lanes": [
     {
+      "id": "rlt_campsite_repair_v1",
+      "status": "materialized_local_verified_pilot",
+      "materialized_date": "2026-11-20",
+      "record_unit": "distinct normalized Campsite proposal and checked grid repair",
+      "records": 511,
+      "canonical_roots": 256,
+      "verified_source_rows": 512,
+      "eligible_for_local_pilot": true,
+      "training_ready": false,
+      "split": "train",
+      "train_pools": ["train", "train2"],
+      "reserved_pools": ["shots", "val", "test", "test2"],
+      "count_method": "Replayed the independent verifier and matched each source row to the pinned fit tensors. One identical repair input was deduplicated.",
+      "source_repo": "MoralityLabAI/Hermes-Skills",
+      "source_commit": "374ea72930ab9bac387ef809df58b805878596a1",
+      "manifest_sha256": "86634a19be602ac9687585d1883976bd21e866e407f0257cf402d4f1536df684",
+      "report": "docs/rlt_hermes_repair.md",
+      "release_scope": "Local development corpus. Audit proposal-output rights and count accepted loss-bearing tokens with the frozen Aleph tokenizer for full-corpus admission."
+    },
+    {
       "repository": "MoralityLabAI/AICourt",
       "commit": "dad297ef6c103f57bf0bbcd90614c4c110b4c504",
       "receipt_path": "results/court-balance-ensemble-2000.json",
@@ -461,7 +481,7 @@
     "Repository code license does not automatically license model outputs/third-party data.",
     "Reserve all legacy heldout families for independent evaluation or explicitly retire them before training."
   ],
-  "scope_note": "Metadata and aggregate receipts only. External shards were not retrieved. Held-out source files are included in tree sizes but excluded from any proposed training release.",
+  "scope_note": "The catalog contains metadata and aggregate receipts. The Campsite repair pack was replayed and materialized locally. Held-out source files are included in tree sizes but excluded from any proposed training release.",
   "lean_retotal": {
     "audit_date": "2026-11-19",
     "org_repositories_scanned": 36,

@@ -6,7 +6,7 @@ The [19 November 2026 landscape report](../reports/2026-11-19_data_landscape.md)
 | --- | --- |
 | [public_pretraining_catalog.json](public_pretraining_catalog.json) | 24 public pretraining and solution sources, including access, ancestry and license notes. |
 | [formal_game_catalog.json](formal_game_catalog.json) | 16 formal-math/game datasets, repositories and generator families. |
-| [owned_corpus_catalog.json](owned_corpus_catalog.json) | Eight owned lanes, four pinned Lean source inventories and 13 primary receipt links. |
+| [owned_corpus_catalog.json](owned_corpus_catalog.json) | Owned corpus receipts, pinned Lean source inventories and the local checked Campsite repair pack. |
 | [aleph_20b_30b_mix.json](aleph_20b_30b_mix.json) | Proposed quotas, repeat limits, fallback rules, objectives and accounting requirements. |
 | [aleph_20b_30b_estimates.json](../estimates/aleph_20b_30b_estimates.json) | Reproducible analytical compute cases for 10B, 20B and 30B tokens. |
 
@@ -23,6 +23,8 @@ The proposed static-root cap is four presentations total across all views of a r
 Reference text and source code need a declared language-modeling objective. Checked tasks use response supervision with claim-specific receipts. The proposed pretraining adapter must represent provenance and split eligibility separately from truth or outcome verification. This planning update leaves the current [`data_etiquette.yaml`](../../configs/data_etiquette.yaml) policy unchanged.
 
 Research predictions and model critiques remain attributed proposals. A proof checker, executed test suite or environment replay can support a narrower outcome claim. Admit each record with the claim type and receipt that establish its allowed supervision.
+
+The RLT Campsite module pilot has 511 distinct, verifier-checked repair examples from 256 train puzzles. It compares direct feedback, answer-state RLT and matched damping on shared targets. Count the repair examples under the existing procedural-games lane once admitted. The local train pack has a content-hashed manifest. Full-scale admission needs a source-rights review and accepted-token counts with the frozen Aleph tokenizer. [Build and replay the training pack](../../docs/rlt_hermes_repair.md#training-pack)
 
 ## Generation measurement
 

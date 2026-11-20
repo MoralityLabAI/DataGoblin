@@ -76,6 +76,23 @@
       "status": "proposed_capacity_subject_to_intake"
     }
   ],
+  "registered_module_pilots": [
+    {
+      "id": "rlt_campsite_answer_refinement",
+      "corpus_id": "rlt_campsite_repair_v1",
+      "accounting_lane": "games_procedural",
+      "objective": "response_only_supervision",
+      "feedback_boundary": "continuous_answer_state",
+      "reasoning_feedback": "direct",
+      "planned_answer_visits": 3,
+      "feedback_controls": ["direct", "rlt", "matched_damping"],
+      "baseline": "direct",
+      "training_split": "train",
+      "development_use": "Train matched arms on the same checked repair targets and report verified repair, state and update RMS, block calls, and verification work. Evaluate fixed-depth and first-verified exits on reserved roots.",
+      "scale_admission": "conditional_on_corpus_admission",
+      "accepted_aleph_tokens": null
+    }
+  ],
   "nested_quotas": {
     "protected_research_reference_inside_educational_20b": 1000000000,
     "protected_research_reference_inside_educational_30b": 1500000000,
