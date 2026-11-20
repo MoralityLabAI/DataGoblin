@@ -186,12 +186,13 @@ def decl_rows(repo: str, rel: str, source: str, token_count) -> list[dict]:
         end = matches[i + 1].start() if i + 1 < len(matches) else len(clean)
         body = clean[match.start():end]
         # This is a conservative source-level split, not Lean syntax elaboration.
-        head = re.split(r":=|\bwhere\b", body, maxsplit=1)[0].strip()
+        raw_head = re.split(r":=|\bwhere\b", body, maxsplit=1)[0]
+        head = raw_head.strip()
         has_sorry = bool(re.search(r"\b(sorry|admit)\b", body))
         axiom = match.group(1) == "axiom"
         # A candidate cluster fingerprint that deliberately omits the declaration name.
         # Matching syntax still requires review of namespaces, imports and assumptions.
-        tail = head[match.end() - match.start():]
+        tail = raw_head[match.end() - match.start():]
         name_free = re.sub(r"\s+", " ", f"{match.group(1)} {tail}").strip()
         rows.append({
             "repository": repo,
