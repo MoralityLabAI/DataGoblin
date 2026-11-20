@@ -150,6 +150,31 @@ training episode. The check peaked at 93.4 MiB within a 128 MiB job. This
 preflight exercised the data and verification interfaces before the
 matched fits.
 
+## Mixed-pilot evidence
+
+All 14 fits used 8,760 parameters, 192 optimizer updates, and 156 planned
+cell calls per update. The constant mixture and text-first curriculum each
+processed 18,432 text targets, 768 Lean pools, and 576 revision episodes
+per fit. The text-heavier control processed 30,720 text targets and 384
+Lean pools with the same number of revision episodes. Match cell calls
+when reading these arms and retain actual wall times in the run receipt.
+
+On the six-proposal Lean comparison the direct ranker recovered all 16
+provable goals in each seed. It used 100 ranker visits, 200 cell calls,
+and 100 checked-action replays per seed. Those actions account for 100
+tactic requests and 16 kernel checks in the recorded Lean environment.
+The composed lexical order recovered 8 goals with 144 tactic requests
+and 8 kernel checks. The ranker doubled coverage here and reduced the
+number of tactic requests. It spent eight additional kernel checks
+confirming the extra proofs. Retain separate budgets for model visits,
+tactics, and kernel checks in the next promotion comparison.
+
+Use the direct ranker as the first learned fallback on this task. When
+the checked pool contains no proof, route the remaining budget to new
+candidate generation. Twelve of the 28 goals reached this pool ceiling.
+
+## Scaling gates
+
 Promote a learned module or routing policy only after comparing quality
 and work on unseen structures, separately by task and by training seed.
 Preserve text competence, show a useful verified task effect, and count
