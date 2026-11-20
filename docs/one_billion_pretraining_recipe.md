@@ -1,11 +1,12 @@
 # DataGoblin 1B pretraining recipe
 
 The registered pilot compares placements and training objectives in a
-shared small cell. The training-pool evidence below informs candidate
-collection. The structural holdout and integrated comparison will inform
-the final routing and curriculum choices. The strict-1B layout is a
-planning allocation. Confirm its parameter count and profile the
-instantiated model on the training backend before allocating the main run.
+shared small cell. The checked Lean data below informs candidate
+collection on development goals and held-out structures. The integrated
+comparison will inform the final routing and curriculum choices. The
+strict-1B layout is a planning allocation. Confirm its parameter count
+and profile the instantiated model on the training backend before
+allocating the main run.
 
 ## Module layout
 
@@ -76,6 +77,38 @@ checks took 14.93 seconds on this host. The registered learned ranker
 still compares a limit of six. Keep wider prefixes in the coverage audit
 to measure whether remaining misses come from order or candidate supply.
 
+## Lean structural holdout
+
+Native Lean ran eight tactics on each of 28 held-out goals. It returned
+zero verified proofs and reached a recursion limit on four attempts.
+The grounded fallback reused a common checked cache and follows each
+proposal order to its first verified action at each limit.
+
+| Proposal order | Proofs at 6 | At 12 | At 24 | Anywhere in pool | Tactic requests at 12 | Kernel checks at 12 |
+|---|---:|---:|---:|---:|---:|---:|
+| Legacy | 0 | 4 | 4 | 4 | 336 | 4 |
+| Wider retrieval | 4 | 8 | 12 | 12 | 296 | 8 |
+| Composed tactics | 8 | 8 | 16 | 16 | 264 | 8 |
+
+Wider retrieval and composition each recovered 88 of 104
+goal–witness-lemma pairs, including every indexed pair. Both retrieved
+all witness lemmas on 24 goals. Legacy recovered 64 pairs and complete
+witness lemma sets on 12 goals. Composition doubled the number of
+verified goals within six proposals relative to the wider order.
+
+The held-out collection used 1,904 deduplicated proposal checks and 72
+kernel checks in addition to the 224 native tactic requests. It retained
+72 positive and 1,832 negative proposal outcomes and kept the four native
+resource failures in the task receipts. Candidate tactics accumulated
+244.83 seconds and kernel checks 15.13 seconds on this host. Native tactics
+accumulated another 163.09 seconds. At the six-proposal limit the
+composed order used 144 fallback tactic requests and eight kernel checks.
+Use that work and coverage as the primary lexical control for the mixed
+pilot. The verified ceiling in the composed pool is 16 of 28 goals.
+Standalone Lean replay compiled 244 proof declarations across the two
+splits, including registered witnesses and accepted proposals. The
+checked pack binds each goal and candidate to its environment and receipt.
+
 ## Training and promotion
 
 The text lane uses 512 training windows and 128 held-out windows from
@@ -110,11 +143,12 @@ The real-batch preflight loaded 512 text windows, 36 Lean goal pools with
 checked tactic outcomes, and 256 rule-revision episodes for training. All
 three losses sent nonzero gradients into the five shared cell parameter
 groups. A four-update direct-feedback run reproduced the uninterrupted
-weights bit for bit after resuming from update two. It checked a recorded Lean proof
-under the current epoch, rejected the same proof under a wrong epoch, and
-ran live graph verification on one edited and one unchanged training
-episode. The check peaked at 93.4 MiB within a 128 MiB job. This preflight
-exercised the data and verification interfaces before the matched fits.
+weights bit for bit after resuming from update two. It checked a recorded
+Lean proof under the current epoch, rejected the same proof under a wrong
+epoch, and ran live graph verification on one edited and one unchanged
+training episode. The check peaked at 93.4 MiB within a 128 MiB job. This
+preflight exercised the data and verification interfaces before the
+matched fits.
 
 Promote a learned module or routing policy only after comparing quality
 and work on unseen structures, separately by task and by training seed.
