@@ -64,6 +64,10 @@ They recovered 72 of 76 goal–witness-lemma pairs and every witness lemma
 on 32 goals. Legacy recovered 64 pairs and every witness lemma on 24
 goals. At full pool depth, changing how the same retrieved lemmas were
 composed doubled the verified goal count on this split.
+The four composed-pool misses all belonged to `append_filter_map`, and
+the retriever had found every lemma in their registered witnesses.
+Five other families had a proof beyond the first six proposals for every
+goal. These are distinct opportunities for better composition and ranking.
 
 The audit paid for the deduplicated union of all three pools. It issued
 2,424 tactic requests and 124 kernel checks, yielding 124 positives and
@@ -101,6 +105,16 @@ Log examples, target tokens, optimizer loss weights, and wall time
 separately. A scale manifest must specify real-token exposures after
 tokenization and packing. Select the next staged mixture and curriculum
 from the held-out trade-off across both fitted seeds.
+
+The real-batch preflight loaded 512 text windows, 36 Lean goal pools with
+checked tactic outcomes, and 256 rule-revision episodes for training. All
+three losses sent nonzero gradients into the five shared cell parameter
+groups. A four-update direct-feedback run reproduced the uninterrupted
+weights bit for bit after resuming from update two. It checked a recorded Lean proof
+under the current epoch, rejected the same proof under a wrong epoch, and
+ran live graph verification on one edited and one unchanged training
+episode. The check peaked at 93.4 MiB within a 128 MiB job. This preflight
+exercised the data and verification interfaces before the matched fits.
 
 Promote a learned module or routing policy only after comparing quality
 and work on unseen structures, separately by task and by training seed.
