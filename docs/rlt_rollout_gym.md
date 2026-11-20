@@ -176,6 +176,44 @@ Pass its path through `run --intervention PATH --depths 4`. The visit must fit e
 
 ## Extend the next collection batches
 
+### Collect Lean selections with OxiBonsai
+
+Tetsuya Kitahata's [OxiBonsai](https://github.com/cool-japan/oxibonsai) serves
+PrismML's [1-bit Bonsai-8B](https://huggingface.co/prism-ml/Bonsai-8B-gguf).
+The model chooses a tactic from the grounded Lean gym's library and can try again after a rejection.
+The lexical baseline and Bonsai see the same candidate pool and have the same attempt budget.
+
+Build OxiBonsai with CPU support and the server feature, then start one model replica on loopback.
+Use the published `Bonsai-8B.gguf` and the Qwen3-8B `tokenizer.json` documented by OxiBonsai.
+The checkpoint hash check also accepts a local copy with a different filename.
+
+```bash
+cargo install oxibonsai-cli --version 0.2.3 --features server --locked
+oxibonsai serve --model /path/to/Bonsai-8B.gguf --tokenizer /path/to/tokenizer.json \
+  --host 127.0.0.1 --port 8080 --pool-size 1 --max-concurrent-requests 1
+```
+
+Run the collector in another terminal. Pass the actual Lean toolchain executable.
+The example collects four train goals using at most four choices per goal and arm.
+
+```bash
+python -m datagoblin rlt-gym lean-bonsai \
+  --checkpoint /path/to/Bonsai-8B.gguf --lean /path/to/toolchain/bin/lean \
+  --max-goals 4 --attempts 4 --out runs/lean-bonsai/train-01
+```
+
+Supply `--fixtures /path/to/fixtures.json` to use the existing Lean gym's frozen cohorts.
+Otherwise the collector generates synthetic goals from the existing templates and `--seed`.
+Set `--split held_templates` for a held-template run. Every winning tactic elaborates against the exact
+statement under Lean, with an axiom audit. Each rollout carries the tactic, verdict, timing and token usage
+when the server reports it. `sft.jsonl` contains only the model's verified train proofs, with the goal,
+proof script and receipt hashes. Held-out runs leave this file empty. `plan.json` records the local
+checkpoint digest and the server's model ID. The operator binds the running server to the checkpoint file.
+
+The collector measures black-box tactic selection and records each attempt for later training review.
+
+### Extend task coverage
+
 The next collection should use the checked synthetic tasks to establish throughput and the frequency of useful repairs. Follow with source-pinned tasks from the existing DataGoblin work. Lean can reuse the grounded ranker and composition paths in [`rlt_lean_train_rank.py`](../src/datagoblin/training_gym/rlt_lean_train_rank.py), [`rlt_lean_rank_eval.py`](../src/datagoblin/training_gym/rlt_lean_rank_eval.py), and [`rlt_lean_composition.py`](../src/datagoblin/training_gym/rlt_lean_composition.py). Preserve the theorem-root split and bind every accepted proof to its kernel receipt. Measure the full candidate-pool ceiling so proof generation receives attention when the ranker has exhausted that pool.
 
 The route-certificate work in [`rlt_route_certificate.py`](../src/datagoblin/training_gym/rlt_route_certificate.py) supplies revision and reuse cases for rule graphs. Exact traversal should remain an available solver there. The existing [supervision study](rlt_trm_supervision.md) supplies a place to compare exact intermediate labels with teacher-proposed revisions.

@@ -78,9 +78,29 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     frontier.add_argument("--rollouts", type=Path, required=True)
     frontier.add_argument("--out", type=Path, required=True)
     frontier.add_argument("--max-tasks", type=int, default=64)
+    bonsai = commands.add_parser("lean-bonsai", help="Collect Lean proofs with a local 1-bit OxiBonsai arm")
+    bonsai.add_argument("--out", type=Path, required=True)
+    bonsai.add_argument("--lean", type=Path, required=True, help="Lean 4 toolchain executable")
+    bonsai.add_argument("--checkpoint", type=Path, required=True, help="PrismML Bonsai-8B.gguf served by OxiBonsai")
+    bonsai.add_argument("--port", type=int, default=8080, help="Loopback OxiBonsai port")
+    bonsai.add_argument("--fixtures", type=Path, help="Existing frozen Lean gym fixtures.json")
+    bonsai.add_argument("--split", choices=("train", "same_templates", "held_templates"), default="train")
+    bonsai.add_argument("--seed", type=int, default=7, help="Seed for synthetic goals when no fixture is given")
+    bonsai.add_argument("--max-goals", type=int, default=4)
+    bonsai.add_argument("--attempts", type=int, default=4, help="Equal attempt budget per goal and arm")
+    bonsai.add_argument("--request-timeout", type=float, default=30)
 
 
 def dispatch(args: argparse.Namespace) -> dict[str, Any]:
+    if args.rlt_command == "lean-bonsai":
+        from .lean_bonsai import run_lean_bonsai
+
+        return run_lean_bonsai(
+            args.out, lean=args.lean, checkpoint=args.checkpoint, port=args.port, split=args.split,
+            fixtures=args.fixtures, seed=args.seed, max_goals=args.max_goals, attempts=args.attempts,
+            request_timeout=args.request_timeout,
+        )
+
     from .runner import mine_frontier, replay_run, run_suite
     from .tasks import load_suite, write_suite
     from .teachers import (
