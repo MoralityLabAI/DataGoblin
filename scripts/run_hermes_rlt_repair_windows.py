@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import faulthandler
 import os
 import subprocess
 import sys
@@ -75,6 +76,7 @@ def main():
         handle.write(str(os.getpid()))
     started, last_gpu_poll = time.monotonic(), 0.0
     status, peak_gpu, minimum_gpu = "aborted", None, None
+    backend = None
 
     def guard():
         nonlocal free, commit, last_gpu_poll, minimum_gpu
@@ -84,41 +86,56 @@ def main():
             raise ResourcePause("host reserve paused the experiment")
         now = time.monotonic()
         if gpu and now - last_gpu_poll >= 10:
-            remaining = gpu_free()
+            cuda_ready = backend is not None and backend.cuda.is_initialized()
+            remaining = backend.cuda.mem_get_info(0)[0] if cuda_ready else gpu_free()
             last_gpu_poll = now
             minimum_gpu = remaining if minimum_gpu is None else min(minimum_gpu, remaining)
             if remaining < GPU_RESERVE:
                 raise ResourcePause("GPU reserve paused the experiment")
 
-    try:
-        guard()
-        if args.phase != "prepare" and not gguf:
-            print(f"Initializing PyTorch for {args.phase}", flush=True)
+    def initialize_backend():
+        nonlocal backend
+        print(f"Initializing PyTorch for {args.phase}", flush=True)
+        faulthandler.dump_traceback_later(90)
+        try:
             import torch
 
             torch.set_num_threads(1)
             torch.set_num_interop_threads(1)
+        finally:
+            faulthandler.cancel_dump_traceback_later()
+        backend = torch
+
+    def initialize_device():
         if gpu:
             print(f"Applying CUDA memory limit for {args.phase}", flush=True)
-            torch.cuda.set_per_process_memory_fraction(gpu_cap / torch.cuda.get_device_properties(0).total_memory, 0)
+            fraction = gpu_cap / backend.cuda.get_device_properties(0).total_memory
+            backend.cuda.set_per_process_memory_fraction(fraction, 0)
+
+    try:
+        guard()
+        if args.phase != "prepare" and not gguf:
+            initialize_backend()
         if args.phase == "prepare":
             experiment.prepare(root, args.study.resolve(), args.hermes_lite.resolve(), guard)
         elif gguf:
             experiment.rollout_gguf(root, args.model.resolve(), args.llama_server.resolve(), guard)
         elif args.phase == "rollout":
+            initialize_device()
             print("Loading the registered local Qwen checkpoint", flush=True)
             experiment.rollout(root, args.model.resolve(), "cuda:0" if gpu else "cpu", guard)
         else:
             from datagoblin.training_gym.rlt_hermes_fit import compare
 
-            compare(root, args.study.resolve(), args.hermes_lite.resolve(), "cuda" if gpu else "cpu", guard)
+            compare(root, args.study.resolve(), args.hermes_lite.resolve(), "cuda" if gpu else "cpu",
+                    guard, initialize_device)
         status = "complete"
     except ResourcePause as exc:
         status = "paused"
         raise SystemExit(75) from exc
     finally:
-        if gpu and "torch" in locals() and torch.cuda.is_initialized():
-            peak_gpu = torch.cuda.max_memory_reserved()
+        if gpu and backend is not None and backend.cuda.is_initialized():
+            peak_gpu = backend.cuda.max_memory_reserved()
         receipt = {"phase": args.phase, "status": status, "hard_host_cap_bytes": cap,
                    "host_peak_commit_bytes": job.peak_bytes(), "minimum_available_bytes": free,
                    "minimum_commit_headroom_bytes": commit, "gpu_peak_reserved_bytes": peak_gpu,

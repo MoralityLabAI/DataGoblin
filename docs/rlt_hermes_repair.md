@@ -8,6 +8,27 @@ The three arms share the paper's 64-wide repair model, three answer cycles, and 
 
 Each arm sees the same 512 archived training proposals from 256 puzzles and receives 320 AdamW updates per seed. Every training target is a nearest legal solution verified by the original verifier. The training puzzles come from the paper's training pools, with one greedy proposal each from Qwen2.5-3B and Bonsai-8B. The pilot uses two independent seeds per arm and scores single models. The paper's ensemble score is a historical reference.
 
+## Results
+
+The replay reproduced the paper's deterministic score of 63/148 on the Qwen2.5-3B archive. The same menu solved 12/36 of the fresh Qwen2.5-0.5B rollouts. The fresh parser found 36 grids, of which 28 had the full rectangular shape. The raw proposals passed on zero cases in each cohort.
+
+| Feedback | Seed | Archive final | Archive first valid | Fresh final | Fresh first valid |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Direct | 117 | 72/148 | 79/148 | 16/36 | 17/36 |
+| RLT | 117 | 73/148 | 81/148 | 16/36 | 17/36 |
+| Matched damping | 117 | 73/148 | 80/148 | 16/36 | 17/36 |
+| Direct | 163 | 77/148 | 79/148 | 14/36 | 15/36 |
+| RLT | 163 | 78/148 | 81/148 | 15/36 | 15/36 |
+| Matched damping | 163 | 78/148 | 81/148 | 15/36 | 15/36 |
+
+The learned repair added 2–4 verified grids on the fresh cohort. RLT added one final-cycle solve over direct feedback in one of two seeds. On cases still open after the menu, RLT and matched damping solved identical final-cycle cases in both cohorts for both seeds. On the archive, RLT's first-valid score was one higher than damping in seed 117 and tied in seed 163. Every commit passed the original verifier.
+
+On fresh cases still open after the menu, RLT and damping reduced mean final answer-state RMS by about 62% relative to their paired direct fits. In seed 117 the RMS was 148.1 for direct, 55.6 for RLT, and 55.7 for damping. In seed 163 it was 126.7, 47.5, and 47.5. This pilot supports a state-scale effect shared by both interpolated updates. It provides little evidence of an advantage from RLT's specific schedule.
+
+On the fresh cohort the final-cycle policy used 112 verifier calls and 288 shared-block calls per fit. Checking for the first valid grid at every cycle used 153–158 verifier calls and 260–280 block calls, depending on the fit. The call counts show the trade-off between added verification and earlier exits. They do not measure a wall-clock speedup.
+
+All six completed fits used single-thread CPU PyTorch after CUDA hit a driver allocation failure. The completed fit stage peaked at 1,025 MiB of Windows job commit. The Qwen replay peaked at 231 MiB of job commit across attempts. A resumed rollout increased the loopback response timeout from 45 to 120 seconds with the same checkpoint, prompts, and decoding. The local evidence digest is `2c4da9edaa4dbf41a9ec73d3c46df76508fac8b26ae1810b916577f7684a3255`.
+
 ## Replay
 
 Use the read-only October Hermes study and its Hermes Lite verifier checkout. The input receipts record the source digests. The run needs the PyTorch and RLT pilot optional dependencies, a Windows Job Object wrapper from the Lean CGRT project, and a caller-provided local checkpoint. The CPU rollout supports the official llama.cpp Windows build and runs a hidden loopback-only process inside the same Job Object.

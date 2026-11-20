@@ -232,7 +232,7 @@ def rollout_gguf(root, model_path, server, guard):
                             "cache_prompt": False, "stop": ["\n\n", "Puzzle:"]}
                     request = Request(base + "/completion", data=json.dumps(body).encode(),
                                       headers={"Content-Type": "application/json"})
-                    with urlopen(request, timeout=45) as response:
+                    with urlopen(request, timeout=120) as response:
                         result = json.load(response)
                     return result["content"], result["timings"]["predicted_n"]
 

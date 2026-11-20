@@ -194,7 +194,7 @@ def assess(model, mode, trm, campsite, cells, records, guard):
     return {"summary": summarize(rows, trm.CYCLES, trm.INNER), "cases": rows}
 
 
-def compare(root, study, hermes_lite, device, guard):
+def compare(root, study, hermes_lite, device, guard, initialize_device):
     import numpy as np
     import torch
 
@@ -202,6 +202,9 @@ def compare(root, study, hermes_lite, device, guard):
     common, campsite, cells, trm = protocol.original(study, hermes_lite)
     if prepared["registration"]["source"] != protocol.source_receipt(study, common, campsite, cells):
         raise ValueError("upstream curriculum changed after preparation")
+    tests = cohorts(root, inputs, campsite, cells, guard)
+    print(f"Reproduced the 63/148 archive menu result and prepared {sum(map(len, tests.values()))} cases", flush=True)
+    initialize_device()
     registration = {
         "prepared_sha256": sha256_file(root / "prepared.json"),
         "fit_code_sha256": sha256_file(Path(__file__)),
@@ -213,7 +216,6 @@ def compare(root, study, hermes_lite, device, guard):
     if manifest.exists() and load_structured(manifest) != registration:
         raise ValueError("fit protocol changed")
     atomic_record(manifest, registration)
-    tests = cohorts(root, inputs, campsite, cells, guard)
     with np.load(root / "training.npz", allow_pickle=False) as arrays:
         tensors = tuple(torch.from_numpy(arrays[name]).to(device) for name in
                         ("features", "labels", "loss_mask", "valid"))
