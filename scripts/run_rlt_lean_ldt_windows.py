@@ -19,30 +19,47 @@ def main():
     parser.add_argument("--torch-cpu", type=Path)
     parser.add_argument("--upstream-ldt", type=Path)
     parser.add_argument("--ramcap-package", type=Path, required=True)
+    parser.add_argument("--host-free-floor-mib", type=int, default=FREE_FLOOR // 2**20)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--grounded", action="store_true")
     mode.add_argument("--trained", action="store_true")
+    mode.add_argument("--composition", action="store_true")
+    mode.add_argument("--pretrain", action="store_true")
+    parser.add_argument("--input-spec", type=Path)
     parser.add_argument("--previous-fixture", type=Path)
     args = parser.parse_args()
     if sys.platform != "win32":
         raise SystemExit("requires a Windows Job Object")
-    if args.phase == "prepare" and (args.checkpoints is None or args.torch_cpu is None):
+    if args.phase == "prepare" and not args.pretrain and (args.checkpoints is None or args.torch_cpu is None):
         parser.error("prepare requires --checkpoints and --torch-cpu")
     if args.phase == "evaluate" and args.upstream_ldt is None:
         parser.error("evaluate requires --upstream-ldt")
     if args.phase == "collect" and (args.previous_fixture is None or args.upstream_ldt is None):
         parser.error("collect requires --previous-fixture and --upstream-ldt")
-    if args.phase in ("collect", "fit") and not args.trained:
-        parser.error("collect and fit require --trained")
+    if args.phase == "collect" and not args.trained:
+        parser.error("collect requires --trained")
+    if args.phase == "fit" and not (args.trained or args.pretrain):
+        parser.error("fit requires --trained or --pretrain")
     if args.trained and args.phase == "prepare":
         parser.error("the trained ranker starts at collect")
+    if args.composition and args.phase not in ("evaluate", "certify"):
+        parser.error("composition supports evaluate and certify")
+    if args.composition and args.phase == "evaluate" and args.previous_fixture is None:
+        parser.error("composition evaluation requires --previous-fixture")
+    if args.pretrain and args.phase not in ("prepare", "fit", "evaluate"):
+        parser.error("pretrain supports prepare, fit and evaluate")
+    if args.pretrain and args.phase == "prepare" and args.input_spec is None:
+        parser.error("pretrain preparation requires --input-spec")
+    if args.host_free_floor_mib <= 0:
+        parser.error("host free-memory reserve must be positive")
+    runtime_floor = args.host_free_floor_mib * 2**20
     root = args.out.resolve()
     deadline = time.monotonic() + 180
     while True:
         free, headroom = memory()
         if (root / "STOP").exists() or time.monotonic() >= deadline:
             raise SystemExit(75)
-        if free >= FREE_FLOOR + COMMIT_CAP and headroom >= COMMIT_FLOOR + COMMIT_CAP:
+        if free >= runtime_floor + COMMIT_CAP and headroom >= COMMIT_FLOOR + COMMIT_CAP:
             break
         time.sleep(8)
     for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS",
@@ -75,7 +92,7 @@ def main():
             last_check = now
             available, commit_left = memory()
             free, headroom = min(free, available), min(headroom, commit_left)
-            if available < FREE_FLOOR or commit_left < COMMIT_FLOOR:
+            if available < runtime_floor or commit_left < COMMIT_FLOOR:
                 raise SystemExit(75)
 
     lock = root / "active.lock"
@@ -83,7 +100,20 @@ def main():
         handle.write(str(os.getpid()))
     try:
         guard()
-        if args.phase == "prepare":
+        if args.pretrain:
+            if args.phase == "prepare":
+                from datagoblin.training_gym.rlt_pretrain_data import prepare
+
+                prepare(root, args.input_spec.resolve(), guard)
+            elif args.phase == "fit":
+                from datagoblin.training_gym.rlt_pretrain_fit import fit
+
+                fit(root, guard)
+            else:
+                from datagoblin.training_gym.rlt_pretrain_eval import evaluate
+
+                evaluate(root, guard)
+        elif args.phase == "prepare":
             import torch
 
             from datagoblin.training_gym.rlt_lean_rank import export
@@ -97,6 +127,13 @@ def main():
             from datagoblin.training_gym.rlt_lean_labels import collect
 
             collect(root, args.previous_fixture.resolve(), guard)
+        elif args.composition:
+            from datagoblin.training_gym import rlt_lean_pool_audit
+
+            if args.phase == "evaluate":
+                rlt_lean_pool_audit.evaluate(root, args.previous_fixture.resolve(), guard)
+            else:
+                rlt_lean_pool_audit.certify(root, guard)
         elif args.trained:
             if args.phase == "fit":
                 from datagoblin.training_gym.rlt_lean_train_rank import fit
@@ -128,9 +165,10 @@ def main():
             "phase": args.phase, "status": status, "hard_commit_cap_bytes": COMMIT_CAP, "cpu_workers": 1,
             "wall_s": time.monotonic() - started, "job_peak_commit_bytes": job.peak_bytes(),
             "min_available_bytes": free, "min_commit_headroom_bytes": headroom,
+            "host_free_floor_bytes": runtime_floor,
         }
         dump_structured(root / f"{args.phase}-resources.json", receipt)
-        if args.trained:
+        if args.trained or args.composition or args.pretrain:
             with (root / "resource-history.jsonl").open("a", encoding="utf-8", newline="\n") as handle:
                 handle.write(canonical_json(receipt) + "\n")
         lock.unlink()

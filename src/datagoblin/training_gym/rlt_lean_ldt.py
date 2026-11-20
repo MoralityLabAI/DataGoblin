@@ -78,6 +78,8 @@ class LeanGate:
             row["kernel_wall_s"] = time.perf_counter() - started
             row["kernel_ok"] = kernel["ok"]
             row["axioms"] = kernel.get("axioms", [])
+            if kernel.get("error"):
+                row["error"] = kernel["error"]
         elif not outcome["ok"]:
             row["error"] = outcome["error"]
         self.attempts.append(row)
