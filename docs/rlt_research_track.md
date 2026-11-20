@@ -502,3 +502,33 @@ independent route hops. The exact route checker can solve this fixture by
 itself, so its work belongs in any claim about the hybrid's cost.
 
     python scripts/run_rlt_trm_ldt_windows.py --out RUN --checkpoints ANSWER_RUN --previous-pack TRAINING_PACK --previous-pack PRIOR_HOLDOUT --upstream-ldt HYBRID_TRM_LDT_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+
+## Live LDT stopping on fresh Lean core goals
+
+Reuse the three matched RLT-02 Loop-XS checkpoints at 3,400 updates.
+Score a shared eight-tactic portfolio using the byte model's mean
+log probability, including EOS, at each encoder visit. Propose the
+highest-ranked remaining tactic and halt as soon as the strict LDT
+boundary commits a proof. The four- and eight-visit trajectories use
+their own planned horizons. The native baseline runs the same
+portfolio in its preregistered fixed order under the same tactic limit.
+At the eight-attempt budget every arm can reach the entire portfolio.
+
+The verifier owns the Lean root and takes each tactic from that root.
+It asks Lean for an explicit kernel check only when the result has no
+remaining goals, then checks the exact theorem's axiom footprint.
+The timing and counts distinguish encoder visits, tactic requests,
+and explicit kernel-check requests. Shared goal initialization and
+the separate standalone replay are recorded outside arm latency.
+Replay the unique successful theorem–tactic pairs through the Lean
+frontend to cross-check the live gate.
+
+The fresh fixture contains generated Lean 4.19 core propositions.
+Weights stay frozen. The suite probes tactic ordering and verified exits
+on this grammar. The CPU Torch phase checks score and ranking parity
+with the NumPy inference path before the Lean evaluation. Both phases
+and the standalone compiler replay use the hard 256 MiB Windows cap.
+
+    python scripts/run_rlt_lean_ldt_windows.py prepare --out RUN --checkpoints MATCHED_LOOP_ROOT --torch-cpu CPU_TORCH_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python scripts/run_rlt_lean_ldt_windows.py evaluate --out RUN --upstream-ldt HYBRID_TRM_LDT_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+    python scripts/run_rlt_lean_ldt_windows.py certify --out RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400

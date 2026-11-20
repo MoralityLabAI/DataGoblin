@@ -1,0 +1,107 @@
+"""Run the live Lean stopping comparison under a 256 MiB process-tree cap."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import time
+from pathlib import Path
+
+from run_rlt_trm_windows import COMMIT_CAP, COMMIT_FLOOR, FREE_FLOOR, memory
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("phase", choices=("prepare", "evaluate", "certify"))
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--checkpoints", type=Path)
+    parser.add_argument("--torch-cpu", type=Path)
+    parser.add_argument("--upstream-ldt", type=Path)
+    parser.add_argument("--ramcap-package", type=Path, required=True)
+    args = parser.parse_args()
+    if sys.platform != "win32":
+        raise SystemExit("requires a Windows Job Object")
+    if args.phase == "prepare" and (args.checkpoints is None or args.torch_cpu is None):
+        parser.error("prepare requires --checkpoints and --torch-cpu")
+    if args.phase == "evaluate" and args.upstream_ldt is None:
+        parser.error("evaluate requires --upstream-ldt")
+    root = args.out.resolve()
+    deadline = time.monotonic() + 180
+    while True:
+        free, headroom = memory()
+        if (root / "STOP").exists() or time.monotonic() >= deadline:
+            raise SystemExit(75)
+        if free >= FREE_FLOOR + COMMIT_CAP and headroom >= COMMIT_FLOOR + COMMIT_CAP:
+            break
+        time.sleep(8)
+    for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS",
+                 "LEAN_NUM_THREADS"):
+        os.environ[name] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    os.environ["MKL_DISABLE_FAST_MM"] = "1"
+    os.environ["ONEDNN_PRIMITIVE_CACHE_CAPACITY"] = "0"
+    paths = [args.ramcap_package.resolve(), Path(__file__).resolve().parents[1] / "src"]
+    paths += [p.resolve() for p in (args.torch_cpu, args.upstream_ldt) if p is not None]
+    sys.path[:0] = list(map(str, paths))
+    from lcgrt.ramcap import Job
+
+    job = Job(COMMIT_CAP, priority="below_normal")
+    job.assign_self()
+    root.mkdir(parents=True, exist_ok=True)
+
+    from datagoblin.serialization import canonical_json, dump_structured
+
+    started = time.monotonic()
+    last_check = started - 1
+    status = "aborted"
+
+    def guard():
+        nonlocal last_check, free, headroom
+        now = time.monotonic()
+        if (root / "STOP").exists():
+            raise SystemExit(75)
+        if now - last_check >= 1:
+            last_check = now
+            available, commit_left = memory()
+            free, headroom = min(free, available), min(headroom, commit_left)
+            if available < FREE_FLOOR or commit_left < COMMIT_FLOOR:
+                raise SystemExit(75)
+
+    lock = root / "active.lock"
+    with lock.open("x", encoding="utf-8") as handle:
+        handle.write(str(os.getpid()))
+    try:
+        guard()
+        if args.phase == "prepare":
+            import torch
+
+            from datagoblin.training_gym.rlt_lean_rank import export
+
+            if not torch.__version__.endswith("+cpu"):
+                raise ValueError("expected CPU-only Torch")
+            torch.set_num_threads(1)
+            torch.set_num_interop_threads(1)
+            export(root, args.checkpoints.resolve(), torch, guard)
+        else:
+            from datagoblin.training_gym import rlt_lean_ldt
+
+            action = rlt_lean_ldt.evaluate if args.phase == "evaluate" else rlt_lean_ldt.certify
+            action(root, guard)
+        guard()
+        if job.peak_bytes() > COMMIT_CAP:
+            raise RuntimeError("the job recorded a memory request above the cap")
+        status = "complete"
+    finally:
+        receipt = {
+            "phase": args.phase, "status": status, "hard_commit_cap_bytes": COMMIT_CAP, "cpu_workers": 1,
+            "wall_s": time.monotonic() - started, "job_peak_commit_bytes": job.peak_bytes(),
+            "min_available_bytes": free, "min_commit_headroom_bytes": headroom,
+        }
+        dump_structured(root / f"{args.phase}-resources.json", receipt)
+        lock.unlink()
+        print(canonical_json(receipt), flush=True)
+
+
+if __name__ == "__main__":
+    main()
