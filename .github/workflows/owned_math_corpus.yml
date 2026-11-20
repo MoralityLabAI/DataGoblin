@@ -5,6 +5,8 @@ on:
       - 'training/corpus_intake/**'
       - 'training/gyms/semaev_redteam/**'
       - 'tests/unit/test_owned_math_audit.py'
+      - 'tests/unit/test_proof_roots.py'
+      - 'tests/unit/test_semaev_redteam_dev.py'
       - '.github/workflows/owned_math_corpus.yml'
   workflow_dispatch:
 
