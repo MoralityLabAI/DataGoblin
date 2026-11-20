@@ -50,6 +50,7 @@ jobs:
           tests/unit/test_rlt_gym_tasks.py
           tests/unit/test_rlt_gym_dynamics.py
           tests/unit/test_rlt_gym_teachers.py
+          tests/unit/test_rlt_gym_lean_bonsai.py
           tests/integration/test_rlt_gym_replay.py
       - name: Check style
         run: ruff check .
