@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BPD-compatible recurrent component comparison",
+  "type": "object",
+  "required": ["selection_receipt_sha256", "arms", "bpd_mechanism_verified"],
+  "properties": {
+    "selection_receipt_sha256": {"$ref": "#/$defs/digest"},
+    "bpd_mechanism_verified": {"const": false},
+    "arms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["untreated", "sham", "matched_random", "component"],
+      "properties": {
+        "untreated": {"$ref": "#/$defs/arm"},
+        "sham": {"$ref": "#/$defs/arm"},
+        "matched_random": {"$ref": "#/$defs/arm"},
+        "component": {
+          "allOf": [
+            {"$ref": "#/$defs/arm"},
+            {"required": ["donor_receipt_sha256"]}
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "arm": {
+      "type": "object",
+      "required": [
+        "task_digest", "checkpoint_sha256", "adapter_sha256", "operator", "component", "placement",
+        "visit", "planned_depth", "evidence_epoch", "feedback_mode", "readout_site", "seed",
+        "realized_absolute_dose"
+      ],
+      "properties": {
+        "task_digest": {"$ref": "#/$defs/digest"},
+        "checkpoint_sha256": {"$ref": "#/$defs/digest"},
+        "adapter_sha256": {"$ref": "#/$defs/digest"},
+        "donor_receipt_sha256": {"$ref": "#/$defs/digest"},
+        "operator": {"type": "string", "minLength": 1},
+        "component": {"type": "string", "minLength": 1},
+        "placement": {"type": "string", "minLength": 1},
+        "visit": {"type": "integer", "minimum": 0},
+        "planned_depth": {"type": "integer", "minimum": 1},
+        "evidence_epoch": {"type": ["string", "integer"]},
+        "feedback_mode": {"type": "string", "minLength": 1},
+        "readout_site": {"type": "string", "minLength": 1},
+        "seed": {"type": "integer", "minimum": 0},
+        "realized_absolute_dose": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

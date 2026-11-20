@@ -2,6 +2,23 @@
   "audit_date": "2026-11-19",
   "corpus_lanes": [
     {
+      "id": "rlt_rollout_gym_campaign_20261121",
+      "status": "materialized_local_verified_pilot",
+      "materialized_date": "2026-11-21",
+      "split": "train",
+      "records_across_six_objectives": 16052,
+      "canonical_roots": 1230,
+      "verified_teacher_roots": 1224,
+      "eligible_for_local_pilot": true,
+      "training_ready": false,
+      "data_manifest_sha256": "2cdfdb32e437da3048149ec06350c0e8cbc5d60b25cdac210e0873aeefd0db81",
+      "aggregate_receipt": "training/rlt_gym/2026-11-21_receipt.json",
+      "report": "training/rlt_gym/2026-11-21_campaign.md",
+      "aleph_tokenizer": null,
+      "train_payload_utf8_bytes": 20875868,
+      "loss_payload_utf8_bytes": 7177154
+    },
+    {
       "id": "rlt_campsite_repair_v1",
       "status": "materialized_local_verified_pilot",
       "materialized_date": "2026-11-20",
@@ -481,7 +498,7 @@
     "Repository code license does not automatically license model outputs/third-party data.",
     "Reserve all legacy heldout families for independent evaluation or explicitly retire them before training."
   ],
-  "scope_note": "The catalog contains metadata and aggregate receipts. The Campsite repair pack was replayed and materialized locally. Held-out source files are included in tree sizes but excluded from any proposed training release.",
+  "scope_note": "The catalog contains metadata and aggregate receipts. The Campsite and RLT rollout packs were replayed and materialized locally. Held-out source files are included in tree sizes but excluded from any proposed training release.",
   "lean_retotal": {
     "audit_date": "2026-11-19",
     "org_repositories_scanned": 36,

@@ -91,6 +91,19 @@
       "development_use": "Train matched arms on the same checked repair targets and report verified repair, state and update RMS, block calls, and verification work. Evaluate fixed-depth and first-verified exits on reserved roots.",
       "scale_admission": "conditional_on_corpus_admission",
       "accepted_aleph_tokens": null
+    },
+    {
+      "id": "rlt_rollout_gym_distillation",
+      "corpus_id": "rlt_rollout_gym_campaign_20261121",
+      "accounting_lane_by_family": {
+        "experiment_plan": "research_mechinterp",
+        "default": "games_procedural"
+      },
+      "objectives": ["sft", "repairs", "transitions", "outcomes", "preferences", "research"],
+      "training_split": "train",
+      "max_presentations_per_root_across_streams": 4,
+      "scale_admission": "conditional_on_corpus_admission",
+      "accepted_aleph_tokens": null
     }
   ],
   "nested_quotas": {

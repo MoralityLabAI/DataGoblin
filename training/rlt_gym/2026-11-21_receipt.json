@@ -1,0 +1,192 @@
+{
+  "archive": {
+    "bytes": 24733522,
+    "entries": 184,
+    "index_sha256": "d78e9137444e32b6ede937f51e0dae9817afb43929154c27bd64107467ca043d",
+    "sha256": "fbec351fd9a2d2746b11b105400b2713213a31e54556698db326402975fbd788"
+  },
+  "dataset": {
+    "aleph_tokenizer": null,
+    "excluded_rollouts": {
+      "calibration": 2730,
+      "cross_suite_overlap": 131,
+      "ood_test": 2604,
+      "ordinary_test": 2352
+    },
+    "manifest_sha256": "2cdfdb32e437da3048149ec06350c0e8cbc5d60b25cdac210e0873aeefd0db81",
+    "roots_by_custody": {
+      "calibration": 1238,
+      "calibration+ordinary_test": 20,
+      "calibration+train": 16,
+      "ood_test": 1274,
+      "ood_test+sealed_poison": 5,
+      "ordinary_test": 1228,
+      "ordinary_test+train": 19,
+      "sealed_poison": 1274,
+      "train": 1237
+    },
+    "sampling_plan": {
+      "accounting_lane_by_family": {
+        "default": "games_procedural",
+        "experiment_plan": "research_mechinterp"
+      },
+      "max_presentations_per_root_across_streams": 4
+    },
+    "streams": {
+      "outcomes": {
+        "bytes": 6946710,
+        "families": {
+          "arithmetic_program": 305,
+          "constraint_assignment": 378,
+          "evidence_retrieval": 346,
+          "experiment_plan": 366,
+          "finite_state_plan": 199,
+          "graph_route": 339,
+          "table_transform": 372
+        },
+        "loss_payload_utf8_bytes": 102270,
+        "prompt_payload_utf8_bytes": 2539250,
+        "roots": 1230,
+        "sha256": "dd5b0ba7e592bb78186e716c046bbd9733e890dce67adce385e6e53a505404d3",
+        "unique_examples": 2305
+      },
+      "preferences": {
+        "bytes": 630207,
+        "families": {
+          "arithmetic_program": 12,
+          "constraint_assignment": 20,
+          "evidence_retrieval": 23,
+          "experiment_plan": 31,
+          "finite_state_plan": 3,
+          "graph_route": 14,
+          "table_transform": 24
+        },
+        "loss_payload_utf8_bytes": 33782,
+        "prompt_payload_utf8_bytes": 125481,
+        "roots": 37,
+        "sha256": "3ca105128df9ade2ef6c454364d015d105e9c8850498f370ec0d37a25d39484c",
+        "unique_examples": 127
+      },
+      "repairs": {
+        "bytes": 625166,
+        "families": {
+          "arithmetic_program": 25,
+          "constraint_assignment": 25,
+          "evidence_retrieval": 44,
+          "experiment_plan": 25,
+          "finite_state_plan": 18,
+          "graph_route": 23,
+          "table_transform": 44
+        },
+        "loss_payload_utf8_bytes": 20492,
+        "prompt_payload_utf8_bytes": 244046,
+        "roots": 146,
+        "sha256": "5184934d4157adfb410c2b3ad9d4d6bbc4b07a730aee01bcc86c1750b02cec20",
+        "unique_examples": 204
+      },
+      "research": {
+        "bytes": 1518674,
+        "families": {
+          "experiment_plan": 397
+        },
+        "loss_payload_utf8_bytes": 35086,
+        "prompt_payload_utf8_bytes": 673918,
+        "roots": 176,
+        "sha256": "0cbf0105218c8bb101caf76bba59041e53d9ebeb824f467c1c44d977521839b0",
+        "unique_examples": 397
+      },
+      "sft": {
+        "bytes": 4018119,
+        "families": {
+          "arithmetic_program": 233,
+          "constraint_assignment": 199,
+          "evidence_retrieval": 227,
+          "experiment_plan": 207,
+          "finite_state_plan": 181,
+          "graph_route": 210,
+          "table_transform": 230
+        },
+        "loss_payload_utf8_bytes": 148387,
+        "prompt_payload_utf8_bytes": 1187229,
+        "roots": 1230,
+        "sha256": "861de4e6d74e4d947799423bd5c887971e621e98e4b205360a495ab166134ad4",
+        "unique_examples": 1487
+      },
+      "transitions": {
+        "bytes": 46212769,
+        "families": {
+          "arithmetic_program": 1728,
+          "constraint_assignment": 1726,
+          "evidence_retrieval": 1729,
+          "experiment_plan": 1721,
+          "finite_state_plan": 1179,
+          "graph_route": 1723,
+          "table_transform": 1726
+        },
+        "loss_payload_utf8_bytes": 6837137,
+        "prompt_payload_utf8_bytes": 16105944,
+        "roots": 1230,
+        "sha256": "284db39540209d6ea84ed352842347e1d3835188f67c436e1ec6a6a9a8225c3f",
+        "unique_examples": 11532
+      }
+    }
+  },
+  "date": "2026-11-21",
+  "native": {
+    "audit_sha256": "f1f467be81c6c36ada876e6ccdb6990517e9123107efefbb602f4e48bbd3bef9",
+    "checker_rechecks": 45632,
+    "device": "cpu",
+    "episodes": 10038,
+    "peak_job_commit_bytes": 412667904,
+    "replayed": 10038,
+    "runs": {
+      "early": {
+        "episodes": 504,
+        "rollouts_sha256": "3e355cf0475874d77bbbc75c7d766bd828b701a768bbfb7e4578257088c6f635",
+        "verified": 164
+      },
+      "pulse": {
+        "episodes": 126,
+        "rollouts_sha256": "c33e5a4c14a40da461b9b27ec978de2555f0af17a754f61d1ba0309d47221b52",
+        "verified": 42
+      },
+      "terminal": {
+        "episodes": 9408,
+        "rollouts_sha256": "a868a478ab3bfde23de12b5d6d97eebfab11ef659eb43338bcdabbf40e0c585d",
+        "verified": 3027
+      }
+    },
+    "trace_bytes": 106768518,
+    "windows_job_commit_cap_bytes": 805306368
+  },
+  "schema": "rlt_gym.campaign_receipt.v1",
+  "teacher": {
+    "accepted_distinct_train_roots": 1224,
+    "authentication": "chatgpt",
+    "invalid_or_missing_provider_calls": 0,
+    "invocations": 27,
+    "opus_verified_roots": 0,
+    "requested_model": "gpt-6.2-sol",
+    "responses_with_final_attempt": 1364,
+    "submitted_packets": 1364,
+    "usage": {
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 110080,
+      "input_tokens": 895130,
+      "output_tokens": 90743,
+      "reasoning_output_tokens": 6246
+    },
+    "usd_cost": null,
+    "verified_distinct_roots_by_family_before_custody": {
+      "arithmetic_program": 180,
+      "constraint_assignment": 177,
+      "evidence_retrieval": 182,
+      "experiment_plan": 176,
+      "finite_state_plan": 160,
+      "graph_route": 181,
+      "table_transform": 182
+    },
+    "verified_episode_outcomes": 1250,
+    "verify_distinct_roots_before_custody": 1238
+  }
+}

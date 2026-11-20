@@ -72,6 +72,10 @@ The architecture-neutral training gym evaluates LoRA, HRM-Text, and bounded loop
 frozen split and metric firewall. The default command runs mock controls only and never loads weights; see
 [`docs/training_gym.md`](docs/training_gym.md).
 
+The RLT rollout gym collects checked attempts across seven task families, compares recurrence schedules on small
+CPU controls, and stages Codex or Opus requests for verified training examples. It preserves repairs and public
+teacher work alongside local state summaries. Start with [`docs/rlt_rollout_gym.md`](docs/rlt_rollout_gym.md).
+
 The collection-etiquette pipeline classifies public metadata envelopes into reject, quarantine, discovery, verified,
 and evaluation custody lanes. Its LDT is currently a deterministic plumbing control and has no authority to release
 training data. See [`docs/data_collection_etiquette.md`](docs/data_collection_etiquette.md).
