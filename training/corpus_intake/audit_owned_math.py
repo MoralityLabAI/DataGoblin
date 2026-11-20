@@ -86,7 +86,13 @@ def category(repo: str, rel: str) -> str:
             if "axiom" in name or "check" in name:
                 return "lean_audit_entrypoint"
             return "general_lean_development"
-        if "fixture" in p or "test" in p or "curriculum" in p:
+        if repo == "EvalMath" and p.startswith("fixtures/external/"):
+            return "lean_external_import"
+        if repo == "EvalMath" and name in {"patchwitness.lean", "patchwitness3.lean"}:
+            return "generated_lean_witness"
+        if repo == "LoopedTransformers" and "/certificates/" in p:
+            return "lean_certificate_fixture"
+        if "fixture" in p or "test" in p or "curriculum" in p or "smoke" in name:
             return "lean_fixture_or_curriculum"
         return "lean_research"
     if suffix == ".py":
@@ -106,6 +112,17 @@ def category(repo: str, rel: str) -> str:
             return "mathematical_papers"
         return "research_notes_and_protocols"
     return "other"
+
+
+def split_role(path: str) -> str:
+    parts = set(re.split(r"[/_.-]+", path.lower()))
+    if parts & {"test", "sealed", "holdout", "holdouts", "reserved"}:
+        return "protected_eval"
+    if parts & {"dev", "validation", "val"}:
+        return "development"
+    if "train" in parts:
+        return "training_candidate"
+    return "unassigned"
 
 
 def is_numeric_certificate(kind: str) -> bool:
@@ -172,6 +189,10 @@ def decl_rows(repo: str, rel: str, source: str, token_count) -> list[dict]:
         head = re.split(r":=|\bwhere\b", body, maxsplit=1)[0].strip()
         has_sorry = bool(re.search(r"\b(sorry|admit)\b", body))
         axiom = match.group(1) == "axiom"
+        # A candidate cluster fingerprint that deliberately omits the declaration name.
+        # Matching syntax still requires review of namespaces, imports and assumptions.
+        tail = head[match.end() - match.start():]
+        name_free = re.sub(r"\s+", " ", f"{match.group(1)} {tail}").strip()
         rows.append({
             "repository": repo,
             "path": rel,
@@ -179,6 +200,9 @@ def decl_rows(repo: str, rel: str, source: str, token_count) -> list[dict]:
             "kind": match.group(1),
             "name": match.group(2),
             "statement_sha256": hashlib.sha256(re.sub(r"\s+", " ", head).encode()).hexdigest(),
+            "name_free_statement_sha256": hashlib.sha256(name_free.encode()).hexdigest(),
+            "source_lane": category(repo, rel),
+            "split_role": split_role(rel),
             "source_tokens": token_count(body),
             "has_sorry_or_admit": has_sorry,
             "is_axiom_declaration": axiom,
@@ -298,7 +322,7 @@ def audit(root: Path, out: Path, tokens: TokenCounter) -> dict:
             group[repo][f"kind:{kind}:tokens"] += count
             totals["tokenized_tokens"] += count
             totals["unique_exact_file_tokens"] += 0 if is_dup else count
-            if kind.startswith(("lean", "general_lean", "repeated_lean")):
+            if path.suffix.lower() == ".lean":
                 rows = decl_rows(repo, rel, content, tokens)
                 declarations.extend(rows)
                 group[repo]["lean_declarations"] += len(rows)
