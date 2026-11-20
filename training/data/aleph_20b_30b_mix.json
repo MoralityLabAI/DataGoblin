@@ -1,0 +1,148 @@
+{
+  "schema_version": "planning-only-1.0",
+  "date": "2026-11-19",
+  "status": "proposal_untrained_unreleased",
+  "model": "Data Goblin Aleph 1B",
+  "unique_neural_parameters": 1007141013,
+  "training_ready": false,
+  "paid_job_started": false,
+  "recommended_primary_endpoint_tokens": 20000000000,
+  "conditional_extension_endpoint_tokens": 30000000000,
+  "token_definition": "Processed non-padding input plus target tokens under one frozen Aleph tokenizer; all repeated presentations count.",
+  "tokenizer_revision": null,
+  "loss_tokens_measured": null,
+  "lanes": [
+    {
+      "id": "educational_reference",
+      "description": "Educational prose, primary research papers and technical reference documents",
+      "target_tokens_20b": 6000000000,
+      "target_tokens_30b": 8000000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    },
+    {
+      "id": "code_tests",
+      "description": "Code, executable examples, repository-linked documentation and tests",
+      "target_tokens_20b": 5500000000,
+      "target_tokens_30b": 9000000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    },
+    {
+      "id": "informal_math",
+      "description": "Mathematical explanations, derivations and algorithms",
+      "target_tokens_20b": 4000000000,
+      "target_tokens_30b": 6000000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    },
+    {
+      "id": "synthetic_explanations_solutions",
+      "description": "Selected synthetic explanations and math/code solution episodes",
+      "target_tokens_20b": 2500000000,
+      "target_tokens_30b": 4000000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    },
+    {
+      "id": "formal_lean",
+      "description": "Lean source, proof-state transitions and checked repairs",
+      "target_tokens_20b": 800000000,
+      "target_tokens_30b": 1200000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    },
+    {
+      "id": "games_procedural",
+      "description": "Actor-visible gameplay and procedurally verified reasoning",
+      "target_tokens_20b": 1000000000,
+      "target_tokens_30b": 1500000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    },
+    {
+      "id": "research_mechinterp",
+      "description": "Complete research episodes, measured interventions and outcome-based revisions",
+      "target_tokens_20b": 200000000,
+      "target_tokens_30b": 300000000,
+      "accepted_unique_aleph_tokens": null,
+      "accepted_processed_aleph_tokens": null,
+      "status": "proposed_capacity_subject_to_intake"
+    }
+  ],
+  "nested_quotas": {
+    "protected_research_reference_inside_educational_20b": 1000000000,
+    "protected_research_reference_inside_educational_30b": 1500000000,
+    "synthetic_lane_max_fraction_unverified_explanatory_rewrites": 0.5,
+    "nested_quotas_are_included_in_lane_totals": true
+  },
+  "sampling_constraints_proposed": {
+    "static_root_max_presentations_total_across_views": 4,
+    "maximum_distinct_verified_views_per_static_root": 4,
+    "root_split_inherited_by_all_views": true,
+    "root_has_exactly_one_accounting_lane": true,
+    "repeat_limits_are_hypotheses_for_pilot": true,
+    "mechanism_or_generator_family_count_reported_separately": true,
+    "existing_heldout_partitions_preserved": true
+  },
+  "shortfall_fallback_proposed": {
+    "research_mechinterp": {
+      "protected_research_reference": 0.5,
+      "code_tests": 0.5
+    },
+    "formal_lean": {
+      "informal_math": 0.5,
+      "independently_checked_solutions": 0.5
+    },
+    "games_procedural": {
+      "code_tests": 0.5,
+      "independently_checked_procedural_or_solutions": 0.5
+    },
+    "unavailable_checked_solution_fallback": "educational_reference",
+    "all_replacements_require_admitted_supply_and_recomputed_achieved_mix": true,
+    "fallback_adds_to_existing_lanes_and_preserves_total_tokens": true
+  },
+  "curriculum_proposed": {
+    "coverage": "Expose every admitted lane from the beginning; shift weights only within the declared cumulative quotas.",
+    "final_operator_focused_fraction_of_run": 0.1,
+    "research_lane_example": "If 70% of the 200M research quota is scheduled in the final 2B of a 20B run, that lane becomes 7% of the final segment while remaining 1% overall.",
+    "extension_decision": "Choose 20B versus 30B before terminal learning-rate decay; preserve optimizer, scheduler, sampler and RNG state at the decision checkpoint."
+  },
+  "objective_contract_proposed": {
+    "language_material": "causal_next_token_pretraining",
+    "checked_tasks_and_operator_actions": "response_only_supervision with causal response and explicitly bounded prefix mask",
+    "public_prose_eligibility_claim": "accepted_for_pretraining_content_provenance_and_split_checks",
+    "truth_status_of_public_prose": "source_claims_only",
+    "verifier_scope": "Typed claim-level receipts: proof acceptance, executed tests, transition validity, outcome or causal intervention result.",
+    "repository_policy_changed": false,
+    "integration_required": "A future pretraining adapter must represent language-modeling eligibility explicitly while preserving current verified/discovery authority rules."
+  },
+  "proposed_generation_pilot": {
+    "examples_target": 10000,
+    "families_min": 12,
+    "families_max": 20,
+    "metrics": [
+      "accepted_unique_aleph_tokens",
+      "target_tokens",
+      "root_families",
+      "compile_or_replay_pass_rate",
+      "duplicate_rate",
+      "accepted_unique_tokens_per_cpu_hour",
+      "accepted_unique_tokens_per_teacher_gpu_hour"
+    ],
+    "executed": false
+  },
+  "cost_boundaries": {
+    "h100_gpu_hours_scenario": 700,
+    "main_training_allocation": 400,
+    "other_campaign_allocation": 300,
+    "silico_ru_to_gpu_hour_conversion": "unverified",
+    "teacher_generation_and_verification": "outside model training estimate; meter separately"
+  }
+}

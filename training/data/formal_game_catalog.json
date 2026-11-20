@@ -1,0 +1,267 @@
+{
+  "checked_at": "2026-11-19",
+  "scope": "Primary-source public formal Lean and gameplay/procedural data inventory for Data Goblin Aleph 1B. No corpus was downloaded, tokenized, or reverified in this audit; sizes below are publisher counts.",
+  "sources": [
+    {
+      "id": "mathlib4_leandojo",
+      "name": "mathlib4 with LeanDojo-v2 extraction",
+      "kind": "source_repository_and_extractor",
+      "urls": [
+        "https://github.com/leanprover-community/mathlib4",
+        "https://github.com/lean-dojo/LeanDojo-v2",
+        "https://github.com/lean-dojo/LeanDojo"
+      ],
+      "size": "No current source-token count measured here",
+      "license": "mathlib4 Apache-2.0; LeanDojo-v2 tooling MIT; other traced repositories retain their own licenses",
+      "priority": "core",
+      "use": "Extract theorem/context/tactic/state transitions and premise retrieval examples from pinned commits. The original LeanDojo repo now directs new projects to v2.",
+      "risks": "Pin Lean and mathlib commit together; theorem and dependency family splits; deduplicate mathlib copies included in downstream prover datasets. Extractor outputs are not yet a generated Aleph corpus.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "goedel_sft_v2",
+      "name": "Goedel-Prover-V2 SFT dataset",
+      "kind": "downloadable_chat_dataset",
+      "urls": [
+        "https://huggingface.co/datasets/Goedel-LM/SFT_dataset_v2",
+        "https://github.com/Goedel-LM/Goedel-Prover-V2",
+        "https://arxiv.org/html/2508.03613v1"
+      ],
+      "rows": 1745010,
+      "size": "6.11 GB reported by Hugging Face; not a token count",
+      "license": "Apache-2.0 on dataset card",
+      "priority": "core_after_filtering",
+      "use": "Proof planning, whole proofs and self-correction in messages with 2-4 turns. Useful source for concise extracted repair episodes.",
+      "risks": "Replay the final proof in a compatible Lean environment. The repository documents Lean 4 v4.9 and the corresponding mathlib. Limit boilerplate and long reasoning, exclude reserved benchmark families, and deduplicate theorems across sources. A full chat rollout is not automatically a single unique theorem.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "stp_lean",
+      "name": "STP_Lean",
+      "kind": "downloadable_prompt_target_dataset",
+      "urls": [
+        "https://huggingface.co/datasets/kfdong/STP_Lean",
+        "https://arxiv.org/html/2502.00212v3"
+      ],
+      "rows": 1738754,
+      "size": "1.21 GB reported; tokens unmeasured",
+      "license": "MIT on dataset card",
+      "priority": "core_after_filtering",
+      "use": "Includes mathlib examples, correct LeanWorkbook proofs, and conjecture/proof pairs from self-play. Fields are prompt, target, weight, iteration, and tag.",
+      "risks": "The paper includes miniF2F-valid and ProofNet-valid in the final 8 iterations; exclude reserved evaluation families. Multiple iterations and proof alternatives cause overlap. The paper's 19.8B generated tokens include search and therefore describe a different quantity from this release's clean unique training tokens.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "numinamath_lean",
+      "name": "NuminaMath-LEAN",
+      "kind": "downloadable_formalization_dataset",
+      "urls": [
+        "https://huggingface.co/datasets/project-numina/NuminaMath-LEAN"
+      ],
+      "rows": 104155,
+      "size": "78.4 MB reported; tokens unmeasured",
+      "license": "Apache-2.0 on dataset card",
+      "priority": "core_after_status_filtering",
+      "use": "Human and machine formalizations of math competition problems; explicit complete/with_sorry/statement statuses; mathlib4 v4.15.0.",
+      "risks": "Card discloses inaccurate reference answers and some autoformalized statements. A compiling statement with sorry is a task prompt, not an accepted proof. Model formal_proof can be empty. Confirm semantic match separately from kernel proof acceptance.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false,
+      "previous_dataset_id": "AI-MO/NuminaMath-LEAN"
+    },
+    {
+      "id": "lean_workbook",
+      "name": "Lean Workbook and Workbook Plus",
+      "kind": "downloadable_statements_and_partial_proof_traces",
+      "urls": [
+        "https://huggingface.co/datasets/internlm/Lean-Workbook"
+      ],
+      "size": "The card reports 57,231 plus 82,893 problems. The current viewer contains 25,214 tactic rows. These counts use different units.",
+      "license": "Apache-2.0 on dataset card",
+      "priority": "dedup_seed_pool",
+      "use": "Natural/formal statement pairs plus available proofs and before/after tactic states. The test environment uses Lean and mathlib4 v4.8.0-rc1.",
+      "risks": "Shares tasks with STP and Goedel. STP reports deduplicating 140K natural/formal pairs to 89,221 formal statements. Status includes proved and disproved; preserve each record's actual status.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "goedel_pset",
+      "name": "Goedel-Pset-v1",
+      "kind": "downloadable_formal_statements",
+      "urls": [
+        "https://huggingface.co/datasets/Goedel-LM/Goedel-Pset-v1"
+      ],
+      "rows": 1732594,
+      "size": "828 MB reported; tokens unmeasured",
+      "license": "License link/badge present but no unambiguous dataset license identified in this read; resolve before inclusion",
+      "priority": "optional_prompt_pool",
+      "use": "Informal/formal pairs produced from Numina problems. Compilation uses the proof placeholder by sorry, and semantic checking uses Qwen2.5-72B Instruct.",
+      "risks": "The 1.73M records contain statements. Model checking supplies soft evidence for faithful translation. Admission to an accepted proof pool requires independent solutions and checks.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "goedel_workbook_proofs",
+      "name": "Goedel Lean-workbook-proofs",
+      "kind": "downloadable_whole_proofs",
+      "urls": [
+        "https://huggingface.co/datasets/Goedel-LM/Lean-workbook-proofs"
+      ],
+      "rows": 29750,
+      "size": "16.2 MB reported; tokens unmeasured",
+      "license": "No clear license in viewed card; resolve before inclusion",
+      "priority": "optional_small_reference",
+      "use": "Goedel-Prover-SFT solutions with problem_id and full_proof.",
+      "risks": "Heavy source overlap with LeanWorkbook and newer SFT corpora. Reverify and deduplicate by theorem.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "deepseek_prover_v1",
+      "name": "DeepSeek-Prover-V1 public dataset",
+      "kind": "downloadable_proof_subset",
+      "urls": [
+        "https://huggingface.co/datasets/deepseek-ai/DeepSeek-Prover-V1"
+      ],
+      "rows": 27503,
+      "size": "The current public file is 19.6 MB. The card separately describes 8M training statements/proofs.",
+      "license": "deepseek-license metadata; card's code/model terms do not establish a clean generic dataset license",
+      "priority": "optional_after_terms_review",
+      "use": "Short formal_statement/goal/header/formal_proof rows.",
+      "risks": "The 8M figure does not establish the number of downloadable records. Some visible examples simply restate an assumption or use contradictory premises, so quality requires more than compilation.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "deepseek_prover_v2",
+      "name": "DeepSeek-Prover-V2 releases",
+      "kind": "model_and_evaluation_material",
+      "urls": [
+        "https://github.com/deepseek-ai/DeepSeek-Prover-V2",
+        "https://huggingface.co/datasets/deepseek-ai/DeepSeek-ProverBench"
+      ],
+      "size": "No full training corpus was identified. Public releases include the 325-item ProverBench and miniF2F solutions.",
+      "license": "Model license applies to models; evaluation artifacts require separate terms check",
+      "priority": "evaluation_quarantine",
+      "use": "Method reference for subgoal decomposition and proof search.",
+      "risks": "Keep benchmark solutions out of training if those benchmarks will be reported.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "reasoning_gym",
+      "name": "Reasoning Gym",
+      "kind": "procedural_generator",
+      "urls": [
+        "https://github.com/open-thought/reasoning-gym",
+        "https://github.com/open-thought/reasoning-gym/blob/main/NOTICE.txt"
+      ],
+      "size": "More than 100 task types; no finite preexisting token volume.",
+      "license": "Apache-2.0 at the top level. NOTICE includes MIT-derived tasks, Apache 2.0 CodeSteer, and GPL-3.0 ACRE attribution.",
+      "priority": "core_generation",
+      "use": "Parameterized tasks with algorithmic score_answer; includes circuits, graphs, Sokoban, algebra, Countdown and ARC-derived tasks.",
+      "risks": "Test graders separately; seed-disjoint splits alone can share the same templates. Task ancestry and algorithm-family splits needed. Original ARC items and derived templates need separation from ARC evaluation claims.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nemotron_rl_reasoning_gym",
+      "name": "Nemotron-RL-ReasoningGym-v1",
+      "kind": "downloadable_question_answer_dataset",
+      "urls": [
+        "https://huggingface.co/datasets/nvidia/Nemotron-RL-ReasoningGym-v1"
+      ],
+      "rows": 15000,
+      "size": "104 environments. The card reports approximately 50 MB, while Hugging Face reports 30.7 MB in total. Tokens remain unmeasured.",
+      "license": "CC-BY-4.0",
+      "priority": "small_bootstrap",
+      "use": "Questions, reference answers, task metadata and environment names; programmatic verification, not long teacher rationales.",
+      "risks": "The existing Hugging Face viewer reports a conversion error for oversized values. Raw JSONL ingestion can be used after inspection. The 15K sample count describes question/answer records rather than complete multi-turn reasoning episodes.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "textarena",
+      "name": "TextArena",
+      "kind": "game_environment_generator",
+      "urls": [
+        "https://github.com/TextArena/TextArena"
+      ],
+      "size": "More than 100 games, with 106 in the current catalog and 192 language interfaces.",
+      "license": "MIT top-level tooling",
+      "priority": "core_generation_small_subset",
+      "use": "Competitive/cooperative text environments, native action parsing and outcomes; seedable local bounded games.",
+      "risks": "Environment availability leaves generated data volume unmeasured. Language-model players incur inference cost. Separate player observation from hidden world state. Social games without solvers provide outcome labels; optimal move labels require additional evidence.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "mgc2025",
+      "name": "MindGamesChallenge 2025 trajectories",
+      "kind": "downloadable_player_perspective_rollouts",
+      "urls": [
+        "https://huggingface.co/datasets/mindgameschallenge/MGC2025",
+        "https://github.com/TextArena/TextArena"
+      ],
+      "rows": 94132,
+      "size": "635 MB reported. Subsets contain 34,359 SecretMafia, 18,193 ColonelBlotto, 18,915 Codenames, and 22,665 ThreePlayerIPD records.",
+      "license": "CC-BY-4.0 on dataset card",
+      "priority": "selective_trace_source",
+      "use": "Multi-turn player observations/actions, rewards, end reasons, and model metadata. TextArena officially announced the release on 31 March 2026.",
+      "risks": "Rows are player perspectives, not independent games. Split by game_id and normalize same-game transcripts. Includes timeouts and invalid moves; quality filters and failure labels needed. Winning due to opponent error does not establish a good move policy.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "lichess",
+      "name": "Lichess puzzles and evaluated positions",
+      "kind": "downloadable_engine_annotated_chess_data",
+      "urls": [
+        "https://database.lichess.org/"
+      ],
+      "size": "The 2026-11-11 snapshot contains 6,193,530 puzzles and 417,862,375 evaluated positions. Token counts remain unmeasured.",
+      "license": "CC0",
+      "priority": "small_engine_checked_subset",
+      "use": "FEN, UCI solutions, tactical themes, and difficulty. Evaluated positions contain engine depth, node counts, principal variations, and scores.",
+      "risks": "Apply first puzzle move before asking learner for solution. Engine evaluations are depth-dependent estimates. Deduplicate positions across games and transformations; cap chess share since research transfer is unproven.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "open_spiel",
+      "name": "OpenSpiel",
+      "kind": "game_environment_and_algorithm_generator",
+      "urls": [
+        "https://github.com/google-deepmind/open_spiel",
+        "https://github.com/google-deepmind/open_spiel/blob/master/docs/games.md"
+      ],
+      "size": "No generated token inventory. Game environments and algorithms are available in C++ and Python.",
+      "license": "Apache-2.0 top-level",
+      "priority": "core_generation_small_solvable_games",
+      "use": "Small games with perfect or imperfect information. Generate state/action/transition/value examples using deterministic solvers or search with a fixed budget.",
+      "risks": "Use information-state views for games with hidden information. Minimax-optimal labels require exact solving. Cap search cost and measure throughput locally.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
+      "id": "nethack_learning_dataset",
+      "name": "NetHack Learning Dataset",
+      "kind": "downloadable_binary_trajectory_dataset",
+      "urls": [
+        "https://arxiv.org/abs/2211.00539",
+        "https://github.com/facebookresearch/nle",
+        "https://github.com/facebookresearch/nle/blob/main/LICENSE"
+      ],
+      "size": "The paper reports 10B human state transitions from 1.5M trajectories, plus 3B bot state-action-score transitions from 100K trajectories.",
+      "license": "NLE code uses the NetHack General Public License. Dataset-specific distribution terms still require inspection.",
+      "priority": "defer_for_first_corpus",
+      "use": "A reference for planning over long horizons. Extract small windows of text states and actions if needed.",
+      "risks": "Transition counts require conversion before they can describe text token volume. Decoder, state compression, licensing, and integration costs make this a later addition. Human trajectories and bot data have different fields.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    }
+  ],
+  "allocation_reference": "aleph_20b_30b_mix.json is the sole whole-mixture planning allocation."
+}
