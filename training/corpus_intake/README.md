@@ -31,8 +31,15 @@ The current o200k_base counts are interim measurements, not native Aleph token c
 - lean_declarations.jsonl: declaration name, source line, statement fingerprint, source token span, sorry and explicit-axiom source flags. **No declaration receives a verified status.**
 - reasoning_episode_candidates.jsonl: Markdown sections with assumption/failure cues. These are review pointers, not independent trajectories.
 - summary.json and report.md: exact token counts by repo for admitted text plus exclusions and source-only declaration counts.
+- proof_root_candidates.json: repeated name-free theorem statement syntax clusters, source lanes, split roles and train/evaluation collision candidates. These are review-only proposals rather than independently verified roots.
 
 Source scope: Lean, Python, Markdown, TeX only. JSON/JSONL experiment receipts, source outside these extensions, large external archives, upstream branches other than the pinned refs and local uncommitted traces remain outside this pass. Any file over 2 MB is recorded only by metadata. Semaev's generated instance arrays and chain-standard templates are recorded as proof artifacts, not tokenized as natural-language or tactic trajectories.
+
+A second source tool groups candidate theorem statement fingerprints after removing declared theorem names. Its CLI can also run independently on a previously generated declaration manifest:
+
+    python training/corpus_intake/proof_roots.py --declarations /tmp/owned_math_audit/lean_declarations.jsonl --output /tmp/owned_math_audit/proof_root_candidates.json
+
+Statement hashes detect literal syntax overlap without claiming semantic identity. Group by the recorded original repository/commit and inspect namespace/import assumptions before deduplicating. If the same statement appears in a training file and a protected development/test file, the candidate is flagged and must be withheld pending a split decision.
 
 The source regex scans declarations for an **inventory estimate**, without parsing Lean elaborator state. Inline axioms, theorem provenance, native_decide, duplicated reasoning ancestry and kernel success require a later structured extractor and pinned compilation. The research-section detector merely flags text to examine. The output is excluded from training by default (training_eligible=false).
 
