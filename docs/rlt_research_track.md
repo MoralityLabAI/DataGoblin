@@ -591,3 +591,12 @@ Use the optional pilot dependencies for fitting and scoring. Each Windows
 phase uses one CPU worker, a 256 MiB process-tree cap and the same host
 reserve. Completed labels and traces are atomic, and optimizer receipts
 allow a paused training arm to resume at its saved update.
+
+## Supervised TRM transitions and spectral interventions
+
+On simple graph walks, compare exact step labels with final-only labels
+and the same final label repeated at every visit. The study fits direct,
+answer and reasoning RLT, and matched damping across three paired seeds.
+The cycle log tracks intermediate decoding, and interventions on leading
+SVD directions test how each carried state affects the final answer.
+[Supervision study and results](rlt_trm_supervision.md)
