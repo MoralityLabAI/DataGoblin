@@ -23,6 +23,13 @@ Once a tokenizer has been frozen for Aleph, supply an **existing local** Hugging
     python -m pip install tokenizers
     python training/corpus_intake/audit_owned_math.py --root /tmp/owned_math_sources --out /tmp/aleph_audit --tokenizer-json /path/to/frozen/tokenizer.json
 
+If GitHub Actions runners are unavailable, there is a Windows PowerShell CPU-only runner using the same pinned inputs. It requires Python with tiktoken and an installed Git command:
+
+    python -m pip install tiktoken==0.12.0
+    pwsh -File training/corpus_intake/run_local_windows.ps1
+
+The Windows runner leaves the checkout and reports under the system temporary directory, avoids GPU and Lean builds, and emits both the interim token census and proof-root/split-overlap candidates. See SEMAEV_KERNEL_GATE.md for the separate pinned Lean proof verification contract.
+
 The current o200k_base counts are interim measurements, not native Aleph token counts. The tokenizer, model loss mask and context packing need distinct accounting. Keep these interim counts separate from the 20B/30B training manifest.
 
 ## Produced files
