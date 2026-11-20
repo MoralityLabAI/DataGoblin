@@ -6,6 +6,7 @@ from training.corpus_intake.audit_owned_math import (
     decl_rows,
     markdown_candidates,
     strip_lean_comments,
+    split_role,
 )
 
 
@@ -63,3 +64,19 @@ def test_source_groups() -> None:
     assert category("EvalMath", "lean/FeedbackChannel/Example.lean") == "lean_research"
     assert category("BPD", "experiments/bpd_lean_curriculum_v2/Example.lean") == "lean_fixture_or_curriculum"
     assert category("semaev-index-calculus", "dialogue/2026-10-25-solver.md") == "research_dialogues"
+
+
+def test_split_roles_and_name_free_theorem_fingerprint() -> None:
+    assert split_role("fixtures/bpd_lean_curriculum_v2/train_negatives.lean") == "training_candidate"
+    assert split_role("fixtures/bpd_lean_curriculum_v2/test_positives.lean") == "protected_eval"
+    assert split_role("fixtures/bpd_lean_curriculum_v2/dev_negatives.lean") == "development"
+    source = """theorem named_first : True := by
+  trivial
+
+  theorem renamed_second : True := by
+    trivial
+"""
+    rows = decl_rows("EvalMath", "lean/Fixture.lean", source, token_stub)
+    assert len(rows) == 2
+    assert rows[0]["name_free_statement_sha256"] == rows[1]["name_free_statement_sha256"]
+    assert rows[0]["statement_sha256"] != rows[1]["statement_sha256"]
