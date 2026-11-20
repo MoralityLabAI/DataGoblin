@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--torch-cpu", type=Path)
     parser.add_argument("--upstream-ldt", type=Path)
     parser.add_argument("--ramcap-package", type=Path, required=True)
+    parser.add_argument("--grounded", action="store_true")
     args = parser.parse_args()
     if sys.platform != "win32":
         raise SystemExit("requires a Windows Job Object")
@@ -84,9 +85,12 @@ def main():
             torch.set_num_interop_threads(1)
             export(root, args.checkpoints.resolve(), torch, guard)
         else:
-            from datagoblin.training_gym import rlt_lean_ldt
+            if args.grounded:
+                from datagoblin.training_gym import rlt_lean_grounded as experiment
+            else:
+                from datagoblin.training_gym import rlt_lean_ldt as experiment
 
-            action = rlt_lean_ldt.evaluate if args.phase == "evaluate" else rlt_lean_ldt.certify
+            action = experiment.evaluate if args.phase == "evaluate" else experiment.certify
             action(root, guard)
         guard()
         if job.peak_bytes() > COMMIT_CAP:

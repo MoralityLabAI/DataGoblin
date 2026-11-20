@@ -532,3 +532,25 @@ and the standalone compiler replay use the hard 256 MiB Windows cap.
     python scripts/run_rlt_lean_ldt_windows.py prepare --out RUN --checkpoints MATCHED_LOOP_ROOT --torch-cpu CPU_TORCH_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
     python scripts/run_rlt_lean_ldt_windows.py evaluate --out RUN --upstream-ldt HYBRID_TRM_LDT_ROOT --ramcap-package PATH_TO_LEAN_CGRT_HRM400
     python scripts/run_rlt_lean_ldt_windows.py certify --out RUN --ramcap-package PATH_TO_LEAN_CGRT_HRM400
+
+## Grounded fallback on harder Lean goals
+
+Compose two or more core lemma applications in freshly instantiated list
+and arithmetic goals. The native portfolio runs first on every frozen
+goal. Only goals left open enter the fallback comparison. Derive candidate
+names from a source-pinned core lemma catalog, scoring the names against
+operations in the rendered target. Build a single pool of explicit
+\`simp\`, \`rw\`, \`exact\`, and \`apply\` proposals. The lexical heuristic and the
+three Loop-XS schedules receive that same pool and six attempts each.
+A wider lexical pass measures the pool's reachable coverage.
+
+Each ranked proposal restarts from the original root and the live LDT
+gate stops immediately on a kernel-checked proof. Count retrieval
+queries, lemma comparisons, encoder visits, tactic RPCs and explicit
+kernel RPCs. Attribute the shared native prefix and retrieval once to
+each end-to-end policy when reporting its work. Compile the distinct
+winning proof scripts and the fixture's withheld construction proofs
+separately. The latter establish that the frozen targets are provable.
+
+Use a new run directory with the same \`prepare\`, \`evaluate\` and \`certify\`
+commands above, adding \`--grounded\` to select the fallback experiment.

@@ -96,10 +96,13 @@ class LeanGate:
         return result.accepted
 
 
-def trial(lean, hybrid, goal, state, arm, budget, rankers, tactics, guard):
+def trial(lean, hybrid, goal, state, arm, budget, rankers, tactics, guard, *, grounded=False):
     gate = LeanGate(hybrid, lean, state["sid"], goal["id"], tactics)
     model = rankers.get(arm)
-    proposals = model.predict(state["goals"][0]["pp"], arm, budget) if model else iter(tactics[:budget])
+    if model:
+        proposals = model.predict(state["goals"][0]["pp"], arm, budget, tactics if grounded else None)
+    else:
+        proposals = iter(tactics[:budget])
     started = time.perf_counter()
     accepted = None
     already = set()
@@ -212,31 +215,7 @@ def certify(root, guard):
                 if tactic not in protocol["native_order"] or tactic != result["attempts"][-1]["tactic"]:
                     raise ValueError("unregistered winning tactic")
                 unique[goal["id"], tactic] = goal["statement"]
-    replays = []
-    certificates = root / "certificates"
-    certificates.mkdir(exist_ok=True)
-    examples = sorted(unique.items())
-    for offset in range(0, len(examples), 16):
-        guard()
-        batch = examples[offset : offset + 16]
-        path = certificates / f"Cert_{offset // 16:02d}.lean"
-        names = [f"dgCert{idx}" for idx in range(len(batch))]
-        statements = [f"theorem {name} : {stmt} := by\n  repeat' intro\n  {tactic}"
-                      for name, ((_, tactic), stmt) in zip(names, batch, strict=True)]
-        path.write_text("\n\n".join(statements + [f"#print axioms {n}" for n in names]) + "\n", encoding="utf-8")
-        started = time.perf_counter()
-        p = subprocess.run([str(config.LEAN_EXE), "-j", "1", str(path)], cwd=root, env=lean_env(config),
-                           timeout=30, capture_output=True, encoding="utf-8")
-        text = p.stdout + p.stderr
-        path.with_suffix(".log").write_text(text, encoding="utf-8")
-        axiom_lines = {}
-        audit_pattern = r"^'(dgCert\d+)' (?:does not depend on any axioms|depends on axioms: \[(.*)\])$"
-        for name, payload in re.findall(audit_pattern, text, re.M):
-            axiom_lines[name] = [part.strip() for part in payload.split(",")] if payload else []
-        if p.returncode or set(axiom_lines) != set(names) or any(set(xs) - AXIOMS for xs in axiom_lines.values()):
-            raise ValueError(f"standalone certificate replay failed: {path.name}")
-        replays.append({"file": path.name, "wall_s": time.perf_counter() - started, "declarations": len(batch),
-                        "source_sha256": sha256_file(path), "output_sha256": sha256_file(path.with_suffix(".log"))})
+    replays = certify_proofs(root, unique, config, guard)
     cells = []
     for budget in protocol["budgets"]:
         for arm in protocol["arms"]:
@@ -254,3 +233,33 @@ def certify(root, guard):
             root / "model-parity.json"
         ),
     })
+
+
+def certify_proofs(root, unique, config, guard, *, batch_size=16):
+    """Compile unique exact statement/tactic pairs in bounded batches."""
+    replays = []
+    certificates = root / "certificates"
+    certificates.mkdir(exist_ok=True)
+    examples = sorted(unique.items())
+    for offset in range(0, len(examples), batch_size):
+        guard()
+        batch = examples[offset : offset + batch_size]
+        path = certificates / f"Cert_{offset // batch_size:02d}.lean"
+        names = [f"dgCert{idx}" for idx in range(len(batch))]
+        statements = [f"theorem {name} : {stmt} := by\n  repeat' intro\n  {tactic}"
+                      for name, ((_, tactic), stmt) in zip(names, batch, strict=True)]
+        path.write_text("\n\n".join(statements + [f"#print axioms {n}" for n in names]) + "\n", encoding="utf-8")
+        started = time.perf_counter()
+        p = subprocess.run([str(config.LEAN_EXE), "-j", "1", str(path)], cwd=root, env=lean_env(config),
+                           timeout=30, capture_output=True, encoding="utf-8")
+        text = p.stdout + p.stderr
+        path.with_suffix(".log").write_text(text, encoding="utf-8")
+        axiom_lines = {}
+        audit_pattern = r"^'(dgCert\d+)' (?:does not depend on any axioms|depends on axioms: \[(.*)\])$"
+        for name, payload in re.findall(audit_pattern, text, re.M):
+            axiom_lines[name] = [part.strip() for part in payload.split(",")] if payload else []
+        if p.returncode or set(axiom_lines) != set(names) or any(set(xs) - AXIOMS for xs in axiom_lines.values()):
+            raise ValueError(f"standalone certificate replay failed: {path.name}")
+        replays.append({"file": path.name, "wall_s": time.perf_counter() - started, "declarations": len(batch),
+                        "source_sha256": sha256_file(path), "output_sha256": sha256_file(path.with_suffix(".log"))})
+    return replays

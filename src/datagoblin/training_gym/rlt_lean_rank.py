@@ -15,12 +15,15 @@ TACTICS = ("simp", "omega", "grind", "exact?", "simp_all", "assumption", "rfl", 
 PAD, BOS, EOS = 256, 257, 258
 
 
-def candidate_tokens():
-    width = max(map(len, TACTICS)) + 1
-    inputs = np.full((len(TACTICS), width), PAD, dtype=np.int64)
+def candidate_tokens(tactics=TACTICS):
+    encoded = [tactic.encode("utf-8") for tactic in tactics]
+    width = max(map(len, encoded)) + 1
+    if width > 96:
+        raise ValueError("tactic and EOS must fit in the checkpoint's decoder window")
+    inputs = np.full((len(tactics), width), PAD, dtype=np.int64)
     targets = inputs.copy()
-    for idx, tactic in enumerate(TACTICS):
-        data = list(tactic.encode("ascii"))
+    for idx, tactic in enumerate(encoded):
+        data = list(tactic)
         inputs[idx, : len(data) + 1] = [BOS, *data]
         targets[idx, : len(data) + 1] = [*data, EOS]
     return inputs, targets
@@ -82,29 +85,41 @@ class LoopTacticRanker:
         hidden = gelu(self.linear(self.norm(value, name + ".n3"), name + ".ff.0"))
         return value + self.linear(hidden, name + ".ff.2")
 
-    def predict(self, raw, mode, depth):
+    def predict(self, raw, mode, depth, tactics=None):
         tokens = np.frombuffer(raw.encode("utf-8")[-384:], dtype=np.uint8)
         w = self.weights
         input_embedding = w["emb.weight"][tokens] + w["pos"][: len(tokens)]
         state = np.zeros_like(input_embedding)
-        decoder_input = w["demb.weight"][self.inputs] + w["dpos"][: self.inputs.shape[1]]
+        inputs, targets = (self.inputs, self.targets) if tactics is None else candidate_tokens(tactics)
+        decoder_input = w["demb.weight"][inputs] + w["dpos"][: inputs.shape[1]]
+        batch_size = len(inputs) if tactics is None else 4
         for index in range(depth):
             endpoint = self.block(state + input_embedding, "fast", 8)
             state = self.feedback(state, endpoint, mode, index, depth)
             context = self.linear(self.norm(state, "enc_norm"), "mem_proj")
-            decoded = decoder_input
-            for layer in (0, 1):
-                decoded = self.block(decoded, f"dec.{layer}", 4, context)
-            logits = self.linear(self.norm(decoded, "head.0"), "head.1")
-            yield scores(logits, self.targets)
+            result = []
+            for offset in range(0, len(inputs), batch_size):
+                batch = slice(offset, offset + batch_size)
+                decoded = decoder_input[batch]
+                for layer in (0, 1):
+                    decoded = self.block(decoded, f"dec.{layer}", 4, context)
+                logits = self.linear(self.norm(decoded, "head.0"), "head.1")
+                result.append(scores(logits, targets[batch]))
+            yield np.concatenate(result)
 
 
 def export(root, checkpoints, torch, guard):
     from lcgrt.feedback import advance
     from lcgrt.tactic_lm import TacticLM, TLMConfig
 
-    examples = ("n : Nat\n⊢ 0 + n = n", "a b : Nat\nh : a + 7 ≤ b\n⊢ a + 5 < b")
-    decoder, targets = candidate_tokens()
+    examples = (
+        ("n : Nat\n⊢ 0 + n = n", (4, 8), None),
+        ("a b : Nat\nh : a + 7 ≤ b\n⊢ a + 5 < b", (4, 8), None),
+        ("xs : List Nat\n⊢ (xs.take 2).reverse = xs.reverse.drop (xs.length - 2)", (6,), (
+            "simp [List.reverse_take, List.reverse_append]", "rw [List.reverse_take]",
+            "exact List.reverse_take", "apply List.reverse_drop", "simp [List.take_append, List.reverse_take]",
+        )),
+    )
     models = {}
     for mode in MODES:
         guard()
@@ -128,24 +143,26 @@ def export(root, checkpoints, torch, guard):
         if any(tensor.dtype != np.float32 for tensor in tensors.values()):
             raise ValueError("expected float32 inference weights")
         ranker = LoopTacticRanker(tensors, advance)
-        max_error, checks = 0.0, 0
+        max_error = 0.0
+        checks = {False: 0, True: 0}
         with torch.inference_mode():
-            for text in examples:
+            for text, depths, tactics in examples:
+                decoder, targets = candidate_tokens(TACTICS if tactics is None else tactics)
                 raw = list(text.encode("utf-8"))
                 enc = torch.tensor([raw])
                 mask = torch.ones_like(enc, dtype=torch.bool)
-                for depth in (4, 8):
+                for depth in depths:
                     trace = []
                     model.encode(enc, mask, fast_steps=depth, trace=trace)
-                    for entry, predicted in zip(trace, ranker.predict(text, mode, depth), strict=True):
-                        mem = model.mem_proj(model.enc_norm(entry["state"])).expand(len(TACTICS), -1, -1)
-                        reference = model.decode(torch.from_numpy(decoder), mem, mask.expand(len(TACTICS), -1))
+                    for entry, predicted in zip(trace, ranker.predict(text, mode, depth, tactics), strict=True):
+                        mem = model.mem_proj(model.enc_norm(entry["state"])).expand(len(decoder), -1, -1)
+                        reference = model.decode(torch.from_numpy(decoder), mem, mask.expand(len(decoder), -1))
                         expected = scores(reference.numpy(), targets)
                         max_error = max(max_error, float(np.max(np.abs(expected - predicted))))
                         orders = (np.argsort(-values, kind="stable") for values in (expected, predicted))
                         if not np.array_equal(*orders):
                             raise ValueError("NumPy tactic ordering differs from Torch reference")
-                        checks += 1
+                        checks[tactics is not None] += 1
         if max_error > 0.0002:
             raise ValueError("NumPy tactic scores differ from Torch reference")
         archive = root / f"{mode}.npz"
@@ -153,7 +170,7 @@ def export(root, checkpoints, torch, guard):
         models[mode] = {
             "checkpoint_sha256": receipt["sha256"], "array_sha256": sha256_file(archive),
             "training_step": receipt["step"], "identity_hash": metadata["identity_hash"],
-            "rank_checks": checks, "maximum_logprob_error": max_error,
+            "rank_checks": checks[False], "grounded_rank_checks": checks[True], "maximum_logprob_error": max_error,
         }
         del ranker, tensors, model, ckpt
     dump_structured(root / "model-parity.json", {
