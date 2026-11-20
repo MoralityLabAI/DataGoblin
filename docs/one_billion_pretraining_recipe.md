@@ -1,11 +1,12 @@
 # DataGoblin 1B pretraining recipe
 
-The registered pilot compares placements and training objectives in a
-shared small cell. The checked Lean data below informs candidate
-collection on development goals and held-out structures. The integrated
-comparison will inform the final routing and curriculum choices. The
-strict-1B layout is a planning allocation. Confirm its parameter count
-and profile the instantiated model on the training backend before
+Start the 1B staging comparison with direct feedback at both boundaries
+and the constant mixed curriculum. Use exact traversal on the rule
+benchmark and a direct learned ranker after native Lean stalls. Keep RLT
+and damping as registered placement alternatives. These decisions come
+from the checked Lean holdout and the integrated two-seed pilot below.
+The strict-1B layout is a planning allocation. Confirm its parameter
+count and profile the instantiated model on the training backend before
 allocating the main run.
 
 ## Module layout
@@ -42,9 +43,9 @@ the current environment and offer grounded actions to the learned ranker
 or the lexical fallback. Stop on the first kernel-checked proof. For a
 rule revision, compare reset, soft carry, and current-epoch no-op reuse.
 Charge traversal and checking work as well as neural block calls. Prior
-pilots support using direct transport for graph reasoning and treating
-answer interpolation as a candidate for promotion by task. The mixed
-pilot tests whether that choice holds with jointly trained weights.
+pilots supported direct transport for graph reasoning. The integrated
+results below preserve that default and measure answer interpolation
+on jointly trained weights.
 [Prior routing evidence](rlt_routing_decision.md)
 
 ## Lean training-pool evidence
@@ -136,8 +137,9 @@ the constant weights, and ends at 0.25/0.375/0.375. Compared with the
 constant arm it preserves both the examples and mean objective weights.
 Log examples, target tokens, optimizer loss weights, and wall time
 separately. A scale manifest must specify real-token exposures after
-tokenization and packing. Select the next staged mixture and curriculum
-from the held-out trade-off across both fitted seeds.
+tokenization and packing. Start with the constant 3/4/3 sample mix and
+0.50/0.25/0.25 loss weights. Run the alternative schedules as controlled
+branches when new data or a larger model changes the trade-off.
 
 The real-batch preflight loaded 512 text windows, 36 Lean goal pools with
 checked tactic outcomes, and 256 rule-revision episodes for training. All
@@ -172,6 +174,68 @@ tactics, and kernel checks in the next promotion comparison.
 Use the direct ranker as the first learned fallback on this task. When
 the checked pool contains no proof, route the remaining budget to new
 candidate generation. Twelve of the 28 goals reached this pool ceiling.
+Use four visits as the first budget in this configuration. Both seeds
+recovered the same 16 proofs at four visits with 76 tactic requests and
+16 kernel checks each. The four-attempt lexical control recovered 8 with
+104 tactic requests and 8 kernel checks. The ranker spent 152 cell calls
+per seed. Summing the original action times gives 12.14 and 13.62 seconds
+of projected Lean work for the ranker and 15.83 for the lexical control.
+These timings describe the recorded actions. Count ranking runtime
+separately when deploying the fallback.
+
+### Feedback placement
+
+The matrix evaluated 74 cells at depths 4, 6, and 10, including all
+training-versus-runtime schedule swaps at depth six. Every matched
+depth-six placement recovered all 16 provable Lean goals in both seeds.
+Their recorded Lean work ranged from 100 to 104 tactic requests and
+16 kernel checks per seed. The following values use FineWeb-Edu and
+OpenWebText for text and 128 held-out episodes for joint before/after
+graph success with current-epoch verified reuse.
+
+| Train and run at depth six | Text bits per byte, seed 137 / 163 | Verified joint graph success, seed 137 / 163 |
+|---|---:|---:|
+| Direct | 4.6549 / 4.6477 | 42 / 15 |
+| Answer RLT | 4.7114 / 4.8851 | 35 / 1 |
+| Answer damping | 4.7298 / 4.9057 | 44 / 0 |
+| Reasoning RLT | 4.6397 / 4.6835 | 26 / 1 |
+| Reasoning damping | 4.6450 / 4.6485 | 1 / 1 |
+
+Answer interpolation was sensitive to training seed. Reasoning
+interpolation traded away verified graph success and gave no consistent
+text gain. Swapping direct weights to answer RLT at runtime moved graph
+success from 42 to 31 on seed 137 and from 15 to 25 on seed 163. Keep
+interpolation opt-in by task and boundary, and test a fitted schedule
+alongside its runtime swap before promoting it. Direct feedback keeps
+the default transport path.
+
+The exact graph baseline solves both turns by traversal and uses 1,508
+hops over 128 episodes. At depth six the direct model with verified
+reuse used 963 checker hops in each seed plus 1,244/1,435 neural visits
+and 1,276/1,450 verifier calls. Its terminal-only policy got 15 joint
+episodes right in each seed. Verification and reuse yielded 42/15.
+At depth ten the direct verified policy reached 50/45 joint episodes
+with additional visits. Use the exact solver wherever the rule graph is
+available. Within a learned route, recheck no-op certificates in the
+current epoch. The no-op cache kept joint coverage and saved 32/45
+neural visits relative to soft carry at depth six. Reset and carry
+ranked differently on edits across seeds. Recompute after an edit by
+default and keep learned carry gated by an independent test.
+
+### Curriculum and data mix
+
+| Direct training recipe at depth six | Text bits per byte, seed 137 / 163 | Verified joint graph success, seed 137 / 163 |
+|---|---:|---:|
+| Constant mixed | 4.6549 / 4.6477 | 42 / 15 |
+| Text-first loss schedule | 4.6941 / 11.6622 | 0 / 0 |
+| Text-heavier batches | 4.6829 / 4.6550 | 0 / 15 |
+
+All three recipes recovered the same Lean ceiling. The constant mix
+preserved more graph performance and had lower text loss in both
+seeds. The text-first failure on seed 163 appeared on both text corpora.
+Keep that outcome in the benchmark as a curriculum regression. These
+two seeds and byte windows support the starting comparison and leave
+the full-size text mixture and curriculum open to a new held-out test.
 
 ## Scaling gates
 
@@ -182,6 +246,20 @@ neural visits, retrieval, verifier calls, and checker traversals. Compare
 the fitted schedules and runtime schedule swaps before attributing an
 effect to training. Record uncertainty and keep the direct and lexical
 controls available where evidence is tied or inconclusive.
+
+For staging, reproduce the direct Lean reference of 16 checked proofs
+and 76 tactic requests within four visits before changing the policy.
+Record all extra kernel work and measure routing latency separately.
+For a new held-out set, compare against its own exact or lexical control
+at the same budget. Require the verifier to reject stale and unsupported
+commits, including no-op reuse. Compare text retention within each
+corpus across both seeds and keep the curriculum failure in regression
+tests. Review quality and the work vector jointly before adding a module.
+
+The completed Lean collection and certification peaked at 180.4 MiB of
+job commit. The mixed fit and scoring history peaked at 91.8 MiB. The
+256 MiB cap applied to each process tree, and the receipts record
+host-memory pauses separately from completed phases.
 
 Before authorizing the main run, instantiate the candidate layout and
 verify unique/trainable parameter counts, causal-mask and epoch parity,
