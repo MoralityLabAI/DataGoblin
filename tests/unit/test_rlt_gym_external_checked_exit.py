@@ -7,7 +7,10 @@ import hashlib
 import pytest
 
 from datagoblin.training_gym.rlt_gym.external_checked_exit import (
-    SCHEMA, digest, replay_corpus, replay_external_episode,
+    SCHEMA,
+    digest,
+    replay_corpus,
+    replay_external_episode,
 )
 
 SHA = hashlib.sha256(b"test-only independent checker").hexdigest()
