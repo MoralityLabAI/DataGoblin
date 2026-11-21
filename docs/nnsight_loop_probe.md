@@ -18,6 +18,7 @@ may override the config and must be checked separately through server receipts.
 
 ~~~shell
 python -m pip install -e ".[dev,interpretability]"
+python -m pip install "transformers @ git+https://github.com/huggingface/transformers.git@a10ebc3c1c44b01d0ee825d48b8d0de3253e4539"
 # Set NDIF_API_KEY privately, outside shell history
 python scripts/inkling_ndif_smoke.py --model thinkingmachines/TML-d24-varloop-research --expected-passes 3
 ~~~
@@ -111,3 +112,27 @@ NNsight integration test is enabled by the interpretability CI job.
 References: [NNsight documentation](https://github.com/ndif-team/nnsight/tree/main/docs),
 [Inkling research release](https://thinkingmachines.ai/news/inkling-2-mini/),
 [NDIF Looped Lens Challenge](https://ndif.us/looped-lens-challenge/).
+
+## Independent verifier join for completed answers
+
+`nnsight_verification.py` joins a cryptographically checked probe receipt to
+operator-collected **complete answer JSON**, then invokes the frozen DataGoblin
+RLT world verifier on every arm. Each input JSONL row must include
+`arm`, `task_id`, `task_digest`, `probe_report_sha256`, `model_id`, `revision`,
+`prompt_sha256`, and `candidate`. Every matched arm must appear exactly once.
+
+~~~shell
+python -m datagoblin.training_gym.rlt_gym.nnsight_verification \
+  --suite runs/inkling/suite --task-id YOUR_FROZEN_TASK_ID \
+  --probe runs/inkling/ndif/message-bank-p3-l12.json \
+  --candidates runs/inkling/ndif/collected-candidates.jsonl \
+  --out runs/inkling/ndif/checked-arms.json
+~~~
+
+Receipts that fail SHA-256 or task-identity checks are rejected, and sealed
+poison tasks remain inaccessible. Verifier verdicts certify the candidate
+against its environment; these post-hoc records do **not** attest that the
+completion was generated under the intervention. Until the capture and
+generation are integrated, `model_execution_attested`,
+`causal_effect_verified`, and `student_training_eligible` remain false.
+The corpus importer remains the only route to student SFT targets.

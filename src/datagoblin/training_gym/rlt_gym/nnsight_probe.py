@@ -199,7 +199,9 @@ def trace_once(
         "provider": "NDIF" if remote else "local",
         "configured_passes": configured,
         "observed_passes": len(observations),
-        "exact_pass_count_supported_by_config": configured == plan.expected_passes,
+        "client_config_passes_match": configured == plan.expected_passes,
+        "exact_pass_count_supported_by_config": not remote and configured == plan.expected_passes,
+        "remote_server_configuration_verified": False if remote else None,
         "prompt_sha256": prompt_sha256,
         "nnsight_version": _package_version("nnsight"),
         "torch_version": _package_version("torch"),
@@ -275,6 +277,6 @@ def run_control_suite(
         "verifier_status": "unverified",
         "student_training_eligible": False,
     }
-    canonical = json.dumps(result, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    canonical = json.dumps(result, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
     result["sha256"] = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     return result

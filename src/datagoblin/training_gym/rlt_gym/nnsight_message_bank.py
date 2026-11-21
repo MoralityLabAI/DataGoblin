@@ -176,7 +176,9 @@ def trace_message_bank(
         "schema_version": BANK_SCHEMA, "plan": asdict(plan),
         "provider": "NDIF" if remote else "local",
         "configured_passes": configured,
-        "exact_pass_count_supported_by_config": configured == plan.expected_passes,
+        "client_config_passes_match": configured == plan.expected_passes,
+        "exact_pass_count_supported_by_config": not remote and configured == plan.expected_passes,
+        "remote_server_configuration_verified": False if remote else None,
         "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest() if isinstance(prompt, str) else None,
         "nnsight_version": _package_version("nnsight"),
         "torch_version": _package_version("torch"),
@@ -239,6 +241,6 @@ def run_bank_control_suite(
         "arms": arms, "comparisons": contrasts,
         "verifier_status": "unverified", "student_training_eligible": False,
     }
-    canonical = json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    canonical = json.dumps(report, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
     report["sha256"] = hashlib.sha256(canonical.encode()).hexdigest()
     return report
