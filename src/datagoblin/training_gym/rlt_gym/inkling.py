@@ -361,7 +361,8 @@ def score(
         sft.append({
             "schema_version": "rlt_gym.inkling_distill.v1", "kind": "verified_sft",
             "input": {"task": public_task(task)},
-            "target": {"candidate": step["candidate"], "public_steps": step.get("public_steps", [])},
+            "target": {"candidate": step["candidate"]},
+            "teacher_public_steps_unverified": step.get("public_steps", []),
             "task_id": task_id, "task_digest": task["task_digest"], "lineage_id": task["lineage_id"],
             "teacher_model": episode["backend"]["model"], "teacher_loop_passes": p,
             "verifier": step["verification"], "source_episode_digest": episode["episode_digest"],
