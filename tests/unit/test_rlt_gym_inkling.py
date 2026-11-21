@@ -15,6 +15,15 @@ from datagoblin.serialization import canonical_json, dump_structured
 from datagoblin.training_gym.rlt_gym import inkling
 from datagoblin.training_gym.rlt_gym.inkling import capture, hillclimb, score, stage
 from datagoblin.training_gym.rlt_gym.inkling_instrumentation import LoopBoundary, stability_sample
+from datagoblin.training_gym.rlt_gym.inkling_rlt_trace import fit_feedback
+from datagoblin.training_gym.rlt_gym.inkling_sae import fit_sae
+from datagoblin.training_gym.rlt_gym.inkling_trace import (
+    WIDTH,
+    boundary_sites,
+    export_sae_inputs,
+    seal_trace,
+    stage_traces,
+)
 from datagoblin.training_gym.rlt_gym.runner import read_jsonl
 from datagoblin.training_gym.rlt_gym.tasks import load_suite, reference_answer, write_suite
 
@@ -199,3 +208,48 @@ def test_instrumented_linear_loop_gain() -> None:
     assert metrics["spectral_gain_estimate"] == pytest.approx(0.75)
     assert metrics["finite_dose_directional_gain"] == pytest.approx(0.75)
     assert metrics["contraction_certified"] is False
+
+
+def test_boundary_trace_preserves_site_tokens_and_lineages(tmp_path: Path) -> None:
+    suite, train, _ = _setup(tmp_path)
+    cal = tmp_path / "cal"
+    stage(suite, cal, passes=(1, 3), split="calibration")
+    prompts = tmp_path / "prompts"
+    plan = stage_traces(suite, [train, cal], prompts, per_stage=1)
+    assert [row["split"] for row in plan["samples"]] == ["train", "calibration"]
+    assert len({row["lineage_id"] for row in plan["samples"]}) == 2
+    sites = boundary_sites(3)
+    assert sites == {0: "l_out-5", 1: "l_out-17", 2: "l_out-35", 3: "l_out-47"}
+    result = tmp_path / "native"
+    result.mkdir()
+    index = result / "rows.tsv"
+    lines = ["sample_key\tpass_index\ttensor\ttoken_index\n"]
+    lines.extend(f"{row['sample_key']}\t{depth}\t{tensor}\t{token}\n"
+                 for row in plan["samples"] for depth, tensor in sites.items() for token in range(16))
+    index.write_text("".join(lines[:-1]), encoding="utf-8")
+    vectors = np.random.default_rng(7).normal(size=(128, WIDTH)).astype("<f4")
+    vectors.tofile(result / "activations.f32")
+    (result / "native-complete.txt").write_text("128\n", encoding="utf-8")
+    provenance = {"passes": 3, "weights_sha256": "1" * 64, "runtime_sha256": "2" * 64}
+    with pytest.raises(ValueError, match="token positions"):
+        seal_trace(prompts, result, **provenance)
+    index.write_text("".join(lines), encoding="utf-8")
+    report = seal_trace(prompts, result, **provenance)
+    assert report["rows"] == 128
+    assert report["tokens_by_sample"] == {"000": 16, "001": 16}
+    exported = tmp_path / "sae"
+    streams = export_sae_inputs(prompts, result, exported)["streams"]
+    assert streams["train"]["rows"] == streams["calibration"]["rows"] == 48
+    assert streams["train"]["roots"] == streams["calibration"]["roots"] == 1
+    with np.load(exported / "calibration.npz") as archive:
+        assert archive["inkling_core_prefill"].shape == (48, WIDTH)
+    dictionary = tmp_path / "dictionary"
+    fitted = fit_sae(exported, dictionary, features=8, top_k=2, steps=2)
+    assert fitted["calibration"]["rows"] == 48
+    feedback = fit_feedback(prompts, result, exported, dictionary, tmp_path / "heads", max_tokens=16)
+    assert feedback["train_tokens"] == feedback["calibration_tokens"] == 16
+    assert [row["eta"] for row in feedback["calibration"]["rlt"]] == [1 / 3, 0.5, 1]
+    assert feedback["calibration"]["matched_damping"][0]["eta"] == pytest.approx(5 / 12)
+    index.write_text("".join(lines[:-1]), encoding="utf-8")
+    with pytest.raises(ValueError, match="sealed receipt"):
+        export_sae_inputs(prompts, result, tmp_path / "tampered")

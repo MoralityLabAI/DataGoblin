@@ -251,3 +251,59 @@ patches and lesions with sham and random-feature trials, then independently
 verify affected readouts. The supplied diagnostic reports local spectral
 and finite-dose directional gain. A sampled gain below one does not
 establish a contraction bound across states, passes or task distributions.
+
+### Native GGUF boundary capture on Windows
+
+The native tracer reads the ggml eval callback from llama.cpp b12602
+(`418fe97b5`). Build it in an x64 Visual Studio Developer PowerShell
+with the headers from that exact revision. The build script derives the
+import libraries from the installed DLLs and runs a local binding check.
+Keep the downloaded headers, binaries and activation files outside Git.
+
+    ./scripts/build_inkling_trace.ps1 -Runtime <llama-dir> -Headers <pinned-headers> -Out <build-dir>
+
+Freeze raw public-context prefills from the same suite as the teacher
+packets. Use the separate train and calibration stages to preserve lineage
+custody through capture and fitting.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_trace stage --suite <suite> --stage <train-stage> <calibration-stage> --out <prompts>
+
+Run the native executable under the same guarded Windows process supervisor
+used for the model. Supply the GPU layer count and the newline-delimited
+CPU tensor patterns from the measured fit plan. Bind the RTX 5080 by its
+runtime device name and put the matching DLL directory on `PATH`.
+
+    inkling_trace <llama-dir> <gguf> Vulkan1 3 <gpu-layers> <cpu-patterns.txt> <prompts> <trace> mmap
+
+The pass-0 record is the shared prelude output. The first core pass ends at
+`l_out-17`. Repeated core passes end at logical cache slots 35, 47 and later
+steps of 12 while reusing the original physical weights. The tracer checks
+the 2,304-wide float32 tensor shape for every token at each boundary.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_trace seal --prompts <prompts> --trace <trace> --passes 3 --weights-sha256 <weight-sha> --runtime-sha256 <runtime-archive-sha>
+    python -m datagoblin.training_gym.rlt_gym.inkling_trace export-sae --prompts <prompts> --trace <trace> --out <sae-input>
+
+The export provides independent `train.npz` and `calibration.npz` matrices
+under the VPD trainer key `inkling_core_prefill`. Row manifests retain
+the task digest, lineage, tensor and token position. Fit on the train
+matrix and use the calibration matrix for reconstruction checks. These
+raw prefills provide an observation lane. Behavioral intervention studies
+need a shared rendered prompt, a verified answer endpoint and matched sham
+and random controls.
+
+The bounded NumPy fitter writes a dictionary with the same weight arrays
+as the VPD top-k trainer. It reports both per-pass and pooled calibration
+reconstruction with a bias-only baseline.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_sae --inputs <sae-input> --out <sae>
+
+Train comparable feedback heads using the same measured prelude and core
+states. Each head fits the one-step target after applying its feedback
+coefficient, then rolls forward from the held-out prelude with its own
+predicted states. The report gives activation and SAE-code errors for
+direct feedback, RLT and matched damping.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_rlt_trace --prompts <prompts> --trace <trace> --inputs <sae-input> --sae <sae> --out <heads>
+
+The feedback test measures prefill-state prediction. Verify task-level
+effects separately through the rollout checker.

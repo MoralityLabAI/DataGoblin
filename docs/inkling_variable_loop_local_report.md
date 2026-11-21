@@ -135,3 +135,41 @@ See [the runbook](inkling_variable_loop_gym.md) for the exact 1-vs-3 and
 six-arm commands and the CPU control reproduction. Local output is in the
 `work/inkling-varloop-local-20261121` sibling directory, including full
 trajectories, replay receipts, frozen requests, and scored fixture data.
+
+## Real Q4 follow-up
+
+The checksum-verified IQ4_NL checkpoint completed three one-pass responses
+on the RTX 5080. The independent checker passed all three eligible training
+roots. Four staged tasks had no completed response after the memory guard
+stopped the server. No three-pass task completion was collected, so the
+answer-level depth comparison remains incomplete.
+
+The first native three-pass trace ran on the RTX 5080 in 151.44 seconds.
+It sealed 1,324 float32 boundary vectors, with one shared-prelude and
+three core-pass outputs at each token. The two prompts contributed 167
+training tokens and 164 calibration tokens from separate roots.
+Native job commit peaked at 12.93 GiB. The GPU was released afterward.
+
+The CPU fit used 501 core vectors from the training root for a
+256-feature, top-16 SAE. On the 492 calibration vectors from the other
+root, reconstruction MSE was 4.578 versus 9.079 for the train-bias
+baseline. The learned feedback heads then predicted the three core
+states from the same measured calibration prelude.
+
+| Feedback during fit and rollout | Final core activation MSE |
+| --- | ---: |
+| Direct | 6.974 |
+| Matched damping | 7.089 |
+| RLT | 7.170 |
+
+This pilot measures reconstruction and recurrence prediction within a
+single held-out root. It supplies neither answer-level gains nor an
+intervention effect. A 14-root prefill expansion was staged across all
+seven task families. The guard yielded the GPU to another process before
+the expanded batch produced a trace. The sealed capture, SAE dictionary
+and fitted heads are in `q4-pilot/native-prefill-01` under the local
+artifact directory above.
+
+The tracer compiled and linked against the installed Windows Vulkan
+runtime. The full local suite passed with 284 passed and one skipped.
+Repository-wide Ruff passed.
