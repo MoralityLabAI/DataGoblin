@@ -103,3 +103,34 @@ def test_mcp_checker_hook_and_no_future_rescue():
 def test_missing_external_verifier_is_rejected():
     with pytest.raises(ValueError, match="unregistered"):
         replay_corpus([make_episode()], checkers={}, trusted_shas={}, trusted_source_revisions={})
+
+
+def test_unapproved_fresh_train_root_is_quarantined():
+    row = replay_external_episode(
+        make_episode(), checker=checker, trusted_verifier_sha=SHA,
+        trusted_source_revision=SOURCE,
+    )
+    assert row["training_eligible"] is False
+    batch = replay_corpus(
+        [make_episode()], checkers={"lean": checker},
+        trusted_shas={"lean": SHA}, trusted_source_revisions={"lean": SOURCE},
+    )
+    assert len(batch["train"]) == 0
+    assert len(batch["evaluation_only"]) == 1
+
+
+def test_source_revision_spoofing_and_missing_approved_roots_fail():
+    row = make_episode()
+    row["source_revision"] = hashlib.sha256(b"unrecognized source").hexdigest()
+    with pytest.raises(ValueError, match="source revision"):
+        replay_external_episode(
+            row, checker=checker, trusted_verifier_sha=SHA,
+            trusted_source_revision=SOURCE, training_authorized=True,
+        )
+    with pytest.raises(ValueError, match="authorized training roots absent"):
+        replay_corpus(
+            [make_episode()], checkers={"lean": checker},
+            trusted_shas={"lean": SHA},
+            trusted_source_revisions={"lean": SOURCE},
+            approved_train_roots=frozenset({"nonexistent_root"}),
+        )
