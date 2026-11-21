@@ -44,7 +44,7 @@ def _task(index: int, group: str) -> tuple[dict[str, Any], list[str]]:
         tactics = ["rfl", "exact True.intro", "decide"]
     elif template == 2:
         theorem = f"∀ n : Nat, n + {k} = {k} + n"
-        tactics = ["exact True.intro", f"intro n\n  exact Nat.add_comm n {k}", "rfl"]
+        tactics = ["exact True.intro", f"intro n\nexact Nat.add_comm n {k}", "rfl"]
     else:
         theorem = f"({k} = {k}) ∧ True"
         tactics = ["rfl", "exact And.intro (by rfl) True.intro", "decide"]
