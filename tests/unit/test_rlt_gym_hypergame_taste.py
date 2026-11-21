@@ -14,6 +14,7 @@ from datagoblin.training_gym.rlt_gym.hypergame_taste import (
     optimal_value,
     posterior,
     q_values,
+    replay_archive,
     rollout,
 )
 
@@ -129,6 +130,8 @@ def test_collection_replay_and_custody(tmp_path):
     b = collect(tmp_path / "b", depths=(0, 1, 2), per_cell=2, seed=29)
     assert a == b
     assert a["profile"] == "public_seed_smoke"
+    assert a["max_train_presentations_per_root"] == 4
+    assert replay_archive(tmp_path / "a")["verified_rollouts"] == 180
     assert a["artifacts"]["public_tasks.jsonl"]["rows"] == 3 * len(SPLITS) * 2
     assert a["artifacts"]["rollouts_scored.jsonl"]["rows"] == 3 * len(SPLITS) * 2 * 6
     for name, info in a["artifacts"].items():
@@ -138,12 +141,15 @@ def test_collection_replay_and_custody(tmp_path):
         row = json.loads(line)
         assert row["root"] not in roots
         roots[row["root"]] = row["split"]
+    per_root_views = {}
     for name in ("train_forks.jsonl", "train_teacher_requests.jsonl"):
         for line in (tmp_path / "a" / name).read_text(encoding="utf8").splitlines():
             row = json.loads(line)
             root = row.get("root", row.get("request_id"))
             assert roots[root] == "train"
+            per_root_views[root] = per_root_views.get(root, 0) + 1
             assert "truth_h1" not in line
+    assert per_root_views and max(per_root_views.values()) <= 4
     with pytest.raises(ValueError):
         collect(tmp_path / "a", depths=(0,), per_cell=1)
 
@@ -165,3 +171,12 @@ def test_no_forks_for_all_optimal_actions():
     row = rollout(task, sealed, "bellman")
     forks = fork_rows(task, row)
     assert all(Fraction(item["expected_regret"]) > 0 for item in forks)
+
+
+def test_corrupt_rollout_is_detected_by_digest(tmp_path):
+    folder = tmp_path / "archive"
+    collect(folder, depths=(1,), per_cell=1)
+    rows = folder / "rollouts_scored.jsonl"
+    rows.write_bytes(rows.read_bytes().replace(b'"correct_publication":true', b'"correct_publication":false', 1))
+    with pytest.raises(ValueError, match="archive hash mismatch"):
+        replay_archive(folder)
