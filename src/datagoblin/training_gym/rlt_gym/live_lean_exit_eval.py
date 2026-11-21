@@ -12,7 +12,6 @@ import hashlib
 import json
 import random
 import re
-import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -120,7 +119,7 @@ class LeanCliSession:
     def kernel(self, sid: int) -> dict[str, Any]:
         if sid not in self.proofs:
             raise ValueError("unknown proof certificate state")
-        original, statement = self.proofs[sid]
+        original, _statement = self.proofs[sid]
         # Independently re-run Lean elaboration/kernel from a separate file and
         # require its own #print axioms result. Same binary, new compiler process.
         audit_path = original.with_name(original.stem + "_kernel.lean")
