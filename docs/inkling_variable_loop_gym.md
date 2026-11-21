@@ -473,6 +473,9 @@ contract on complete roots. This study supplies a signed SAE intervention
 receipt. Parameter-level VPD and BPD decomposition require their own
 analysis and validation.
 
+The [signed query-gain report](inkling/signed_vpd.md) records the native
+answer checks and state displacements for both perturbation signs.
+
 ### Paired BPD geometry score
 
 Inspect the frozen aligned and orthogonal directions before using the
