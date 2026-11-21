@@ -89,7 +89,7 @@ def test_real_exact_replay_seven_family_rlt_suite(tmp_path: Path) -> None:
         training_depth=2, verified_stop=False, include_controls=False,
         max_wall_seconds=120,
     )
-    assert result["expected_episodes"] == 28
+    assert result["episodes"] == 28
     report = campaign(suite, run, tmp_path / "output", planned_depth=2)
     assert report["provenance"]["source_roots"] == 28
     assert report["provenance"]["split_counts"] == {
