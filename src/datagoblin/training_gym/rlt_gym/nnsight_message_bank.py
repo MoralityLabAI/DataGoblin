@@ -142,7 +142,7 @@ def trace_message_bank(
                     bank0[0, -1, list(plan.feature_ids)] *= 1 - plan.dose
                     bank1[0, -1, list(plan.feature_ids)] *= 1 - plan.dose
                 elif plan.kind == "donor_patch":
-                    for bank, donor_coordinates in zip((bank0, bank1), donor_values):
+                    for bank, donor_coordinates in zip((bank0, bank1), donor_values, strict=True):
                         previous = bank[0, -1, list(plan.feature_ids)]
                         replacement = torch.as_tensor(donor_coordinates, device=previous.device,
                                                       dtype=previous.dtype)
