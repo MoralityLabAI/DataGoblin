@@ -12,6 +12,7 @@ import hmac
 import json
 import random
 from collections import defaultdict
+from contextlib import ExitStack
 from fractions import Fraction
 from functools import lru_cache
 from pathlib import Path
@@ -239,16 +240,17 @@ def fork_rows(task: dict, row: dict) -> list[dict]:
     return forks
 
 
-def _write_jsonl(path: Path, rows: list[dict]) -> str:
-    with path.open("x", encoding="utf-8", newline="\n") as output:
-        for item in rows:
-            output.write(_json(item) + "\n")
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def collect(out: Path, *, depths: tuple[int, ...] = (0, 1, 2, 4, 8),
             per_cell: int = 16, seed: int = 23, private_seed_file: Path | None = None) -> dict:
-    """Freeze cases, run paired controls, emit train-only preference forks."""
+    """Freeze cases and stream paired controls with bounded working memory."""
     if out.exists() or per_cell < 1 or per_cell > 10_000 or len(set(depths)) != len(depths):
         raise ValueError("output must be fresh; per-cell must be 1..10000; depths must be unique")
     if not depths or any(k < 0 or k > 16 for k in depths):
@@ -257,68 +259,90 @@ def collect(out: Path, *, depths: tuple[int, ...] = (0, 1, 2, 4, 8),
     if key is not None and len(key) < 16:
         raise ValueError("private seed file must contain at least 16 bytes")
     out.mkdir(parents=True)
-    public_rows, sealed_rows, traces, forks, requests = [], [], [], [], []
-    metrics: dict[tuple[str, int, str], list[dict]] = defaultdict(list)
+    files = (
+        "public_tasks.jsonl", "private_sealed.jsonl", "rollouts_scored.jsonl",
+        "train_forks.jsonl", "train_teacher_requests.jsonl",
+    )
+    counts = {name: 0 for name in files}
+    hashers = {name: hashlib.sha256() for name in files}
+    metrics: dict[tuple[str, int, str], dict] = defaultdict(
+        lambda: {"episodes": 0, "correct_publications": 0, "verifier_calls": 0,
+                 "utility": 0, "cost": 0, "regret": Fraction(0)}
+    )
     seen = set()
-    for split in SPLITS:
-        for depth in depths:
-            for ordinal in range(per_cell):
-                selector = f"{split}:{depth}:{ordinal}"
-                material = (
-                    hmac.new(key, selector.encode(), hashlib.sha256).digest() if key is not None
-                    else hashlib.sha256(f"{seed}:{selector}".encode()).digest()
-                )
-                rng = random.Random(int.from_bytes(material, "big"))
-                task, sealed = generate(depth, split, rng, ordinal)
-                if task["root"] in seen:
-                    raise AssertionError("duplicate task lineage")
-                seen.add(task["root"])
-                public_rows.append(task)
-                sealed_rows.append(sealed)
-                if split == "train":
-                    requests.append({
-                        "request_id": task["root"], "public": task["public"],
-                        "visible_history": [], "answer_format": {"action": "one legal action"},
-                    })
-                for policy in POLICIES:
-                    row = rollout(task, sealed, policy)
-                    traces.append(row)
-                    metrics[(split, depth, policy)].append(row)
+    with ExitStack() as stack:
+        outputs = {name: stack.enter_context((out / name).open("xb")) for name in files}
+
+        def emit(name: str, item: dict) -> None:
+            payload = (_json(item) + "\n").encode("utf-8")
+            outputs[name].write(payload)
+            hashers[name].update(payload)
+            counts[name] += 1
+
+        for split in SPLITS:
+            for depth in depths:
+                for ordinal in range(per_cell):
+                    selector = f"{split}:{depth}:{ordinal}"
+                    material = (
+                        hmac.new(key, selector.encode(), hashlib.sha256).digest() if key is not None
+                        else hashlib.sha256(f"{seed}:{selector}".encode()).digest()
+                    )
+                    rng = random.Random(int.from_bytes(material, "big"))
+                    task, sealed = generate(depth, split, rng, ordinal)
+                    if task["root"] in seen:
+                        raise AssertionError("duplicate task lineage")
+                    seen.add(task["root"])
+                    emit("public_tasks.jsonl", task)
+                    emit("private_sealed.jsonl", sealed)
                     if split == "train":
-                        forks.extend(fork_rows(task, row))
-    # Training views share a strict four-presentation budget per root:
-    # one teacher request and at most three independently graded forks.
-    unique_forks: dict[str, dict[tuple[str, str, str], dict]] = defaultdict(dict)
-    for item in forks:
-        key = (_json(item["context"]), item["preferred_action"], item["dispreferred_action"])
-        unique_forks[item["root"]].setdefault(key, item)
-    forks = []
-    for root in sorted(unique_forks):
-        choices = sorted(
-            unique_forks[root].values(),
-            key=lambda item: (-Fraction(item["expected_regret"]), _json(item["context"]),
-                              item["dispreferred_action"]),
-        )
-        forks.extend(choices[:3])
-    artifacts = {}
-    for name, rows in (
-        ("public_tasks.jsonl", public_rows), ("private_sealed.jsonl", sealed_rows),
-        ("rollouts_scored.jsonl", traces), ("train_forks.jsonl", forks),
-        ("train_teacher_requests.jsonl", requests),
-    ):
-        artifacts[name] = {"rows": len(rows), "sha256": _write_jsonl(out / name, rows)}
+                        emit("train_teacher_requests.jsonl", {
+                            "request_id": task["root"], "public": task["public"],
+                            "visible_history": [], "answer_format": {"action": "one legal action"},
+                        })
+                    root_forks = []
+                    for policy in POLICIES:
+                        row = rollout(task, sealed, policy)
+                        emit("rollouts_scored.jsonl", row)
+                        cell = metrics[(split, depth, policy)]
+                        cell["episodes"] += 1
+                        cell["correct_publications"] += int(row["correct_publication"])
+                        cell["verifier_calls"] += row["verifier_calls"]
+                        cell["utility"] += row["realized_utility"]
+                        cell["cost"] += row["total_research_cost"]
+                        cell["regret"] += Fraction(row["events"][0]["post_choice_regret"])
+                        if split == "train":
+                            root_forks.extend(fork_rows(task, row))
+                    if split == "train":
+                        # One teacher request + three distinct forks is the shared
+                        # four-view root budget across every policy and export.
+                        unique: dict[tuple[str, str, str], dict] = {}
+                        for item in root_forks:
+                            identity = (
+                                _json(item["context"]), item["preferred_action"],
+                                item["dispreferred_action"],
+                            )
+                            unique.setdefault(identity, item)
+                        ranked = sorted(
+                            unique.values(),
+                            key=lambda item: (-Fraction(item["expected_regret"]),
+                                              _json(item["context"]), item["dispreferred_action"]),
+                        )
+                        for item in ranked[:3]:
+                            emit("train_forks.jsonl", item)
+    artifacts = {
+        name: {"rows": counts[name], "sha256": hashers[name].hexdigest()}
+        for name in files
+    }
     cells = [
         {
-            "split": split, "K": depth, "policy": policy, "episodes": len(rows),
-            "correct_publications": sum(row["correct_publication"] for row in rows),
-            "verifier_calls": sum(row["verifier_calls"] for row in rows),
-            "mean_true_utility": sum(row["realized_utility"] for row in rows) / len(rows),
-            "mean_research_cost": sum(row["total_research_cost"] for row in rows) / len(rows),
-            "initial_action_regret": str(sum(
-                Fraction(row["events"][0]["post_choice_regret"]) for row in rows
-            ) / len(rows)),
+            "split": split, "K": depth, "policy": policy, "episodes": cell["episodes"],
+            "correct_publications": cell["correct_publications"],
+            "verifier_calls": cell["verifier_calls"],
+            "mean_true_utility": cell["utility"] / cell["episodes"],
+            "mean_research_cost": cell["cost"] / cell["episodes"],
+            "initial_action_regret": str(cell["regret"] / cell["episodes"]),
         }
-        for (split, depth, policy), rows in sorted(metrics.items())
+        for (split, depth, policy), cell in sorted(metrics.items())
     ]
     manifest = {
         "schema": SCHEMA, "profile": "private_seeded" if key is not None else "public_seed_smoke",
@@ -334,14 +358,54 @@ def collect(out: Path, *, depths: tuple[int, ...] = (0, 1, 2, 4, 8),
     return manifest
 
 
+def replay_archive(folder: Path) -> dict:
+    """Verify file hashes and replay every policy against its sealed world."""
+    manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+    if manifest["schema"] != SCHEMA:
+        raise ValueError("unexpected archive schema")
+    for name, data in manifest["artifacts"].items():
+        if _file_sha256(folder / name) != data["sha256"]:
+            raise ValueError(f"archive hash mismatch: {name}")
+    roots = actions = episodes = 0
+    with (folder / "public_tasks.jsonl").open(encoding="utf-8") as tasks, (
+        folder / "private_sealed.jsonl"
+    ).open(encoding="utf-8") as secrets, (
+        folder / "rollouts_scored.jsonl"
+    ).open(encoding="utf-8") as traces:
+        for raw_task, raw_secret in zip(tasks, secrets, strict=True):
+            task, secret = json.loads(raw_task), json.loads(raw_secret)
+            roots += 1
+            for policy in POLICIES:
+                line = traces.readline()
+                if not line:
+                    raise ValueError("truncated trace archive")
+                got = json.loads(line)
+                expected = rollout(task, secret, policy)
+                if expected != got:
+                    raise ValueError(f"policy trace mismatch: {task['root']}/{policy}")
+                episodes += 1
+                actions += len(got["events"])
+        if traces.readline():
+            raise ValueError("unexpected extra scored trace")
+    return {"verified_roots": roots, "verified_rollouts": episodes, "verified_actions": actions}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--out", type=Path)
+    parser.add_argument("--replay", type=Path, help="Verify and replay a frozen run archive")
     parser.add_argument("--seed", type=int, default=23)
     parser.add_argument("--per-cell", type=int, default=16)
     parser.add_argument("--depths", type=int, nargs="+", default=[0, 1, 2, 4, 8])
     parser.add_argument("--private-seed-file", type=Path)
     args = parser.parse_args()
+    if args.replay:
+        if args.out:
+            parser.error("--replay and --out are mutually exclusive")
+        print(_json(replay_archive(args.replay)))
+        return
+    if args.out is None:
+        parser.error("--out is required for collection")
     manifest = collect(
         args.out, seed=args.seed, per_cell=args.per_cell,
         depths=tuple(args.depths), private_seed_file=args.private_seed_file,
