@@ -298,3 +298,43 @@ establish a contraction bound across states, passes or task distributions.
 The pass-aware NNsight readout and matched intervention controls are documented
 in [nnsight_loop_probe.md](nnsight_loop_probe.md). These unverified mechanistic
 receipts are kept separate from teacher responses and student SFT labels.
+
+
+## Native pretrained TRM verifier-exit evidence bridge (development only)
+
+The linked BPD native-model experiment now includes a genuine pretrained
+7M Attention-TRM with recurrent hidden-state continuation and an online
+Sudoku verifier. Its [first original run](https://github.com/MoralityLabAI/BPD/actions/runs/44903527858)
+uses 24 fresh 50-blank root puzzles: 23/24 exact solved under fixed
+two-step and online verifier-gated policies, with 48 versus 33 outer
+steps and a 31.17% measured reduction in CPU native inference time.
+The source uses the SHA-pinned gaoxin492 checkpoint. The corresponding
+[second independently audited rerun](https://github.com/MoralityLabAI/BPD/actions/runs/44903755773)
+preserved those solve/visit counts, measured 30.68% lower native time,
+and retained the raw audit report. These outcomes are DEVELOPMENT
+results, not scientific confirmation or Inkling-specific routing.
+
+After extracting the second GitHub Actions artifact so that its JSON
+and audit files are available locally, run:
+
+    python -m datagoblin.training_gym.rlt_gym.native_exit_bridge \
+      --input runs/bpd/trm_online_adaptive_50blank_20261123.json \
+      --audit runs/bpd/trm_online_adaptive_50blank_20261123.audit.json \
+      --out runs/datagoblin/native-trm-exit-dev
+
+The importer verifies that the BPD audit hash matches exactly,
+recomputes Sudoku legality from each saved candidate, checks the
+identical fixed/adaptive prefixes and stopping decisions, and refuses
+non-development provenance or an attempt to declare this source
+train-eligible. Outputs are depth_transitions.jsonl, episodes.jsonl,
+and a SHA-bound manifest. Every example is explicitly marked as
+training_eligible=false; the labels support research on controller
+task formats and future schema design only.
+
+To generate RLT training data, acquire new, lineage-disjoint
+TRAIN sources, rerun the independent verifier and create separate
+unexposed validation/test populations with explicit authorizations.
+Do not relabel these 24 development source roots as training examples.
+The native TRM supplies empirical state recurrence and task-specific
+verifier labels; the larger Inkling research checkpoint and Goodfire's
+fixed-three-pass coordinate-2027 mechanism remain separate experiments.
