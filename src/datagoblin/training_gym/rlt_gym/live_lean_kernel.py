@@ -50,6 +50,7 @@ def _task(index: int, group: str) -> tuple[dict[str, Any], list[str]]:
         tactics = ["rfl", "exact And.intro (by rfl) True.intro", "decide"]
     return {
         "statement": theorem, "family": "lean_kernel_arithmetic",
+        "proof_case": ("zero_add", "self_eq", "nat_comm", "and_true")[template],
         "instance": f"{group}:{index}:{k}", "import": "Init",
         "tactic_menu_digest": digest(tactics),
     }, tactics
@@ -212,6 +213,17 @@ def run(executable: Path, out: Path, *, per_split: int = 8) -> dict[str, Any]:
         tool_calls = session.calls
         kernel_calls = session.kernel_replays
         tool_seconds = session.seconds
+    # A dead proof family is a broken harness positive control.
+    by_case: dict[str, dict[str, int]] = {}
+    for ep in roots:
+        key = ep["public_task"]["proof_case"]
+        cell = by_case.setdefault(key, {"roots": 0, "kernel_certified_roots": 0})
+        cell["roots"] += 1
+        cell["kernel_certified_roots"] += int(any(
+            step["verification"]["passed"] for step in ep["attempts"]
+        ))
+    if any(cell["kernel_certified_roots"] == 0 for cell in by_case.values()):
+        raise ValueError(f"Lean native positive-control proof case failed: {by_case}")
     results = []
     for split in SPLITS:
         subset = [x for x in (*verified["train"], *verified["evaluation_only"]) if x["split"] == split]
@@ -237,6 +249,7 @@ def run(executable: Path, out: Path, *, per_split: int = 8) -> dict[str, Any]:
         "verifier_sha256": verifier_sha, "source_revision_sha256": registry_sha,
         "driver_sha256": source_sha, "model_sha256": MODEL_SHA,
         "fresh_task_roots": len(roots), "source_splits": results,
+        "positive_control_cases": by_case,
         "training_eligible_rows": len(verified["train"]),
         "evaluation_only_rows": len(verified["evaluation_only"]),
         "independently_rechecked_candidate_attempts": verified["verified_candidate_checks"],
