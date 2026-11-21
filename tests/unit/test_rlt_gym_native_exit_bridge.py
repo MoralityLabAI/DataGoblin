@@ -17,6 +17,7 @@ from datagoblin.training_gym.rlt_gym.native_exit_bridge import (
 
 
 def _stage(tmp_path: Path) -> tuple[Path, Path]:
+    tmp_path.mkdir(parents=True, exist_ok=True)
     solution = "".join(str((r * 3 + r // 3 + c) % 9 + 1) for r in range(9) for c in range(9))
     question = "." + solution[1:]
     root = "development-sudoku-root1"
