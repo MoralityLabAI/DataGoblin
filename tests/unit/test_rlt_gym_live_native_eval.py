@@ -8,17 +8,15 @@ from pathlib import Path
 import pytest
 
 from datagoblin.training_gym.rlt_gym.external_checked_exit import digest
-from datagoblin.training_gym.rlt_gym.live_lean_exit_eval import (
-    SPLITS as LEAN_SPLITS,
-    _world,
-)
+from datagoblin.training_gym.rlt_gym.live_lean_exit_eval import SPLITS as LEAN_SPLITS
+from datagoblin.training_gym.rlt_gym.live_lean_exit_eval import _world
 from datagoblin.training_gym.rlt_gym.live_mcp03_eval import (
     EXPECTED_HYBRID_COMMIT,
-    SPLITS as MCP_SPLITS,
     _source_for_symbol,
     _tree_sha,
     _write_world,
 )
+from datagoblin.training_gym.rlt_gym.live_mcp03_eval import SPLITS as MCP_SPLITS
 
 
 def test_live_lean_generator_is_disjoint_and_menu_bound() -> None:
