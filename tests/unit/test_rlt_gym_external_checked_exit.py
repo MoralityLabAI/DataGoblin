@@ -63,7 +63,8 @@ def test_receipt_tamper_and_untrusted_verifier():
     record = make_episode()
     record["attempts"][1]["verification"]["passed"] = False
     with pytest.raises(ValueError, match="receipt"):
-        replay_external_episode(record, checker=checker, trusted_verifier_sha=SHA)
+        replay_external_episode(record, checker=checker, trusted_verifier_sha=SHA,
+                                trusted_source_revision=SOURCE)
     with pytest.raises(ValueError, match="verifier"):
         replay_external_episode(make_episode(), checker=checker, trusted_verifier_sha="0" * 64,
             trusted_source_revision=SOURCE)
@@ -73,11 +74,13 @@ def test_protected_split_and_reused_root():
     with pytest.raises(ValueError, match="protected"):
         replay_external_episode(
             make_episode(split="sealed_poison"), checker=checker, trusted_verifier_sha=SHA,
+            trusted_source_revision=SOURCE,
         )
     with pytest.raises(ValueError, match="reused"):
         replay_corpus(
             [make_episode(), make_episode()],
             checkers={"lean": checker}, trusted_shas={"lean": SHA},
+            trusted_source_revisions={"lean": SOURCE}, approved_train_roots=frozenset({"a"}),
         )
 
 
@@ -86,11 +89,13 @@ def test_mcp_checker_hook_and_no_future_rescue():
     record["kind"] = "mcp"
     assert replay_external_episode(
         record, checker=checker, trusted_verifier_sha=SHA,
+        trusted_source_revision=SOURCE,
     )["kind"] == "mcp"
     for i, step in enumerate(record["attempts"]):
         step["candidate"] = {"proof": f"fail{i}"}
         step["verification"] = checker(record["public_task"], step["candidate"])
-    checked = replay_external_episode(record, checker=checker, trusted_verifier_sha=SHA)
+    checked = replay_external_episode(record, checker=checker, trusted_verifier_sha=SHA,
+                                      trusted_source_revision=SOURCE)
     assert checked["future_rescue"] is False
     assert checked["cost_until_first_verified_or_budget"] == 3
 
