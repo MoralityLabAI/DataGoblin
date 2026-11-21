@@ -7,11 +7,19 @@ on:
     paths:
       - "src/datagoblin/training_gym/rlt_gym/postfailure_exit.py"
       - "tests/unit/test_rlt_gym_postfailure_exit.py"
+      - "src/datagoblin/training_gym/rlt_gym/external_checked_exit.py"
+      - "src/datagoblin/training_gym/rlt_gym/external_native_adapters.py"
+      - "tests/unit/test_rlt_gym_external_checked_exit.py"
+      - "tests/unit/test_rlt_gym_external_native_adapters.py"
       - ".github/workflows/rlt-postfailure-value.yml"
   pull_request:
     paths:
       - "src/datagoblin/training_gym/rlt_gym/postfailure_exit.py"
       - "tests/unit/test_rlt_gym_postfailure_exit.py"
+      - "src/datagoblin/training_gym/rlt_gym/external_checked_exit.py"
+      - "src/datagoblin/training_gym/rlt_gym/external_native_adapters.py"
+      - "tests/unit/test_rlt_gym_external_checked_exit.py"
+      - "tests/unit/test_rlt_gym_external_native_adapters.py"
       - ".github/workflows/rlt-postfailure-value.yml"
   workflow_dispatch:
 
@@ -36,5 +44,13 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Test seven-family source replay and policy selection
         run: python -m pytest -q tests/unit/test_rlt_gym_postfailure_exit.py
+      - name: Test registered Lean/MCP checker contracts
+        run: python -m pytest -q tests/unit/test_rlt_gym_external_checked_exit.py tests/unit/test_rlt_gym_external_native_adapters.py
       - name: Lint post-failure value experiment
-        run: ruff check src/datagoblin/training_gym/rlt_gym/postfailure_exit.py tests/unit/test_rlt_gym_postfailure_exit.py
+        run: >-
+          ruff check src/datagoblin/training_gym/rlt_gym/postfailure_exit.py
+          src/datagoblin/training_gym/rlt_gym/external_checked_exit.py
+          src/datagoblin/training_gym/rlt_gym/external_native_adapters.py
+          tests/unit/test_rlt_gym_postfailure_exit.py
+          tests/unit/test_rlt_gym_external_checked_exit.py
+          tests/unit/test_rlt_gym_external_native_adapters.py
