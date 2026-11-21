@@ -118,6 +118,14 @@ def _read_arm(run: Path, rows: list[dict], tasks: dict, depth: int, cap: int) ->
     return outcomes, metadata[0]
 
 
+def capture_segments(arm: Path) -> list[Path]:
+    parts = arm / "continuations"
+    continuations = sorted(path for path in parts.iterdir() if path.is_dir()) if parts.is_dir() else []
+    if any(path.name != f"{index:03d}" for index, path in enumerate(continuations)):
+        raise ValueError("holdout continuations must be consecutively numbered")
+    return [arm, *continuations]
+
+
 def _prelude(run: Path, rows: list[dict]) -> dict[str, np.ndarray]:
     tokens = {row["sample_key"]: str(row["prompt_tokens"] - 1) for row in rows}
     result = {}
@@ -189,32 +197,39 @@ def score_holdout(suite: Path, holdout: Path, runs: Path, reference: Path, fit_p
     for batch, tasks_in_batch in batches.items():
         for depth in DEPTHS:
             path = runs / batch / f"p{depth:02d}"
-            raw = path / "raw"
-            if not (raw / "completed.tsv").is_file():
-                continue
-            receipt = _manifest(path / "command.json")
-            arm, config = _read_arm(raw, tasks_in_batch, tasks, depth, plan["model_new_token_cap"])
-            identity = (*(receipt[key] for key in PROVENANCE), config["requested_load_mode"])
-            if (receipt["holdout_plan_sha256"] != plan_sha or receipt["batch"] != batch or receipt["passes"] != depth
-                    or any(SHA256.fullmatch(receipt[k]) is None for k in PROVENANCE)
-                    or receipt["weights_sha256"] != sealed["weights_sha256"]
-                    or receipt["runtime_archive_sha256"] != sealed["runtime_sha256"]
-                    or (provenance is not None and identity != provenance)):
-                raise ValueError("holdout arms must use the same frozen checkpoint, runtime and placement")
-            provenance = identity
-            for row in arm:
-                group = per_root[row["lineage_id"]]
-                if group and row["prompt_tokens"] != next(iter(group.values()))["prompt_tokens"]:
-                    raise ValueError("a matched root used different prompt token counts across depths")
-                group[depth] = row
-            outcomes.extend(arm)
-            if depth == 1:
-                states = _prelude(raw, arm)
-                initial.extend((row["lineage_id"], states[row["sample_key"]]) for row in arm)
-            sources[f"{batch}/p{depth:02d}"] = {
-                "command": sha256_file(path / "command.json"), "completed": sha256_file(raw / "completed.tsv"),
-                "config": sha256_file(raw / "native-config.tsv"),
-            }
+            prefix = 0
+            for segment in capture_segments(path):
+                raw = segment / "raw"
+                if not (raw / "completed.tsv").is_file():
+                    continue
+                receipt = _manifest(segment / "command.json")
+                offset = receipt.get("prompt_offset", 0 if segment == path else None)
+                if offset != prefix or prefix == len(tasks_in_batch):
+                    raise ValueError("holdout continuation does not start at the next unattempted prompt")
+                arm, config = _read_arm(raw, tasks_in_batch[prefix:], tasks, depth, plan["model_new_token_cap"])
+                identity = (*(receipt[key] for key in PROVENANCE), config["requested_load_mode"])
+                if (receipt["holdout_plan_sha256"] != plan_sha or receipt["batch"] != batch
+                        or receipt["passes"] != depth
+                        or any(SHA256.fullmatch(receipt[k]) is None for k in PROVENANCE)
+                        or receipt["weights_sha256"] != sealed["weights_sha256"]
+                        or receipt["runtime_archive_sha256"] != sealed["runtime_sha256"]
+                        or (provenance is not None and identity != provenance)):
+                    raise ValueError("holdout arms must use the same frozen checkpoint, runtime and placement")
+                provenance = identity
+                for row in arm:
+                    group = per_root[row["lineage_id"]]
+                    if group and row["prompt_tokens"] != next(iter(group.values()))["prompt_tokens"]:
+                        raise ValueError("a matched root used different prompt token counts across depths")
+                    group[depth] = row
+                outcomes.extend(arm)
+                if depth == 1:
+                    states = _prelude(raw, arm)
+                    initial.extend((row["lineage_id"], states[row["sample_key"]]) for row in arm)
+                sources[segment.relative_to(runs).as_posix()] = {
+                    "command": sha256_file(segment / "command.json"), "completed": sha256_file(raw / "completed.tsv"),
+                    "config": sha256_file(raw / "native-config.tsv"), "prompt_offset": prefix,
+                }
+                prefix += len(arm)
     choices = defaultdict(dict)
     if initial:
         with np.load(dictionary, allow_pickle=False) as w:

@@ -1,0 +1,42 @@
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -566,0 +567,6 @@
++#ifdef _WIN32
++    const char * stream_gpu = std::getenv("DATAGOBLIN_STREAM_GPU_WEIGHTS");
++    if (load_mode == LLAMA_LOAD_MODE_MMAP && stream_gpu && std::string(stream_gpu) == "1") {
++        this->use_direct_io = true;
++    }
++#endif
+@@ -1509 +1515 @@
+-    if (prefetch && use_mmap && skip_prefetch && std::string(skip_prefetch) == "1") {
++    if (prefetch && use_mmap && (use_direct_io || (skip_prefetch && std::string(skip_prefetch) == "1"))) {
+@@ -1788,0 +1795,2 @@
++    std::vector<uint8_t> streamed_chunk;
++    size_t streamed_bytes = 0;
+@@ -1803,0 +1812,21 @@
++        // Keep the host tensors mapped. Read device payloads through the unbuffered
++        // handle so uploading them does not also fill the file cache.
++        if (use_mmap && use_direct_io && cur->buffer && !ggml_backend_buffer_is_host(cur->buffer) && !lazy.has(cur)) {
++            const auto & file = files.at(weight->idx);
++            if (!file->has_direct_io() || check_tensors) {
++                throw std::runtime_error("streamed GPU loading requires unbuffered I/O without tensor validation");
++            }
++            if (streamed_chunk.empty()) {
++                streamed_chunk.resize(4 * 1024 * 1024);
++            }
++            file->seek(weight->offs, SEEK_SET);
++            for (size_t start = 0; start < n_size;) {
++                const size_t len = std::min(streamed_chunk.size(), n_size - start);
++                file->read_raw(streamed_chunk.data(), len);
++                ggml_backend_tensor_set(cur, streamed_chunk.data(), start, len);
++                start += len;
++            }
++            streamed_bytes += n_size;
++            size_done += n_size;
++            continue;
++        }
+@@ -1940,0 +1970,4 @@
++    if (streamed_bytes) {
++        LLAMA_LOG_INFO("%s: streamed %zu device weight bytes from unbuffered GGUF reads\n", __func__, streamed_bytes);
++    }
++

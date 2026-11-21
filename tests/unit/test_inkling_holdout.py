@@ -20,6 +20,7 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
     suite_file = suite / "manifest.json"
     _, tasks = load_suite(suite_file)
     task = next(row for row in tasks if row["split"] == "ordinary_test")
+    ood = next(row for row in tasks if row["split"] == "ood_test")
     train = [row for row in tasks if row["split"] == "train"]
     holdout = tmp_path / "holdout"
     prompts = holdout / "batch-01"
@@ -28,6 +29,10 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
     path.write_bytes(native_prompt({"context": {"task": public_task(task), "history": []}}).encode("utf-8"))
     row = {key: task[key] for key in ("task_id", "task_digest", "lineage_id", "family", "split")}
     row.update(batch="batch-01", sample_key="000", prompt_sha256=sha256_file(path))
+    ood_path = prompts / "001.txt"
+    ood_path.write_bytes(native_prompt({"context": {"task": public_task(ood), "history": []}}).encode("utf-8"))
+    ood_row = {key: ood[key] for key in ("task_id", "task_digest", "lineage_id", "family", "split")}
+    ood_row.update(batch="batch-01", sample_key="001", prompt_sha256=sha256_file(ood_path))
     fit_prompts = tmp_path / "fit-prompts"
     fit_prompts.mkdir()
     dump_structured(fit_prompts / "manifest.json", {
@@ -58,17 +63,21 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
     })
     plan = holdout / "manifest.json"
     dump_structured(plan, {
-        "schema_version": "rlt_gym.inkling_native_holdout_plan.v1", "rows": [row],
+        "schema_version": "rlt_gym.inkling_native_holdout_plan.v1", "rows": [row, ood_row],
         "fixed_depths": [1, 3, 6], "model_new_token_cap": 192, "suite_sha256": sha256_file(suite_file),
         "prior_trace_sha256": sha256_file(trace), "frozen_depth_policy_sha256": sha256_file(policy),
     })
     runs = tmp_path / "runs"
-    for depth in (1, 3, 6):
+    for depth, offset in ((1, 0), (1, 1), (3, 0), (6, 0)):
         arm = runs / "batch-01" / f"p{depth:02d}"
+        if offset:
+            arm = arm / "continuations/000"
+        sample_key = f"{offset:03d}"
         raw = arm / "raw"
         raw.mkdir(parents=True)
         dump_structured(arm / "command.json", {
             "holdout_plan_sha256": sha256_file(plan), "batch": "batch-01", "passes": depth,
+            "prompt_offset": offset,
             "weights_sha256": "1" * 64, "runtime_archive_sha256": "2" * 64,
             "native_program_sha256": "3" * 64, "placement_sha256": "4" * 64, "runtime_llama_sha256": "5" * 64,
         })
@@ -77,19 +86,22 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
             encoding="utf-8",
         )
         (raw / "completed.tsv").write_text(
-            "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n000\t10\t2\tstop\t100\n",
+            "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n"
+            f"{sample_key}\t10\t2\tstop\t100\n",
             encoding="utf-8",
         )
         content = canonical_json({"candidate": reference_answer(task) if depth == 3 else None})
-        (raw / "000.reply").write_bytes((content if depth > 1 else "bad JSON").encode("utf-8"))
+        (raw / f"{sample_key}.reply").write_bytes((content if depth > 1 else "bad JSON").encode("utf-8"))
         if depth == 1:
-            (raw / "rows.tsv").write_text("sample_key\tpass_index\ttensor\ttoken_index\n000\t0\tl_out-5\t9\n",
-                                         encoding="utf-8")
+            (raw / "rows.tsv").write_text(
+                f"sample_key\tpass_index\ttensor\ttoken_index\n{sample_key}\t0\tl_out-5\t9\n", encoding="utf-8",
+            )
             np.zeros(WIDTH, dtype="<f4").tofile(raw / "activations.f32")
     out = tmp_path / "score"
     report = score_holdout(suite, holdout, runs, reference, fit_prompts, out)
     got = report["results"]["ordinary_test/all"]
-    assert report["observed_attempts"] == 3 and report["verifier_calls"] == 2
+    assert report["observed_attempts"] == 4 and report["verifier_calls"] == 2
+    assert report["sources"]["batch-01/p01/continuations/000"]["prompt_offset"] == 1
     assert got["paired_1_3_6"]["first_valid_depth"] == {"1": 0, "3": 1, "6": 0}
     assert got["paired_1_3_6"]["regressed_roots"] == 1
     rlt = got["paired_1_3"]["routing"]["rlt"]
@@ -98,6 +110,7 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
     routing = read_jsonl(out / "routing.jsonl")[0]
     assert routing["prelude_sha256"] == sha256_file(runs / "batch-01/p01/raw/activations.f32")
     assert routing["prompt_sha256"] == row["prompt_sha256"]
+    assert read_jsonl(out / "routing.jsonl")[1]["lineage_id"] == ood["lineage_id"]
     path.write_text("mutated prompt", encoding="utf-8")
     with pytest.raises(ValueError, match="differs from its original"):
         score_holdout(suite, holdout, runs, reference, fit_prompts, tmp_path / "rejected")

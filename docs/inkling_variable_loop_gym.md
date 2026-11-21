@@ -289,6 +289,14 @@ the `llama` target against the matching portable GGML build. Set
 confirm the loader reports that it disabled prefetch. Record the loaded
 `llama.dll` digest alongside the backend archive digest on each arm.
 
+If device upload still fills the workstation's file cache, apply
+`scripts/inkling_stream_gpu_weights.patch` after the no-prefetch patch
+using `git apply --unidiff-zero` at the pinned revision. Rebuild
+`llama` and set `DATAGOBLIN_STREAM_GPU_WEIGHTS=1` for the guarded
+`mmap` run. CPU tensors stay mapped. Device tensors use 4 MiB
+unbuffered reads. Check for the device-weight byte count in the load
+log and use the same loaded library for all matched depth arms.
+
 The pass-0 record is the shared prelude output. The first core pass ends at
 `l_out-17`. Repeated core passes end at logical cache slots 35, 47 and later
 steps of 12 while reusing the original physical weights. The tracer checks
@@ -374,6 +382,11 @@ test lineages. Run each staged batch at depths 1, 3 and 6 with the same
 checkpoint, prompt, placement and output budget. The scorer reads each
 arm from `<runs>/<batch>/p<depth>/raw` and checks the sibling
 `command.json` against the frozen plan and model provenance.
+To resume an interrupted arm, retain its original capture and write the
+remaining prompts to the next numbered `continuations/<number>/raw`
+segment. The segment's `command.json` must record its zero-based
+`prompt_offset` and the same runtime provenance. The scorer joins
+segments only when each starts after the previous durable prefix.
 
     python -m datagoblin.training_gym.rlt_gym.inkling_holdout --suite <suite> --holdout <holdout-plan> --runs <runs> --reference <native-eval-02> --fit-prompts <fitting-prompts> --out <audit>
 
