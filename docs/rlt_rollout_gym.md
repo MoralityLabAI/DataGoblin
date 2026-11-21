@@ -176,6 +176,9 @@ Pass its path through `run --intervention PATH --depths 4`. The visit must fit e
 
 ## Extend the next collection batches
 
+The [Lean-CGRT harness replay](lean_cgrt_harness.md) uses the archived c4 budget to compare ALEPH-1B
+and Bonsai 27B on goals left open by automation.
+
 ### Collect Lean selections with OxiBonsai
 
 Tetsuya Kitahata's [OxiBonsai](https://github.com/cool-japan/oxibonsai) serves
