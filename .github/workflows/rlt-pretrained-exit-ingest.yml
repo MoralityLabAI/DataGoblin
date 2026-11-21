@@ -1,0 +1,35 @@
+name: Pretrained TRM exit training corpus importer
+
+on:
+  push:
+    branches:
+      - research/trm-exit-train-ingest-20261121
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/pretrained_exit_ingest.py"
+      - "tests/unit/test_rlt_gym_pretrained_exit_ingest.py"
+      - ".github/workflows/rlt-pretrained-exit-ingest.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/pretrained_exit_ingest.py"
+      - "tests/unit/test_rlt_gym_pretrained_exit_ingest.py"
+      - ".github/workflows/rlt-pretrained-exit-ingest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin and development test tools
+        run: python -m pip install -e ".[dev]"
+      - name: Run archive/custody/verifier tests
+        run: python -m pytest -q tests/unit/test_rlt_gym_pretrained_exit_ingest.py
+      - name: Lint importer
+        run: ruff check src/datagoblin/training_gym/rlt_gym/pretrained_exit_ingest.py tests/unit/test_rlt_gym_pretrained_exit_ingest.py
