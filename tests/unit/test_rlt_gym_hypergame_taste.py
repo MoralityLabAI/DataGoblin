@@ -163,7 +163,9 @@ def test_private_evaluation_seed_changes_sealed_cohort(tmp_path):
     result_b = collect(tmp_path / "private-b", depths=(2,), per_cell=2, private_seed_file=two)
     assert result_a["profile"] == "private_seeded"
     assert result_a["seed_commitment"] != result_b["seed_commitment"]
-    assert result_a["artifacts"]["public_tasks.jsonl"]["sha256"] != result_b["artifacts"]["public_tasks.jsonl"]["sha256"]
+    sha_a = result_a["artifacts"]["public_tasks.jsonl"]["sha256"]
+    sha_b = result_b["artifacts"]["public_tasks.jsonl"]["sha256"]
+    assert sha_a != sha_b
 
 
 def test_no_forks_for_all_optimal_actions():
@@ -177,6 +179,6 @@ def test_corrupt_rollout_is_detected_by_digest(tmp_path):
     folder = tmp_path / "archive"
     collect(folder, depths=(1,), per_cell=1)
     rows = folder / "rollouts_scored.jsonl"
-    rows.write_bytes(rows.read_bytes().replace(b'"correct_publication":true', b'"correct_publication":false', 1))
+    rows.write_bytes(rows.read_bytes().replace(b'"schema":"datagoblin.hypergame_taste.v1"', b'"schema":"tampered"', 1))
     with pytest.raises(ValueError, match="archive hash mismatch"):
         replay_archive(folder)
