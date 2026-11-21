@@ -41,7 +41,7 @@ def test_no_calibration_or_repeated_train_roots():
     train = [_case("train", "graph_route", 0), _case("train", "graph_route", 1)]
     model = fit_family(train)
     with pytest.raises(ValueError, match="TRAIN"):
-        fit_family(train + [_case("calibration", "graph_route", 2)])
+        fit_family([*train, _case("calibration", "graph_route", 2)])
     with pytest.raises(ValueError, match="duplicate"):
         fit_family([train[0], train[0]])
     with pytest.raises(ValueError, match="CALIBRATION"):
