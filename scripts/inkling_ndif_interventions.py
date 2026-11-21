@@ -23,7 +23,10 @@ def main() -> None:
     parser.add_argument("--donor-task-digest")
     parser.add_argument("--passes", type=int, default=3)
     parser.add_argument("--pass-index", type=int, default=1, help="Zero-based architectural pass to modify")
-    parser.add_argument("--site", default="model.language_model.layers.17")
+    parser.add_argument("--site-type", choices=("layer", "bank"), default="layer")
+    parser.add_argument("--site", help="Dotted module path; defaults depend on site-type")
+    parser.add_argument("--bank-layer", type=int, default=12,
+                        help="Middle-layer index 6..17, used for message-bank interventions")
     parser.add_argument("--features", type=int, nargs="+", default=[2027])
     parser.add_argument("--dose", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=7)
@@ -35,26 +38,33 @@ def main() -> None:
     if not key:
         raise SystemExit("Set NDIF_API_KEY in the environment; it will not be written to receipts")
     from nnsight import CONFIG, TransformersModel, is_model_running
-    from datagoblin.training_gym.rlt_gym.nnsight_probe import ProbePlan, run_control_suite
-
-    plan = ProbePlan(
-        model_id=args.model, revision=args.revision,
-        task_digest=args.task_digest or _digest(args.prompt),
-        site_path=args.site, expected_passes=args.passes,
-        intervention_pass=args.pass_index, feature_ids=tuple(args.features),
-        dose=args.dose, seed=args.seed, target_token_id=args.target_token_id,
-    )
     if args.donor_task_digest and not args.donor_prompt:
         parser.error("--donor-task-digest requires --donor-prompt")
     if not is_model_running(args.model, task="text-generation", revision=args.revision):
         raise SystemExit(f"NDIF has no confirmed running deployment for {args.model} at {args.revision}")
     CONFIG.set_default_api_key(key)
     model = TransformersModel(args.model, task="text-generation", revision=args.revision)
-    result = run_control_suite(
-        model, args.prompt, plan, remote=True,
-        donor_prompt=args.donor_prompt,
-        donor_task_digest=(args.donor_task_digest or _digest(args.donor_prompt)) if args.donor_prompt else None,
+    common = dict(
+        model_id=args.model, revision=args.revision,
+        task_digest=args.task_digest or _digest(args.prompt),
+        expected_passes=args.passes, intervention_pass=args.pass_index,
+        feature_ids=tuple(args.features), dose=args.dose, seed=args.seed,
+        target_token_id=args.target_token_id,
     )
+    donor_digest = (args.donor_task_digest or _digest(args.donor_prompt)) if args.donor_prompt else None
+    if args.site_type == "bank":
+        from datagoblin.training_gym.rlt_gym.nnsight_message_bank import BankPlan, run_bank_control_suite
+
+        plan = BankPlan(**common, layer_index=args.bank_layer,
+                        site_path=args.site or "model.language_model.message_input")
+        result = run_bank_control_suite(model, args.prompt, plan, remote=True,
+                                        donor_prompt=args.donor_prompt, donor_task_digest=donor_digest)
+    else:
+        from datagoblin.training_gym.rlt_gym.nnsight_probe import ProbePlan, run_control_suite
+
+        plan = ProbePlan(**common, site_path=args.site or "model.language_model.layers.17")
+        result = run_control_suite(model, args.prompt, plan, remote=True,
+                                   donor_prompt=args.donor_prompt, donor_task_digest=donor_digest)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("x", encoding="utf-8") as file:
         file.write(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) + "\n")

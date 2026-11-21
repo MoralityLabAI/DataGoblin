@@ -54,10 +54,35 @@ Output paths are create-only. The JSON contains no API key or full activation
 vectors. The suite makes four remote traces, or six with a donor, each
 explicitly requested by running the script.
 
+## Message-bank probes
+
+The official NNsight Inkling guide identifies the previous pass's two middle
+block sums at llm.message_input.inputs[0][:2]. The message_input module fires
+12 times during Pass 2 and 12 during Pass 3, once for every shared core layer.
+The index mapping is zero-based: Pass 2 at layer 6 is call 0; Pass 3 at layer
+12 is call 18. Bank controls patch both previous-pass core blocks before
+the learned cross-pass mixing gates. Receipts check all 12*(passes-1)
+module invocations and report each bank's per-call norm and requested
+coordinate values, without exporting full hidden vectors.
+
+~~~shell
+python scripts/inkling_ndif_interventions.py \
+  --site-type bank --bank-layer 12 \
+  --revision main --prompt 'The Eiffel Tower is in the city of' \
+  --passes 3 --pass-index 2 --features 2027 --dose 0.5 \
+  --out runs/inkling/ndif/message-bank-p3-l12.json
+~~~
+
+The bank lane also supports --donor-prompt and preserves its task digest.
+All mechanistic results remain unverified. Coordinate 2027 is an exploratory
+target from recent Inkling interpretability reports. A localized lesion of
+this coordinate is a hypothesis test, not an established causal mechanism.
+
 ## Interpretation and next experiments
 
-The default site reads the shared decoder layer output. It does not directly
-expose Inkling's block-sum messages or their learned mixing gates. To study
+The default site reads the shared decoder layer output. Use --site-type bank
+for direct interventions on the two previous-pass core blocks before their gates.
+The individual learned mixing gates need separate probes. To study
 those quantities, identify and validate the real .source operation or
 submodule in the installed Inkling implementation, then supply its path
 through --site. The selected site must return a [B, S, H] tensor, and its

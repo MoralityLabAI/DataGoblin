@@ -6,6 +6,7 @@ on:
       - "src/datagoblin/training_gym/rlt_gym/**"
       - "tests/unit/test_rlt_gym_inkling.py"
       - "tests/unit/test_rlt_gym_nnsight_probe.py"
+      - "tests/unit/test_rlt_gym_nnsight_message_bank.py"
       - "scripts/inkling_ndif*.py"
       - ".github/workflows/inkling-varloop-gym.yml"
       - "pyproject.toml"
@@ -31,9 +32,9 @@ jobs:
       - name: Install package and test tools
         run: python -m pip install -e ".[dev]"
       - name: Test verified depth-pair distillation and pass-aware receipts
-        run: python -m pytest -q tests/unit/test_rlt_gym_inkling.py tests/unit/test_rlt_gym_nnsight_probe.py
+        run: python -m pytest -q tests/unit/test_rlt_gym_inkling.py tests/unit/test_rlt_gym_nnsight_probe.py tests/unit/test_rlt_gym_nnsight_message_bank.py
       - name: Lint gym and NDIF scripts
-        run: ruff check src/datagoblin/training_gym/rlt_gym/inkling*.py src/datagoblin/training_gym/rlt_gym/nnsight_probe.py tests/unit/test_rlt_gym_inkling.py tests/unit/test_rlt_gym_nnsight_probe.py scripts/inkling_ndif*.py
+        run: ruff check src/datagoblin/training_gym/rlt_gym/inkling*.py src/datagoblin/training_gym/rlt_gym/nnsight_probe.py src/datagoblin/training_gym/rlt_gym/nnsight_message_bank.py tests/unit/test_rlt_gym_inkling.py tests/unit/test_rlt_gym_nnsight_probe.py scripts/inkling_ndif*.py
       - name: Stage public fixture with no GPU or network
         run: |
           python -m datagoblin rlt-gym make-suite --seed 7 --per-family 1 --out runs/inkling-ci/suite
@@ -67,4 +68,4 @@ jobs:
       - name: Install optional NNsight integration
         run: python -m pip install -e ".[dev,interpretability]"
       - name: Exercise real three-pass recurrent PyTorch fixture
-        run: python -m pytest -q tests/unit/test_rlt_gym_nnsight_probe.py
+        run: python -m pytest -q tests/unit/test_rlt_gym_nnsight_probe.py tests/unit/test_rlt_gym_nnsight_message_bank.py
