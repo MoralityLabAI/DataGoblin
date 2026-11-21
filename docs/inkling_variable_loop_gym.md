@@ -348,6 +348,9 @@ direct feedback, RLT and matched damping.
 The feedback test measures prefill-state prediction. Verify task-level
 effects separately through the rollout checker.
 
+The [depth-prefix forecast](inkling/depth_prefix_forecast.md) measures
+third-pass accuracy and perturbation gain when the fit uses two transitions.
+
 ### Native answer evaluation and SAE screening
 
 Stage the train and calibration packs with matched depths and completion
