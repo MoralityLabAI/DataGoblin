@@ -73,6 +73,7 @@ def test_import_rechecks_verifier_and_preserves_development_custody(tmp_path: Pa
         json.loads(line) for line in (tmp_path / "out" / "depth_transitions.jsonl").read_text().splitlines()
     ]
     assert [r["target"]["exit_decision"] for r in rows] == ["continue", "stop"]
+    assert all(row["under_online_adaptive_trajectory"] for row in rows)
     assert all(r["training_eligible"] is False and r["split"] == "development" for r in rows)
 
 
@@ -113,3 +114,30 @@ def test_import_rejects_changed_rlt_prefix(tmp_path: Path) -> None:
     audited.write_text(canonical_json(audit_value), encoding="utf-8")
     with pytest.raises(ValueError, match="prefix"):
         import_native_exit(src, audited, tmp_path / "out")
+
+
+
+def test_import_marks_counterfactual_fixed_depth_after_early_verified_stop(tmp_path: Path) -> None:
+    src, audited = _stage(tmp_path)
+    value = json.loads(src.read_text())
+    record = value["records"][0]
+    solved = record["policies"]["fixed_2"]["trace"][1]["candidate"]
+    record["policies"]["fixed_2"]["trace"][0]["candidate"] = solved
+    record["policies"]["fixed_2"]["trace"][0]["sudoku_checker_passed"] = True
+    record["policies"]["verifier_exit"]["trace"] = [
+        dict(record["policies"]["fixed_2"]["trace"][0])
+    ]
+    src.write_text(canonical_json(value), encoding="utf-8")
+    a = json.loads(audited.read_text())
+    a["receipt_sha256"] = sha256_file(src)
+    a["depth_one_verified"] = 1
+    a["adaptive_steps"] = 1
+    a["step_fraction_saved"] = 0.5
+    audited.write_text(canonical_json(a), encoding="utf-8")
+    import_native_exit(src, audited, tmp_path / "out")
+    lines = (tmp_path / "out" / "depth_transitions.jsonl").read_text().splitlines()
+    rows = [json.loads(line) for line in lines]
+    assert rows[0]["under_online_adaptive_trajectory"] is True
+    assert rows[1]["under_online_adaptive_trajectory"] is False
+    assert rows[1]["counterfactual_fixed_depth_only"] is True
+    assert all(row["training_eligible"] is False for row in rows)
