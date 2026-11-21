@@ -38,8 +38,27 @@ matched damping. The 2.5th and 97.5th percentiles from resampling the
 seven root pairs were [0.077, 0.233] and [−0.012, 0.138], respectively.
 These intervals summarize variation across the calibration roots.
 
+## Exact gains of the fitted heads
+
+Each step has an affine state map with linear part
+`(1 - eta) I + eta A`, where `A` is the fitted endpoint's state matrix.
+Multiplying those matrices gives the three-pass Jacobian. Its largest
+singular value is the worst-case L2 gain. Its Frobenius norm divided by
+the square root of the code width gives the isotropic RMS gain.
+
+| Feedback, fit two and runtime three | Worst-case L2 gain | Isotropic RMS gain | Feature 121 L2 gain |
+| --- | ---: | ---: | ---: |
+| Direct | 127.24 | 8.83 | 0.284 |
+| RLT | 82.58 | 5.81 | 0.342 |
+| Matched damping | 87.05 | 6.05 | 0.351 |
+
+Worst-case directions amplify even where the selected SAE feature
+attenuates. These gains come from the affine predictors in SAE code
+space. The feature-121 live intervention still needs its matched controls.
+
 The experiment evaluated activation prediction and perturbation response.
 Live answer accuracy and causal interventions have their own evaluation
 stages. The local `native-rlt-depth-forecast-01` capture contains fitted
 heads, pass-indexed norms, the comparison by fit horizon, and digests of
-the source trace and SAE outside Git.
+the source trace and SAE outside Git. Its `linear_gain.json` audit records
+exact per-pass gains and binds them to the fitted-head digest.
