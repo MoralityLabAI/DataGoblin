@@ -138,6 +138,16 @@ the whole sweep. The native checkpoint was midtrained on 1–5 passes, and 7/10
 are extrapolative research conditions. Disable the fixed three-pass DSpark
 speculator when collecting variable-loop comparisons.
 
+Reserve 35 GiB on the checkpoint cache volume and pin the serving image.
+For a depth-specific server identity, start vLLM with
+`--served-model-name "thinkingmachines/TML-d24-varloop-research#passes=$PASSES"`
+and pass the same value to `capture --served-model`. For llama.cpp, use
+`--alias` with the same value. A response labeled for another arm will be
+excluded. Record `--runtime-version "$RUNTIME_VERSION"` and
+`--weights-artifact "$WEIGHTS_ARTIFACT"` alongside `--weights-revision`.
+Use the Hugging Face repository for native weights or the repository plus
+filename for a GGUF. Keep revision, artifact, and runtime matched across arms.
+
 The capture records the declared pass count and server response identity.
 The ordinary OpenAI-compatible completion API cannot independently prove
 which weight revision or loop configuration served a request; the provenance
@@ -155,13 +165,13 @@ After every capture directory exists:
 This routes EVERY captured answer through the existing RLT teacher importer.
 The scorer replays the environment-owned receipts and writes:
 
-* depth_matrix.jsonl: paired task × teacher pass outcomes and reported usage;
+* depth_matrix.jsonl: paired task × teacher pass outcomes, usage and verifier receipts;
 * sft.jsonl: one verified, train-split completion per lineage, chosen from
   the shallowest passing teacher pass count;
 * preferences.jsonl: a matched-task pass/fail pair where a deeper pass
   succeeds after a shallower pass fails;
 * curriculum.jsonl: train-only tasks to target in a later collection, with
-  first passing depth and failed pass counts;
+  first passing depth, failed passes and priority for verified depth rescues;
 * outcomes.jsonl: checker labels for unique candidate attempts, with the
   verdict outside the input;
 * repairs.jsonl: shallower wrong answer paired with a deeper verified answer
@@ -183,6 +193,10 @@ Models often vary in output length as internal computation increases. Keep
 the correct-at-lowest-depth, fastest-effective, and fixed-budget curricula
 separate in later experiments. The first export uses the shallowest
 verifier-correct pass as a deterministic policy.
+
+The paired table gives each task family its own count of successes, failures,
+rescues, regressions, and tasks without two definitive verdicts. The Aleph
+adapter uses the corpus history and checker-code fields.
 
 Any synthetic fixtures used to test the collector must declare
 source_kind=synthetic_fixture. The scorer refuses these by default. With
@@ -217,6 +231,10 @@ The sealed_poison split is never part of architecture selection. Continue
 using the existing RLT gym native runner for matched feedback-schedule
 comparisons, state-pulse perturbation and exact replay.
 
+Supply `visit_candidates` with one candidate per recurrent visit to score
+first-valid visit and regressions. Its last entry must match `candidate`.
+An optional `fit_depth` reports how many episodes exceed that training depth.
+
 ### Reproduce the CPU control and held-out confirmation
 
 ```sh
@@ -241,6 +259,28 @@ depth before confirmation, which executes and times real early stopping on
 the ordinary and OOD splits. The sealed split stays sealed.
 
 ## Instrumented loop probes
+
+### NDIF smoke test
+
+Run the smoke test in a separate environment with access to PyPI, GitHub,
+Hugging Face and NDIF. The script prompts for an NDIF key or reads the
+process variable `NDIF_API_KEY`. It uses one public prompt and prints the
+GPT-2 activation shape and next token or the Inkling layer-17 active-block
+norms and observed pass count.
+
+```sh
+python -m pip install nnsight==0.8.3
+python scripts/inkling_ndif_smoke.py
+python -m pip install "transformers @ git+https://github.com/huggingface/transformers.git@add-inkling2-mini"
+python scripts/inkling_ndif_smoke.py --model thinkingmachines/TML-d24-varloop-research
+```
+
+The hosted deployment sets the architectural pass count for each remote
+trace. Use NDIF for mechanistic measurements at that setting and the local
+server lane above for the matched teacher depth sweep.
+[NNsight Inkling deployment and trace guide](https://nnsight.net/blog/2026/11/20/opening-the-box-of-inkling-2-mini-using-nnsight-ndif/)
+
+### Local instrumentation contract
 
 `inkling_instrumentation.LoopProbe` is separate from the completion API.
 Implement it at a reproducible pass boundary with task digest, layer, token
@@ -500,3 +540,49 @@ coverage and leave the mean contrast empty until a complete pair exists.
 
 The [native geometry report](inkling/bpd_geometry_pair.md) records the
 complete seven-root aligned and orthogonal comparison.
+
+## NNsight causal pass probes
+
+The pass-aware NNsight readout and matched intervention controls are documented
+in [nnsight_loop_probe.md](nnsight_loop_probe.md). These unverified mechanistic
+receipts are kept separate from teacher responses and student SFT labels.
+
+
+## Native pretrained TRM verifier-exit evidence bridge (development only)
+
+The linked BPD native-model experiment now includes a genuine pretrained
+7M Attention-TRM with recurrent hidden-state continuation and an online
+Sudoku verifier. Its [first original run](https://github.com/MoralityLabAI/BPD/actions/runs/44903527858)
+uses 24 fresh 50-blank root puzzles: 23/24 exact solved under fixed
+two-step and online verifier-gated policies, with 48 versus 33 outer
+steps and a 31.17% measured reduction in CPU native inference time.
+The source uses the SHA-pinned gaoxin492 checkpoint. The corresponding
+[second independently audited rerun](https://github.com/MoralityLabAI/BPD/actions/runs/44903755773)
+preserved those solve/visit counts, measured 30.68% lower native time,
+and retained the raw audit report. These outcomes are DEVELOPMENT
+results, not scientific confirmation or Inkling-specific routing.
+
+After extracting the second GitHub Actions artifact so that its JSON
+and audit files are available locally, run:
+
+    python -m datagoblin.training_gym.rlt_gym.native_exit_bridge \
+      --input runs/bpd/trm_online_adaptive_50blank_20261123.json \
+      --audit runs/bpd/trm_online_adaptive_50blank_20261123.audit.json \
+      --out runs/datagoblin/native-trm-exit-dev
+
+The importer verifies that the BPD audit hash matches exactly,
+recomputes Sudoku legality from each saved candidate, checks the
+identical fixed/adaptive prefixes and stopping decisions, and refuses
+non-development provenance or an attempt to declare this source
+train-eligible. Outputs are depth_transitions.jsonl, episodes.jsonl,
+and a SHA-bound manifest. Every example is explicitly marked as
+training_eligible=false; the labels support research on controller
+task formats and future schema design only.
+
+To generate RLT training data, acquire new, lineage-disjoint
+TRAIN sources, rerun the independent verifier and create separate
+unexposed validation/test populations with explicit authorizations.
+Do not relabel these 24 development source roots as training examples.
+The native TRM supplies empirical state recurrence and task-specific
+verifier labels; the larger Inkling research checkpoint and Goodfire's
+fixed-three-pass coordinate-2027 mechanism remain separate experiments.
