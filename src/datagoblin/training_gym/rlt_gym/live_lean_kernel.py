@@ -63,7 +63,6 @@ class LeanNativeSession:
         self.directory = directory
         self.statements = statements
         self.proof_by_sid: dict[int, tuple[Path, str]] = {}
-        self.next_sid = 10000
         self.calls = 0
         self.kernel_replays = 0
         self.seconds = 0.0
@@ -85,8 +84,11 @@ class LeanNativeSession:
         if sid not in self.statements or not isinstance(tactic, str):
             raise ValueError("unknown source goal or tactic")
         self.calls += 1
-        candidate_sid = self.next_sid
-        self.next_sid += 1
+        # Stable certificate identity makes the second independent Lean
+        # compilation produce exactly the same verifier receipt as the first.
+        candidate_sid = int.from_bytes(
+            hashlib.sha256(f"{sid}:{tactic}".encode()).digest()[:8], "big",
+        )
         name = f"dgCheck{candidate_sid}"
         file = self.directory / f"{name}.lean"
         file.write_text(
