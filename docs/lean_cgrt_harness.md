@@ -41,6 +41,22 @@ training examples. Keep the cohort out of ALEPH's training and selection data.
 | Family | 198 | 83 | 14 |
 | Total | 588 | 307 | 20 |
 
+### Archived ranker controls
+
+A second replay used the same four automation checks followed by the first four
+available tactics from each archived checkpoint's own ranking. The menu filter
+and kernel receipt rule were identical. Counts below are closures out of 588.
+
+| Archived policy | Seed 17 | Seed 29 | Seed 43 |
+| --- | ---: | ---: | ---: |
+| Flat-S | 312 | 307 | 310 |
+| Loop-S | 312 | 308 | 312 |
+| TRM-4M | 300 | 300 | 300 |
+
+Automation alone at eight checks closed 307 goals. The strongest archived
+checkpoint added five closures on this allocation. The revised ordering is a
+retrospective control for the two-model harness.
+
 ## Run locally
 
 Locate the original c4 `states.jsonl.gz` and the corresponding `mathlib-c3`
