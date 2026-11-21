@@ -62,6 +62,14 @@ def _case(task: dict[str, Any], episode: dict[str, Any]) -> dict[str, Any]:
         observed = None
     else:
         observed = features(public_task(task), fail["candidate"], [fail["candidate"]])
+        # The first verifier failure code is already public when the post-check
+        # controller decides; hashed features never include future receipts.
+        for signal in (
+            f"known_check_code:{fail['verification']['code']}",
+            f"remaining_budget:{min(len(steps) - 1, 16)}",
+        ):
+            digest = hashlib.blake2s(signal.encode(), digest_size=4).digest()
+            observed[1 + int.from_bytes(digest, "little") % (WIDTH - 1)] += 1.0
         if observed.shape != (WIDTH,) or not np.isfinite(observed).all():
             raise ValueError("bad pre-decision feature vector")
     return {
