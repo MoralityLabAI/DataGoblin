@@ -25,7 +25,10 @@ from .external_native_adapters import LeanKernelChecker
 SPLITS = ("train", "calibration", "ordinary_test", "ood_test")
 SOURCE_SEED = 20261122
 MODEL_SHA = hashlib.sha256(b"fixed_contrived_lean_tactic_menu_v1").hexdigest()
-AXIOM_MARK = re.compile(r"(?m)^'?(?:_root_\.)?(dgCheck\d+)'?\s+(does not depend on any axioms|depends on axioms:\s*\[(.*?)\])")
+AXIOM_MARK = re.compile(
+    r"(?m)^'?(?:_root_\.)?(dgCheck\d+)'?\s+"
+    r"(does not depend on any axioms|depends on axioms:\s*\[(.*?)\])"
+)
 LIMIT_SECS = 15
 
 
