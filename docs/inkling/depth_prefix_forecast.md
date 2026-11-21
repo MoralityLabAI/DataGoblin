@@ -62,3 +62,29 @@ stages. The local `native-rlt-depth-forecast-01` capture contains fitted
 heads, pass-indexed norms, the comparison by fit horizon, and digests of
 the source trace and SAE outside Git. Its `linear_gain.json` audit records
 exact per-pass gains and binds them to the fitted-head digest.
+
+## Six-pass transfer
+
+The frozen heads were evaluated on final-prefill-token trajectories from
+the [six-pass holdout](six_pass_holdout.md). Its 14 roots are disjoint from
+both the head-fitting and calibration roots. Each head started at the
+measured held-out prelude and rolled forward on its own predictions for six
+visits. The visit clock remained visit divided by three. Each feedback rule
+used its six-visit coefficient schedule.
+
+| Fit horizon | Feedback | Pass-six activation MSE | Isotropic RMS gain |
+| --- | --- | ---: | ---: |
+| 2 or 3 | Direct | 120.79 | 24.12 |
+| 2 | RLT | 76.56 | 8.12 |
+| 2 | Matched damping | 68.10 | 8.19 |
+| 3 | RLT | 58.93 | 18.12 |
+| 3 | Matched damping | 58.27 | 19.29 |
+| — | Copy the measured prelude | 56.56 | — |
+
+At pass six, RLT fitted with horizon three reduced activation MSE by
+51% versus the direct head. The measured-prelude baseline had the lowest
+error. The frozen SAE's reconstruction of the measured pass-six state
+had MSE 5.42. The local `native-rlt-depth-transfer-06` report holds
+per-pass metrics, per-root errors, and the source digests. This comparison
+estimates offline state transfer. Answer-level effects remain part of
+the separate live routing trial.
