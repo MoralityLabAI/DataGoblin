@@ -132,8 +132,12 @@ def import_native_exit(source_path: Path, audit_path: Path, out: Path) -> dict[s
                 "model_sha256": MODEL_SHA256, "outer_step": index + 1,
                 "input": {"question": question, "candidate": step["candidate"]},
                 "checker_passed": passes,
-                "target": {"exit_decision": "stop" if passes else "continue"},
+                "target": {
+                    "exit_decision": "stop" if passes else "continue" if index == 0 else "budget_exhausted",
+                },
                 "next_step_available": index == 0,
+                "under_online_adaptive_trajectory": index < len(asteps),
+                "counterfactual_fixed_depth_only": index >= len(asteps),
                 "mean_blank_logit_margin": step.get("mean_blank_logit_margin"),
                 "min_blank_logit_margin": step.get("min_blank_logit_margin"),
                 "training_eligible": False,
