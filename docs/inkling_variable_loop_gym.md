@@ -297,6 +297,14 @@ using `git apply --unidiff-zero` at the pinned revision. Rebuild
 unbuffered reads. Check for the device-weight byte count in the load
 log and use the same loaded library for all matched depth arms.
 
+For six-pass evaluation, also apply `scripts/inkling_loop_graph_arena.patch`
+with `git apply --unidiff-zero` at the same pinned revision and rebuild
+`llama`. A six-pass prefill on the original streamed build exceeded the GGML
+graph arena. The patch scales the graph node estimate by the ratio of
+logical to physical layers for the Inkling loop architecture. Keep the
+existing launch and live resource guards. Run a guarded six-pass check
+and use the rebuilt runtime for every arm in a matched comparison.
+
 The pass-0 record is the shared prelude output. The first core pass ends at
 `l_out-17`. Repeated core passes end at logical cache slots 35, 47 and later
 steps of 12 while reusing the original physical weights. The tracer checks

@@ -1,0 +1,11 @@
+--- a/src/models/models.h
++++ b/src/models/models.h
+@@ -2551,0 +2552,8 @@
++    uint32_t graph_nodes_per_tensor() const override {
++        const uint32_t base = llama_model_inkling2::graph_nodes_per_tensor();
++        const uint32_t physical = static_cast<uint32_t>(n_phys);
++        // Reserve graph nodes for repeated core layers as well as physical tensors.
++        return physical > 0
++            ? static_cast<uint32_t>((uint64_t(base) * hparams.n_layer_all + physical - 1) / physical)
++            : base;
++    }
