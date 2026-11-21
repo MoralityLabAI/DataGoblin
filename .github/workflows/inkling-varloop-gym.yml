@@ -1,18 +1,12 @@
 name: Inkling variable-loop distillation gym
 
 on:
-  push:
-    branches:
-      - research/inkling-varloop-distill-20261121
-    paths:
-      - "src/datagoblin/training_gym/rlt_gym/inkling.py"
-      - "tests/unit/test_rlt_gym_inkling.py"
-      - ".github/workflows/inkling-varloop-gym.yml"
   pull_request:
     paths:
-      - "src/datagoblin/training_gym/rlt_gym/inkling.py"
+      - "src/datagoblin/training_gym/rlt_gym/**"
       - "tests/unit/test_rlt_gym_inkling.py"
       - ".github/workflows/inkling-varloop-gym.yml"
+      - "pyproject.toml"
   workflow_dispatch:
 
 permissions:
@@ -37,7 +31,7 @@ jobs:
       - name: Test verified depth-pair distillation and calibration-only selection
         run: python -m pytest -q tests/unit/test_rlt_gym_inkling.py
       - name: Lint new gym and tests
-        run: ruff check src/datagoblin/training_gym/rlt_gym/inkling.py tests/unit/test_rlt_gym_inkling.py
+        run: ruff check src/datagoblin/training_gym/rlt_gym/inkling*.py tests/unit/test_rlt_gym_inkling.py
       - name: Stage public fixture with no GPU or network
         run: |
           python -m datagoblin rlt-gym make-suite --seed 7 --per-family 1 --out runs/inkling-ci/suite

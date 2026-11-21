@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 from datagoblin.hashing import sha256_file
 from datagoblin.serialization import canonical_json, dump_structured
+from datagoblin.training_gym.rlt_gym import inkling
 from datagoblin.training_gym.rlt_gym.inkling import capture, hillclimb, score, stage
+from datagoblin.training_gym.rlt_gym.inkling_instrumentation import LoopBoundary, stability_sample
 from datagoblin.training_gym.rlt_gym.runner import read_jsonl
 from datagoblin.training_gym.rlt_gym.tasks import load_suite, reference_answer, write_suite
 
@@ -90,6 +95,9 @@ def test_checked_depth_preference_and_fixture_provenance(tmp_path: Path) -> None
     assert result["preference_pairs"] == 7
     manifest = json.loads((tmp_path / "score" / "manifest.json").read_text())
     assert manifest["student_training_eligible_rows"] == 0
+    assert manifest["stream_rows"]["outcomes"] == 14
+    assert manifest["stream_rows"]["repairs"] == 7
+    assert manifest["stream_rows"]["aleph"] == 0
     records = read_jsonl(tmp_path / "score" / "sft.jsonl")
     assert {row["teacher_loop_passes"] for row in records} == {3}
     assert all(row["fixture"] and not row["student_training_eligible"] for row in records)
@@ -97,6 +105,45 @@ def test_checked_depth_preference_and_fixture_provenance(tmp_path: Path) -> None
     pairs = read_jsonl(tmp_path / "score" / "preferences.jsonl")
     assert all(row["chosen_verification"]["passed"] for row in pairs)
     assert all(not row["rejected_verification"]["passed"] for row in pairs)
+
+
+def test_capture_binds_model_identity_and_preserves_spent_tokens(tmp_path: Path, monkeypatch) -> None:
+    suite, staged, frozen = _setup(tmp_path)
+    captures = tmp_path / "captures"
+    first = read_jsonl(staged / "p01" / "requests.jsonl")[0]
+    answer = canonical_json(reference_answer(frozen[first["task_id"]]))
+    replies = iter([
+        (inkling.MODEL, '{"not_the_answer":true}'), ("unexpected-model", answer),
+        (inkling.MODEL, answer), (inkling.MODEL, None),
+    ])
+
+    def open_response(request, timeout):
+        body = json.loads(request.data)
+        assert body["model"] == inkling.MODEL and timeout > 0
+        model, content = next(replies)
+        return BytesIO(canonical_json({
+            "model": model, "usage": {"prompt_tokens": 25, "completion_tokens": 10},
+            "choices": [{"message": {"content": content}, "finish_reason": "stop"}],
+        }).encode())
+
+    monkeypatch.setattr(inkling.urllib.request, "build_opener", lambda *_: SimpleNamespace(open=open_response))
+    for passes in (1, 3):
+        capture(staged, captures / f"p{passes:02d}", passes=passes, server_loop_passes=passes,
+                max_requests=2, weights_revision="fixture-in-test")
+    out = tmp_path / "score"
+    assert score(staged, captures, suite, out)["preference_pairs"] == 1
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert [arm["reported_tokens"] for arm in manifest["per_pass"]] == [70, 70]
+    assert [arm["verified_outcomes"] for arm in manifest["per_pass"]] == [1, 1]
+    assert manifest["paired_depths"][0]["paired_verified_tasks"] == 1
+    assert manifest["paired_depths"][0]["higher_only"] == 1
+    rows = read_jsonl(out / "aleph.jsonl")
+    assert {row["kind"] for row in rows} == {"sft", "outcomes", "repairs"}
+    assert all(row["loss"]["boundary"] == "response_only" for row in rows)
+    observation_path = captures / "p01" / "observations.jsonl"
+    observation_path.write_bytes(observation_path.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="observation digest"):
+        score(staged, captures, suite, tmp_path / "reject")
 
 
 def test_hillclimb_selection_never_reads_test_splits(tmp_path: Path) -> None:
@@ -119,7 +166,7 @@ def test_hillclimb_selection_never_reads_test_splits(tmp_path: Path) -> None:
     report = json.loads((tmp_path / "ranks" / "rank.json").read_text())
     assert report["selection_only"] is True
     assert report["requires_fresh_confirmation"] == ["ordinary_test", "ood_test"]
-    bad = rows + [{
+    bad = [*rows, {
         "model_id": "rlt_depth4", "task_id": next(t for t in frozen if frozen[t]["split"] == "ood_test"),
         "task_digest": next(t["task_digest"] for t in frozen.values() if t["split"] == "ood_test"),
         "visits": 1, "candidate": {},
@@ -138,3 +185,17 @@ def test_response_parser_is_bounded() -> None:
     assert _decode_candidate('{"value":3}') == (True, {"value": 3}, [])
     assert _decode_candidate("nonsense")[0] is False
     assert _decode_candidate("x" * 300_000)[0] is False
+
+
+def test_instrumented_linear_loop_gain() -> None:
+    matrix = np.diag([0.25, 0.75])
+    probe = SimpleNamespace(
+        activation=lambda point: np.array([2.0, 3.0]),
+        advance=lambda point, state: matrix @ state,
+        jvp=lambda point, state, tangent: matrix @ tangent,
+        vjp=lambda point, state, cotangent: matrix.T @ cotangent,
+    )
+    metrics = stability_sample(probe, LoopBoundary("task", 1, 3, 17, 0, "message"))
+    assert metrics["spectral_gain_estimate"] == pytest.approx(0.75)
+    assert metrics["finite_dose_directional_gain"] == pytest.approx(0.75)
+    assert metrics["contraction_certified"] is False
