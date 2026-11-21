@@ -11,7 +11,10 @@ import pytest
 
 from datagoblin.serialization import canonical_json
 from datagoblin.training_gym.rlt_gym.pretrained_exit_ingest import (
-    FEATURES, MODEL_SHA, _digest, ingest,
+    FEATURES,
+    MODEL_SHA,
+    _digest,
+    ingest,
 )
 
 

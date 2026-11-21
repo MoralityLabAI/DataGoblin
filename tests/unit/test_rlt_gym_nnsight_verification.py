@@ -85,7 +85,7 @@ def test_real_rlt_verifier_on_frozen_calibration_task(tmp_path) -> None:
     task = next(item for item in all_tasks if item["split"] == "calibration")
     report, rows, _ = _receipt()
     report["task_digest"] = task["task_digest"]
-    for name, arm in report["arms"].items():
+    for arm in report["arms"].values():
         arm["plan"]["task_digest"] = task["task_digest"]
     report_body = {key: value for key, value in report.items() if key != "sha256"}
     report["sha256"] = hashlib.sha256(_canonical(report_body).encode()).hexdigest()

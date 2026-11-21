@@ -1,0 +1,85 @@
+name: DataGoblin scaled post-failure value study
+
+on:
+  push:
+    branches:
+      - research/verifier-postfailure-exit-20261121
+    paths:
+      - ".github/workflows/rlt-postfailure-scale.yml"
+      - "src/datagoblin/training_gym/rlt_gym/postfailure_exit.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registered-source-cohorts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite_seed: [20261124, 20261125]
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin CPU runtime
+        run: python -m pip install -e ".[dev]"
+      - name: Generate disjoint task worlds and full fixed-depth proposals
+        run: |
+          set -euo pipefail
+          ROOT="runs/pf-${{ matrix.suite_seed }}"
+          python -m datagoblin rlt-gym make-suite \
+            --seed "${{ matrix.suite_seed }}" --per-family 16 --out "$ROOT/suite"
+          python -m datagoblin rlt-gym run \
+            --suite "$ROOT/suite" --seeds 7 --training-modes direct \
+            --modes direct --depths 4 --training-depth 4 \
+            --splits train calibration ordinary_test ood_test \
+            --terminal-only --omit-controls --max-wall-seconds 360 \
+            --out "$ROOT/full"
+      - name: Replay all trajectories from frozen source and checkpoint
+        run: |
+          ROOT="runs/pf-${{ matrix.suite_seed }}"
+          python -m datagoblin rlt-gym replay --suite "$ROOT/suite" \
+            --run "$ROOT/full" --out "$ROOT/replay.json"
+      - name: Fit and evaluate zero- and one-missed-rescue CAL policies
+        run: |
+          set -euo pipefail
+          ROOT="runs/pf-${{ matrix.suite_seed }}"
+          for ALLOWANCE in 0 1; do
+            python -m datagoblin.training_gym.rlt_gym.postfailure_exit \
+              --suite "$ROOT/suite" --run "$ROOT/full" \
+              --seed 7 --mode direct --training-mode direct --depth 4 \
+              --max-missed-calibration-rescues "$ALLOWANCE" \
+              --out "$ROOT/policy-$ALLOWANCE"
+          done
+      - name: Summarize measured verifier costs and root solves
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("runs/pf-${{ matrix.suite_seed }}")
+          for allowance in (0,1):
+              x=json.loads((root/f"policy-{allowance}"/"report.json").read_text())
+              print("policy",allowance,"source_roots",x["provenance"]["source_roots"])
+              print("CAL",x["selection"]["calibration_policy"]["solved"],
+                    x["selection"]["calibration_policy"]["verifier_calls"])
+              for split,panel in x["evaluations"].items():
+                  print(split,[(name,p["solved"],p["verifier_calls"],
+                    p["missed_future_rescues"]) for name,p in panel["policies"].items()])
+          PY
+      - name: Retain exact root-level replay and paired policy evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: datagoblin-postfailure-scale-${{ matrix.suite_seed }}
+          path: runs/pf-${{ matrix.suite_seed }}/
+          if-no-files-found: warn
+          retention-days: 14
