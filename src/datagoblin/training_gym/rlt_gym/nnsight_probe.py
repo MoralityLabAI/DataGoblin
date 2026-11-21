@@ -82,10 +82,29 @@ def _package_version(name: str) -> str | None:
 
 
 def _configuration_passes(model: Any) -> int | None:
-    config = getattr(model, "config", None)
-    text_config = getattr(config, "text_config", config)
-    value = getattr(text_config, "loop_num_passes", None)
-    return int(value) if type(value) is int else None
+    """Read Inkling's actual runtime config, before fallback wrapper metadata.
+
+    The official Inkling implementation reads language_model.config.loop_num_passes
+    at the start of each forward. TransformersModel.config can differ when a
+    hosted backend changes the active loop depth.
+    """
+    language_model = getattr(getattr(model, "model", None), "language_model", None)
+    configs = (getattr(language_model, "config", None), getattr(model, "config", None))
+    for config in configs:
+        for candidate in (config, getattr(config, "text_config", None)):
+            value = getattr(candidate, "loop_num_passes", None)
+            if type(value) is int and 1 <= value <= 16:
+                return value
+    return None
+
+
+def _trace_context(model: Any, prompt: Any, remote: bool) -> Any:
+    """Only remote-capable wrappers accept the remote keyword.
+
+    A plain NNsight(torch.nn.Module) uses Envoy.trace, whose extra keywords are
+    forwarded to the module forward. Supplying remote=False there is a bug.
+    """
+    return model.trace(prompt, remote=True) if remote else model.trace(prompt)
 
 
 def sample_random_features(width: int, avoid: tuple[int, ...], seed: int) -> tuple[int, ...]:
@@ -144,7 +163,7 @@ def trace_once(
         raise ValueError("donor values were provided for a non-donor intervention")
 
     site = _resolve(model, plan.site_path)
-    with model.trace(prompt, remote=remote) as tracer:
+    with _trace_context(model, prompt, remote) as tracer:
         observations = nnsight.save([])
         for pass_index in tracer.iter[:plan.expected_passes]:
             activation = site.output  # Inkling decoder layer returns [B, S, H].

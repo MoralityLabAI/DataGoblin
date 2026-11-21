@@ -96,3 +96,47 @@ def test_actual_nnsight_message_bank_fixture() -> None:
     result = run_bank_control_suite(model, torch.ones(1, 1, 4), plan)
     assert len(result["arms"]["observe"]["observations"]) == 24
     assert result["arms"]["observe"]["readout"] == result["arms"]["sham"]["readout"]
+
+def test_pytorch_causal_message_bank_fixture_without_nnsight() -> None:
+    """A real recurrent forward uses 24 bank calls; a targeted patch changes output."""
+    torch = pytest.importorskip("torch")
+
+    class Bank(torch.nn.Module):
+        def forward(self, block0, block1):
+            return block0 + block1
+
+    class Loop(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.message_input = Bank()
+
+        def forward(self, x):
+            for _ in range(2):
+                for _ in range(12):
+                    x = x + self.message_input(x, x) * 0.01
+            return x
+
+    model = Loop().eval()
+    x = torch.tensor([[[1.0, 2.0, 3.0, 4.0]]])
+    baseline = model(x)
+    visits = []
+
+    def patch(_module, inputs):
+        visit = len(visits)
+        visits.append(visit)
+        a, b = inputs
+        if visit != message_call_index(2, 12):
+            return None
+        a, b = a.clone(), b.clone()
+        a[0, -1, 0] = 0
+        b[0, -1, 0] = 0
+        return a, b
+
+    handle = model.message_input.register_forward_pre_hook(patch)
+    try:
+        changed = model(x)
+    finally:
+        handle.remove()
+    assert len(visits) == 24
+    assert changed[0, 0, 0] < baseline[0, 0, 0]
+    assert torch.equal(changed[0, 0, 1:], baseline[0, 0, 1:])

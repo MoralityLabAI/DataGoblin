@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from types import SimpleNamespace
 
 import pytest
 
 from datagoblin.training_gym.rlt_gym.nnsight_probe import (
     ProbePlan,
+    _configuration_passes,
+    _trace_context,
     check_passes,
     run_control_suite,
     sample_random_features,
@@ -107,3 +110,23 @@ def test_actual_nnsight_tiny_recurrent_fixture() -> None:
     assert result["arms"]["sham"]["readout"] == result["arms"]["observe"]["readout"]
     assert result["arms"]["observe"]["configured_passes"] is None
     assert result["verifier_status"] == "unverified"
+
+def test_inkling_runtime_configuration_precedes_wrapper_metadata() -> None:
+    wrapped = SimpleNamespace(
+        config=SimpleNamespace(text_config=SimpleNamespace(loop_num_passes=3)),
+        model=SimpleNamespace(language_model=SimpleNamespace(config=SimpleNamespace(loop_num_passes=5))),
+    )
+    assert _configuration_passes(wrapped) == 5
+    assert _configuration_passes(SimpleNamespace(config=SimpleNamespace(loop_num_passes=3))) == 3
+    assert _configuration_passes(SimpleNamespace(config=SimpleNamespace())) is None
+
+
+def test_base_nnsight_trace_does_not_receive_remote_false() -> None:
+    class TinyWrapper:
+        def trace(self, prompt, **kwargs):
+            assert prompt == "fixture"
+            return kwargs
+
+    model = TinyWrapper()
+    assert _trace_context(model, "fixture", False) == {}
+    assert _trace_context(model, "fixture", True) == {"remote": True}

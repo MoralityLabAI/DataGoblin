@@ -18,6 +18,7 @@ from .nnsight_probe import (
     _configuration_passes,
     _package_version,
     _resolve,
+    _trace_context,
     sample_random_features,
 )
 
@@ -132,7 +133,7 @@ def trace_message_bank(
     message_input = _resolve(model, plan.site_path)
     target_call = message_call_index(plan.intervention_pass, plan.layer_index)
     total_calls = CORE_LENGTH * (plan.expected_passes - 1)
-    with model.trace(prompt, remote=remote) as tracer:
+    with _trace_context(model, prompt, remote) as tracer:
         observations = nnsight.save([])
         for call_index in tracer.iter[:total_calls]:
             bank0, bank1 = message_input.inputs[0][:2]

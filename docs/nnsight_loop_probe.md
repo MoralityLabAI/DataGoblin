@@ -99,7 +99,12 @@ ordinary and OOD tests for confirmation. Include donor identity, sham/random
 controls, prompt hashes and a depth-matched baseline in every causal claim.
 
 The tiny PyTorch recurrent fixture exercises three calls to a shared module
-inside one model.trace, plus same-prompt sham and ablation runs. Its pure
+inside one model.trace, plus same-prompt sham and ablation runs. A separate
+pure-PyTorch forward-hook control exercises all 24 message-bank calls and
+checks a selected pass/layer lesion changes only the targeted coordinate.
+On locally constructed NNsight wrappers, trace() receives no remote keyword;
+only explicitly remote NDIF calls use remote=True. The pass-count check
+reads language_model.config before wrapper metadata. Its pure
 contract tests have no NDIF key, teacher weights or GPU requirement. The
 NNsight integration test is enabled by the interpretability CI job.
 
