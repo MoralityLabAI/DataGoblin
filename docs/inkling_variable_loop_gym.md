@@ -436,6 +436,9 @@ native timings, and total wall time including initialization and retries.
     python -m datagoblin.training_gym.rlt_gym.inkling_live_routes stage --suite <suite> --holdout <holdout-plan> --routes <routes> --prior <earlier-audit> --out <live-requests>
     python -m datagoblin.training_gym.rlt_gym.inkling_live_routes score --suite <suite> --holdout <holdout-plan> --routes <routes> --prior <earlier-audit> --requests <live-requests> --runs <live-captures> --reference <native-eval-02> --out <live-score>
 
+The [live routing report](inkling/live_rlt_routing.md) records the verified
+28-root comparison against fixed three-pass inference.
+
 ### Matched SAE readout perturbation
 
 Screen the same token and core output that the executable will perturb.
