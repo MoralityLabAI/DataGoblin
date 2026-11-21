@@ -472,3 +472,22 @@ The verifier checks each answer and enforces the existing BPD matched-arm
 contract on complete roots. This study supplies a signed SAE intervention
 receipt. Parameter-level VPD and BPD decomposition require their own
 analysis and validation.
+
+### Paired BPD geometry score
+
+Inspect the frozen aligned and orthogonal directions before using the
+two native captures. The trial directory holds `geometry.json` and
+the `aligned` and `orthogonal` trial manifests.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_bpd_pair inspect --trials <geometry-trials>
+    python -m datagoblin.training_gym.rlt_gym.inkling_bpd_pair score --suite <suite> --trials <geometry-trials> --aligned-run <aligned-capture> --orthogonal-run <orthogonal-capture> --out <paired-score>
+
+The score checks the shared checkpoint, runtime, placement, decode
+settings, and prompt plan. It independently verifies both captures and
+uses roots with all four arms in each direction. On each root it
+subtracts the matched-random distance from the component distance to
+the untreated final-pass state. It then compares that excess between
+aligned and orthogonal directions. The same comparison is computed for
+the binary solve verdict. Paired rows record whether the untreated and
+sham replies agreed across both captures. Partial runs report their
+coverage and leave the mean contrast empty until a complete pair exists.
