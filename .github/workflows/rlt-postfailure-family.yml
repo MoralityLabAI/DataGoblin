@@ -1,0 +1,93 @@
+name: RLT family-rescue baseline on new roots
+
+on:
+  push:
+    branches:
+      - research/verifier-postfailure-exit-20261121
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/family_exit_baseline.py"
+      - "tests/unit/test_rlt_gym_family_exit_baseline.py"
+      - ".github/workflows/rlt-postfailure-family.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/family_exit_baseline.py"
+      - "tests/unit/test_rlt_gym_family_exit_baseline.py"
+      - ".github/workflows/rlt-postfailure-family.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  family-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU controls and test runtime
+        run: python -m pip install -e ".[dev]"
+      - name: Test independent family-prior and CAL split custody
+        run: python -m pytest -q tests/unit/test_rlt_gym_family_exit_baseline.py
+      - name: Lint family controller
+        run: >-
+          ruff check src/datagoblin/training_gym/rlt_gym/family_exit_baseline.py
+          tests/unit/test_rlt_gym_family_exit_baseline.py
+      - name: Generate fresh 16-per-family source and full-depth fixed decisions
+        if: github.event_name == 'push'
+        run: |
+          python -m datagoblin rlt-gym make-suite --seed 20261126 --per-family 16 \
+            --out runs/family-stop/suite
+          python -m datagoblin rlt-gym run --suite runs/family-stop/suite \
+            --seeds 7 --training-modes direct --modes direct \
+            --depths 4 --training-depth 4 \
+            --splits train calibration ordinary_test ood_test \
+            --terminal-only --omit-controls --max-wall-seconds 360 \
+            --out runs/family-stop/full
+      - name: Independently replay exact source trajectories
+        if: github.event_name == 'push'
+        run: >-
+          python -m datagoblin rlt-gym replay
+          --suite runs/family-stop/suite --run runs/family-stop/full
+          --out runs/family-stop/replay.json
+      - name: Fit both preregistered CAL-zero models on identical task roots
+        if: github.event_name == 'push'
+        run: |
+          python -m datagoblin.training_gym.rlt_gym.postfailure_exit \
+            --suite runs/family-stop/suite --run runs/family-stop/full \
+            --seed 7 --mode direct --training-mode direct --depth 4 \
+            --max-missed-calibration-rescues 0 \
+            --out runs/family-stop/ridge
+          python -m datagoblin.training_gym.rlt_gym.family_exit_baseline \
+            --suite runs/family-stop/suite --source runs/family-stop/full \
+            --seed 7 --depth 4 --missed-rescue-allowance 0 \
+            --out runs/family-stop/family
+      - name: Print paired policy results without sealed split access
+        if: github.event_name == 'push'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("runs/family-stop")
+          for kind in ("ridge","family"):
+              x=json.loads((root/kind/"report.json").read_text())
+              results=x["evaluations"] if kind=="ridge" else x["evaluation"]
+              for split, panel in results.items():
+                  print(kind,split,{k:(v["solved"],v["verifier_calls"],v["missed_future_rescues"])
+                    for k,v in panel["policies"].items()})
+          PY
+      - name: Retain full source and verifier receipt archive
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: datagoblin-postfailure-family-control-20261126
+          path: runs/family-stop/
+          if-no-files-found: warn
+          retention-days: 14
