@@ -361,16 +361,24 @@ outputs and record both generations on escalated roots.
 
 ### Matched SAE readout perturbation
 
-Freeze the first train-ranked feature admitted by the calibration screen.
-The trial uses fresh ordinary-test roots and perturbs only the last prompt
-token at the final core output. A signed decoder direction opposes the
-training-set contrast. The executable records the realized vector norm.
+Screen the same token and core output that the executable will perturb.
+Pass `--prompts <prompts> --trace <three-pass-trace> --target-pass 3` to
+`inkling_vpd_screen` for the last prompt token at the final core output.
+Use `--target-pass 2` to study propagation into the third pass. Freeze the
+first train-ranked feature admitted by that screen. On fresh ordinary-test
+roots, a signed decoder direction opposes the training-set contrast.
+The executable records the realized vector norm.
 Each root runs untreated, sham, orthogonal matched random, and feature
 arms under identical prompt text and decoding budgets.
 
     python -m datagoblin.training_gym.rlt_gym.inkling_feature_trial stage --suite <suite> --sae <sae> --screened <screen> --out <trial>
     inkling_trace <llama-dir> <gguf> Vulkan1 3 <gpu-layers> <cpu-patterns.txt> <trial/prompts> <run> mmap 192 <trial/deltas>
     python -m datagoblin.training_gym.rlt_gym.inkling_feature_trial score --suite <suite> --trial <trial> --run <run> --out <verified> --native-program-sha256 <executable-sha>
+
+Supply the registered intervention pass after `<trial>/deltas` on the native
+command line. The default is the final pass. A pass-two perturbation keeps
+the decoder at depth three, and its matched comparisons report each arm's
+last-token state distance from untreated at pass three.
 
 The verifier checks each answer and enforces the existing BPD matched-arm
 contract on complete roots. This study supplies a signed SAE intervention

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import math
 from collections import defaultdict
@@ -16,10 +17,36 @@ from datagoblin.serialization import dump_structured
 from .bpd_contract import validate_comparison
 from .inkling import MAX_RESPONSE_BYTES, _decode_candidate, _jsonl, _manifest, _new_dir, _suite_file
 from .inkling_native import _finished_rows
-from .inkling_trace import MAX_TOKENS, SHA256, WIDTH, native_prompt
+from .inkling_trace import MAX_TOKENS, SHA256, WIDTH, boundary_sites, native_prompt
 from .tasks import load_suite, public_task, verify
 
 ARMS = ("untreated", "sham", "matched_random", "component")
+
+
+def _final_pass_states(run: Path, completed: list[dict]) -> dict[str, np.ndarray]:
+    tokens = {row["sample_key"]: str(int(row["prompt_tokens"]) - 1) for row in completed}
+    states = {}
+    if not tokens:
+        return states
+    with (run / "rows.tsv").open(encoding="utf-8", newline="") as index, (
+        run / "activations.f32"
+    ).open("rb") as vectors:
+        for offset, row in enumerate(csv.DictReader(index, delimiter="\t")):
+            key = row["sample_key"]
+            if key not in tokens or row["pass_index"] != "3" or row["token_index"] != tokens[key]:
+                continue
+            if key in states or row["tensor"] != boundary_sites(3)[3]:
+                raise ValueError("invalid final-pass readout trace")
+            vectors.seek(offset * WIDTH * 4)
+            state = np.frombuffer(vectors.read(WIDTH * 4), dtype="<f4")
+            if state.shape != (WIDTH,) or not np.isfinite(state).all():
+                raise ValueError("invalid final-pass activation vector")
+            states[key] = state.astype(np.float64)
+            if states.keys() == tokens.keys():
+                break
+    if states.keys() != tokens.keys():
+        raise ValueError("completed middle-pass trials require final-pass readout states")
+    return states
 
 
 def stage_trial(
@@ -29,8 +56,12 @@ def stage_trial(
         raise ValueError("invalid intervention root budget")
     shortlist_path = screened / "manifest.json"
     shortlist = _manifest(shortlist_path)
-    if shortlist.get("schema_version") != "rlt_gym.inkling_vpd_feature_screen.v1" or shortlist["contrast"] != [1, 3]:
-        raise ValueError("expected a screened first-to-third-pass feature dictionary")
+    if (shortlist.get("schema_version") != "rlt_gym.inkling_vpd_feature_screen.v1"
+            or shortlist["contrast"] not in ([1, 2], [1, 3])):
+        raise ValueError("expected a screened feature contrast ending at core pass two or three")
+    target_pass = shortlist["contrast"][1]
+    if target_pass == 2 and shortlist.get("token_selection") != "last_prefill_token":
+        raise ValueError("middle-pass trials require screening at the intervention token")
     dictionary = sae / "sae_dictionary.npz"
     if sha256_file(dictionary) != shortlist["dictionary_sha256"] or not shortlist["admitted_features"]:
         raise ValueError("intervention needs an admitted feature and its original dictionary")
@@ -86,6 +117,7 @@ def stage_trial(
     fitted = _manifest(sae / "manifest.json")
     result = {
         "schema_version": "rlt_gym.inkling_feature_trial.v1", "feature": feature, "seed": seed,
+        "intervention_pass": target_pass,
         "suite_sha256": sha256_file(suite_file), "selection_receipt_sha256": sha256_file(shortlist_path),
         "donor_receipt_sha256": sha256_file(donor), "dictionary_sha256": sha256_file(dictionary),
         "requested_dose": abs(delta), "rows": rows, "weights_sha256": fitted["weights_sha256"],
@@ -103,9 +135,13 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
             or plan["donor_receipt_sha256"] != sha256_file(trial / "training-contrast.json")):
         raise ValueError("invalid intervention provenance")
     config = _finished_rows(run / "native-config.tsv")
-    if (len(config) != 1 or config[0]["passes"] != "3" or int(config[0]["context"]) != MAX_TOKENS
+    target_pass = plan.get("intervention_pass", 3)
+    if (target_pass not in (2, 3) or len(config) != 1 or config[0]["passes"] != "3"
+            or int(config[0].get("intervention_pass", "3")) != target_pass
+            or int(config[0]["context"]) != MAX_TOKENS
             or not 1 <= int(config[0]["max_new_tokens"]) <= 384):
-        raise ValueError("intervention run did not use the registered three-pass decoder")
+        raise ValueError("intervention run did not use the registered depth and intervention pass")
+    target_site = boundary_sites(3)[target_pass]
     budget = int(config[0]["max_new_tokens"])
     completed = _finished_rows(run / "completed.tsv")
     patched = _finished_rows(run / "interventions.tsv")
@@ -114,6 +150,7 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
     if (len(set(keys)) != len(keys) or observed != keys[:len(observed)]
             or [row["sample_key"] for row in patched][:len(observed)] != observed):
         raise ValueError("intervention receipts do not match completed prompts")
+    final_states = _final_pass_states(run, completed) if target_pass == 2 else {}
     _, suite_tasks = load_suite(suite_file)
     tasks = {task["task_id"]: task for task in suite_tasks}
     rows, grouped = [], defaultdict(dict)
@@ -146,9 +183,9 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
         row = {
             **expected, "verdict": verdict, "reply_sha256": sha256_file(reply), "realized_absolute_dose": dose,
             "prefill_token": int(receipt["prefill_token"]), "checkpoint_sha256": plan["weights_sha256"],
-            "adapter_sha256": native_program_sha256, "readout_site": "l_out-47",
+            "adapter_sha256": native_program_sha256, "readout_site": target_site,
             "operator": "additive_sae_direction", "component": f"sae:{plan['feature']}",
-            "placement": "last_prefill_token", "visit": 2, "planned_depth": 3,
+            "placement": "last_prefill_token", "visit": target_pass - 1, "planned_depth": 3,
             "feedback_mode": "native_inkling", "seed": plan["seed"],
             "donor_receipt_sha256": plan["donor_receipt_sha256"],
         }
@@ -163,6 +200,12 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
         comparison = {"arms": arms, "selection_receipt_sha256": plan["selection_receipt_sha256"],
                       "bpd_mechanism_verified": False}
         validate_comparison(comparison)
+        if final_states:
+            baseline = final_states[arms["untreated"]["sample_key"]]
+            comparison["final_pass_state_l2_vs_untreated"] = {
+                arm: float(np.linalg.norm(final_states[arms[arm]["sample_key"]] - baseline))
+                for arm in ARMS[1:]
+            }
         comparisons.append(comparison)
     _new_dir(out)
     _jsonl(out / "rollouts.jsonl", rows)
@@ -170,6 +213,7 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
     result = {
         "schema_version": "rlt_gym.inkling_feature_trial_score.v1",
         "plan_sha256": sha256_file(trial / "manifest.json"), "feature": plan["feature"],
+        "intervention_pass": target_pass,
         "planned_roots": len(plan["rows"]) // len(ARMS), "matched_roots": len(comparisons), "answers": len(rows),
         "verified_solves": {arm: sum(row["arms"][arm]["verdict"]["passed"] for row in comparisons) for arm in ARMS},
         "reply_changes_vs_untreated": {

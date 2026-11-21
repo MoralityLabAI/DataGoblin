@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -14,6 +15,7 @@ from datagoblin.serialization import dump_structured
 
 from .inkling import _manifest, _new_dir
 from .inkling_sae import _encode, _load_split
+from .inkling_trace import NATIVE_ANSWER, WIDTH, boundary_sites
 
 
 def _root_effects(matrix, rows, encoder, bias, center, top_k, last_pass):
@@ -63,7 +65,44 @@ def _max_stat(oriented: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray, 
     return observed, adjusted, len(signs), exact
 
 
-def screen_features(inputs: Path, sae: Path, out: Path, *, shortlist: int = 16, seed: int = 7) -> dict:
+def _last_token_pairs(prompts: Path, trace: Path, meta: dict, target: int) -> tuple[dict, list[dict]]:
+    prompt_path, trace_path = prompts / "manifest.json", trace / "manifest.json"
+    sealed = _manifest(trace_path)
+    samples = _manifest(prompt_path)["samples"]
+    index, activations = trace / "rows.tsv", trace / "activations.f32"
+    if (sealed["input_format"] != NATIVE_ANSWER or sealed["intervention_applied"]
+            or sealed["passes"] < target or sealed["source_prompt_manifest_sha256"] != sha256_file(prompt_path)
+            or meta["trace_manifest_sha256"] != sha256_file(trace_path)
+            or sha256_file(index) != sealed["files"]["rows.tsv"]
+            or sha256_file(activations) != sealed["files"]["activations.f32"]):
+        raise ValueError("last-token screening requires the unmodified native answer trace")
+    positions = {
+        (row["sample_key"], str(visit)): str(sealed["tokens_by_sample"][row["sample_key"]] - 1)
+        for row in samples for visit in (1, target)
+    }
+    states = {}
+    sites = boundary_sites(sealed["passes"])
+    with index.open(encoding="utf-8", newline="") as rows, activations.open("rb") as vectors:
+        for offset, row in enumerate(csv.DictReader(rows, delimiter="\t")):
+            position = (row["sample_key"], row["pass_index"])
+            if position not in positions or positions[position] != row["token_index"]:
+                continue
+            if position in states or row["tensor"] != sites[int(row["pass_index"])]:
+                raise ValueError("last-token trace has duplicate or mismatched sites")
+            vectors.seek(offset * WIDTH * 4)
+            state = np.frombuffer(vectors.read(WIDTH * 4), dtype="<f4")
+            if state.shape != (WIDTH,) or not np.isfinite(state).all():
+                raise ValueError("last-token trace contains an invalid activation")
+            states[position] = state
+    if states.keys() != positions.keys():
+        raise ValueError("last-token screen requires both visits at every root")
+    return states, samples
+
+
+def screen_features(
+    inputs: Path, sae: Path, out: Path, *, shortlist: int = 16, seed: int = 7,
+    prompts: Path | None = None, trace: Path | None = None, target_pass: int | None = None,
+) -> dict:
     """Fix the feature IDs and signs on train, then screen them on calibration roots."""
     if not 1 <= shortlist <= 64:
         raise ValueError("invalid feature shortlist budget")
@@ -77,13 +116,37 @@ def screen_features(inputs: Path, sae: Path, out: Path, *, shortlist: int = 16, 
     with np.load(dictionary) as weights:
         encoder, bias, center = (weights[label] for label in ("encoder_weight", "encoder_bias", "pre_bias"))
         top_k = int(weights["top_k"])
-    train, train_rows = _load_split(inputs, meta["streams"]["train"], meta["key"], "train")
-    cal, cal_rows = _load_split(inputs, meta["streams"]["calibration"], meta["key"], "calibration")
-    last_pass = max(row["pass_index"] for row in train_rows)
-    if last_pass <= 1 or max(row["pass_index"] for row in cal_rows) != last_pass:
-        raise ValueError("feature screen requires matched first and final core passes")
-    fit, train_pairs = _root_effects(train, train_rows, encoder, bias, center, top_k, last_pass)
-    heldout, cal_pairs = _root_effects(cal, cal_rows, encoder, bias, center, top_k, last_pass)
+    if prompts is None and trace is None and target_pass is None:
+        train, train_rows = _load_split(inputs, meta["streams"]["train"], meta["key"], "train")
+        cal, cal_rows = _load_split(inputs, meta["streams"]["calibration"], meta["key"], "calibration")
+        last_pass = max(row["pass_index"] for row in train_rows)
+        if last_pass <= 1 or max(row["pass_index"] for row in cal_rows) != last_pass:
+            raise ValueError("feature screen requires matched first and final core passes")
+        fit, train_pairs = _root_effects(train, train_rows, encoder, bias, center, top_k, last_pass)
+        heldout, cal_pairs = _root_effects(cal, cal_rows, encoder, bias, center, top_k, last_pass)
+        position_receipt = {"token_selection": "all_paired_prefill_tokens"}
+    else:
+        if prompts is None or trace is None or target_pass not in (2, 3):
+            raise ValueError("last-token screening requires prompts, trace and a target pass of two or three")
+        last_pass = target_pass
+        states, samples = _last_token_pairs(prompts, trace, meta, last_pass)
+        splits = {}
+        for split in ("train", "calibration"):
+            rows = [row for row in samples if row["split"] == split]
+            counts = dict.fromkeys((row["lineage_id"] for row in rows), 1)
+            if len(counts) != len(rows) or len(rows) < 4:
+                raise ValueError("last-token screen requires four distinct roots per split")
+            keys = [row["sample_key"] for row in rows]
+            early = np.stack([states[key, "1"] for key in keys])
+            late = np.stack([states[key, str(last_pass)] for key in keys])
+            effects = _encode(late - center, encoder, bias, top_k) - _encode(early - center, encoder, bias, top_k)
+            splits[split] = (effects.astype(np.float64), counts)
+        fit, train_pairs = splits["train"]
+        heldout, cal_pairs = splits["calibration"]
+        position_receipt = {
+            "token_selection": "last_prefill_token", "position_trace_sha256": meta["trace_manifest_sha256"],
+            "position_prompts_sha256": sha256_file(prompts / "manifest.json"),
+        }
     if min(len(train_pairs), len(cal_pairs)) < 4 or train_pairs.keys() & cal_pairs.keys():
         raise ValueError("the screen requires four disjoint roots per split")
     means = fit.mean(axis=0)
@@ -107,6 +170,7 @@ def screen_features(inputs: Path, sae: Path, out: Path, *, shortlist: int = 16, 
         "permutation_unit": "root", "permutations": permutations, "exact_permutation": exact, "seed": seed,
         "features": features, "admitted_features": [row["feature"] for row in features
                                                    if row["admitted_for_intervention"]],
+        **position_receipt,
         "intervention_applied": False, "bpd_mechanism_verified": False,
     }
     dump_structured(out / "manifest.json", result)
@@ -119,6 +183,9 @@ def main() -> None:
         parser.add_argument(f"--{option}", type=Path, required=True)
     parser.add_argument("--shortlist", type=int, default=16)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--prompts", type=Path)
+    parser.add_argument("--trace", type=Path)
+    parser.add_argument("--target-pass", type=int, choices=(2, 3))
     result = screen_features(**vars(parser.parse_args()))
     print(json.dumps({"admitted_features": result["admitted_features"], "permutations": result["permutations"]}))
 

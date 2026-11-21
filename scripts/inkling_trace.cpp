@@ -35,12 +35,14 @@ struct Trace {
     bool enabled = false;
     std::map<std::string, bool> seen;
     std::vector<float> readout_delta;
+    int intervention_pass;
     int intervention_token = -1;
     double realized_dose = 0.0;
     bool intervention_applied = false;
 
-    Trace(const fs::path &out, int passes)
-        : data(out / "activations.f32", std::ios::binary), index(out / "rows.tsv") {
+    Trace(const fs::path &out, int passes, int target_pass)
+        : data(out / "activations.f32", std::ios::binary), index(out / "rows.tsv"),
+          intervention_pass(target_pass) {
         if (!data || !index) {
             throw std::runtime_error("Could not open trace files");
         }
@@ -74,7 +76,7 @@ static bool observe(ggml_tensor *tensor, bool ask, void *data) {
         const size_t size = block.size() * sizeof(float);
         ggml_backend_tensor_get(tensor, block.data(), 0, size);
         const int cue = trace.intervention_token - trace.offset;
-        if (!trace.readout_delta.empty() && anchor->second == static_cast<int>(trace.anchors.size()) - 1
+        if (!trace.readout_delta.empty() && anchor->second == trace.intervention_pass
                 && cue >= 0 && cue < trace.batch) {
             if (trace.intervention_applied) {
                 throw std::runtime_error("Repeated readout intervention");
@@ -259,16 +261,17 @@ int main(int argc, char **argv) {
         std::cout << "Load mode " << model.load_mode << ", context " << context.n_ctx << '\n';
         return 0;
     }
-    if (argc < 10 || argc > 12) {
+    if (argc < 10 || argc > 13) {
         std::cerr << "Use: inkling_trace RUNTIME GGUF DEVICE PASSES GPU_LAYERS CPU_PATTERNS PROMPTS OUT "
-                  << "mmap|none|direct-io [MAX_NEW_TOKENS [INTERVENTION_DIR]]\n";
+                  << "mmap|none|direct-io [MAX_NEW_TOKENS [INTERVENTION_DIR [INTERVENTION_PASS]]]\n";
         return 2;
     }
     try {
         const int passes = std::stoi(argv[4]);
         const int layers = std::stoi(argv[5]);
         const int new_tokens = argc >= 11 ? std::stoi(argv[10]) : 0;
-        const fs::path intervention_dir = argc == 12 ? fs::path(argv[11]) : fs::path();
+        const fs::path intervention_dir = argc >= 12 ? fs::path(argv[11]) : fs::path();
+        const int intervention_pass = argc == 13 ? std::stoi(argv[12]) : passes;
         const fs::path out = argv[8];
         const std::string load_mode = argv[9];
         const std::map<std::string, llama_load_mode> load_modes = {
@@ -278,7 +281,8 @@ int main(int argc, char **argv) {
         };
         if (passes < 1 || passes > 6 || layers < 0 || layers > 256 || new_tokens < 0 || new_tokens > 384
                 || load_modes.find(load_mode) == load_modes.end() || fs::exists(out)
-                || (!intervention_dir.empty() && (!fs::is_directory(intervention_dir) || !new_tokens))) {
+                || (argc >= 12 && (intervention_dir.empty() || !fs::is_directory(intervention_dir) || !new_tokens
+                    || intervention_pass < 1 || intervention_pass > passes))) {
             throw std::runtime_error("Invalid loop, placement, load mode, or output path");
         }
         std::vector<fs::path> prompts;
@@ -331,7 +335,7 @@ int main(int argc, char **argv) {
         config.n_threads_batch = 3;
         config.n_seq_max = 1;
         fs::create_directories(out);
-        Trace trace(out, passes);
+        Trace trace(out, passes, intervention_pass);
         config.cb_eval = observe;
         config.cb_eval_user_data = &trace;
         std::unique_ptr<llama_context, decltype(&llama_free)> context(
@@ -342,8 +346,9 @@ int main(int argc, char **argv) {
         std::ofstream progress(out / "completed.tsv");
         progress << "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n" << std::flush;
         std::ofstream config_file(out / "native-config.tsv");
-        config_file << "passes\tmax_new_tokens\tcontext\trequested_load_mode\n" << passes << '\t' << new_tokens
-                    << '\t' << CONTEXT << '\t' << load_mode << '\n';
+        config_file << "passes\tmax_new_tokens\tcontext\trequested_load_mode\tintervention_pass\n"
+                    << passes << '\t' << new_tokens << '\t' << CONTEXT << '\t' << load_mode << '\t'
+                    << (intervention_dir.empty() ? 0 : intervention_pass) << '\n';
         config_file.close();
         if (!progress || !config_file) {
             throw std::runtime_error("Could not write native execution metadata");
