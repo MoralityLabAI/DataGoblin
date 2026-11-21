@@ -15,6 +15,7 @@ from datagoblin.training_gym.rlt_gym.external_native_adapters import (
 
 SHA = hashlib.sha256(b"test-only lean certificate").hexdigest()
 MODEL = hashlib.sha256(b"test-only model").hexdigest()
+SOURCE = hashlib.sha256(b"test-only lean source").hexdigest()
 
 
 class FakeLean:
@@ -59,7 +60,7 @@ def test_lean_kernel_and_candidate_menu():
     candidates = ({"id": 1}, {"id": 2})
     ep = {
         "schema_version": SCHEMA, "kind": "lean", "split": "train",
-        "root_id": "fresh_root", "source_revision": "fixture-pinned-lean",
+        "root_id": "fresh_root", "source_revision": SOURCE,
         "model_sha256": MODEL, "verifier_sha256": SHA,
         "source_exposure": "fresh", "evidence_kind": "native_operator_verified",
         "public_task": task, "task_digest": digest(task),
@@ -69,7 +70,8 @@ def test_lean_kernel_and_candidate_menu():
             for i, c in enumerate(candidates)
         ],
     }
-    row = replay_external_episode(ep, checker=checker, trusted_verifier_sha=SHA)
+    row = replay_external_episode(ep, checker=checker, trusted_verifier_sha=SHA,
+        trusted_source_revision=SOURCE, training_authorized=True)
     assert row["future_rescue"] is True
     assert row["cost_until_first_verified_or_budget"] == 2
 
