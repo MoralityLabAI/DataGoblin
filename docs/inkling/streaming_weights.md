@@ -67,22 +67,22 @@ files, tracer, and loaded runtime libraries.
 
 ## Choose a placement and launch
 
-The six-pass core-offload plan requests 85 GPU layers and forces the four
-physical suffix blocks onto CPU. Put this single pattern in the placement
-file for this checkpoint.
+The completed six-pass configuration requests 85 GPU layers and keeps
+physical blocks 0–5 and 20–23 on CPU. Put this single pattern in the
+placement file for this checkpoint.
 
 ```text
-^blk\.(20|21|22|23)\.
+^blk\.([0-5]|2[0-3])\.
 ```
 
 All 12 physical recurrent core layers, blocks 6–17, can then reside on
-the GPU. The RTX 5080 loader measured **12,085 MiB on Vulkan** and
-**4,715 MiB mapped on CPU** with this placement. It streamed exactly
-**12,672,091,648 bytes**. The workstation then reached the system commit
-reserve during context creation, before it finished a rollout. Check
-host commit as well as VRAM when sizing the next placement. For a smaller
-allocation, move additional non-recurrent blocks to CPU and record the
-change as a new placement.
+the GPU. The RTX 5080 loader measured **8,633 MiB on Vulkan** and
+**8,167 MiB mapped on CPU**. It streamed exactly **9,052,198,144 bytes**
+and completed the [14-case holdout batch](six_pass_holdout.md).
+
+An earlier placement kept only blocks 20–23 on CPU. It streamed
+**12,672,091,648 bytes** and reached the system commit reserve during
+context creation. Check host commit as well as VRAM when sizing placement.
 
 Set the two opt-ins in the launcher environment. Use `mmap` as the
 requested mode. Keep context at 1024 for this campaign.
