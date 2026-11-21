@@ -44,9 +44,11 @@ jobs:
           "$HOME/.elan/bin/lean" --version
       - name: Execute real standalone Lean theorem and kernel replay campaign
         run: |
+          REAL_LEAN="$("$HOME/.elan/bin/elan" which lean)"
+          test -f "$REAL_LEAN"
           python -m py_compile src/datagoblin/training_gym/rlt_gym/live_lean_kernel.py
           python -m datagoblin.training_gym.rlt_gym.live_lean_kernel \
-            --lean "$HOME/.elan/bin/lean" --per-split 4 \
+            --lean "$REAL_LEAN" --per-split 8 \
             --out runs/rlt_native_lean
       - name: Archive source roots, proofs and independent receipt audit
         if: always()
