@@ -305,6 +305,13 @@ logical to physical layers for the Inkling loop architecture. Keep the
 existing launch and live resource guards. Run a guarded six-pass check
 and use the rebuilt runtime for every arm in a matched comparison.
 
+On a Windows host with one NVIDIA device, the guarded launcher can use
+`inkling_nvml.WindowsNvmlMonitor` for VRAM, utilization and compute PIDs.
+Reuse one monitor per launch and combine each fresh GPU sample with the
+existing Windows memory counters. An unavailable sample or a five-second
+timeout raises an error. Keep the resource limits and stop the native
+process on a live sampling error.
+
 The pass-0 record is the shared prelude output. The first core pass ends at
 `l_out-17`. Repeated core passes end at logical cache slots 35, 47 and later
 steps of 12 while reusing the original physical weights. The tracer checks
