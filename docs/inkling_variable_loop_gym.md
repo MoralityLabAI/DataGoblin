@@ -118,9 +118,9 @@ source_kind=synthetic_fixture. The scorer refuses these by default. With
 --include-fixtures the rows are retained for engineering tests, visibly
 marked fixture=true and student_training_eligible=false.
 
-The student targets are environment-verified public answers and optional
-public work artifacts, without claims about hidden recurrence or private
-reasoning state. Future activation interventions must use a separately
+The student SFT targets contain only environment-verified answers.
+Optional teacher public steps are retained as attributed, unverified metadata
+rather than training targets. Future activation interventions require a separate
 instrumented native model and donor/sham/random controls.
 
 ## Hill-climb the small recurrent students
