@@ -1,0 +1,339 @@
+"""Synthetic K-depth belief and research-taste gym for verifier-grounded RLT training.
+
+This is a *nested subjective signal-game proxy*, not a claim of realistic theory
+of mind or a neural result. Public policy observations and sealed sampling are
+separate. The independent reference solves expected value with exact Fractions.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import hmac
+import json
+import random
+from collections import defaultdict
+from fractions import Fraction
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+SCHEMA = "datagoblin.hypergame_taste.v1"
+SPLITS = ("train", "calibration", "ordinary_test", "ood_test", "sealed_poison")
+POLICIES = ("bellman", "greedy", "ignore_nested", "forced_probe", "proxy", "random")
+TESTS = (("pilot", Fraction(2, 3), 1), ("replicate", Fraction(9, 10), 2))
+ROLES = ("scout", "reviewer", "rival", "auditor", "committee", "archivist")
+CORRECT, WRONG = 10, -15
+
+
+def _fraction(value: Fraction | str | int) -> str:
+    return str(value)
+
+
+def _json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+
+
+def _digest(value: Any) -> str:
+    return hashlib.sha256(_json(value).encode("utf-8")).hexdigest()
+
+
+def _draw(rng: random.Random, probability: Fraction) -> bool:
+    return rng.randrange(probability.denominator) < probability.numerator
+
+
+def generate(depth: int, split: str, rng: random.Random, ordinal: int) -> tuple[dict, dict]:
+    """Build a private world and the strictly predecision public observation."""
+    if depth < 0 or depth > 16 or split not in SPLITS:
+        raise ValueError("K must be 0..16 and split must be registered")
+    prior = rng.choice((Fraction(1, 3), Fraction(1, 2), Fraction(2, 3)))
+    truth = int(_draw(rng, prior))
+    base_accuracy = rng.choice((Fraction(3, 4), Fraction(4, 5)))
+    report = truth if _draw(rng, base_accuracy) else 1 - truth
+    layers = []
+    for layer in range(depth):
+        accuracy = rng.choice((Fraction(3, 5), Fraction(2, 3), Fraction(3, 4))) if split == "ood_test" else (
+            rng.choice((Fraction(2, 3), Fraction(3, 4), Fraction(4, 5)))
+        )
+        invert = bool(rng.getrandbits(1))
+        report = (report ^ int(invert)) if _draw(rng, accuracy) else (report ^ int(invert) ^ 1)
+        layers.append({
+            "role": f"{ROLES[layer % len(ROLES)]}_{layer + 1}",
+            "belief_about": "origin" if layer == 0 else layers[-1]["role"],
+            "inverts_earlier_endorsement": invert,
+            "fidelity": _fraction(accuracy),
+            "subjective_game": "challenge the previous actor" if invert else "defend the previous actor",
+        })
+    budget = rng.choice((2, 3, 4))
+    turns = rng.choice((2, 3))
+    public = {
+        "schema": SCHEMA, "scenario": "research-council-with-nested-subjective-beliefs",
+        "question": "Which of hypotheses H0 and H1 is supported, and which experiment is worth its cost?",
+        "K": depth, "prior_h1": _fraction(prior), "base_sensor_fidelity": _fraction(base_accuracy),
+        "nested_views": layers, "outer_endorsement": report,
+        "available_experiments": [
+            {"action": name, "fidelity": _fraction(accuracy), "cost": cost}
+            for name, accuracy, cost in TESTS
+        ],
+        "credits": budget, "turn_limit": turns,
+        "payoffs": {"correct_publication": CORRECT, "wrong_publication": WRONG, "abstain": 0},
+        "response_contract": "Choose one legal action; experiment results become visible at the next visit.",
+    }
+    # The identifier binds the public observation; the ordinal prevents accidental
+    # reuse of equivalent visible scenarios within one frozen run.
+    root = hashlib.sha256(f"{_digest(public)}:{ordinal}:{split}".encode()).hexdigest()
+    stream = {
+        name: [truth if _draw(rng, accuracy) else 1 - truth for _ in range(turns)]
+        for name, accuracy, _ in TESTS
+    }
+    private = {"root": root, "truth_h1": truth, "test_outcomes": stream}
+    return {"root": root, "split": split, "public": public}, private
+
+
+def posterior(public: dict, observations: list[dict] | tuple = (), *, ignore_nested: bool = False) -> Fraction:
+    """Exact Bayes update from the visible outer report and observed experiments."""
+    p = Fraction(public["prior_h1"])
+    fidelity = Fraction(public["base_sensor_fidelity"])
+    inverted = False
+    if not ignore_nested:
+        for layer in public["nested_views"]:
+            fidelity = (1 + (2 * fidelity - 1) * (2 * Fraction(layer["fidelity"]) - 1)) / 2
+            inverted ^= layer["inverts_earlier_endorsement"]
+    signal = public["outer_endorsement"] ^ int(inverted)
+    p = _bayes(p, fidelity, signal)
+    tests = {name: accuracy for name, accuracy, _ in TESTS}
+    for result in observations:
+        p = _bayes(p, tests[result["experiment"]], result["result"])
+    return p
+
+
+def _bayes(p: Fraction, accuracy: Fraction, signal: int) -> Fraction:
+    likelihood_one = accuracy if signal == 1 else 1 - accuracy
+    likelihood_zero = 1 - likelihood_one
+    numerator = p * likelihood_one
+    denominator = numerator + (1 - p) * likelihood_zero
+    if denominator == 0:
+        raise ValueError("impossible observation")
+    return numerator / denominator
+
+
+def _experiment_result(p: Fraction, accuracy: Fraction) -> tuple[Fraction, Fraction, Fraction, Fraction]:
+    prob_one = p * accuracy + (1 - p) * (1 - accuracy)
+    prob_zero = 1 - prob_one
+    after_one = p * accuracy / prob_one if prob_one else p
+    after_zero = p * (1 - accuracy) / prob_zero if prob_zero else p
+    return prob_one, after_one, prob_zero, after_zero
+
+
+@lru_cache(maxsize=200_000)
+def q_values(p: Fraction, credits: int, turns: int) -> tuple[tuple[str, Fraction], ...]:
+    """Independent Bayes/Bellman values. Returned order fixes ties."""
+    if credits < 0 or turns < 1:
+        raise ValueError("invalid finite horizon")
+    options = [
+        ("abstain", Fraction(0)),
+        ("submit_0", (1 - p) * CORRECT + p * WRONG),
+        ("submit_1", p * CORRECT + (1 - p) * WRONG),
+    ]
+    if turns > 1:
+        for name, accuracy, cost in TESTS:
+            if credits >= cost:
+                prob_one, p_one, prob_zero, p_zero = _experiment_result(p, accuracy)
+                future = prob_one * optimal_value(p_one, credits - cost, turns - 1)
+                future += prob_zero * optimal_value(p_zero, credits - cost, turns - 1)
+                options.append((name, future - cost))
+    return tuple(options)
+
+
+def optimal_value(p: Fraction, credits: int, turns: int) -> Fraction:
+    return max(value for _, value in q_values(p, credits, turns))
+
+
+def best_action(p: Fraction, credits: int, turns: int) -> str:
+    q = q_values(p, credits, turns)
+    maximum = max(v for _, v in q)
+    return next(action for action, value in q if value == maximum)
+
+
+def choose(policy: str, public: dict, observations: list[dict],
+           credits: int, turns: int, rng: random.Random) -> str:
+    p = posterior(public, observations, ignore_nested=(policy == "ignore_nested"))
+    options = q_values(p, credits, turns)
+    if policy in {"bellman", "ignore_nested"}:
+        return best_action(p, credits, turns)
+    if policy == "random":
+        return rng.choice([name for name, _ in options])
+    if policy == "proxy":
+        return f"submit_{public['outer_endorsement']}"
+    if policy == "forced_probe" and turns > 1 and credits >= 1:
+        return "pilot"
+    terminals = options[:3]
+    return max(terminals, key=lambda pair: pair[1])[0]
+
+
+def rollout(task: dict, sealed: dict, policy: str) -> dict:
+    """Matched-world simulation. Grader labels are recorded after each choice."""
+    if policy not in POLICIES or task["root"] != sealed["root"]:
+        raise ValueError("unknown policy or mismatched sealed world")
+    public = task["public"]
+    credits, turns = public["credits"], public["turn_limit"]
+    observations: list[dict] = []
+    used: dict[str, int] = defaultdict(int)
+    events = []
+    spent = 0
+    rng = random.Random(int(_digest({"root": task["root"], "policy": policy})[:16], 16))
+    while turns > 0:
+        p = posterior(public, observations)
+        values = dict(q_values(p, credits, turns))
+        action = choose(policy, public, observations, credits, turns, rng)
+        if action not in values:
+            raise ValueError("policy chose an illegal action")
+        best = max(values.values())
+        event = {
+            "before": {"history": list(observations), "credits": credits, "turns_left": turns},
+            "proposal": action, "post_choice_oracle_values": {k: str(v) for k, v in values.items()},
+            "post_choice_regret": str(best - values[action]),
+            "oracle_preferred": best_action(p, credits, turns),
+        }
+        if action in {"pilot", "replicate"}:
+            cost = next(c for name, _, c in TESTS if name == action)
+            answer = sealed["test_outcomes"][action][used[action]]
+            used[action] += 1
+            observations.append({"experiment": action, "result": answer})
+            event["experiment_observation"] = answer
+            credits -= cost
+            spent += cost
+            events.append(event)
+            turns -= 1
+            continue
+        success = action == f"submit_{sealed['truth_h1']}"
+        utility = (CORRECT if success else WRONG) if action != "abstain" else 0
+        events.append(event)
+        break
+    else:
+        action, success, utility = "abstain", False, 0
+    return {
+        "schema": SCHEMA, "root": task["root"], "split": task["split"], "K": public["K"],
+        "policy": policy, "events": events, "terminal": action, "correct_publication": success,
+        "realized_utility": utility - spent, "verifier_calls": len(events),
+        "total_research_cost": spent, "evidence_class": "synthetic_exact_oracle",
+    }
+
+
+def fork_rows(task: dict, row: dict) -> list[dict]:
+    """Outcome-blind exact preferences at each visited decision point."""
+    public = task["public"]
+    forks = []
+    for i, step in enumerate(row["events"]):
+        values = {key: Fraction(value) for key, value in step["post_choice_oracle_values"].items()}
+        preferred = step["oracle_preferred"]
+        for candidate, score in values.items():
+            if score < values[preferred]:
+                forks.append({
+                    "schema": SCHEMA, "root": task["root"], "K": public["K"],
+                    "step": i, "public": public, "context": step["before"],
+                    "preferred_action": preferred, "dispreferred_action": candidate,
+                    "expected_regret": str(values[preferred] - score),
+                    "source_policy": row["policy"], "evidence_class": "synthetic_exact_oracle",
+                    "split": "train",
+                })
+    return forks
+
+
+def _write_jsonl(path: Path, rows: list[dict]) -> str:
+    with path.open("x", encoding="utf-8", newline="\n") as output:
+        for item in rows:
+            output.write(_json(item) + "\n")
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def collect(out: Path, *, depths: tuple[int, ...] = (0, 1, 2, 4, 8),
+            per_cell: int = 16, seed: int = 23, private_seed_file: Path | None = None) -> dict:
+    """Freeze cases, run paired controls, emit train-only preference forks."""
+    if out.exists() or per_cell < 1 or per_cell > 10_000 or len(set(depths)) != len(depths):
+        raise ValueError("output must be fresh; per-cell must be 1..10000; depths must be unique")
+    if not depths or any(k < 0 or k > 16 for k in depths):
+        raise ValueError("depths must be in 0..16")
+    key = private_seed_file.read_bytes() if private_seed_file else None
+    if key is not None and len(key) < 16:
+        raise ValueError("private seed file must contain at least 16 bytes")
+    out.mkdir(parents=True)
+    public_rows, sealed_rows, traces, forks, requests = [], [], [], [], []
+    metrics: dict[tuple[str, int, str], list[dict]] = defaultdict(list)
+    seen = set()
+    for split in SPLITS:
+        for depth in depths:
+            for ordinal in range(per_cell):
+                selector = f"{split}:{depth}:{ordinal}"
+                material = (
+                    hmac.new(key, selector.encode(), hashlib.sha256).digest() if key is not None
+                    else hashlib.sha256(f"{seed}:{selector}".encode()).digest()
+                )
+                rng = random.Random(int.from_bytes(material, "big"))
+                task, sealed = generate(depth, split, rng, ordinal)
+                if task["root"] in seen:
+                    raise AssertionError("duplicate task lineage")
+                seen.add(task["root"])
+                public_rows.append(task)
+                sealed_rows.append(sealed)
+                if split == "train":
+                    requests.append({
+                        "request_id": task["root"], "public": task["public"],
+                        "visible_history": [], "answer_format": {"action": "one legal action"},
+                    })
+                for policy in POLICIES:
+                    row = rollout(task, sealed, policy)
+                    traces.append(row)
+                    metrics[(split, depth, policy)].append(row)
+                    if split == "train":
+                        forks.extend(fork_rows(task, row))
+    artifacts = {}
+    for name, rows in (
+        ("public_tasks.jsonl", public_rows), ("private_sealed.jsonl", sealed_rows),
+        ("rollouts_scored.jsonl", traces), ("train_forks.jsonl", forks),
+        ("train_teacher_requests.jsonl", requests),
+    ):
+        artifacts[name] = {"rows": len(rows), "sha256": _write_jsonl(out / name, rows)}
+    cells = [
+        {
+            "split": split, "K": depth, "policy": policy, "episodes": len(rows),
+            "correct_publications": sum(row["correct_publication"] for row in rows),
+            "verifier_calls": sum(row["verifier_calls"] for row in rows),
+            "mean_true_utility": sum(row["realized_utility"] for row in rows) / len(rows),
+            "mean_research_cost": sum(row["total_research_cost"] for row in rows) / len(rows),
+            "initial_action_regret": str(sum(
+                Fraction(row["events"][0]["post_choice_regret"]) for row in rows
+            ) / len(rows)),
+        }
+        for (split, depth, policy), rows in sorted(metrics.items())
+    ]
+    manifest = {
+        "schema": SCHEMA, "profile": "private_seeded" if key is not None else "public_seed_smoke",
+        "seed_commitment": hashlib.sha256(key).hexdigest() if key is not None else None,
+        "K_values": list(depths), "per_depth_per_split": per_cell, "splits": list(SPLITS),
+        "policies": list(POLICIES), "artifacts": artifacts, "cells": cells,
+        "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "architecture_promotion_eligible": False,
+        "holdout_rule": "train_forks and train_teacher_requests contain training roots only",
+        "visibility": "rollouts_scored and private_sealed are evaluation-owned; never send to a teacher",
+    }
+    (out / "manifest.json").write_text(_json(manifest) + "\n", encoding="utf-8")
+    return manifest
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--seed", type=int, default=23)
+    parser.add_argument("--per-cell", type=int, default=16)
+    parser.add_argument("--depths", type=int, nargs="+", default=[0, 1, 2, 4, 8])
+    parser.add_argument("--private-seed-file", type=Path)
+    args = parser.parse_args()
+    manifest = collect(
+        args.out, seed=args.seed, per_cell=args.per_cell,
+        depths=tuple(args.depths), private_seed_file=args.private_seed_file,
+    )
+    print(_json({"profile": manifest["profile"], "artifacts": manifest["artifacts"]}))
+
+
+if __name__ == "__main__":
+    main()
