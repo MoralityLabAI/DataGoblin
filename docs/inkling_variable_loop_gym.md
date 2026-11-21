@@ -289,6 +289,9 @@ the `llama` target against the matching portable GGML build. Set
 confirm the loader reports that it disabled prefetch. Record the loaded
 `llama.dll` digest alongside the backend archive digest on each arm.
 
+For the full Windows build and launch procedure, see
+[Streaming Inkling variable-loop Q4 weights](inkling/streaming_weights.md).
+
 If device upload still fills the workstation's file cache, apply
 `scripts/inkling_stream_gpu_weights.patch` after the no-prefetch patch
 using `git apply --unidiff-zero` at the pinned revision. Rebuild
