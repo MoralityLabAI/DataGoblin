@@ -14,6 +14,7 @@ This directory records the proposed **Data Goblin Aleph 1B** architecture and an
 - [Compute assumptions and 700 H100-hour envelope](estimates/README.md).
 - [Runnable analytical compute model](estimates/aleph_compute.py).
 - [Experiment protocol and gates](aleph_protocol.md).
+- [RLT gym collection for the compact learner](rlt_gym/README.md). Executable CPU controls, teacher repair queues, and checked training exports.
 - [Source artifact manifest](SOURCES.md).
 
 The existing project machinery is in [`docs/training_gym.md`](../docs/training_gym.md), [`docs/hrm_text_milestone.md`](../docs/hrm_text_milestone.md), and [`docs/model_training_roadmap.md`](../docs/model_training_roadmap.md). The training gym currently runs offline deterministic scaffolding; real architecture promotion and 1B training are unverified.

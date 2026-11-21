@@ -1,0 +1,72 @@
+name: Inkling variable-loop distillation gym
+
+on:
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/**"
+      - "tests/unit/test_rlt_gym_inkling.py"
+      - "tests/unit/test_rlt_gym_nnsight_probe.py"
+      - "tests/unit/test_rlt_gym_nnsight_message_bank.py"
+      - "tests/unit/test_rlt_gym_nnsight_verification.py"
+      - "scripts/inkling_ndif*.py"
+      - ".github/workflows/inkling-varloop-gym.yml"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package and test tools
+        run: python -m pip install -e ".[dev]"
+      - name: Test verified depth-pair distillation and pass-aware receipts
+        run: python -m pytest -q tests/unit/test_rlt_gym_inkling.py tests/unit/test_rlt_gym_nnsight_probe.py tests/unit/test_rlt_gym_nnsight_message_bank.py tests/unit/test_rlt_gym_nnsight_verification.py
+      - name: Lint gym and NDIF scripts
+        run: ruff check src/datagoblin/training_gym/rlt_gym/inkling*.py src/datagoblin/training_gym/rlt_gym/nnsight_probe.py src/datagoblin/training_gym/rlt_gym/nnsight_message_bank.py src/datagoblin/training_gym/rlt_gym/nnsight_verification.py tests/unit/test_rlt_gym_inkling.py tests/unit/test_rlt_gym_nnsight_probe.py scripts/inkling_ndif*.py
+      - name: Stage public fixture with no GPU or network
+        run: |
+          python -m datagoblin rlt-gym make-suite --seed 7 --per-family 1 --out runs/inkling-ci/suite
+          python -m datagoblin.training_gym.rlt_gym.inkling stage \
+            --suite runs/inkling-ci/suite --out runs/inkling-ci/stage \
+            --passes 1 3 --max-tasks 7
+          python -m datagoblin.training_gym.rlt_gym.inkling capture \
+            --stage runs/inkling-ci/stage --out runs/inkling-ci/not-created \
+            --passes 1 --server-loop-passes 1 --dry-run
+      - name: Retain fixture request receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: inkling-gym-fixture
+          path: runs/inkling-ci/
+          if-no-files-found: warn
+          retention-days: 7
+
+  nnsight-pytorch-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install optional NNsight integration
+        run: python -m pip install -e ".[dev,interpretability]"
+      - name: Exercise real three-pass recurrent PyTorch fixture
+        run: python -m pytest -q tests/unit/test_rlt_gym_nnsight_probe.py tests/unit/test_rlt_gym_nnsight_message_bank.py tests/unit/test_rlt_gym_nnsight_verification.py
