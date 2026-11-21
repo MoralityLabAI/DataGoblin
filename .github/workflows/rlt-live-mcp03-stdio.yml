@@ -1,0 +1,69 @@
+name: RLT live MCP03 stdio state-effect verifier
+
+on:
+  push:
+    branches:
+      - research/native-lean-mcp-rlt-20261122
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/live_mcp03_eval.py"
+      - "tests/unit/test_rlt_gym_live_native_eval.py"
+      - ".github/workflows/rlt-live-mcp03-stdio.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/live_mcp03_eval.py"
+      - "tests/unit/test_rlt_gym_live_native_eval.py"
+      - ".github/workflows/rlt-live-mcp03-stdio.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-stdio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin and test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Check frozen source effects and safe symbol labels
+        run: python -m pytest -q tests/unit/test_rlt_gym_live_native_eval.py
+      - name: Fetch pinned HybridTRMLDT MCP-03 code into isolated checkout
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dg-hybrid-mcp03
+          git -C /tmp/dg-hybrid-mcp03 init -q
+          git -C /tmp/dg-hybrid-mcp03 remote add origin https://github.com/MoralityLabAI/HybridTRMLDT.git
+          git -C /tmp/dg-hybrid-mcp03 fetch -q --depth=1 origin \
+            7e90a2d446dbb2f994a33632350e7219bdee1ba4
+          git -C /tmp/dg-hybrid-mcp03 checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/dg-hybrid-mcp03 rev-parse HEAD)" = \
+            "7e90a2d446dbb2f994a33632350e7219bdee1ba4"
+      - name: Execute actual MCP JSON-RPC stdio tool calls and independent symbol judge
+        if: github.event_name == 'push'
+        run: |
+          timeout --signal=TERM --kill-after=15s 750s \
+            python -m datagoblin.training_gym.rlt_gym.live_mcp03_eval \
+            --hybrid-root /tmp/dg-hybrid-mcp03 --roots-per-split 3 \
+            --out runs/live-mcp03
+      - name: Lint native MCP and Lean checkers
+        run: >-
+          ruff check src/datagoblin/training_gym/rlt_gym/live_mcp03_eval.py
+          src/datagoblin/training_gym/rlt_gym/live_lean_exit_eval.py
+          tests/unit/test_rlt_gym_live_native_eval.py
+      - name: Retain real JSON-RPC tool, corpus and source snapshot receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-mcp03-live-stdio-roots
+          path: runs/live-mcp03/
+          if-no-files-found: warn
+          retention-days: 21
