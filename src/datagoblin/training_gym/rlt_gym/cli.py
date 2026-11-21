@@ -92,9 +92,33 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     bonsai.add_argument("--max-goals", type=int, default=4)
     bonsai.add_argument("--attempts", type=int, default=4, help="Equal attempt budget per goal and arm")
     bonsai.add_argument("--request-timeout", type=float, help="Seconds per call (HTTP: 30, direct: 120)")
+    harness = commands.add_parser("lean-harness", help="Replay Lean-CGRT with automation-first local model policies")
+    harness.add_argument("--states", type=Path, required=True, help="Lean-CGRT states.jsonl.gz receipt")
+    harness.add_argument("--states-sha256", required=True)
+    harness.add_argument("--contexts", type=Path, help="Original Lean-CGRT split traces directory")
+    harness.add_argument("--encoder-sha256", help="Sampled goal encoder digest from the original eval.json")
+    harness.add_argument("--aleph-port", type=int, help="Local ALEPH-1B OpenAI-compatible endpoint port")
+    harness.add_argument("--aleph-model", default="aleph-1b")
+    harness.add_argument("--bonsai-port", type=int, help="Local Bonsai 27B OpenAI-compatible endpoint port")
+    harness.add_argument("--bonsai-model", default="bonsai-27b-ptq1")
+    harness.add_argument("--max-goals", type=int, default=600)
+    harness.add_argument("--request-timeout", type=float, default=30)
+    harness.add_argument("--out", type=Path, required=True)
 
 
 def dispatch(args: argparse.Namespace) -> dict[str, Any]:
+    if args.rlt_command == "lean-harness":
+        from .lean_harness import LocalChat, run
+
+        model_ports = {"aleph": (args.aleph_port, args.aleph_model), "bonsai": (args.bonsai_port, args.bonsai_model)}
+        models = {name: LocalChat(port, model, args.request_timeout)
+                  for name, (port, model) in model_ports.items() if port is not None}
+        return run(
+            args.states, args.out, expected_sha256=args.states_sha256, max_goals=args.max_goals,
+            models=models, model_ids={name: backend.model for name, backend in models.items()},
+            context_dir=args.contexts, encoder_sha256=args.encoder_sha256,
+        )
+
     if args.rlt_command == "lean-bonsai":
         from .lean_bonsai import run_lean_bonsai
 
