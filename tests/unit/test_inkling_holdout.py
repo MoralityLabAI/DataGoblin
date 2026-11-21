@@ -9,6 +9,12 @@ from datagoblin.hashing import sha256_file
 from datagoblin.serialization import canonical_json, dump_structured
 from datagoblin.training_gym.rlt_feedback import MODES
 from datagoblin.training_gym.rlt_gym.inkling_holdout import score_holdout
+from datagoblin.training_gym.rlt_gym.inkling_prompt_router import (
+    FEATURE_WIDTH,
+    STUDENT_SCHEMA,
+    replay_prompt_routes,
+    stage_prompt_routes,
+)
 from datagoblin.training_gym.rlt_gym.inkling_trace import NATIVE_ANSWER, WIDTH, native_prompt
 from datagoblin.training_gym.rlt_gym.runner import read_jsonl
 from datagoblin.training_gym.rlt_gym.tasks import load_suite, public_task, reference_answer, write_suite
@@ -111,6 +117,23 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
     assert routing["prelude_sha256"] == sha256_file(runs / "batch-01/p01/raw/activations.f32")
     assert routing["prompt_sha256"] == row["prompt_sha256"]
     assert read_jsonl(out / "routing.jsonl")[1]["lineage_id"] == ood["lineage_id"]
+    student = tmp_path / "prompt-student"
+    student.mkdir()
+    model = student / "student.npz"
+    np.savez(model, weight=np.zeros(FEATURE_WIDTH + 1), center=np.zeros(FEATURE_WIDTH + 1),
+             intercept=2.0, threshold=1.5)
+    dump_structured(student / "manifest.json", {
+        "schema_version": STUDENT_SCHEMA, "suite_sha256": sha256_file(suite_file),
+        "teacher_policy_sha256": sha256_file(policy), "teacher_trace_sha256": sha256_file(trace),
+        "train_roots": [row["lineage_id"] for row in train], "calibration_roots": [],
+        "student_sha256": sha256_file(model),
+    })
+    routes = tmp_path / "prompt-routes"
+    assert stage_prompt_routes(suite, holdout, student, routes)["three_pass_roots"] == 2
+    replay = replay_prompt_routes(routes, out, tmp_path / "prompt-replay")
+    selected = replay["results"]["all"]["student"]
+    assert selected["roots"] == 1 and selected["verified_correct"] == 1 and selected["model_calls"] == 1
+    assert selected["layer_visit_token_proxy"] == 48 * 12
     path.write_text("mutated prompt", encoding="utf-8")
     with pytest.raises(ValueError, match="differs from its original"):
         score_holdout(suite, holdout, runs, reference, fit_prompts, tmp_path / "rejected")

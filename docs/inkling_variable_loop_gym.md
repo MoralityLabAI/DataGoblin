@@ -397,6 +397,15 @@ replay uses only the one-pass prelude state to choose a depth and
 charges both generations when it restarts at three. Test results are
 held in the evaluation audit.
 
+A smaller prompt router can learn the RLT selector's scores from the sealed
+training and calibration traces. Freeze its choices from public prompts
+before model execution. The replay charges one chosen native generation
+per paired root and reports checker calls for those outputs.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_prompt_router fit --suite <suite> --holdout <holdout-plan> --reference <native-eval-02> --fit-prompts <fitting-prompts> --out <student>
+    python -m datagoblin.training_gym.rlt_gym.inkling_prompt_router stage --suite <suite> --holdout <holdout-plan> --student <student> --out <routes>
+    python -m datagoblin.training_gym.rlt_gym.inkling_prompt_router replay --routes <routes> --audit <native-audit> --out <replay>
+
 ### Matched SAE readout perturbation
 
 Screen the same token and core output that the executable will perturb.
