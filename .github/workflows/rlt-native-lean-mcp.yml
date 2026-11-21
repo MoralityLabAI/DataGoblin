@@ -1,0 +1,95 @@
+name: RLT live Lean kernel and MCP-03 state-effect controls
+
+on:
+  push:
+    branches:
+      - research/live-lean-mcp-postfailure-20261122
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/live_lean_kernel.py"
+      - "src/datagoblin/training_gym/rlt_gym/live_mcp03.py"
+      - ".github/workflows/rlt-native-lean-mcp.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/live_lean_kernel.py"
+      - "src/datagoblin/training_gym/rlt_gym/live_mcp03.py"
+      - ".github/workflows/rlt-native-lean-mcp.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-lean4-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin offline verifier
+        run: python -m pip install -e ".[dev]"
+      - name: Pin and install actual Lean 4 compiler
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            --output /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.12.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - name: Execute real standalone Lean theorem and kernel replay campaign
+        run: |
+          python -m py_compile src/datagoblin/training_gym/rlt_gym/live_lean_kernel.py
+          python -m datagoblin.training_gym.rlt_gym.live_lean_kernel \
+            --lean "$HOME/.elan/bin/lean" --per-split 4 \
+            --out runs/rlt_native_lean
+      - name: Archive source roots, proofs and independent receipt audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-native-lean4-postfailure
+          path: runs/rlt_native_lean/
+          if-no-files-found: warn
+          retention-days: 14
+
+  live-mcp03-tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: MoralityLabAI/HybridTRMLDT
+          ref: 7e90a2d446dbb2f994a33632350e7219bdee1ba4
+          path: external/hybrid
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin and verify pinned MCP-03 source commit
+        run: |
+          test "$(git -C external/hybrid rev-parse HEAD)" = "7e90a2d446dbb2f994a33632350e7219bdee1ba4"
+          python -m pip install -e ".[dev]"
+      - name: Run real MCP-03 tool server surface and private gold-symbol judge
+        env:
+          PYTHONPATH: "${{ github.workspace }}/external/hybrid"
+        run: |
+          python -m py_compile src/datagoblin/training_gym/rlt_gym/live_mcp03.py
+          python -m datagoblin.training_gym.rlt_gym.live_mcp03 \
+            --per-split 8 --out runs/rlt_native_mcp03
+      - name: Archive genuine tool effects and source-replay audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-native-mcp03-postfailure
+          path: runs/rlt_native_mcp03/
+          if-no-files-found: warn
+          retention-days: 14
