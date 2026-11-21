@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -213,6 +214,19 @@ def run(executable: Path, out: Path, *, per_split: int = 8) -> dict[str, Any]:
         tool_calls = session.calls
         kernel_calls = session.kernel_replays
         tool_seconds = session.seconds
+        certified = {
+            step["verification"]["evidence"]["kernel_session_sid"]
+            for ep in roots for step in ep["attempts"]
+            if step["verification"]["passed"]
+        }
+        proof_dir = out / "certified_proofs"
+        proof_dir.mkdir()
+        proof_sources = {}
+        for sid in sorted(certified):
+            source, _name = session.proof_by_sid[sid]
+            target = proof_dir / source.name
+            shutil.copyfile(source, target)
+            proof_sources[target.relative_to(out).as_posix()] = _sha(target)
     # A dead proof family is a broken harness positive control.
     by_case: dict[str, dict[str, int]] = {}
     for ep in roots:
@@ -256,6 +270,8 @@ def run(executable: Path, out: Path, *, per_split: int = 8) -> dict[str, Any]:
         "actual_lean_compilations": tool_calls + kernel_calls,
         "model_tactic_policy": "fixed synthetic menu, no learned proof selection",
         "kernel_replays": kernel_calls, "total_compiler_seconds": tool_seconds,
+        "certified_proofs_retained": len(proof_sources),
+        "certified_proof_source_sha256": proof_sources,
         "elapsed_seconds": round(time.perf_counter() - started, 4),
         "file_sha256": {
             name: _sha(out / name) for name in ("source_episodes.jsonl", "verified_rows.jsonl")
