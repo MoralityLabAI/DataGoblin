@@ -275,6 +275,12 @@ runtime device name and put the matching DLL directory on `PATH`.
 
     inkling_trace <llama-dir> <gguf> Vulkan1 3 <gpu-layers> <cpu-patterns.txt> <prompts> <trace> mmap
 
+The runner also accepts `direct-io`, which requests unbuffered reads and
+avoids the memory-mapped loader's whole-file prefetch. It requires commit
+headroom for the CPU buffers and still uses the same host and GPU memory
+guards. The native config records the requested mode. Check the llama.cpp
+load log for actual direct I/O and any fallback to buffered reads.
+
 The pass-0 record is the shared prelude output. The first core pass ends at
 `l_out-17`. Repeated core passes end at logical cache slots 35, 47 and later
 steps of 12 while reusing the original physical weights. The tracer checks
@@ -345,6 +351,11 @@ training outcomes. On calibration, replay the selected depth against the
 already observed outcomes and compare it with both fixed-depth policies.
 The recorded layer-visit token measure is an analytical cost proxy. The
 selector replay does not include a live deployment of the prelude router.
+For a policy that runs depth one and restarts selected prompts at depth
+three, charge the observed depth-one work on every root plus the full
+depth-three work on escalated roots. Compare that total with both fixed
+depths. If routing precedes verification, count checker calls on the chosen
+outputs and record both generations on escalated roots.
 
     python -m datagoblin.training_gym.rlt_gym.inkling_routing --prompts <prompts> --trace <three-pass-trace> --sae <sae> --heads <heads> --train <verified-train> --calibration <verified-calibration> --out <routing>
 

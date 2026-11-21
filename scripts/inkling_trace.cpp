@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
     }
     if (argc < 10 || argc > 12) {
         std::cerr << "Use: inkling_trace RUNTIME GGUF DEVICE PASSES GPU_LAYERS CPU_PATTERNS PROMPTS OUT "
-                  << "mmap|none [MAX_NEW_TOKENS [INTERVENTION_DIR]]\n";
+                  << "mmap|none|direct-io [MAX_NEW_TOKENS [INTERVENTION_DIR]]\n";
         return 2;
     }
     try {
@@ -271,8 +271,13 @@ int main(int argc, char **argv) {
         const fs::path intervention_dir = argc == 12 ? fs::path(argv[11]) : fs::path();
         const fs::path out = argv[8];
         const std::string load_mode = argv[9];
+        const std::map<std::string, llama_load_mode> load_modes = {
+            {"mmap", LLAMA_LOAD_MODE_MMAP},
+            {"none", LLAMA_LOAD_MODE_NONE},
+            {"direct-io", LLAMA_LOAD_MODE_DIRECT_IO},
+        };
         if (passes < 1 || passes > 6 || layers < 0 || layers > 256 || new_tokens < 0 || new_tokens > 384
-                || (load_mode != "mmap" && load_mode != "none") || fs::exists(out)
+                || load_modes.find(load_mode) == load_modes.end() || fs::exists(out)
                 || (!intervention_dir.empty() && (!fs::is_directory(intervention_dir) || !new_tokens))) {
             throw std::runtime_error("Invalid loop, placement, load mode, or output path");
         }
@@ -309,7 +314,7 @@ int main(int argc, char **argv) {
         model_params.kv_overrides = overrides;
         model_params.use_extra_bufts = false;
         model_params.no_host = true;
-        model_params.load_mode = load_mode == "mmap" ? LLAMA_LOAD_MODE_MMAP : LLAMA_LOAD_MODE_NONE;
+        model_params.load_mode = load_modes.at(load_mode);
         std::unique_ptr<llama_model, decltype(&llama_model_free)> model(
             llama_model_load_from_file(argv[2], model_params), llama_model_free);
         char architecture[80] = {};
@@ -337,8 +342,8 @@ int main(int argc, char **argv) {
         std::ofstream progress(out / "completed.tsv");
         progress << "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n" << std::flush;
         std::ofstream config_file(out / "native-config.tsv");
-        config_file << "passes\tmax_new_tokens\tcontext\n" << passes << '\t' << new_tokens
-                    << '\t' << CONTEXT << '\n';
+        config_file << "passes\tmax_new_tokens\tcontext\trequested_load_mode\n" << passes << '\t' << new_tokens
+                    << '\t' << CONTEXT << '\t' << load_mode << '\n';
         config_file.close();
         if (!progress || !config_file) {
             throw std::runtime_error("Could not write native execution metadata");
