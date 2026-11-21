@@ -37,9 +37,12 @@ def replay_external_episode(
     *,
     checker: Callable[[dict[str, Any], Any], dict[str, Any]],
     trusted_verifier_sha: str,
+    trusted_source_revision: str,
+    training_authorized: bool = False,
 ) -> dict[str, Any]:
     """Replay each proposal through an operator-supplied verifier; no oracle shortcuts."""
-    if not callable(checker) or not _sha(trusted_verifier_sha):
+    if (not callable(checker) or not _sha(trusted_verifier_sha)
+            or not _sha(trusted_source_revision)):
         raise ValueError("live checker and pinned verifier SHA required")
     if episode.get("schema_version") != SCHEMA or episode.get("kind") not in KINDS:
         raise ValueError("unknown external checker task")
@@ -51,6 +54,8 @@ def replay_external_episode(
             raise ValueError("missing root, source revision or model identity")
     if not _sha(episode.get("model_sha256")):
         raise ValueError("invalid producer checkpoint hash")
+    if episode.get("source_revision") != trusted_source_revision:
+        raise ValueError("source revision differs from trusted registry")
     if episode.get("verifier_sha256") != trusted_verifier_sha:
         raise ValueError("pinned verifier differs from source")
     if episode.get("source_exposure") not in ("fresh", "historical"):
@@ -87,7 +92,8 @@ def replay_external_episode(
         replayed.append({"visit": visit, "passed": actual["passed"], "code": actual["code"]})
     passed_first = replayed[0]["passed"]
     future = next((r["visit"] for r in replayed[1:] if r["passed"]), None)
-    train_ok = episode["split"] == "train" and episode["source_exposure"] == "fresh"
+    train_ok = (training_authorized and episode["split"] == "train"
+                and episode["source_exposure"] == "fresh")
     return {
         "schema_version": "rlt_gym.external_postfailure.v1",
         "kind": episode["kind"],
@@ -119,6 +125,8 @@ def replay_corpus(
     episodes: Iterable[Mapping[str, Any]], *,
     checkers: Mapping[str, Callable[[dict[str, Any], Any], dict[str, Any]]],
     trusted_shas: Mapping[str, str],
+    trusted_source_revisions: Mapping[str, str],
+    approved_train_roots: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Recheck all roots and isolate TRAIN supervision from exposed evaluations."""
     seen_roots: set[str] = set()
@@ -126,16 +134,20 @@ def replay_corpus(
     training, development = [], []
     for episode in episodes:
         kind = episode.get("kind")
-        if kind not in checkers or kind not in trusted_shas:
+        if kind not in checkers or kind not in trusted_shas or kind not in trusted_source_revisions:
             raise ValueError("unregistered external checker")
         row = replay_external_episode(
             episode, checker=checkers[kind], trusted_verifier_sha=trusted_shas[kind],
+            trusted_source_revision=trusted_source_revisions[kind],
+            training_authorized=episode.get("root_id") in approved_train_roots,
         )
         if row["root_id"] in seen_roots or row["task_digest"] in seen_tasks:
             raise ValueError("source root or task reused across splits")
         seen_roots.add(row["root_id"])
         seen_tasks.add(row["task_digest"])
         (training if row["training_eligible"] else development).append(row)
+    if approved_train_roots - seen_roots:
+        raise ValueError("authorized training roots absent from checked corpus")
     if not seen_roots:
         raise ValueError("empty corpus")
     return {
