@@ -14,7 +14,7 @@ import numpy as np
 from datagoblin.hashing import sha256_file
 from datagoblin.serialization import canonical_json, dump_structured
 
-from .inkling import _jsonl, _new_dir, _suite_file, audit_stage
+from .inkling import _completion_prompt, _jsonl, _new_dir, _suite_file, audit_stage
 from .runner import read_jsonl
 from .tasks import load_suite
 
@@ -22,6 +22,8 @@ WIDTH = 2304
 MAX_TOKENS = 1024
 MAX_PROMPTS = 64
 SHA256 = re.compile(r"[0-9a-f]{64}")
+RAW_PREFILL = "canonical_public_context_raw_prefill"
+NATIVE_ANSWER = "inkling_answer_only_prefill.v1"
 
 
 def boundary_sites(passes: int) -> dict[int, str]:
@@ -30,8 +32,19 @@ def boundary_sites(passes: int) -> dict[int, str]:
     return {0: "l_out-5", 1: "l_out-17", **{p: f"l_out-{35 + (p - 2)*12}" for p in range(2, passes + 1)}}
 
 
-def stage_traces(suite: Path, sources: list[Path], out: Path, *, per_stage: int = 4) -> dict:
-    """Freeze a common raw public-context prefill for each requested root."""
+def native_prompt(request: dict) -> str:
+    """Render the pinned template's text-only user turn and prefill its answer channel."""
+    return (
+        "<|message_system|><|content_text|>Thinking effort level: 0<|end_message|>"
+        "<|message_user|><|content_text|>" + _completion_prompt(request)
+        + "<|end_message|><|message_model|><|content_text|>"
+    )
+
+
+def stage_traces(
+    suite: Path, sources: list[Path], out: Path, *, per_stage: int = 4, completion: bool = False,
+) -> dict:
+    """Freeze a common prefill for each requested root."""
     if not sources or not 1 <= per_stage <= MAX_PROMPTS // len(sources):
         raise ValueError("invalid trace prompt budget")
     rows = []
@@ -52,14 +65,13 @@ def stage_traces(suite: Path, sources: list[Path], out: Path, *, per_stage: int 
             task = tasks[request["task_id"]]
             if task["split"] != manifest["split"] or task["task_digest"] != request["task_digest"]:
                 raise ValueError("prompt is outside its declared split or task binding")
-            # Include the canonical task context, with the scoring oracle omitted.
-            content = canonical_json(request["context"]).encode("utf-8")
+            content = native_prompt(request) if completion else canonical_json(request["context"])
             rows.append(({
                 "sample_key": f"{len(rows):03d}", "split": manifest["split"],
                 "task_id": request["task_id"], "task_digest": request["task_digest"],
                 "family": task["family"],
                 "lineage_id": task["lineage_id"],
-            }, content))
+            }, content.encode("utf-8")))
             if task["lineage_id"] in roots:
                 raise ValueError("duplicate trace lineage")
             roots.add(task["lineage_id"])
@@ -71,7 +83,7 @@ def stage_traces(suite: Path, sources: list[Path], out: Path, *, per_stage: int 
         samples.append({**row, "input_sha256": sha256_file(path)})
     report = {
         "schema_version": "rlt_gym.inkling_trace_prompts.v1",
-        "input_format": "canonical_public_context_raw_prefill",
+        "input_format": NATIVE_ANSWER if completion else RAW_PREFILL,
         "samples": samples,
         "suite_manifest_sha256": suite_sha,
         "source_stage_sha256": [sha256_file(source / "manifest.json") for source in sources],
@@ -202,6 +214,7 @@ def main() -> None:
     stage.add_argument("--stage", type=Path, nargs="+", required=True)
     stage.add_argument("--out", type=Path, required=True)
     stage.add_argument("--per-stage", type=int, default=4)
+    stage.add_argument("--completion", action="store_true")
     seal = commands.add_parser("seal")
     seal.add_argument("--prompts", type=Path, required=True)
     seal.add_argument("--trace", type=Path, required=True)
@@ -215,7 +228,7 @@ def main() -> None:
     export.add_argument("--max-rows", type=int, default=4096)
     args = parser.parse_args()
     if args.command == "stage":
-        result = stage_traces(args.suite, args.stage, args.out, per_stage=args.per_stage)
+        result = stage_traces(args.suite, args.stage, args.out, per_stage=args.per_stage, completion=args.completion)
     elif args.command == "seal":
         result = seal_trace(args.prompts, args.trace, passes=args.passes,
                             weights_sha256=args.weights_sha256, runtime_sha256=args.runtime_sha256)

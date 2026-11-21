@@ -14,8 +14,11 @@ from datagoblin.hashing import sha256_file
 from datagoblin.serialization import canonical_json, dump_structured
 from datagoblin.training_gym.rlt_gym import inkling
 from datagoblin.training_gym.rlt_gym.inkling import capture, hillclimb, score, stage
+from datagoblin.training_gym.rlt_gym.inkling_feature_trial import score_trial, stage_trial
 from datagoblin.training_gym.rlt_gym.inkling_instrumentation import LoopBoundary, stability_sample
+from datagoblin.training_gym.rlt_gym.inkling_native import import_native
 from datagoblin.training_gym.rlt_gym.inkling_rlt_trace import fit_feedback
+from datagoblin.training_gym.rlt_gym.inkling_routing import _threshold
 from datagoblin.training_gym.rlt_gym.inkling_sae import fit_sae
 from datagoblin.training_gym.rlt_gym.inkling_trace import (
     WIDTH,
@@ -24,6 +27,7 @@ from datagoblin.training_gym.rlt_gym.inkling_trace import (
     seal_trace,
     stage_traces,
 )
+from datagoblin.training_gym.rlt_gym.inkling_vpd_screen import _max_stat
 from datagoblin.training_gym.rlt_gym.runner import read_jsonl
 from datagoblin.training_gym.rlt_gym.tasks import load_suite, reference_answer, write_suite
 
@@ -253,3 +257,96 @@ def test_boundary_trace_preserves_site_tokens_and_lineages(tmp_path: Path) -> No
     index.write_text("".join(lines[:-1]), encoding="utf-8")
     with pytest.raises(ValueError, match="sealed receipt"):
         export_sae_inputs(prompts, result, tmp_path / "tampered")
+
+
+def test_native_completed_prefix_reaches_independent_scoring(tmp_path: Path) -> None:
+    suite, staged, tasks = _setup(tmp_path)
+    prompts = tmp_path / "prompts"
+    plan = stage_traces(suite, [staged], prompts, per_stage=2, completion=True)
+    task_id = plan["samples"][0]["task_id"]
+    captures = tmp_path / "captures"
+    provenance = {"weights_revision": "fixture", "weights_sha256": "1" * 64,
+                  "runtime_sha256": "2" * 64, "program_sha256": "3" * 64}
+    for passes in (1, 3):
+        native = tmp_path / f"native-{passes}"
+        native.mkdir()
+        (native / "native-config.tsv").write_text(
+            f"passes\tmax_new_tokens\tcontext\n{passes}\t32\t1024\n", encoding="utf-8",
+        )
+        (native / "completed.tsv").write_text(
+            "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n"
+            "000\t128\t5\tstop\t250\n001\t87",
+            encoding="utf-8",
+        )
+        (native / "000.reply").write_text(canonical_json({"candidate": reference_answer(tasks[task_id])}),
+                                         encoding="utf-8")
+        result = import_native(staged, prompts, native, captures / f"p{passes:02d}", passes=passes, **provenance)
+        assert result["network_calls"] == 0
+        assert result["native_completions"] == 1
+    verified = tmp_path / "verified"
+    score(staged, captures, suite, verified)
+    rows = read_jsonl(verified / "depth_matrix.jsonl")
+    assert [row["task_id"] for row in rows if row["passed"]] == [task_id, task_id]
+
+
+def test_root_permutation_adjusts_for_the_shortlist() -> None:
+    oriented = np.column_stack((np.ones(7), np.arange(-3, 4)))
+    scores, adjusted, draws, exact = _max_stat(oriented, 7)
+    assert exact and draws == 128
+    assert scores.tolist() == [1, 0]
+    assert adjusted[0] == 1 / 128
+    assert adjusted[1] > 0.05
+
+
+def test_depth_threshold_optimizes_verified_solutions_then_cost() -> None:
+    pairs = [
+        ({"passed": True, "passes": 1, "layer_visit_token_proxy": 10, "verifier_calls": 1},
+         {"passed": True, "passes": 3, "layer_visit_token_proxy": 30, "verifier_calls": 1}),
+        ({"passed": False, "passes": 1, "layer_visit_token_proxy": 12, "verifier_calls": 1},
+         {"passed": True, "passes": 3, "layer_visit_token_proxy": 40, "verifier_calls": 1}),
+    ]
+    strength = np.array([0.4, 1.0])
+    assert _threshold(strength, pairs) == 1.0
+    assert _threshold(strength, [pairs[0], pairs[0]]) > strength.max()
+
+
+def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(tmp_path: Path) -> None:
+    suite, _, tasks = _setup(tmp_path)
+    sae = tmp_path / "sae"
+    sae.mkdir()
+    dictionary = sae / "sae_dictionary.npz"
+    np.savez(dictionary, decoder=np.ones((1, WIDTH), dtype=np.float32))
+    dump_structured(sae / "manifest.json", {"weights_sha256": "1" * 64})
+    screened = tmp_path / "screened"
+    screened.mkdir()
+    dump_structured(screened / "manifest.json", {
+        "schema_version": "rlt_gym.inkling_vpd_feature_screen.v1", "contrast": [1, 3],
+        "dictionary_sha256": sha256_file(dictionary), "admitted_features": [0],
+        "features": [{"feature": 0, "training_mean_difference": 4.0}],
+        "train_pairs_by_root": {}, "calibration_pairs_by_root": {},
+    })
+    trial = tmp_path / "trial"
+    plan = stage_trial(suite, sae, screened, trial, roots=1)
+    assert len({row["prompt_sha256"] for row in plan["rows"]}) == 1
+    task = tasks[plan["rows"][0]["task_id"]]
+    assert task["split"] == "ordinary_test"
+    run = tmp_path / "native"
+    run.mkdir()
+    (run / "native-config.tsv").write_text("passes\tmax_new_tokens\tcontext\n3\t32\t1024\n", encoding="utf-8")
+    progress = ["sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n"]
+    patches = ["sample_key\tapplied\tprefill_token\trealized_l2\n"]
+    for row in plan["rows"]:
+        key, arm = row["sample_key"], row["arm"]
+        progress.append(f"{key}\t128\t8\tstop\t300\n")
+        patches.append(f"{key}\t{int(arm != 'untreated')}\t127\t{int(arm in {'component', 'matched_random'})}\n")
+        (run / f"{key}.reply").write_text(canonical_json(reference_answer(task)), encoding="utf-8")
+    (run / "completed.tsv").write_text("".join(progress), encoding="utf-8")
+    intervention_file = run / "interventions.tsv"
+    intervention_file.write_text("".join(patches), encoding="utf-8")
+    result = score_trial(suite, trial, run, tmp_path / "verified", native_program_sha256="2" * 64)
+    assert result["matched_roots"] == 1 and list(result["verified_solves"].values()) == [1] * 4
+    assert result["bpd_mechanism_verified"] is False
+    patches[-1] = "003\t1\t127\t0.5\n"
+    intervention_file.write_text("".join(patches), encoding="utf-8")
+    with pytest.raises(ValueError, match="frozen arm"):
+        score_trial(suite, trial, run, tmp_path / "rejected", native_program_sha256="2" * 64)

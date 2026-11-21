@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -32,6 +34,10 @@ struct Trace {
     int64_t rows = 0;
     bool enabled = false;
     std::map<std::string, bool> seen;
+    std::vector<float> readout_delta;
+    int intervention_token = -1;
+    double realized_dose = 0.0;
+    bool intervention_applied = false;
 
     Trace(const fs::path &out, int passes)
         : data(out / "activations.f32", std::ios::binary), index(out / "rows.tsv") {
@@ -49,10 +55,13 @@ struct Trace {
 
 static bool observe(ggml_tensor *tensor, bool ask, void *data) {
     auto &trace = *static_cast<Trace *>(data);
+    if (!trace.enabled) {
+        return !ask;
+    }
     try {
         const std::string name = ggml_get_name(tensor);
         const auto anchor = trace.anchors.find(name);
-        const bool wanted = trace.enabled && anchor != trace.anchors.end();
+        const bool wanted = anchor != trace.anchors.end();
         if (ask || !wanted) {
             return ask ? wanted : true;
         }
@@ -64,6 +73,26 @@ static bool observe(ggml_tensor *tensor, bool ask, void *data) {
         std::vector<float> block(WIDTH * trace.batch);
         const size_t size = block.size() * sizeof(float);
         ggml_backend_tensor_get(tensor, block.data(), 0, size);
+        const int cue = trace.intervention_token - trace.offset;
+        if (!trace.readout_delta.empty() && anchor->second == static_cast<int>(trace.anchors.size()) - 1
+                && cue >= 0 && cue < trace.batch) {
+            if (trace.intervention_applied) {
+                throw std::runtime_error("Repeated readout intervention");
+            }
+            float *row = block.data() + cue * WIDTH;
+            double norm_squared = 0.0;
+            for (int i = 0; i < WIDTH; ++i) {
+                const float original = row[i];
+                if (trace.readout_delta[i] != 0) {
+                    row[i] += trace.readout_delta[i];
+                }
+                const double delta = double(row[i]) - original;
+                norm_squared += delta * delta;
+            }
+            ggml_backend_tensor_set(tensor, row, cue * WIDTH * sizeof(float), WIDTH * sizeof(float));
+            trace.realized_dose = std::sqrt(norm_squared);
+            trace.intervention_applied = true;
+        }
         trace.data.write(reinterpret_cast<const char *>(block.data()), size);
         for (int token = 0; token < trace.batch; ++token) {
             trace.index << trace.key << '\t' << anchor->second << '\t' << name << '\t'
@@ -118,6 +147,22 @@ static std::vector<llama_token> tokenize(const llama_vocab *vocab, const fs::pat
     return tokens;
 }
 
+static std::vector<float> load_delta(const fs::path &path) {
+    if (!fs::exists(path)) {
+        return {};
+    }
+    if (fs::file_size(path) != WIDTH * sizeof(float)) {
+        throw std::runtime_error("Intervention vector has the wrong width");
+    }
+    std::vector<float> data(WIDTH);
+    std::ifstream stream(path, std::ios::binary);
+    if (!stream.read(reinterpret_cast<char *>(data.data()), WIDTH * sizeof(float))
+            || std::any_of(data.begin(), data.end(), [](float value) { return !std::isfinite(value); })) {
+        throw std::runtime_error("Intervention vector is unreadable or nonfinite");
+    }
+    return data;
+}
+
 static void decode(llama_context *ctx, Trace &trace, const std::vector<llama_token> &tokens) {
     llama_memory_clear(llama_get_memory(ctx), true);
     const int count = static_cast<int>(tokens.size());
@@ -148,6 +193,65 @@ static void decode(llama_context *ctx, Trace &trace, const std::vector<llama_tok
     }
 }
 
+struct Completion {
+    std::string raw;
+    int tokens = 0;
+    bool stopped = false;
+};
+
+static Completion generate(llama_context *ctx, const llama_vocab *vocab, int position, int budget) {
+    Completion result;
+    auto batch = llama_batch_init(1, 0, 1);
+    try {
+        const int32_t vocab_size = llama_vocab_n_tokens(vocab);
+        while (result.tokens < budget) {
+            const float *logits = llama_get_logits_ith(ctx, -1);
+            if (!logits || vocab_size <= 0) {
+                throw std::runtime_error("No logits for native generation");
+            }
+            const float *best = std::max_element(logits, logits + vocab_size);
+            if (!std::isfinite(*best)) {
+                throw std::runtime_error("Nonfinite native generation logits");
+            }
+            const auto token = static_cast<llama_token>(best - logits);
+            ++result.tokens;
+            if (llama_vocab_is_eog(vocab, token)) {
+                result.stopped = true;
+                break;
+            }
+            std::array<char, 256> piece{};
+            const int size = llama_token_to_piece(vocab, token, piece.data(),
+                                                static_cast<int>(piece.size()), 0, true);
+            if (size < 0 || size > static_cast<int>(piece.size())) {
+                throw std::runtime_error("A decoded token exceeds the native buffer");
+            }
+            const std::string text(piece.data(), size);
+            if (text == "<|end_message|>") {
+                result.stopped = true;
+                break;
+            }
+            result.raw += text;
+            if (result.tokens == budget) {
+                break;
+            }
+            batch.n_tokens = 1;
+            batch.token[0] = token;
+            batch.pos[0] = position++;
+            batch.n_seq_id[0] = 1;
+            batch.seq_id[0][0] = 0;
+            batch.logits[0] = true;
+            if (llama_decode(ctx, batch)) {
+                throw std::runtime_error("Native generated-token decode failed");
+            }
+        }
+    } catch (...) {
+        llama_batch_free(batch);
+        throw;
+    }
+    llama_batch_free(batch);
+    return result;
+}
+
 int main(int argc, char **argv) {
     if (argc == 2 && std::string(argv[1]) == "--check-binding") {
         const auto model = llama_model_default_params();
@@ -155,17 +259,21 @@ int main(int argc, char **argv) {
         std::cout << "Load mode " << model.load_mode << ", context " << context.n_ctx << '\n';
         return 0;
     }
-    if (argc != 10) {
-        std::cerr << "Use: inkling_trace RUNTIME GGUF DEVICE PASSES GPU_LAYERS CPU_PATTERNS PROMPTS OUT mmap|none\n";
+    if (argc < 10 || argc > 12) {
+        std::cerr << "Use: inkling_trace RUNTIME GGUF DEVICE PASSES GPU_LAYERS CPU_PATTERNS PROMPTS OUT "
+                  << "mmap|none [MAX_NEW_TOKENS [INTERVENTION_DIR]]\n";
         return 2;
     }
     try {
         const int passes = std::stoi(argv[4]);
         const int layers = std::stoi(argv[5]);
+        const int new_tokens = argc >= 11 ? std::stoi(argv[10]) : 0;
+        const fs::path intervention_dir = argc == 12 ? fs::path(argv[11]) : fs::path();
         const fs::path out = argv[8];
         const std::string load_mode = argv[9];
-        if (passes < 1 || passes > 6 || layers < 0 || layers > 256
-                || (load_mode != "mmap" && load_mode != "none") || fs::exists(out)) {
+        if (passes < 1 || passes > 6 || layers < 0 || layers > 256 || new_tokens < 0 || new_tokens > 384
+                || (load_mode != "mmap" && load_mode != "none") || fs::exists(out)
+                || (!intervention_dir.empty() && (!fs::is_directory(intervention_dir) || !new_tokens))) {
             throw std::runtime_error("Invalid loop, placement, load mode, or output path");
         }
         std::vector<fs::path> prompts;
@@ -226,10 +334,70 @@ int main(int argc, char **argv) {
         if (!context) {
             throw std::runtime_error("Could not allocate the trace context");
         }
+        std::ofstream progress(out / "completed.tsv");
+        progress << "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n" << std::flush;
+        std::ofstream config_file(out / "native-config.tsv");
+        config_file << "passes\tmax_new_tokens\tcontext\n" << passes << '\t' << new_tokens
+                    << '\t' << CONTEXT << '\n';
+        config_file.close();
+        if (!progress || !config_file) {
+            throw std::runtime_error("Could not write native execution metadata");
+        }
+        std::ofstream interventions;
+        if (!intervention_dir.empty()) {
+            interventions.open(out / "interventions.tsv");
+            interventions << "sample_key\tapplied\tprefill_token\trealized_l2\n" << std::flush;
+            interventions.precision(17);
+            if (!interventions) {
+                throw std::runtime_error("Could not open the intervention receipt");
+            }
+        }
+        const auto *vocab = llama_model_get_vocab(model.get());
         for (const auto &prompt : prompts) {
+            const auto started = std::chrono::steady_clock::now();
             trace.key = prompt.stem().string();
-            const auto tokens = tokenize(llama_model_get_vocab(model.get()), prompt);
+            const auto tokens = tokenize(vocab, prompt);
+            if (tokens.size() + new_tokens > CONTEXT) {
+                throw std::runtime_error("Combined prompt and generation budget exceeds context: " + trace.key);
+            }
+            if (!intervention_dir.empty()) {
+                trace.readout_delta = load_delta(intervention_dir / (trace.key + ".delta.f32"));
+                trace.intervention_token = static_cast<int>(tokens.size()) - 1;
+                trace.realized_dose = 0;
+                trace.intervention_applied = false;
+            }
             decode(context.get(), trace, tokens);
+            if (trace.intervention_applied != !trace.readout_delta.empty()) {
+                throw std::runtime_error("The requested readout intervention did not execute");
+            }
+            Completion answer;
+            const char *reason = "prefill";
+            if (new_tokens) {
+                answer = generate(context.get(), vocab, static_cast<int>(tokens.size()), new_tokens);
+                reason = answer.stopped ? "stop" : "length";
+                std::ofstream reply(out / (trace.key + ".reply"), std::ios::binary);
+                reply.write(answer.raw.data(), answer.raw.size());
+                reply.close();
+                if (!reply) {
+                    throw std::runtime_error("Could not finish writing the native reply");
+                }
+            }
+            trace.data.flush();
+            trace.index.flush();
+            if (interventions.is_open()) {
+                interventions << trace.key << '\t' << int(trace.intervention_applied) << '\t'
+                              << trace.intervention_token << '\t' << trace.realized_dose << '\n' << std::flush;
+                if (!interventions) {
+                    throw std::runtime_error("Could not publish the intervention receipt");
+                }
+            }
+            const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - started).count();
+            progress << trace.key << '\t' << tokens.size() << '\t' << answer.tokens << '\t'
+                     << reason << '\t' << elapsed << '\n' << std::flush;
+            if (!trace.data || !trace.index || !progress) {
+                throw std::runtime_error("Could not commit a native prompt's output");
+            }
             std::cout << trace.key << " " << tokens.size() << " tokens\n" << std::flush;
         }
         trace.data.close();

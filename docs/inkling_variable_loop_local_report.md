@@ -173,3 +173,57 @@ artifact directory above.
 The tracer compiled and linked against the installed Windows Vulkan
 runtime. The full local suite passed with 284 passed and one skipped.
 Repository-wide Ruff passed.
+
+## Native answer evaluation and intervention preparation
+
+The next guarded trace completed across all seven families on seven
+training and seven calibration roots. The three-pass RTX 5080 capture
+sealed 16,220 raw public-context vectors. The answer-only decoder then
+recorded 28 completions from the same split structure at architectural
+depths one and three. The independent verifier checked 26 answers.
+Two one-pass outputs were censored at parsing.
+
+| Split | One pass solved | Three passes solved |
+| --- | ---: | ---: |
+| Train | 2/7 | 5/7 |
+| Calibration | 3/7 | 3/7 |
+
+The verified training matrix yielded five SFT rows, three depth
+preferences, three repairs, and 19 response-only Aleph rows. All raw
+completions, receipts, and exports remain outside Git in
+q4-pilot/native-eval-02. The audited subdirectory binds the verified
+outcomes to the native executable, runtime, model and rendered prompts.
+
+The corresponding three-pass answer-prefill run sealed 19,188 vectors.
+The SAE refit reduced calibration reconstruction MSE from 7.016 to 3.866.
+It admitted 16 features in the root-paired first-to-third-pass screen.
+The VPD repository's dictionary loader accepted the 256-feature top-16
+checkpoint and reproduced DataGoblin's sparse encoding exactly on 128
+calibration vectors.
+After refitting the feedback heads on these rollout prefills, train-only
+thresholds yielded the following offline routing comparison.
+
+| Calibration policy | Verified solves / 7 | Three-pass choices | Layer-visit token proxy |
+| --- | ---: | ---: | ---: |
+| Always one pass | 3 | 0 | 70,776 |
+| Always three passes | 3 | 7 | 136,800 |
+| Direct head | 4 | 4 | 116,904 |
+| RLT head | 4 | 4 | 105,600 |
+| Matched damping head | 3 | 5 | 115,176 |
+
+The cost column sums recorded token usage under the depth selected for
+each task. It excludes the cost of a deployed router. For final core
+activation reconstruction on the same calibration roots, direct scored
+5.581 MSE, matched damping 5.662, and RLT 5.737.
+
+Feature 24 was the first train-ranked feature admitted by the answer-prefill
+screen. The perturbation bundle freezes 16 arms on four ordinary-test
+roots, including untreated, sham, matched random and the signed SAE
+direction. It records the basis and training contrast. The first live
+attempt stopped during memory-mapped loading before producing an
+intervention or a reply. Preserve the prepared bundle for the next
+available 5080 window. The native rollout results do not certify VPD
+parameter effects or a BPD mechanism.
+
+The full local suite passed with 288 passed and one skipped.
+Repository-wide Ruff passed.

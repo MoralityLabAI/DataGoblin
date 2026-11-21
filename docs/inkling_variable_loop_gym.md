@@ -307,3 +307,61 @@ direct feedback, RLT and matched damping.
 
 The feedback test measures prefill-state prediction. Verify task-level
 effects separately through the rollout checker.
+
+### Native answer evaluation and SAE screening
+
+Stage the train and calibration packs with matched depths and completion
+mode. The prompt uses the checkpoint's text-only chat format, zero
+thinking effort, and a prefilled answer channel. Keep this protocol fixed
+across the native arms. It is a separate comparison from the server's
+reasoning-enabled runs.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_trace stage --suite <suite> --stage <train-stage> <calibration-stage> --out <prompts> --per-stage 7 --completion
+
+Append a generation budget of up to 384 tokens to the native executable
+command. It uses greedy decoding and flushes each completed prompt and
+reply. The import can recover a completed prefix if a resource guard stops
+the process. Import each depth and split before running the existing
+Inkling scorer. Keep the native runtime, executable and model digests in
+the capture manifest.
+
+    inkling_trace <llama-dir> <gguf> Vulkan1 3 <gpu-layers> <cpu-patterns.txt> <prompts> <trace> mmap 192
+    python -m datagoblin.training_gym.rlt_gym.inkling_native --stage <train-stage> --prompts <prompts> --run <trace> --out <captures/p03> --passes 3 --weights-revision <revision> --weights-sha256 <weight-sha> --runtime-sha256 <runtime-archive-sha> --program-sha256 <executable-sha>
+
+For the SAE screen, match first and final core states at the same token
+position. Select feature IDs and directions on training roots, then
+evaluate them on calibration roots with a max-statistic sign-flip test.
+Each root contributes one observation per feature. The shortlist prepares
+feature interventions. It measures directional changes in activation and
+does not establish an effect on verified outcomes.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_vpd_screen --inputs <sae-input> --sae <sae> --out <feature-screen>
+
+If both native answer arms complete, refit the dictionary and feedback
+heads using the trace from the same rendered prompts as the evals. The
+depth selector uses predicted first-to-final movement from the prelude to
+choose between one and three passes. The threshold is fitted on verified
+training outcomes. On calibration, replay the selected depth against the
+already observed outcomes and compare it with both fixed-depth policies.
+The recorded layer-visit token measure is an analytical cost proxy. The
+selector replay does not include a live deployment of the prelude router.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_routing --prompts <prompts> --trace <three-pass-trace> --sae <sae> --heads <heads> --train <verified-train> --calibration <verified-calibration> --out <routing>
+
+### Matched SAE readout perturbation
+
+Freeze the first train-ranked feature admitted by the calibration screen.
+The trial uses fresh ordinary-test roots and perturbs only the last prompt
+token at the final core output. A signed decoder direction opposes the
+training-set contrast. The executable records the realized vector norm.
+Each root runs untreated, sham, orthogonal matched random, and feature
+arms under identical prompt text and decoding budgets.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_feature_trial stage --suite <suite> --sae <sae> --screened <screen> --out <trial>
+    inkling_trace <llama-dir> <gguf> Vulkan1 3 <gpu-layers> <cpu-patterns.txt> <trial/prompts> <run> mmap 192 <trial/deltas>
+    python -m datagoblin.training_gym.rlt_gym.inkling_feature_trial score --suite <suite> --trial <trial> --run <run> --out <verified> --native-program-sha256 <executable-sha>
+
+The verifier checks each answer and enforces the existing BPD matched-arm
+contract on complete roots. This study supplies a signed SAE intervention
+receipt. Parameter-level VPD and BPD decomposition require their own
+analysis and validation.

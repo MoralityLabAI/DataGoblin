@@ -183,6 +183,17 @@ def _usage(data: dict[str, Any]) -> dict[str, int | None]:
     }
 
 
+def _completion_prompt(request: dict[str, Any]) -> str:
+    return canonical_json({
+        "task": request["context"]["task"],
+        "history": request["context"]["history"],
+        "instructions": (
+            "Solve the task and output a JSON object with candidate holding the exact answer "
+            "shape, plus optional public_steps with brief checkable explanations. No Markdown."
+        ),
+    })
+
+
 def capture(
     stage_dir: Path, out: Path, *, passes: int, server_loop_passes: int,
     base_url: str = "http://127.0.0.1:8000/v1", served_model: str = MODEL,
@@ -244,16 +255,9 @@ def capture(
     for request in requests:
         if time.monotonic() >= deadline:
             break
-        prompt = {
-            "task": request["context"]["task"], "history": request["context"]["history"],
-            "instructions": (
-                "Solve the task and output a JSON object with candidate holding the exact answer "
-                "shape, plus optional public_steps with brief checkable explanations. No Markdown."
-            ),
-        }
         body = {
             "model": served_model,
-            "messages": [{"role": "user", "content": canonical_json(prompt)}],
+            "messages": [{"role": "user", "content": _completion_prompt(request)}],
             "temperature": 0, "max_tokens": max_tokens,
         }
         row: dict[str, Any] = {"request_id": request["request_id"], "task_digest": request["task_digest"]}
@@ -312,7 +316,10 @@ def _audit_observations(stage: Path, capture_dir: Path, manifest: dict) -> dict:
         raise ValueError("capture observation digest mismatch")
     requests = read_jsonl(stage / "requests.jsonl")
     rows = read_jsonl(path)
-    if not len(rows) == manifest.get("network_calls") <= manifest.get("requests_planned", -1) <= len(requests):
+    native = manifest.get("source_kind") == "local_native_declared"
+    invocations = manifest.get("native_completions" if native else "network_calls")
+    if ((native and manifest.get("network_calls") != 0)
+            or not len(rows) == invocations <= manifest.get("requests_planned", -1) <= len(requests)):
         raise ValueError("invalid capture request accounting")
     observations, expected = {}, []
     for request, row in zip(requests, rows, strict=False):
@@ -401,7 +408,7 @@ def score(
             raise ValueError(f"capture {label} does not match stage")
         if fixture and not include_fixtures:
             raise ValueError("fixture capture requires explicit include_fixtures")
-        if not fixture and manifest.get("source_kind") != "local_operator_declared":
+        if not fixture and manifest.get("source_kind") not in {"local_operator_declared", "local_native_declared"}:
             raise ValueError("unknown capture provenance")
         if not fixture:
             if (manifest.get("server_loop_passes_operator_declared") != p
@@ -419,6 +426,8 @@ def score(
     control_keys = (
         "source_kind", "share_cache_operator_declared", "runtime_operator_declared",
         "weights_revision_operator_declared", "temperature", "max_tokens", "requests_planned",
+        "native_input_format", "native_program_sha256", "native_runtime_sha256", "native_weights_sha256",
+        "native_prompt_manifest_sha256",
     )
     controls = {tuple(arm[4].get(key) for key in control_keys) for arm in arms}
     if len(controls) != 1:
