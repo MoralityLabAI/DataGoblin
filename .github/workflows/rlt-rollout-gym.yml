@@ -78,6 +78,15 @@ jobs:
           --suite runs/rlt-ci/suite --provider codex --model ci-request-fixture
           --split train --max-tasks 7 --max-visits 4
           --out runs/rlt-ci/teacher-requests
+      - name: Collect K-depth hypergame research-taste controls
+        run: >-
+          python -m datagoblin.training_gym.rlt_gym.hypergame_taste
+          --seed 23 --per-cell 2 --depths 0 1 2 4 8
+          --out runs/rlt-ci/hypergame-taste
+      - name: Replay K-depth hypergame evidence
+        run: >-
+          python -m datagoblin.training_gym.rlt_gym.hypergame_taste
+          --replay runs/rlt-ci/hypergame-taste
       - name: Retain collection receipts
         if: always()
         uses: actions/upload-artifact@v4
