@@ -8,7 +8,13 @@ from pathlib import Path
 import pytest
 
 from datagoblin.training_gym.rlt_gym.postfailure_exit import (
-    WIDTH, _policy, campaign, choose_threshold, evaluate, fit, predict,
+    WIDTH,
+    _policy,
+    campaign,
+    choose_threshold,
+    evaluate,
+    fit,
+    predict,
 )
 from datagoblin.training_gym.rlt_gym.runner import run_suite
 from datagoblin.training_gym.rlt_gym.tasks import write_suite
