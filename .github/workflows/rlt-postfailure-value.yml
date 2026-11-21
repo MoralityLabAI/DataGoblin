@@ -1,0 +1,40 @@
+name: RLT post-failure verifier value gym
+
+on:
+  push:
+    branches:
+      - research/verifier-postfailure-exit-20261121
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/postfailure_exit.py"
+      - "tests/unit/test_rlt_gym_postfailure_exit.py"
+      - ".github/workflows/rlt-postfailure-value.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/postfailure_exit.py"
+      - "tests/unit/test_rlt_gym_postfailure_exit.py"
+      - ".github/workflows/rlt-postfailure-value.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU control and test tools
+        run: python -m pip install -e ".[dev]"
+      - name: Test seven-family source replay and policy selection
+        run: python -m pytest -q tests/unit/test_rlt_gym_postfailure_exit.py
+      - name: Lint post-failure value experiment
+        run: ruff check src/datagoblin/training_gym/rlt_gym/postfailure_exit.py tests/unit/test_rlt_gym_postfailure_exit.py
