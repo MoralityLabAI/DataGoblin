@@ -286,6 +286,20 @@ def collect(out: Path, *, depths: tuple[int, ...] = (0, 1, 2, 4, 8),
                     metrics[(split, depth, policy)].append(row)
                     if split == "train":
                         forks.extend(fork_rows(task, row))
+    # Training views share a strict four-presentation budget per root:
+    # one teacher request and at most three independently graded forks.
+    unique_forks: dict[str, dict[tuple[str, str, str], dict]] = defaultdict(dict)
+    for item in forks:
+        key = (_json(item["context"]), item["preferred_action"], item["dispreferred_action"])
+        unique_forks[item["root"]].setdefault(key, item)
+    forks = []
+    for root in sorted(unique_forks):
+        choices = sorted(
+            unique_forks[root].values(),
+            key=lambda item: (-Fraction(item["expected_regret"]), _json(item["context"]),
+                              item["dispreferred_action"]),
+        )
+        forks.extend(choices[:3])
     artifacts = {}
     for name, rows in (
         ("public_tasks.jsonl", public_rows), ("private_sealed.jsonl", sealed_rows),
@@ -312,7 +326,7 @@ def collect(out: Path, *, depths: tuple[int, ...] = (0, 1, 2, 4, 8),
         "K_values": list(depths), "per_depth_per_split": per_cell, "splits": list(SPLITS),
         "policies": list(POLICIES), "artifacts": artifacts, "cells": cells,
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "architecture_promotion_eligible": False,
+        "architecture_promotion_eligible": False, "max_train_presentations_per_root": 4,
         "holdout_rule": "train_forks and train_teacher_requests contain training roots only",
         "visibility": "rollouts_scored and private_sealed are evaluation-owned; never send to a teacher",
     }
