@@ -19,15 +19,30 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("campaign", "out", "ramcap-package"):
         parser.add_argument(f"--{name}", required=True, type=Path)
-    parser.add_argument("--cohort", type=Path, help="Reuse an already frozen development and held-out cohort")
+    variant = parser.add_mutually_exclusive_group()
+    variant.add_argument("--cohort", type=Path, help="Reuse an already frozen development and held-out cohort")
+    variant.add_argument("--previous-proxy", type=Path, help="Fit and test hard-pool repair using this completed proxy")
+    variant.add_argument("--resume-hard", action="store_true", help="Resume a fitted hard-pool evaluation")
+    parser.add_argument("--wait-seconds", type=int, default=0, help="Maximum wait for RAM headroom")
     args = parser.parse_args()
     if sys.platform != "win32":
         parser.error("the resource wrapper requires Windows")
-    if args.out.exists():
-        parser.error("choose a fresh output directory")
-    available, commit = memory()
-    if available < RESERVE + CAP or commit < COMMIT_FLOOR + CAP:
-        raise SystemExit("insufficient free memory for the capped proxy run")
+    if args.out.exists() != args.resume_hard:
+        parser.error("use an existing output with --resume-hard or a fresh output for training")
+    allowance = CAP
+    if args.resume_hard:
+        from json import loads
+
+        prior_run = loads((args.out / "resources.json").read_text(encoding="utf-8"))
+        allowance = min(CAP, prior_run["peak_job_commit_bytes"] + 32 * MIB)
+    deadline = time.monotonic() + args.wait_seconds
+    while True:
+        available, commit = memory()
+        if available >= RESERVE + allowance and commit >= COMMIT_FLOOR + allowance:
+            break
+        if time.monotonic() >= deadline:
+            raise SystemExit("insufficient free memory for the capped proxy run")
+        time.sleep(5)
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
     for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
         os.environ[name] = "1"
@@ -37,7 +52,6 @@ def main():
     job = Job(CAP, priority="below_normal")
     job.assign_self()
     from datagoblin.serialization import canonical_json, dump_structured
-    from datagoblin.training_gym.rlt_gym.aleph_proxy import run
 
     started = time.monotonic()
     status = "aborted"
@@ -50,7 +64,18 @@ def main():
             raise SystemExit("stopped at the resource guard")
 
     try:
-        result = run(args.campaign.resolve(), args.out.resolve(), guard, cohort=args.cohort)
+        if args.resume_hard:
+            from datagoblin.training_gym.rlt_gym.hard_repair import resume
+
+            result = resume(args.campaign.resolve(), args.out.resolve(), guard)
+        elif args.previous_proxy is None:
+            from datagoblin.training_gym.rlt_gym.aleph_proxy import run
+
+            result = run(args.campaign.resolve(), args.out.resolve(), guard, cohort=args.cohort)
+        else:
+            from datagoblin.training_gym.rlt_gym.hard_repair import run as run_hard
+
+            result = run_hard(args.campaign.resolve(), args.previous_proxy.resolve(), args.out.resolve(), guard)
         print(canonical_json(result["policies"]))
         status = "complete"
     finally:
