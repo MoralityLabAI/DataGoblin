@@ -116,12 +116,20 @@ selection custody, and a known linear stability probe. Ruff passed on the
 changed Python modules and tests. The Q4 planning command wrote a dry-run
 receipt for seven requests and made zero network calls.
 
+The editable development install succeeded in a fresh local environment.
+The six Inkling tests and Ruff also passed there. The full local suite
+completed with 283 passed and one skipped in 1,091.59 seconds, peaking at
+159.1 MiB under the 768 MiB Windows job limit.
+
 PR #5's previous Inkling job failed before runner assignment. The
 job record has no runner name or steps and the logs endpoint returned
 `BlobNotFound`. The base CI and RLT jobs on the same SHA also had no
 recorded steps. The Actions API exposed no scheduler rejection reason.
 The change removes the duplicate feature-branch push trigger while
 keeping PR and manual runs. [Previous hosted Inkling run](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44871178089)
+
+The first hosted run after the change also had an empty step list and a
+`BlobNotFound` response for its logs. [Post-push hosted run](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44875460358)
 
 See [the runbook](inkling_variable_loop_gym.md) for the exact 1-vs-3 and
 six-arm commands and the CPU control reproduction. Local output is in the
