@@ -88,3 +88,31 @@ had MSE 5.42. The local `native-rlt-depth-transfer-06` report holds
 per-pass metrics, per-root errors, and the source digests. This comparison
 estimates offline state transfer. Answer-level effects remain part of
 the separate live routing trial.
+
+## Stationary endpoints with a bounded state map
+
+A follow-up fit replaced the visit clock with a shared stationary endpoint.
+It used the same first two training transitions, the frozen SAE, and a
+three-visit fit schedule. Each head was fitted by weighted affine ridge
+regression, projected to a spectral cap, and refitted for its intercept.
+The cap was selected on three-step activation error in leave-one-root-out
+validation using only the seven training roots. The direct head selected
+zero, giving a constant endpoint. RLT and matched damping selected
+one, giving a non-expansive state map in SAE code space.
+
+| Predictor | Pass-three calibration MSE | Pass-six holdout MSE |
+| --- | ---: | ---: |
+| Bounded direct | 7.61 | 10.56 |
+| Bounded RLT | 8.12 | 11.23 |
+| Bounded matched damping | 8.31 | 11.95 |
+| Training pass-two mean activation | 8.24 | 10.29 |
+| Frozen SAE center | 7.49 | 10.76 |
+
+At pass six the stationary bounded RLT head reduced MSE from 58.93
+to 11.23 relative to the earlier affine RLT head fitted with horizon
+three. The training pass-two mean activation still had the lowest
+pass-six error. The model family changed both its clock and its spectral
+constraint. The evaluation reused the seven calibration roots and
+14 six-pass roots from the earlier reports. The local
+`native-rlt-stable-endpoints-01` artifact contains the frozen fits,
+root-fold errors, per-pass gain bounds, and baseline scores.
