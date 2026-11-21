@@ -19,6 +19,8 @@
 namespace fs = std::filesystem;
 
 constexpr int WIDTH = 2304;
+constexpr int GAIN_RANK = 64;
+constexpr char GAIN_TENSOR[] = "blk.6.loop_q_ctrl_gain.weight";
 constexpr int CONTEXT = 1024;
 constexpr int BATCH = 16;
 constexpr int MAX_PROMPTS = 64;
@@ -36,13 +38,16 @@ struct Trace {
     std::map<std::string, bool> seen;
     std::vector<float> readout_delta;
     int intervention_pass;
+    bool parameter_gain;
+    int gain_evaluations = 0;
     int intervention_token = -1;
     double realized_dose = 0.0;
+    double projected_delta = 0.0;
     bool intervention_applied = false;
 
-    Trace(const fs::path &out, int passes, int target_pass)
+    Trace(const fs::path &out, int passes, int target_pass, bool gain_mode = false)
         : data(out / "activations.f32", std::ios::binary), index(out / "rows.tsv"),
-          intervention_pass(target_pass) {
+          intervention_pass(target_pass), parameter_gain(gain_mode) {
         if (!data || !index) {
             throw std::runtime_error("Could not open trace files");
         }
@@ -55,12 +60,67 @@ struct Trace {
     }
 };
 
+static void observe_gain(Trace &trace, ggml_tensor *tensor) {
+    const int visit = 1 + ++trace.gain_evaluations;
+    const auto *weight = tensor->src[0];
+    auto *input = tensor->src[1];
+    if (!input || weight->type != GGML_TYPE_F32 || weight->ne[0] != GAIN_RANK || weight->ne[1] != WIDTH
+            || tensor->type != GGML_TYPE_F32 || input->type != GGML_TYPE_F32
+            || !ggml_is_contiguous(tensor) || !ggml_is_contiguous(input)
+            || tensor->ne[0] != WIDTH || input->ne[0] != GAIN_RANK
+            || ggml_nrows(tensor) != trace.batch || ggml_nrows(input) != trace.batch
+            || trace.seen.size() != static_cast<size_t>(visit)) {
+        throw std::runtime_error("The query-gain projection did not match the expected core pass");
+    }
+    const int cue = trace.intervention_token - trace.offset;
+    if (visit != trace.intervention_pass || cue < 0 || cue >= trace.batch || trace.readout_delta.empty()) {
+        return;
+    }
+    if (trace.intervention_applied) {
+        throw std::runtime_error("Repeated query-gain intervention");
+    }
+    std::array<float, GAIN_RANK> gate{};
+    ggml_backend_tensor_get(input, gate.data(), cue * input->nb[1], sizeof(gate));
+    std::array<float, WIDTH> output{};
+    const size_t offset = cue * tensor->nb[1];
+    ggml_backend_tensor_get(tensor, output.data(), offset, sizeof(output));
+    double projection = 0.0, right_squared = 0.0;
+    for (int i = 0; i < GAIN_RANK; ++i) {
+        const double factor = trace.readout_delta[WIDTH + i];
+        projection += gate[i] * factor;
+        right_squared += factor * factor;
+    }
+    double left_squared = 0.0, realized_squared = 0.0;
+    for (int i = 0; i < WIDTH; ++i) {
+        const double factor = trace.readout_delta[i];
+        const double original = output[i];
+        output[i] = static_cast<float>(original + projection * factor);
+        if (!std::isfinite(output[i])) {
+            throw std::runtime_error("Nonfinite query-gain intervention");
+        }
+        const double delta = output[i] - original;
+        left_squared += factor * factor;
+        realized_squared += delta * delta;
+    }
+    ggml_backend_tensor_set(tensor, output.data(), offset, sizeof(output));
+    trace.realized_dose = std::sqrt(left_squared * right_squared);
+    trace.projected_delta = std::sqrt(realized_squared);
+    trace.intervention_applied = true;
+}
+
 static bool observe(ggml_tensor *tensor, bool ask, void *data) {
     auto &trace = *static_cast<Trace *>(data);
     if (!trace.enabled) {
         return !ask;
     }
     try {
+        if (trace.parameter_gain && tensor->op == GGML_OP_MUL_MAT && tensor->src[0]
+                && std::strcmp(ggml_get_name(tensor->src[0]), GAIN_TENSOR) == 0) {
+            if (!ask) {
+                observe_gain(trace, tensor);
+            }
+            return true;
+        }
         const std::string name = ggml_get_name(tensor);
         const auto anchor = trace.anchors.find(name);
         const bool wanted = anchor != trace.anchors.end();
@@ -76,7 +136,7 @@ static bool observe(ggml_tensor *tensor, bool ask, void *data) {
         const size_t size = block.size() * sizeof(float);
         ggml_backend_tensor_get(tensor, block.data(), 0, size);
         const int cue = trace.intervention_token - trace.offset;
-        if (!trace.readout_delta.empty() && anchor->second == trace.intervention_pass
+        if (!trace.parameter_gain && !trace.readout_delta.empty() && anchor->second == trace.intervention_pass
                 && cue >= 0 && cue < trace.batch) {
             if (trace.intervention_applied) {
                 throw std::runtime_error("Repeated readout intervention");
@@ -93,6 +153,7 @@ static bool observe(ggml_tensor *tensor, bool ask, void *data) {
             }
             ggml_backend_tensor_set(tensor, row, cue * WIDTH * sizeof(float), WIDTH * sizeof(float));
             trace.realized_dose = std::sqrt(norm_squared);
+            trace.projected_delta = trace.realized_dose;
             trace.intervention_applied = true;
         }
         trace.data.write(reinterpret_cast<const char *>(block.data()), size);
@@ -149,16 +210,17 @@ static std::vector<llama_token> tokenize(const llama_vocab *vocab, const fs::pat
     return tokens;
 }
 
-static std::vector<float> load_delta(const fs::path &path) {
+static std::vector<float> load_delta(const fs::path &path, size_t width) {
     if (!fs::exists(path)) {
         return {};
     }
-    if (fs::file_size(path) != WIDTH * sizeof(float)) {
+    const auto bytes = width * sizeof(float);
+    if (fs::file_size(path) != bytes) {
         throw std::runtime_error("Intervention vector has the wrong width");
     }
-    std::vector<float> data(WIDTH);
+    std::vector<float> data(width);
     std::ifstream stream(path, std::ios::binary);
-    if (!stream.read(reinterpret_cast<char *>(data.data()), WIDTH * sizeof(float))
+    if (!stream.read(reinterpret_cast<char *>(data.data()), bytes)
             || std::any_of(data.begin(), data.end(), [](float value) { return !std::isfinite(value); })) {
         throw std::runtime_error("Intervention vector is unreadable or nonfinite");
     }
@@ -174,6 +236,7 @@ static void decode(llama_context *ctx, Trace &trace, const std::vector<llama_tok
         trace.offset = offset;
         trace.batch = std::min(BATCH, count - offset);
         trace.seen.clear();
+        trace.gain_evaluations = 0;
         batch.n_tokens = trace.batch;
         for (int i = 0; i < batch.n_tokens; ++i) {
             batch.token[i] = tokens[offset + i];
@@ -185,6 +248,10 @@ static void decode(llama_context *ctx, Trace &trace, const std::vector<llama_tok
         trace.enabled = true;
         status = llama_decode(ctx, batch);
         trace.enabled = false;
+        if (trace.parameter_gain && trace.gain_evaluations != static_cast<int>(trace.anchors.size()) - 2
+                && trace.error.empty()) {
+            trace.error = "Missing or duplicate query-gain projection";
+        }
         if (status || !trace.error.empty() || trace.seen.size() != trace.anchors.size()) {
             break;
         }
@@ -272,6 +339,7 @@ int main(int argc, char **argv) {
         const int new_tokens = argc >= 11 ? std::stoi(argv[10]) : 0;
         const fs::path intervention_dir = argc >= 12 ? fs::path(argv[11]) : fs::path();
         const int intervention_pass = argc == 13 ? std::stoi(argv[12]) : passes;
+        const bool parameter_gain = !intervention_dir.empty() && fs::is_regular_file(intervention_dir / "q-gain-rank-one");
         const fs::path out = argv[8];
         const std::string load_mode = argv[9];
         const std::map<std::string, llama_load_mode> load_modes = {
@@ -282,7 +350,8 @@ int main(int argc, char **argv) {
         if (passes < 1 || passes > 6 || layers < 0 || layers > 256 || new_tokens < 0 || new_tokens > 384
                 || load_modes.find(load_mode) == load_modes.end() || fs::exists(out)
                 || (argc >= 12 && (intervention_dir.empty() || !fs::is_directory(intervention_dir) || !new_tokens
-                    || intervention_pass < 1 || intervention_pass > passes))) {
+                    || intervention_pass < 1 || intervention_pass > passes))
+                || (parameter_gain && intervention_pass < 2)) {
             throw std::runtime_error("Invalid loop, placement, load mode, or output path");
         }
         std::vector<fs::path> prompts;
@@ -335,7 +404,7 @@ int main(int argc, char **argv) {
         config.n_threads_batch = 3;
         config.n_seq_max = 1;
         fs::create_directories(out);
-        Trace trace(out, passes, intervention_pass);
+        Trace trace(out, passes, intervention_pass, parameter_gain);
         config.cb_eval = observe;
         config.cb_eval_user_data = &trace;
         std::unique_ptr<llama_context, decltype(&llama_free)> context(
@@ -346,9 +415,10 @@ int main(int argc, char **argv) {
         std::ofstream progress(out / "completed.tsv");
         progress << "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n" << std::flush;
         std::ofstream config_file(out / "native-config.tsv");
-        config_file << "passes\tmax_new_tokens\tcontext\trequested_load_mode\tintervention_pass\n"
+        config_file << "passes\tmax_new_tokens\tcontext\trequested_load_mode\tintervention_pass\tintervention_operator\n"
                     << passes << '\t' << new_tokens << '\t' << CONTEXT << '\t' << load_mode << '\t'
-                    << (intervention_dir.empty() ? 0 : intervention_pass) << '\n';
+                    << (intervention_dir.empty() ? 0 : intervention_pass) << '\t'
+                    << (parameter_gain ? "rank_one_q_gain" : "additive_sae_direction") << '\n';
         config_file.close();
         if (!progress || !config_file) {
             throw std::runtime_error("Could not write native execution metadata");
@@ -356,7 +426,7 @@ int main(int argc, char **argv) {
         std::ofstream interventions;
         if (!intervention_dir.empty()) {
             interventions.open(out / "interventions.tsv");
-            interventions << "sample_key\tapplied\tprefill_token\trealized_l2\n" << std::flush;
+            interventions << "sample_key\tapplied\tprefill_token\trealized_l2\tprojected_delta_l2\n" << std::flush;
             interventions.precision(17);
             if (!interventions) {
                 throw std::runtime_error("Could not open the intervention receipt");
@@ -371,9 +441,11 @@ int main(int argc, char **argv) {
                 throw std::runtime_error("Combined prompt and generation budget exceeds context: " + trace.key);
             }
             if (!intervention_dir.empty()) {
-                trace.readout_delta = load_delta(intervention_dir / (trace.key + ".delta.f32"));
+                trace.readout_delta = load_delta(intervention_dir / (trace.key + ".delta.f32"),
+                                                 WIDTH + (parameter_gain ? GAIN_RANK : 0));
                 trace.intervention_token = static_cast<int>(tokens.size()) - 1;
                 trace.realized_dose = 0;
+                trace.projected_delta = 0;
                 trace.intervention_applied = false;
             }
             decode(context.get(), trace, tokens);
@@ -396,7 +468,8 @@ int main(int argc, char **argv) {
             trace.index.flush();
             if (interventions.is_open()) {
                 interventions << trace.key << '\t' << int(trace.intervention_applied) << '\t'
-                              << trace.intervention_token << '\t' << trace.realized_dose << '\n' << std::flush;
+                              << trace.intervention_token << '\t' << trace.realized_dose << '\t'
+                              << trace.projected_delta << '\n' << std::flush;
                 if (!interventions) {
                     throw std::runtime_error("Could not publish the intervention receipt");
                 }

@@ -21,6 +21,40 @@ from .inkling_trace import MAX_TOKENS, SHA256, WIDTH, boundary_sites, native_pro
 from .tasks import load_suite, public_task, verify
 
 ARMS = ("untreated", "sham", "matched_random", "component")
+ACTIVATION_OPERATOR = "additive_sae_direction"
+PARAMETER_OPERATOR = "rank_one_q_gain"
+GAIN_TENSOR = "blk.6.loop_q_ctrl_gain.weight"
+GAIN_RANK = 64
+
+
+def _parameter_directions(
+    preflight: Path, feature: int, weights_sha256: str, dictionary_sha256: str, trace_sha256: str, coefficient: int,
+):
+    manifest = preflight / "manifest.json"
+    factors = preflight / "rank-one-factors.npz"
+    report = _manifest(manifest)
+    if (report["schema_version"] != "rlt_gym.inkling_native_parameter_preflight.v1"
+            or report["feature"] != feature or report["parameter_target"] != GAIN_TENSOR
+            or report["checkpoint_sha256"] != weights_sha256 or report["factors_sha256"] != sha256_file(factors)
+            or report["dictionary_sha256"] != dictionary_sha256 or report["trace_manifest_sha256"] != trace_sha256):
+        raise ValueError("query-gain factors do not match the frozen weights and SAE feature")
+    with np.load(factors, allow_pickle=False) as data:
+        left, random, right = (data[name].astype(np.float64) for name in
+                               ("selected_output", "matched_random_output", "shared_input"))
+        dose = float(data["scale"])
+    if (left.shape != (WIDTH,) or random.shape != (WIDTH,) or right.shape != (GAIN_RANK,)
+            or any(not np.isclose(np.linalg.norm(vector), 1) for vector in (left, random, right))
+            or not np.isclose(left @ random, 0, atol=1e-6)
+            or not math.isfinite(dose) or dose <= 0 or dose != report["factor_frobenius_dose"]):
+        raise ValueError("invalid matched query-gain factors")
+    return {
+        "sham": np.zeros(WIDTH + GAIN_RANK),
+        "matched_random": np.concatenate((coefficient * dose * random, right)),
+        "component": np.concatenate((coefficient * dose * left, right)),
+    }, dose, {
+        "parameter_preflight_sha256": sha256_file(manifest), "parameter_target": GAIN_TENSOR,
+        "parameter_coefficient": coefficient,
+    }
 
 
 def _final_pass_states(run: Path, completed: list[dict]) -> dict[str, np.ndarray]:
@@ -51,9 +85,11 @@ def _final_pass_states(run: Path, completed: list[dict]) -> dict[str, np.ndarray
 
 def stage_trial(
     suite: Path, sae: Path, screened: Path, out: Path, *, roots: int = 4, seed: int = 7,
+    parameter_preflight: Path | None = None, parameter_coefficient: int = 1,
 ) -> dict:
-    if not 1 <= roots <= 12:
-        raise ValueError("invalid intervention root budget")
+    if (not 1 <= roots <= 12 or parameter_coefficient not in (-1, 1)
+            or (parameter_preflight is None and parameter_coefficient != 1)):
+        raise ValueError("invalid intervention root budget or parameter coefficient")
     shortlist_path = screened / "manifest.json"
     shortlist = _manifest(shortlist_path)
     if (shortlist.get("schema_version") != "rlt_gym.inkling_vpd_feature_screen.v1"
@@ -67,17 +103,30 @@ def stage_trial(
         raise ValueError("intervention needs an admitted feature and its original dictionary")
     feature = shortlist["admitted_features"][0]
     selected = next(row for row in shortlist["features"] if row["feature"] == feature)
+    fitted = _manifest(sae / "manifest.json")
     delta = -0.25 * float(selected["training_mean_difference"])
-    with np.load(dictionary) as data:
-        axis = data["decoder"][feature].astype(np.float64)
-    norm = np.linalg.norm(axis)
-    if axis.shape != (WIDTH,) or not math.isfinite(norm) or norm <= 0 or not math.isfinite(delta) or delta == 0:
-        raise ValueError("invalid feature direction or dose")
-    axis /= norm
-    vector = np.random.default_rng(seed).standard_normal(WIDTH)
-    vector -= axis * (vector @ axis)
-    vector *= abs(delta) / np.linalg.norm(vector)
-    directions = {"sham": np.zeros(WIDTH), "matched_random": vector, "component": axis * delta}
+    parameter_receipt = {}
+    if parameter_preflight is None:
+        with np.load(dictionary, allow_pickle=False) as data:
+            axis = data["decoder"][feature].astype(np.float64)
+        norm = np.linalg.norm(axis)
+        if axis.shape != (WIDTH,) or not math.isfinite(norm) or norm <= 0 or not math.isfinite(delta) or delta == 0:
+            raise ValueError("invalid feature direction or dose")
+        axis /= norm
+        vector = np.random.default_rng(seed).standard_normal(WIDTH)
+        vector -= axis * (vector @ axis)
+        dose = abs(delta)
+        vector *= dose / np.linalg.norm(vector)
+        directions = {"sham": np.zeros(WIDTH), "matched_random": vector, "component": axis * delta}
+        operator = ACTIVATION_OPERATOR
+    else:
+        if target_pass != 2:
+            raise ValueError("query-gain factors are fitted for the second core pass")
+        directions, dose, parameter_receipt = _parameter_directions(
+            parameter_preflight, feature, fitted["weights_sha256"], shortlist["dictionary_sha256"],
+            shortlist["position_trace_sha256"], parameter_coefficient,
+        )
+        operator = PARAMETER_OPERATOR
 
     suite_file = _suite_file(suite)
     _, tasks = load_suite(suite_file)
@@ -94,6 +143,8 @@ def stage_trial(
     prompt_dir, vector_dir = out / "prompts", out / "deltas"
     prompt_dir.mkdir()
     vector_dir.mkdir()
+    if operator == PARAMETER_OPERATOR:
+        (vector_dir / "q-gain-rank-one").write_text(GAIN_TENSOR + "\n", encoding="ascii")
     rows = []
     for task in chosen:
         content = native_prompt({"context": {"task": public_task(task), "history": []}})
@@ -112,15 +163,16 @@ def stage_trial(
                 "prompt_sha256": sha256_file(prompt), "delta_sha256": vector_hash,
             })
     donor = out / "training-contrast.json"
-    dump_structured(donor, {"feature": feature, "coefficient": delta, "source": selected,
-                            "training_pairs": shortlist["train_pairs_by_root"]})
-    fitted = _manifest(sae / "manifest.json")
+    coefficient = parameter_coefficient if operator == PARAMETER_OPERATOR else delta
+    dump_structured(donor, {"feature": feature, "coefficient": coefficient, "source": selected,
+                            "training_pairs": shortlist["train_pairs_by_root"], **parameter_receipt})
     result = {
         "schema_version": "rlt_gym.inkling_feature_trial.v1", "feature": feature, "seed": seed,
-        "intervention_pass": target_pass,
+        "intervention_pass": target_pass, "intervention_operator": operator,
         "suite_sha256": sha256_file(suite_file), "selection_receipt_sha256": sha256_file(shortlist_path),
         "donor_receipt_sha256": sha256_file(donor), "dictionary_sha256": sha256_file(dictionary),
-        "requested_dose": abs(delta), "rows": rows, "weights_sha256": fitted["weights_sha256"],
+        "requested_dose": dose, "rows": rows, "weights_sha256": fitted["weights_sha256"],
+        **parameter_receipt,
     }
     dump_structured(out / "manifest.json", result)
     return result
@@ -136,12 +188,20 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
         raise ValueError("invalid intervention provenance")
     config = _finished_rows(run / "native-config.tsv")
     target_pass = plan.get("intervention_pass", 3)
+    operator = plan.get("intervention_operator", ACTIVATION_OPERATOR)
     if (target_pass not in (2, 3) or len(config) != 1 or config[0]["passes"] != "3"
             or int(config[0].get("intervention_pass", "3")) != target_pass
+            or operator not in (ACTIVATION_OPERATOR, PARAMETER_OPERATOR)
+            or config[0].get("intervention_operator", ACTIVATION_OPERATOR) != operator
             or int(config[0]["context"]) != MAX_TOKENS
             or not 1 <= int(config[0]["max_new_tokens"]) <= 384):
         raise ValueError("intervention run did not use the registered depth and intervention pass")
     target_site = boundary_sites(3)[target_pass]
+    component = f"sae:{plan['feature']}"
+    if operator == PARAMETER_OPERATOR:
+        if target_pass != 2 or plan["parameter_target"] != GAIN_TENSOR:
+            raise ValueError("invalid query-gain target")
+        component = f"{GAIN_TENSOR}/{component}"
     budget = int(config[0]["max_new_tokens"])
     completed = _finished_rows(run / "completed.tsv")
     patched = _finished_rows(run / "interventions.tsv")
@@ -159,6 +219,7 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
         task = tasks[expected["task_id"]]
         delta = trial / "deltas" / f"{key}.delta.f32"
         dose = float(receipt["realized_l2"])
+        projected = float(receipt.get("projected_delta_l2", "nan" if operator == PARAMETER_OPERATOR else dose))
         input_tokens, output_tokens = int(completion["prompt_tokens"]), int(completion["generated_tokens"])
         if (arm not in ARMS or receipt["applied"] != ("0" if arm == "untreated" else "1")
                 or int(receipt["prefill_token"]) != input_tokens - 1
@@ -169,6 +230,8 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
                 or sha256_file(trial / "prompts" / f"{key}.txt") != expected["prompt_sha256"]
                 or (sha256_file(delta) if delta.is_file() else None) != expected["delta_sha256"]
                 or not math.isfinite(dose)
+                or not math.isfinite(projected) or projected < 0
+                or (arm in ARMS[:2] and projected != 0)
                 or not math.isclose(dose, plan["requested_dose"] if arm in ARMS[2:] else 0, rel_tol=1e-5)):
             raise ValueError("the realized intervention differs from its frozen arm")
         reply = run / f"{key}.reply"
@@ -182,9 +245,10 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
         verdict = verify(task, answer) if parsed else {"passed": False, "status": "parse_failure"}
         row = {
             **expected, "verdict": verdict, "reply_sha256": sha256_file(reply), "realized_absolute_dose": dose,
+            "projected_delta_l2": projected,
             "prefill_token": int(receipt["prefill_token"]), "checkpoint_sha256": plan["weights_sha256"],
             "adapter_sha256": native_program_sha256, "readout_site": target_site,
-            "operator": "additive_sae_direction", "component": f"sae:{plan['feature']}",
+            "operator": operator, "component": component,
             "placement": "last_prefill_token", "visit": target_pass - 1, "planned_depth": 3,
             "feedback_mode": "native_inkling", "seed": plan["seed"],
             "donor_receipt_sha256": plan["donor_receipt_sha256"],
@@ -213,7 +277,7 @@ def score_trial(suite: Path, trial: Path, run: Path, out: Path, *, native_progra
     result = {
         "schema_version": "rlt_gym.inkling_feature_trial_score.v1",
         "plan_sha256": sha256_file(trial / "manifest.json"), "feature": plan["feature"],
-        "intervention_pass": target_pass,
+        "intervention_pass": target_pass, "intervention_operator": operator,
         "planned_roots": len(plan["rows"]) // len(ARMS), "matched_roots": len(comparisons), "answers": len(rows),
         "verified_solves": {arm: sum(row["arms"][arm]["verdict"]["passed"] for row in comparisons) for arm in ARMS},
         "reply_changes_vs_untreated": {
@@ -236,6 +300,8 @@ def main() -> None:
         stage.add_argument(f"--{option}", type=Path, required=True)
     stage.add_argument("--roots", type=int, default=4)
     stage.add_argument("--seed", type=int, default=7)
+    stage.add_argument("--parameter-preflight", type=Path)
+    stage.add_argument("--parameter-coefficient", type=int, choices=(-1, 1), default=1)
     score = commands.add_parser("score")
     for option in ("suite", "trial", "run", "out"):
         score.add_argument(f"--{option}", type=Path, required=True)

@@ -310,8 +310,10 @@ def test_depth_threshold_optimizes_verified_solutions_then_cost() -> None:
     assert _threshold(strength, [pairs[0], pairs[0]]) > strength.max()
 
 
-@pytest.mark.parametrize("target_pass", [2, 3])
-def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(tmp_path: Path, target_pass: int) -> None:
+@pytest.mark.parametrize(("target_pass", "parameter"), [(2, False), (3, False), (2, True)])
+def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(
+    tmp_path: Path, target_pass: int, parameter: bool,
+) -> None:
     suite, _, tasks = _setup(tmp_path)
     sae = tmp_path / "sae"
     sae.mkdir()
@@ -323,13 +325,32 @@ def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(tmp_path: Pa
     dump_structured(screened / "manifest.json", {
         "schema_version": "rlt_gym.inkling_vpd_feature_screen.v1", "contrast": [1, target_pass],
         "token_selection": "last_prefill_token",
+        "position_trace_sha256": "3" * 64,
         "dictionary_sha256": sha256_file(dictionary), "admitted_features": [0],
         "features": [{"feature": 0, "training_mean_difference": 4.0}],
         "train_pairs_by_root": {}, "calibration_pairs_by_root": {},
     })
+    preflight = None
+    if parameter:
+        preflight = tmp_path / "factors"
+        preflight.mkdir()
+        factors = preflight / "rank-one-factors.npz"
+        np.savez(factors, selected_output=np.eye(1, WIDTH)[0], matched_random_output=np.eye(2, WIDTH)[1],
+                 shared_input=np.eye(1, 64)[0], scale=1)
+        dump_structured(preflight / "manifest.json", {
+            "schema_version": "rlt_gym.inkling_native_parameter_preflight.v1",
+            "feature": 0, "parameter_target": "blk.6.loop_q_ctrl_gain.weight",
+            "checkpoint_sha256": "1" * 64, "trace_manifest_sha256": "3" * 64,
+            "dictionary_sha256": sha256_file(dictionary), "factors_sha256": sha256_file(factors),
+            "factor_frobenius_dose": 1,
+        })
     trial = tmp_path / "trial"
-    plan = stage_trial(suite, sae, screened, trial, roots=1)
+    plan = stage_trial(suite, sae, screened, trial, roots=1, parameter_preflight=preflight,
+                       parameter_coefficient=-1 if parameter else 1)
     assert plan["intervention_pass"] == target_pass
+    if parameter:
+        delta = np.fromfile(trial / "deltas" / "003.delta.f32", dtype="<f4")
+        assert delta.shape == (WIDTH + 64,) and delta[0] == -1 and delta[WIDTH] == 1
     assert len({row["prompt_sha256"] for row in plan["rows"]}) == 1
     task = tasks[plan["rows"][0]["task_id"]]
     assert task["split"] == "ordinary_test"
@@ -338,11 +359,12 @@ def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(tmp_path: Pa
     config = run / "native-config.tsv"
     config.write_text("passes\tmax_new_tokens\tcontext\n3\t32\t1024\n", encoding="utf-8")
     progress = ["sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n"]
-    patches = ["sample_key\tapplied\tprefill_token\trealized_l2\n"]
+    patches = ["sample_key\tapplied\tprefill_token\trealized_l2\tprojected_delta_l2\n"]
     for row in plan["rows"]:
         key, arm = row["sample_key"], row["arm"]
         progress.append(f"{key}\t128\t8\tstop\t300\n")
-        patches.append(f"{key}\t{int(arm != 'untreated')}\t127\t{int(arm in {'component', 'matched_random'})}\n")
+        dose = int(arm in {"component", "matched_random"})
+        patches.append(f"{key}\t{int(arm != 'untreated')}\t127\t{dose}\t{3 * dose}\n")
         (run / f"{key}.reply").write_text(canonical_json(reference_answer(task)), encoding="utf-8")
     (run / "completed.tsv").write_text("".join(progress), encoding="utf-8")
     intervention_file = run / "interventions.tsv"
@@ -350,7 +372,11 @@ def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(tmp_path: Pa
     if target_pass == 2:
         with pytest.raises(ValueError, match="intervention pass"):
             score_trial(suite, trial, run, tmp_path / "wrong-pass", native_program_sha256="2" * 64)
-        config.write_text("passes\tmax_new_tokens\tcontext\tintervention_pass\n3\t32\t1024\t2\n", encoding="utf-8")
+        config.write_text(
+            "passes\tmax_new_tokens\tcontext\tintervention_pass\tintervention_operator\n"
+            f"3\t32\t1024\t2\t{plan['intervention_operator']}\n",
+            encoding="utf-8",
+        )
         header = "sample_key\tpass_index\ttensor\ttoken_index\n"
         (run / "rows.tsv").write_text(
             header + "".join(f"{row['sample_key']}\t3\tl_out-47\t127\n" for row in plan["rows"]),
@@ -364,9 +390,12 @@ def test_feature_trial_uses_fresh_prompts_and_matched_realized_dose(tmp_path: Pa
     assert result["bpd_mechanism_verified"] is False
     comparison = read_jsonl(tmp_path / "verified" / "comparisons.jsonl")[0]
     assert comparison["arms"]["component"]["visit"] == target_pass - 1
+    if parameter:
+        assert comparison["arms"]["component"]["operator"] == "rank_one_q_gain"
+        assert comparison["arms"]["component"]["projected_delta_l2"] == 3
     if target_pass == 2:
         assert comparison["final_pass_state_l2_vs_untreated"] == {"sham": 0.0, "matched_random": 2.0, "component": 3.0}
-    patches[-1] = "003\t1\t127\t0.5\n"
+    patches[-1] = "003\t1\t127\t0.5\t3\n"
     intervention_file.write_text("".join(patches), encoding="utf-8")
     with pytest.raises(ValueError, match="frozen arm"):
         score_trial(suite, trial, run, tmp_path / "rejected", native_program_sha256="2" * 64)

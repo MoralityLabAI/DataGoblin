@@ -380,6 +380,17 @@ command line. The default is the final pass. A pass-two perturbation keeps
 the decoder at depth three, and its matched comparisons report each arm's
 last-token state distance from untreated at pass three.
 
+For a signed query-gain parameter trial, stage the pass-two screen with
+`--parameter-preflight <frozen-factors-dir> --parameter-coefficient 1` or
+`--parameter-coefficient -1`. The preflight binds its rank-one factors
+to the checkpoint, dictionary and trace, with equal Frobenius doses for
+the selected and orthogonal random directions. At the registered token
+and pass, the executable adds the factorized parameter delta's product
+with the live gate input to the output of
+`blk.6.loop_q_ctrl_gain.weight`. This is equivalent to using perturbed
+weights for that matmul. The checkpoint stays read-only. The receipt
+records both the parameter dose and the realized projection change.
+
 The verifier checks each answer and enforces the existing BPD matched-arm
 contract on complete roots. This study supplies a signed SAE intervention
 receipt. Parameter-level VPD and BPD decomposition require their own
