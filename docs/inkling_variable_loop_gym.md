@@ -494,3 +494,6 @@ aligned and orthogonal directions. The same comparison is computed for
 the binary solve verdict. Paired rows record whether the untreated and
 sham replies agreed across both captures. Partial runs report their
 coverage and leave the mean contrast empty until a complete pair exists.
+
+The [native geometry report](inkling/bpd_geometry_pair.md) records the
+complete seven-root aligned and orthogonal comparison.
