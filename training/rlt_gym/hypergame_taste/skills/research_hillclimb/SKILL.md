@@ -36,6 +36,8 @@ Return one JSON object containing:
 
 For broader benchmarks, the action enum is supplied by the taskset. The policy may propose a new experiment only through the declared legal extension interface. A proposed experiment is a candidate; it must be checked by the environment before its usefulness becomes a verified claim.
 
+For the strategic research worlds, use `pilot`, `replicate`, `intervene:<mode>`, `publish:<mode>` or `abstain` according to the visible legal menu. The local model collector requests only the action field. An intervention tests the initially omitted mode, while a publication commits to one mode. Record the remaining credits and turns before proposing. Update the forecast after a probe exposes its observation. During controller training, use only a prior verifier acceptance or rejection as correction feedback. The grader retains exact action values, hidden truth and unused successor signals.
+
 ## Executable cycle
 
 1. **Observe.** Read the actor-specific predecision state and visible experiment history. Compute or estimate a belief state and record what evidence supports it. Keep objective outcomes, after-turn reveals, future publications and sealed checker labels outside the model prompt.

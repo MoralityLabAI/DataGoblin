@@ -1,6 +1,24 @@
 # K-depth Hypergames and Research Taste: RLT Gym
 
-**2026-11-21 status:** A CPU-only exact-reference collector is implemented on this branch. Its traces are synthetic controls, with no trained RLT or frontier teacher outputs claimed. The local hard-pool commit 4b88fa6 was absent from remote GitHub when this branch began.
+The strategic campaign, fitted CPU controller, and local-model runs are documented in the [experiment report](REPORT.md). The original binary-signal collector remains runnable and its archive format is frozen. The [Aleph hard-pool comparison](../hard_pool_proxy.md) includes the results recovered from local commit `4b88fa6` and its prerequisite.
+
+## Strategic research worlds
+
+`research_world.py` defines three candidate causal modes and an initial proposal pool that omits one. Each actor receives the previous endorsement and a private sensor reading. The actor's own trust, sensor weight and institutional incentive determine whether it endorses. The public model gives each nested view its own channel and ties it to its predecessor. A sequence of actors can be adversarial, and observational aliasing can make two causal modes indistinguishable until a probe separates them.
+
+Research decisions use a separate horizon of 2, 3 or 4 turns. The public vector has 140, 512 or 1024 coordinates. Dispersed parity gates change an experiment target, a probe cost, the payoff, or the time when the goal changes. The researcher can run a cheap pilot, replicate, propose a legal intervention on the missing mode, publish irrevocably or abstain. The evaluator draws all possible experiment streams when it freezes the world. It can execute a legal counterfactual with the same tape and action occurrence. The forward channel marginalizes actor observations and the Bellman solver uses integer probability weights. A separate rational enumerator checks sampled worlds at all dimensions. The two-ply and belief-blind controls test what shorter planning and a weaker observation contract cost.
+
+The six task families use different channel and payoff parameters in the same finite game. They are analogues for transferable decisions within each family. The strategic actors follow declared one-shot rules, and the trained head acts at the initial research fork. The simulator supplies neither open-ended research execution nor a general equilibrium solver. Out-of-pool proposals select a legal intervention or publication through the extension contract.
+
+## Data and model entry points
+
+Use `research_campaign` for matched strategic controls, `research_controller` for CPU fitting and paired evaluation, `research_teacher` for actual model calls, and `research_benchmarks format-training` for chat JSONL. Each training presentation uses one of six task formats. Replay regenerates the export ledger and checks every output row. Controller fitting and model requests use separate root namespaces. Keep the held-out key outside version control and leave private state, scored traces, and evaluator labels with the evaluator.
+
+The initial controller routes by task family, abstracts evidence into a public posterior and legal action features, then learns to revise proposals from verifier rejections. It starts in the native pool under the same visit and check limits as the corresponding controls. The route and evidence abstraction are CPU stand-ins for the planned TRM and LDT models.
+
+## External benchmark exchange
+
+The `research_benchmarks external` command accepts a source revision and its SHA-256. It writes separate evaluation inputs and labels for an authorized Taste-Bench research export and public rTaste `mves.csv`. Taste-Bench evaluates both option orders. rTaste preserves missing outcomes and identifies audited model labels as such. Both formats are evaluation-only. Taste-Bench requires upstream access. FrontierScience's release prohibits training use. Anthropic TASTE and TasteVal use their own access boundaries. See the crosswalk below for the separate PaperBench, Co-Scientist, AlphaEvolve, Prime Intellect, Atropos, Hermes and IdeaTaste contracts.
 
 ## What to train
 
@@ -25,7 +43,7 @@ A research agent estimates P(H1 | observations), then chooses publication of H0/
 | [HG-04](https://github.com/MoralityLabAI/GPTStoryworld/blob/main/verifiers_envs/storyworld-hypergames-env/HG04_RESULTS.md) | Observer-quotient sufficiency, source-hashed CPU checks, misleading objectives and information-loss controls |
 | [DataGoblin Aleph](../2026-11-21_aleph_proxy.md) | Verified repair, fitted candidate ordering and the check-every-visit comparator |
 
-HG-01 measures first- and second-order perception through p/p2. K>2 requires an explicitly defined generator of higher-order views and independent objective/subjective transition tables before drawing conclusions about real agents. This version supplies the former only for synthetic reports.
+HG-01 measures first- and second-order perception through p/p2. The strategic simulator uses a synthetic chain of observer-owned channels for higher-order views. A source-backed application needs native actor observations and legal successor receipts from the originating storyworld.
 
 ## External research-taste sources and interfaces
 
@@ -85,6 +103,6 @@ The companion [research-hillclimb skill](skills/research_hillclimb/SKILL.md) acc
 
 Build a compact ranker on the synthetic training forks and then collect independent teacher repairs. Compare against greedy, nested-belief-blind, always-probe, fixed-depth, learned-order check-each-visit and deferral policies on frozen roots. Track regret and realized utility with confidence intervals over root-level paired comparisons; record verifier calls, recurrent visits, research cost and family/K coverage.
 
-The next **serious Storyworld** suite needs source-locked actor-visible p/p2, higher-order belief maps, subjectively perceived action sets and legal successor tables, an independently controlled objective transition oracle, changing goals, irreversible effects, and research hypotheses whose value can be falsified by experiment. If a counterfactual transition is unavailable, classify that case as insufficient_counterfactual_data rather than fabricate a result. Test novel agent/goal/payoff templates and private held-out seeds, not merely reworded train cases.
+For transfer to native Storyworld data, use source-locked actor-visible p/p2 and the originating world's successor function. If an unobserved counterfactual cannot be executed from the source snapshot, classify that case as `insufficient_counterfactual_data`.
 
 Evidence class in this first branch is synthetic_exact_oracle; architecture_promotion_eligible remains false until a trained RLT meets the preregistered held-out improvement gates.

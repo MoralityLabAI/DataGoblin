@@ -87,6 +87,15 @@ jobs:
         run: >-
           python -m datagoblin.training_gym.rlt_gym.hypergame_taste
           --replay runs/rlt-ci/hypergame-taste
+      - name: Collect strategic research worlds including depth stress
+        run: >-
+          python -m datagoblin.training_gym.rlt_gym.research_campaign
+          --seed 23 --per-cell 3 --depths 0 1 2 4 8 12 16
+          --out runs/rlt-ci/strategic-research
+      - name: Replay strategic worlds and check independent references
+        run: >-
+          python -m datagoblin.training_gym.rlt_gym.research_campaign
+          --replay runs/rlt-ci/strategic-research
       - name: Retain collection receipts
         if: always()
         uses: actions/upload-artifact@v4
