@@ -9,6 +9,7 @@ from datagoblin.hashing import sha256_file
 from datagoblin.serialization import canonical_json, dump_structured
 from datagoblin.training_gym.rlt_feedback import MODES
 from datagoblin.training_gym.rlt_gym.inkling_holdout import score_holdout
+from datagoblin.training_gym.rlt_gym.inkling_live_routes import score_live_requests, stage_live_requests
 from datagoblin.training_gym.rlt_gym.inkling_prompt_router import (
     FEATURE_WIDTH,
     STUDENT_SCHEMA,
@@ -134,6 +135,49 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
     selected = replay["results"]["all"]["student"]
     assert selected["roots"] == 1 and selected["verified_correct"] == 1 and selected["model_calls"] == 1
     assert selected["layer_visit_token_proxy"] == 48 * 12
+    prior = tmp_path / "prior"
+    prior.mkdir()
+    earlier = [entry for entry in read_jsonl(out / "outcomes.jsonl") if entry["split"] == "ordinary_test"]
+    (prior / "outcomes.jsonl").write_text("".join(canonical_json(entry) + "\n" for entry in earlier), encoding="utf-8")
+    dump_structured(prior / "manifest.json", {
+        "schema_version": "rlt_gym.inkling_native_holdout_score.v1",
+        "holdout_plan_sha256": sha256_file(plan), "files": {"outcomes.jsonl": sha256_file(prior / "outcomes.jsonl")},
+    })
+    requests = tmp_path / "live-requests"
+    live = stage_live_requests(suite, holdout, routes, prior, requests)
+    assert live["planned_roots"] == 1
+    assert {group["policy"] for group in live["groups"]} == {"routed", "fixed_3"}
+    live_runs = tmp_path / "live-captures"
+    for group in live["groups"]:
+        assert group["rows"][0]["lineage_id"] == ood["lineage_id"]
+        capture = live_runs / group["group"]
+        raw = capture / "raw"
+        raw.mkdir(parents=True)
+        dump_structured(capture / "command.json", {
+            "request_plan_sha256": sha256_file(requests / "manifest.json"), "group": group["group"],
+            "passes": 3, "prompt_offset": 0, "load_mode": "mmap", "weights_sha256": "1" * 64,
+            "runtime_archive_sha256": "2" * 64, "native_program_sha256": "3" * 64,
+            "placement_sha256": "4" * 64, "runtime_llama_sha256": "5" * 64,
+        })
+        dump_structured(capture / "resource-receipt.json", {
+            "status": "complete", "launched": True, "wall_seconds": 2.0 if group["policy"] == "routed" else 3.0,
+        })
+        (raw / "native-config.tsv").write_text(
+            "passes\tmax_new_tokens\tcontext\trequested_load_mode\n3\t192\t1024\tmmap\n", encoding="utf-8",
+        )
+        (raw / "completed.tsv").write_text(
+            "sample_key\tprompt_tokens\tgenerated_tokens\tfinish_reason\telapsed_ms\n000\t10\t2\tstop\t100\n",
+            encoding="utf-8",
+        )
+        (raw / "000.reply").write_text(canonical_json({"candidate": reference_answer(ood)}), encoding="utf-8")
+        (raw / "native-complete.txt").write_text("", encoding="utf-8")
+    live_report = score_live_requests(
+        suite, holdout, routes, prior, requests, live_runs, reference, tmp_path / "live-score",
+    )
+    assert live_report["complete_pairing"]
+    assert live_report["results"]["all"]["fixed_3"]["verified_correct"] == 1
+    assert live_report["results"]["all"]["routed"]["model_calls"] == 1
+    assert live_report["model_wall_seconds_including_startup_and_retries"] == {"routed": 2.0, "fixed_3": 3.0}
     path.write_text("mutated prompt", encoding="utf-8")
     with pytest.raises(ValueError, match="differs from its original"):
         score_holdout(suite, holdout, runs, reference, fit_prompts, tmp_path / "rejected")

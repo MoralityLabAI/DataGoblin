@@ -406,6 +406,15 @@ per paired root and reports checker calls for those outputs.
     python -m datagoblin.training_gym.rlt_gym.inkling_prompt_router stage --suite <suite> --holdout <holdout-plan> --student <student> --out <routes>
     python -m datagoblin.training_gym.rlt_gym.inkling_prompt_router replay --routes <routes> --audit <native-audit> --out <replay>
 
+For a live comparison, stage the frozen router against fixed depth three
+on the same unobserved roots. Use the guarded native worker on each group
+directory. Save each terminal attempt's command and resource receipts
+beside its `raw` output. Report shared-context checker work, per-answer
+native timings, and total wall time including initialization and retries.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_live_routes stage --suite <suite> --holdout <holdout-plan> --routes <routes> --prior <earlier-audit> --out <live-requests>
+    python -m datagoblin.training_gym.rlt_gym.inkling_live_routes score --suite <suite> --holdout <holdout-plan> --routes <routes> --prior <earlier-audit> --requests <live-requests> --runs <live-captures> --reference <native-eval-02> --out <live-score>
+
 ### Matched SAE readout perturbation
 
 Screen the same token and core output that the executable will perturb.
