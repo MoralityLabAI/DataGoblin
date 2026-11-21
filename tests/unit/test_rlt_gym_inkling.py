@@ -98,6 +98,10 @@ def test_checked_depth_preference_and_fixture_provenance(tmp_path: Path) -> None
     assert manifest["stream_rows"]["outcomes"] == 14
     assert manifest["stream_rows"]["repairs"] == 7
     assert manifest["stream_rows"]["aleph"] == 0
+    assert manifest["paired_depths"][0]["higher_only"] == 7
+    assert len(manifest["paired_depths"][0]["families"]) == 7
+    assert all(row["depth_rescue"] and row["priority"] == "high"
+               for row in read_jsonl(tmp_path / "score" / "curriculum.jsonl"))
     records = read_jsonl(tmp_path / "score" / "sft.jsonl")
     assert {row["teacher_loop_passes"] for row in records} == {3}
     assert all(row["fixture"] and not row["student_training_eligible"] for row in records)
@@ -112,14 +116,15 @@ def test_capture_binds_model_identity_and_preserves_spent_tokens(tmp_path: Path,
     captures = tmp_path / "captures"
     first = read_jsonl(staged / "p01" / "requests.jsonl")[0]
     answer = canonical_json(reference_answer(frozen[first["task_id"]]))
+    shallow, deep = (f"{inkling.MODEL}#passes={passes}" for passes in (1, 3))
     replies = iter([
-        (inkling.MODEL, '{"not_the_answer":true}'), ("unexpected-model", answer),
-        (inkling.MODEL, answer), (inkling.MODEL, None),
+        (shallow, '{"not_the_answer":true}'), (deep, answer),
+        (deep, answer), (deep, None),
     ])
 
     def open_response(request, timeout):
         body = json.loads(request.data)
-        assert body["model"] == inkling.MODEL and timeout > 0
+        assert body["model"] in {shallow, deep} and timeout > 0
         model, content = next(replies)
         return BytesIO(canonical_json({
             "model": model, "usage": {"prompt_tokens": 25, "completion_tokens": 10},
@@ -129,7 +134,8 @@ def test_capture_binds_model_identity_and_preserves_spent_tokens(tmp_path: Path,
     monkeypatch.setattr(inkling.urllib.request, "build_opener", lambda *_: SimpleNamespace(open=open_response))
     for passes in (1, 3):
         capture(staged, captures / f"p{passes:02d}", passes=passes, server_loop_passes=passes,
-                max_requests=2, weights_revision="fixture-in-test")
+                served_model=f"{inkling.MODEL}#passes={passes}", max_requests=2,
+                weights_revision="fixture-in-test", weights_artifact="test-artifact", runtime_version="test-version")
     out = tmp_path / "score"
     assert score(staged, captures, suite, out)["preference_pairs"] == 1
     manifest = json.loads((out / "manifest.json").read_text())
@@ -137,9 +143,24 @@ def test_capture_binds_model_identity_and_preserves_spent_tokens(tmp_path: Path,
     assert [arm["verified_outcomes"] for arm in manifest["per_pass"]] == [1, 1]
     assert manifest["paired_depths"][0]["paired_verified_tasks"] == 1
     assert manifest["paired_depths"][0]["higher_only"] == 1
+    assert manifest["paired_depths"][0]["unpaired_tasks"] == 6
+    assert manifest["capture_controls"]["weights_artifact_operator_declared"] == "test-artifact"
+    checked, mismatched, *_ = read_jsonl(out / "depth_matrix.jsonl")
+    assert checked["verifier"]["status"] == "failed"
+    assert mismatched["reported_tokens"] == 35
+    assert mismatched["layer_visit_token_proxy"] is None
     rows = read_jsonl(out / "aleph.jsonl")
     assert {row["kind"] for row in rows} == {"sft", "outcomes", "repairs"}
     assert all(row["loss"]["boundary"] == "response_only" for row in rows)
+    repair = next(row for row in rows if row["kind"] == "repairs")
+    assert repair["input"]["history"][0]["feedback"]["status"] == "failed"
+    assert all("checker_code" in row["target"] for row in rows if row["kind"] == "outcomes")
+    manifest_path = captures / "p03" / "manifest.json"
+    arm = json.loads(manifest_path.read_text())
+    dump_structured(manifest_path, {**arm, "runtime_version_operator_declared": "different-version"})
+    with pytest.raises(ValueError, match="generation controls"):
+        score(staged, captures, suite, tmp_path / "reject_controls")
+    dump_structured(manifest_path, arm)
     observation_path = captures / "p01" / "observations.jsonl"
     observation_path.write_bytes(observation_path.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="observation digest"):
@@ -152,12 +173,15 @@ def test_hillclimb_selection_never_reads_test_splits(tmp_path: Path) -> None:
     rows = []
     for model_id in ("rlt_depth4", "ldt_tiny"):
         for task in cal:
+            answer = reference_answer(task)
+            visits = 2 if model_id == "ldt_tiny" else 4
             rows.append({
                 "model_id": model_id,
                 "task_id": task["task_id"],
                 "task_digest": task["task_digest"],
-                "visits": 2 if model_id == "ldt_tiny" else 4,
-                "candidate": reference_answer(task),
+                "visits": visits, "fit_depth": 2,
+                "visit_candidates": [answer, {}, answer, answer] if visits == 4 else [{}, answer],
+                "candidate": answer,
             })
     source = tmp_path / "predictions.jsonl"
     _write_jsonl(source, rows)
@@ -166,6 +190,10 @@ def test_hillclimb_selection_never_reads_test_splits(tmp_path: Path) -> None:
     report = json.loads((tmp_path / "ranks" / "rank.json").read_text())
     assert report["selection_only"] is True
     assert report["requires_fresh_confirmation"] == ["ordinary_test", "ood_test"]
+    direct, deep = report["ranked_candidates"]
+    assert direct["first_valid_visit_mean_one_based"] == 2 and direct["regression_tasks"] == 0
+    assert deep["first_valid_visit_mean_one_based"] == 1 and deep["regression_tasks"] == 7
+    assert deep["extrapolation_tasks"] == 7
     bad = [*rows, {
         "model_id": "rlt_depth4", "task_id": next(t for t in frozen if frozen[t]["split"] == "ood_test"),
         "task_digest": next(t["task_digest"] for t in frozen.values() if t["split"] == "ood_test"),

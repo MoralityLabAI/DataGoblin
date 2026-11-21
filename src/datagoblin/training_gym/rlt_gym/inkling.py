@@ -24,7 +24,7 @@ from datagoblin.serialization import canonical_json, dump_structured
 
 from .runner import read_jsonl
 from .tasks import load_suite, public_task, verify
-from .teachers import _balanced_tasks, _validate_episode, import_teacher_responses, prepare_teacher_batch
+from .teachers import _balanced_tasks, _history, _validate_episode, import_teacher_responses, prepare_teacher_batch
 
 MODEL = "thinkingmachines/TML-d24-varloop-research"
 SCHEMA = "rlt_gym.inkling_sweep.v1"
@@ -34,6 +34,10 @@ MAX_RESPONSE_BYTES = 262_144
 
 def _suite_file(path: Path) -> Path:
     return path / "manifest.json" if path.is_dir() else path
+
+
+def _teacher_model(model: str, passes: int) -> str:
+    return f"{model}#passes={passes}"
 
 
 def _new_dir(path: Path) -> None:
@@ -81,7 +85,7 @@ def audit_stage(stage_dir: Path) -> dict[str, Any]:
         if ([request["task_id"] for request in requests] != root["task_ids"]
                 or len(requests) != record["requests"] or not requests
                 or len({request["request_id"] for request in requests}) != len(requests)
-                or any(request["model"] != f"{root['model']}#passes={passes}" for request in requests)):
+                or any(request["model"] != _teacher_model(root["model"], passes) for request in requests)):
             raise ValueError("unexpected staged request identity or coverage")
         normalized = [{k: v for k, v in request.items() if k not in {"model", "request_id"}}
                       for request in requests]
@@ -117,7 +121,7 @@ def stage(
         # One generated answer at a fixed teacher architecture depth, not N revisions.
         prepare_teacher_batch(
             suite_file, out / name, provider="local",
-            model=f"{model}#passes={passes_count}", split=split,
+            model=_teacher_model(model, passes_count), split=split,
             task_ids=ids, max_visits=1,
         )
         batches[name] = {
@@ -189,7 +193,8 @@ def capture(
     share_cache: bool = False, max_requests: int = 28, max_tokens: int = 768,
     timeout_seconds: float = 90, max_wall_seconds: float = 900,
     dry_run: bool = False, api_key_env: str = "", runtime: str = "vllm",
-    weights_revision: str | None = None,
+    weights_revision: str | None = None, weights_artifact: str | None = None,
+    runtime_version: str | None = None,
 ) -> dict[str, Any]:
     """Call an operator-started local vLLM server, one architectural depth per process.
 
@@ -206,12 +211,14 @@ def capture(
         raise ValueError("max_tokens is out of bounds")
     if any(not math.isfinite(x) or x <= 0 for x in (timeout_seconds, max_wall_seconds)):
         raise ValueError("time budgets must be finite and positive")
-    if served_model != root["model"]:
+    depth_model = _teacher_model(root["model"], passes)
+    if served_model not in {root["model"], depth_model}:
         raise ValueError("served model must match staged identity")
-    if runtime not in {"vllm", "llama_cpp"} or (
-        weights_revision is not None and not 1 <= len(weights_revision) <= 200
+    if runtime not in {"vllm", "llama_cpp"} or any(
+        value is not None and (not isinstance(value, str) or not 1 <= len(value) <= 200)
+        for value in (weights_revision, weights_artifact, runtime_version)
     ):
-        raise ValueError("invalid runtime or weight revision")
+        raise ValueError("invalid runtime or weight provenance")
     if runtime == "llama_cpp" and (passes > 6 or share_cache):
         raise ValueError("released llama.cpp GGUF supports 1-6 passes with separate per-pass caches")
     endpoint = _endpoint(base_url)
@@ -223,6 +230,7 @@ def capture(
         "share_cache_operator_declared": share_cache, "server_configuration_verified": False,
         "model_requested": served_model, "endpoint": endpoint,
         "runtime_operator_declared": runtime, "weights_revision_operator_declared": weights_revision,
+        "weights_artifact_operator_declared": weights_artifact, "runtime_version_operator_declared": runtime_version,
         "temperature": 0,
         "max_tokens": max_tokens, "timeout_seconds": timeout_seconds,
         "max_wall_seconds": max_wall_seconds, "api_key_env_used": bool(api_key_env),
@@ -341,13 +349,25 @@ def _paired_depths(passes: list[int], matrix: list[dict]) -> list[dict]:
     for row in matrix:
         if row["status"] in {"passed", "failed"}:
             checked[row["passes"]][row["task_id"]] = row["passed"]
+    def transitions(lo: int, hi: int, task_ids: set[str]) -> dict:
+        shared = task_ids & checked[lo].keys() & checked[hi].keys()
+        pairs = Counter((checked[lo][key], checked[hi][key]) for key in shared)
+        return {
+            "staged_tasks": len(task_ids), "paired_verified_tasks": len(shared),
+            "lower_only": pairs[True, False], "higher_only": pairs[False, True],
+            "both_passed": pairs[True, True], "both_failed": pairs[False, False],
+            "unpaired_tasks": len(task_ids) - len(shared),
+        }
+
+    families: dict[str, set[str]] = defaultdict(set)
+    for row in matrix:
+        families[row["family"]].add(row["task_id"])
+    task_ids = set().union(*families.values())
     results = []
     for lo, hi in combinations(sorted(passes), 2):
-        shared = sorted(checked[lo].keys() & checked[hi].keys())
         results.append({
-            "lower_passes": lo, "higher_passes": hi, "paired_verified_tasks": len(shared),
-            "higher_only": sum(checked[hi][key] and not checked[lo][key] for key in shared),
-            "lower_only": sum(checked[lo][key] and not checked[hi][key] for key in shared),
+            "lower_passes": lo, "higher_passes": hi, **transitions(lo, hi, task_ids),
+            "families": {family: transitions(lo, hi, ids) for family, ids in sorted(families.items())},
         })
     return results
 
@@ -360,6 +380,16 @@ def _aleph_rows(rows: list[dict]) -> list[dict]:
         kind = {"verified_sft": "sft", "verified_repair": "repairs",
                 "pre_verdict_outcome": "outcomes"}[row["kind"]]
         root, context, target = row["lineage_id"], row["input"], row["target"]
+        context = {"history": [], **context}
+        if kind == "outcomes":
+            target = {**target, "checker_code": row["verifier"]["code"]}
+        if kind == "repairs":
+            context = {
+                "task": context["task"],
+                "history": _history([{
+                    "candidate": context["failed_candidate"], "verification": row["failed_verification"],
+                }]),
+            }
         result.append({
             "id": sha256_json([kind, root, context, target]), "kind": kind,
             "root": root, "family": row["family"], "split": row["split"],
@@ -404,8 +434,9 @@ def score(
         if not fixture and manifest.get("source_kind") != "local_operator_declared":
             raise ValueError("unknown capture provenance")
         if not fixture:
+            model_requested = manifest.get("model_requested")
             if (manifest.get("server_loop_passes_operator_declared") != p
-                    or manifest.get("model_requested") != root["model"]
+                    or model_requested not in {root["model"], _teacher_model(root["model"], p)}
                     or type(manifest.get("share_cache_operator_declared")) is not bool
                     or manifest.get("server_configuration_verified") is not False
                     or manifest.get("runtime_operator_declared") not in {"vllm", "llama_cpp"}
@@ -418,10 +449,12 @@ def score(
         arms.append((p, label, capture_dir, fixture, manifest))
     control_keys = (
         "source_kind", "share_cache_operator_declared", "runtime_operator_declared",
-        "weights_revision_operator_declared", "temperature", "max_tokens", "requests_planned",
+        "weights_revision_operator_declared", "weights_artifact_operator_declared",
+        "runtime_version_operator_declared", "temperature", "max_tokens", "requests_planned",
     )
     controls = {tuple(arm[4].get(key) for key in control_keys) for arm in arms}
-    if len(controls) != 1:
+    alias_modes = {arm[4].get("model_requested") == root["model"] for arm in arms if not arm[3]}
+    if len(controls) != 1 or len(alias_modes) > 1:
         raise ValueError("teacher arms change capture provenance or generation controls")
     _new_dir(out)
     for p, label, capture_dir, fixture, manifest in arms:
@@ -435,18 +468,22 @@ def score(
                 or {ep["task_id"] for ep in episodes} != set(root["task_ids"])):
             raise ValueError("incomplete depth matrix")
         counts: Counter[str] = Counter()
+        capture_errors: Counter[str] = Counter()
         known_tokens = 0
         reported_tokens = 0
         for ep in episodes:
             task = tasks[ep["task_id"]]
             _validate_episode(ep, task)
-            if task["split"] != root["split"] or ep["backend"]["model"] != f"{root['model']}#passes={p}":
+            if task["split"] != root["split"] or ep["backend"]["model"] != _teacher_model(root["model"], p):
                 raise ValueError("teacher model/pass identity mismatch")
             passed = ep["outcome"]["passed"]
             status = ep["outcome"]["status"]
             counts[status] += 1
             step = ep["steps"][0] if ep["steps"] else None
             observation = observations.get(task["task_id"], {})
+            capture_error = observation.get("error")
+            if capture_error is not None:
+                capture_errors[capture_error] += 1
             usage = (step or {}).get("usage", {}) if fixture else observation.get("usage", {})
             tokens = None
             if type(usage.get("input_tokens")) is int and type(usage.get("output_tokens")) is int:
@@ -464,9 +501,13 @@ def score(
                 "latency_seconds": observation.get("latency_seconds"),
                 "returned_model": observation.get("returned_model"),
                 "finish_reason": observation.get("finish_reason"),
+                "capture_error": capture_error,
+                "usage": usage or None,
                 "reported_tokens": tokens,
-                "layer_visit_token_proxy": (12 + 12 * p) * tokens if tokens is not None else None,
-                "episode_digest": ep["episode_digest"],
+                "layer_visit_token_proxy": (
+                    (12 + 12 * p) * tokens if tokens is not None and capture_error is None else None
+                ),
+                "episode_digest": ep["episode_digest"], "verifier": step["verification"] if step else None,
             })
         definitive = counts["passed"] + counts["failed"]
         per_pass.append({
@@ -477,9 +518,11 @@ def score(
             "accuracy_per_staged_task": counts["passed"] / len(episodes),
             "accuracy_on_verified_outcomes": counts["passed"] / definitive if definitive else None,
             "statuses": dict(counts), "reported_tokens": reported_tokens,
+            "capture_errors": dict(capture_errors),
             "capture_manifest_sha256": sha256_file(capture_dir / "manifest.json"),
             "elapsed_seconds": manifest.get("elapsed_seconds"),
             "usage_known": known_tokens, "extrapolative": p > 5,
+            "served_model_requested": manifest.get("model_requested"),
             "server_configuration_verified": False,
         })
     sft, preferences, curriculum, outcomes, repairs = [], [], [], [], []
@@ -517,11 +560,14 @@ def score(
                 "source_episode_digest": ep["episode_digest"],
                 "fixture": fixture, "student_training_eligible": not fixture,
             })
+        first_success = good[0][0] if good else None
+        rescued = first_success is not None and any(depth < first_success for depth, _, _ in bad)
         curriculum.append({
             **provenance,
-            "first_verified_pass": good[0][0] if good else None,
+            "first_verified_pass": first_success,
             "failed_passes": [p for p, _, _ in bad],
-            "priority": "high" if not good or good[0][0] > 3 else "regular",
+            "depth_rescue": rescued,
+            "priority": "high" if rescued or not good or good[0][0] > 3 else "regular",
             "all_passes_unsolved": len(bad) == len(attempts),
             "censored_passes": sorted(set(root["passes"]) - {d for d, _, _ in [*good, *bad]}),
             "fixture": attempts[0][2],
@@ -621,9 +667,26 @@ def hillclimb(suite: Path, predictions: Path, out: Path) -> dict[str, Any]:
         if latency is not None and (type(latency) not in {int, float} or not math.isfinite(latency)
                                     or latency < 0):
             raise ValueError("invalid latency_ms")
+        task = calibration[task_id]
+        trajectory = row.get("visit_candidates")
+        first_valid = None
+        regressed = None
+        if trajectory is None:
+            passed = verify(task, row.get("candidate"))["passed"]
+        else:
+            if (not isinstance(trajectory, list) or len(trajectory) != visits
+                    or canonical_json(trajectory[-1]) != canonical_json(row.get("candidate"))):
+                raise ValueError("visit_candidates must cover every visit and end with candidate")
+            outcomes = [verify(task, candidate)["passed"] for candidate in trajectory]
+            first_valid = next((index for index, valid in enumerate(outcomes, 1) if valid), None)
+            regressed = first_valid is not None and not all(outcomes[first_valid:])
+            passed = outcomes[-1]
+        fit_depth = row.get("fit_depth")
+        if fit_depth is not None and (type(fit_depth) is not int or not 1 <= fit_depth <= 128):
+            raise ValueError("invalid fit_depth")
         scores[model][task_id] = {
-            "passed": verify(calibration[task_id], row.get("candidate"))["passed"],
-            "visits": visits, "latency_ms": latency,
+            "passed": passed, "visits": visits, "latency_ms": latency,
+            "fit_depth": fit_depth, "first_valid": first_valid, "regressed": regressed,
         }
     if not scores:
         raise ValueError("predictions are empty")
@@ -634,11 +697,26 @@ def hillclimb(suite: Path, predictions: Path, out: Path) -> dict[str, Any]:
         values = list(predictions_by_task.values())
         correct = sum(row["passed"] for row in values)
         times = [row["latency_ms"] for row in values if row["latency_ms"] is not None]
+        with_trajectory = [row for row in values if row["regressed"] is not None]
+        first_valid = [row["first_valid"] for row in with_trajectory if row["first_valid"] is not None]
+        fit_depths = {row["fit_depth"] for row in values}
+        if len(fit_depths) != 1:
+            raise ValueError("fit_depth must be consistent across a student arm")
+        fit_depth = next(iter(fit_depths))
         ranked.append({
             "model_id": model, "verified_correct": correct, "tasks": len(values),
             "accuracy": correct / len(values),
             "mean_visits": sum(row["visits"] for row in values) / len(values),
+            "recurrent_visits": sum(row["visits"] for row in values),
             "mean_latency_ms_reported": sum(times) / len(times) if len(times) == len(values) else None,
+            "trajectory_tasks": len(with_trajectory), "ever_verified_correct": len(first_valid),
+            "first_valid_visit_mean_one_based": sum(first_valid) / len(first_valid) if first_valid else None,
+            "regression_tasks": sum(row["regressed"] for row in with_trajectory),
+            "terminal_failures_after_success": sum(
+                row["first_valid"] is not None and not row["passed"] for row in with_trajectory
+            ),
+            "fit_depth": fit_depth,
+            "extrapolation_tasks": sum(row["visits"] > fit_depth for row in values) if fit_depth is not None else None,
         })
     ranked.sort(key=lambda row: (-row["verified_correct"], row["mean_visits"], row["model_id"]))
     _new_dir(out)
@@ -680,6 +758,8 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--api-key-env", default="")
     c.add_argument("--runtime", choices=("vllm", "llama_cpp"), default="vllm")
     c.add_argument("--weights-revision")
+    c.add_argument("--weights-artifact")
+    c.add_argument("--runtime-version")
     r = commands.add_parser("score")
     r.add_argument("--stage", type=Path, required=True)
     r.add_argument("--captures", type=Path, required=True)
@@ -706,7 +786,8 @@ def main(argv: list[str] | None = None) -> int:
                 max_requests=args.max_requests, max_tokens=args.max_tokens,
                 timeout_seconds=args.timeout_seconds, max_wall_seconds=args.max_wall_seconds,
                 dry_run=args.dry_run, api_key_env=args.api_key_env, runtime=args.runtime,
-                weights_revision=args.weights_revision,
+                weights_revision=args.weights_revision, weights_artifact=args.weights_artifact,
+                runtime_version=args.runtime_version,
             )
         elif args.command == "score":
             value = score(args.stage, args.captures, args.suite, args.out,

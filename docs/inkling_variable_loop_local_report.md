@@ -135,3 +135,104 @@ See [the runbook](inkling_variable_loop_gym.md) for the exact 1-vs-3 and
 six-arm commands and the CPU control reproduction. Local output is in the
 `work/inkling-varloop-local-20261121` sibling directory, including full
 trajectories, replay receipts, frozen requests, and scored fixture data.
+
+## Follow-up on the Windows workstation
+
+The tracked source was recovered from the prior local copy and verified
+file-by-file against PR head `5a6e08030997c5536c6d9939f3d9ba45225595d0`.
+The editable development install succeeded in a fresh Python 3.12.10
+environment using cached wheels. The focused Inkling suite passed all
+six tests, and repository-wide Ruff passed. The full suite completed
+with 263 passed and 21 skipped in 60.06 seconds in the development-only
+environment. The run used a short, writable temp directory outside the
+checkout for Windows path length and custodian tests. The NDIF smoke
+script passed its CLI check.
+
+The seed-7 smoke suite regenerated 35 tasks and 14 matched requests across
+the seven training roots. Seed 91 regenerated 140 tasks and 168 requests
+in each of the separate train and calibration stages. The large stages
+each cover 28 roots at six depths. Ordered match checks passed for all
+three stages. The depth-bound IQ4_NL capture dry run planned seven calls
+and made zero.
+
+The synthetic verifier fixture produced 14 matrix rows, seven SFT rows,
+seven preferences, seven curriculum rows, 14 outcome rows, and seven
+repairs. It produced zero eligible SFT rows and zero Aleph training rows.
+The scorer now includes the verifier receipt with each outcome, breaks
+down paired gains and regressions by family, prioritizes verified rescues,
+and writes Aleph-compatible repair history and checker codes. Capture
+accepts a per-depth alias and keeps runtime version and weight artifact
+matched across arms. Identity mismatches retain reported usage without
+attributing it to the intended architecture.
+
+### Fresh CPU control replay
+
+A new suite used generator seed 19 with one root per family in each
+split. The proxy fit crossed direct, RLT, and matched damping at fit and
+runtime, using model seeds 7, 19, and 91 and depths 1, 2, 4, and 8.
+Calibration ran 770 episodes in 25.47 seconds. The six selected arms
+ran 252 ordinary and OOD episodes in 11.03 seconds of rollout time.
+All 1,022 trajectories replayed and 3,183 candidates were independently
+rechecked. Calibration rollout SHA-256 was
+`982a1e51b8b2ce5259b2a0d8f6bc3544190d689dc1292449aecf76410a9b45fc`.
+
+| Selected arm | Depth | Calibration solved / 21 | Ordinary solved / 21 | OOD solved / 21 | Held-out checks |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Direct fixed | 2 | 5 | 6 | 5 | 84 |
+| Direct early | 2 | 5 | 7 | 6 | 72 |
+| RLT fixed | 1 | 6 | 7 | 5 | 42 |
+| RLT early | 1 | 6 | 7 | 5 | 42 |
+| Damping fixed | 1 | 6 | 7 | 5 | 42 |
+| Damping early | 1 | 6 | 7 | 5 | 42 |
+
+For direct early, ordinary and OOD latency averaged 31.29 ms and
+29.76 ms per episode respectively. The proxy early-stop arm made one
+additional solve on the combined holdouts relative to either depth-1
+matched arm at a cost of 30 additional checks. Keep a depth-1 floor and
+compare confidence-gated second visits against a random gate with the
+same check allowance on new calibration roots. Freeze that threshold
+before ordinary and OOD confirmation. The held-out episodes share roots
+across model seeds. These are CPU proxy results. Genuine teacher attempts
+and teacher-trained student fits remain at zero.
+
+### Hardware, collection, and instrumentation
+
+| Measurement | Windows workstation |
+| --- | --- |
+| NVIDIA driver / CUDA driver API | 577.05 / 12.9 |
+| RTX 5080 Laptop VRAM | 16,303 MiB total |
+| Free VRAM | 5,602 MiB initially, 15,915 MiB on the later sample |
+| Host RAM | 48,248 MiB visible, 12,298 MiB available on the later sample |
+| Host commit headroom | 24,556 MiB on the later sample |
+| Disk | 71.38 GiB available on the later sample |
+
+The native checkpoint requires a larger single-device memory budget.
+The 16.42 GiB IQ4_NL file also exceeds this GPU's total VRAM. The later
+CPU and GPU samples make partial offload worth testing with a compatible
+llama.cpp build and the runbook's one-stream, 4,096-token pilot. This
+shell could not resolve Hugging Face or PyPI, and no checkpoint cache
+or compatible runtime was confirmed. WSL returned access denied. No
+download started, no teacher server ran, and no unrelated GPU job was
+interrupted. This recheck retained about 11 MB of generated run data
+under the ignored `runs/inkling-recheck` directory.
+[Native checkpoint requirements](https://huggingface.co/thinkingmachines/TML-d24-varloop-research)
+
+NDIF documents a deployment of this exact research checkpoint. The
+deployment fixes the pass count for a remote trace. The optional smoke
+script uses one public prompt for either GPT-2 or the Inkling layer-17
+active-block readout. This shell could not install NNsight or resolve
+`api.ndif.us`, so no authenticated trace ran.
+[NDIF Inkling tracing and pass configuration](https://nnsight.net/blog/2026/11/20/opening-the-box-of-inkling-2-mini-using-nnsight-ndif/)
+
+The latest inherited Inkling check failed two seconds after creation.
+The job API returned `runner_id: 0`, an empty runner name, and
+`steps: []`. The logs returned `BlobNotFound`. This was a pre-runner
+failure. GitHub records an annotation, but the available job and logs
+endpoints do not expose its text, so the reason for declining assignment
+is unconfirmed.
+[Hosted run and job](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44875895278/job/136760385113)
+
+The [runbook](inkling_variable_loop_gym.md) contains the exact collection
+and scoring commands. Start with the seven-task 1-vs-3 pilot on a
+memory-suitable host and keep each arm's startup log with its receipt.
+Collect the large train and calibration stages into separate directories.
