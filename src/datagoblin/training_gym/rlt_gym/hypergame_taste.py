@@ -363,6 +363,8 @@ def replay_archive(folder: Path) -> dict:
     manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
     if manifest["schema"] != SCHEMA:
         raise ValueError("unexpected archive schema")
+    if manifest["source_sha256"] != _file_sha256(Path(__file__)):
+        raise ValueError("source changed since the frozen collection")
     for name, data in manifest["artifacts"].items():
         if _file_sha256(folder / name) != data["sha256"]:
             raise ValueError(f"archive hash mismatch: {name}")
@@ -387,6 +389,10 @@ def replay_archive(folder: Path) -> dict:
                 actions += len(got["events"])
         if traces.readline():
             raise ValueError("unexpected extra scored trace")
+    expected_roots = manifest["artifacts"]["public_tasks.jsonl"]["rows"]
+    expected_episodes = manifest["artifacts"]["rollouts_scored.jsonl"]["rows"]
+    if roots != expected_roots or episodes != expected_episodes:
+        raise ValueError("archive row count mismatch")
     return {"verified_roots": roots, "verified_rollouts": episodes, "verified_actions": actions}
 
 
