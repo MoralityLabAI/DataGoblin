@@ -281,6 +281,14 @@ headroom for the CPU buffers and still uses the same host and GPU memory
 guards. The native config records the requested mode. Check the llama.cpp
 load log for actual direct I/O and any fallback to buffered reads.
 
+On Windows, the optional `scripts/inkling_no_prefetch.patch` for
+llama.cpp `418fe97b5` keeps CPU-resident weights memory-mapped while
+skipping the full-file prefetch. Apply it to a local source copy and build
+the `llama` target against the matching portable GGML build. Set
+`DATAGOBLIN_SKIP_GGUF_PREFETCH=1` for the guarded `mmap` launch and
+confirm the loader reports that it disabled prefetch. Record the loaded
+`llama.dll` digest alongside the backend archive digest on each arm.
+
 The pass-0 record is the shared prelude output. The first core pass ends at
 `l_out-17`. Repeated core passes end at logical cache slots 35, 47 and later
 steps of 12 while reusing the original physical weights. The tracer checks

@@ -24,7 +24,9 @@ from .tasks import load_suite, public_task, verify
 
 DEPTHS = (1, 3, 6)
 SPLITS = ("ordinary_test", "ood_test")
-PROVENANCE = ("weights_sha256", "runtime_archive_sha256", "native_program_sha256", "placement_sha256")
+PROVENANCE = (
+    "weights_sha256", "runtime_archive_sha256", "runtime_llama_sha256", "native_program_sha256", "placement_sha256",
+)
 
 
 def audit_holdout_plan(suite: Path, holdout: Path) -> tuple[dict, dict, dict]:

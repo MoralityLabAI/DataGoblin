@@ -1,0 +1,15 @@
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -1 +1,2 @@
++#include <cstdlib>
+ #include "llama-model-loader.h"
+@@ -1505,2 +1506,9 @@
+ void llama_model_loader::init_mappings(bool prefetch, llama_mlocks * mlock_mmaps) {
++#ifdef _WIN32
++    const char * skip_prefetch = std::getenv("DATAGOBLIN_SKIP_GGUF_PREFETCH");
++    if (prefetch && use_mmap && skip_prefetch && std::string(skip_prefetch) == "1") {
++        LLAMA_LOG_INFO("%s: disabling whole-file GGUF prefetch for this Windows run\n", __func__);
++        prefetch = false;
++    }
++#endif
+     // note: read_lazy also requires mmap; this condition make sure it's usable even when --load-mode is not set to mmap

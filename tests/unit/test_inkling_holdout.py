@@ -70,7 +70,7 @@ def test_heldout_replay_checks_answers_and_charges_restarts(tmp_path: Path) -> N
         dump_structured(arm / "command.json", {
             "holdout_plan_sha256": sha256_file(plan), "batch": "batch-01", "passes": depth,
             "weights_sha256": "1" * 64, "runtime_archive_sha256": "2" * 64,
-            "native_program_sha256": "3" * 64, "placement_sha256": "4" * 64,
+            "native_program_sha256": "3" * 64, "placement_sha256": "4" * 64, "runtime_llama_sha256": "5" * 64,
         })
         (raw / "native-config.tsv").write_text(
             f"passes\tmax_new_tokens\tcontext\trequested_load_mode\n{depth}\t192\t1024\tmmap\n",
