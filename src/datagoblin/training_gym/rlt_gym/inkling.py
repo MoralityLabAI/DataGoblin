@@ -272,6 +272,7 @@ def score(
     _new_dir(out)
     grouped: dict[str, list[tuple[int, dict[str, Any], bool]]] = defaultdict(list)
     matrix, per_pass = [], []
+    cache_options: set[bool] = set()
     for p in root["passes"]:
         _, batch = _batch(stage_dir, p)
         label = f"p{p:02d}"
@@ -289,6 +290,14 @@ def score(
             raise ValueError("fixture capture requires explicit include_fixtures")
         if not fixture and manifest.get("source_kind") != "local_vllm_operator_declared":
             raise ValueError("unknown capture provenance")
+        if not fixture:
+            if (manifest.get("server_loop_passes_operator_declared") != p
+                    or manifest.get("model_requested") != root["model"]
+                    or type(manifest.get("share_cache_operator_declared")) is not bool):
+                raise ValueError("capture server model/cache/loop declaration mismatch")
+            cache_options.add(manifest["share_cache_operator_declared"])
+            if len(cache_options) > 1:
+                raise ValueError("comparison changes loop_share_cache across pass counts")
         import_teacher_responses(
             suite_file, stage_dir / label / "requests.jsonl",
             capture_dir / "responses.jsonl", out / label,
