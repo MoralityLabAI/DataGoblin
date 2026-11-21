@@ -93,6 +93,7 @@ def test_checked_depth_preference_and_fixture_provenance(tmp_path: Path) -> None
     records = read_jsonl(tmp_path / "score" / "sft.jsonl")
     assert {row["teacher_loop_passes"] for row in records} == {3}
     assert all(row["fixture"] and not row["student_training_eligible"] for row in records)
+    assert all("public_steps" not in row["target"] and row["teacher_public_steps_unverified"] for row in records)
     pairs = read_jsonl(tmp_path / "score" / "preferences.jsonl")
     assert all(row["chosen_verification"]["passed"] for row in pairs)
     assert all(not row["rejected_verification"]["passed"] for row in pairs)
