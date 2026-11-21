@@ -359,6 +359,23 @@ outputs and record both generations on escalated roots.
 
     python -m datagoblin.training_gym.rlt_gym.inkling_routing --prompts <prompts> --trace <three-pass-trace> --sae <sae> --heads <heads> --train <verified-train> --calibration <verified-calibration> --out <routing>
 
+### Held-out depth evaluation
+
+Use the frozen native holdout plan with ordinary and out-of-distribution
+test lineages. Run each staged batch at depths 1, 3 and 6 with the same
+checkpoint, prompt, placement and output budget. The scorer reads each
+arm from `<runs>/<batch>/p<depth>/raw` and checks the sibling
+`command.json` against the frozen plan and model provenance.
+
+    python -m datagoblin.training_gym.rlt_gym.inkling_holdout --suite <suite> --holdout <holdout-plan> --runs <runs> --reference <native-eval-02> --fit-prompts <fitting-prompts> --out <audit>
+
+The report scores durable partial results and compares depths on
+matched roots. It records the first successful depth, regressions,
+parser failures, and independent checker work. The frozen routing
+replay uses only the one-pass prelude state to choose a depth and
+charges both generations when it restarts at three. Test results are
+held in the evaluation audit.
+
 ### Matched SAE readout perturbation
 
 Screen the same token and core output that the executable will perturb.

@@ -71,6 +71,16 @@ def _threshold(strength: np.ndarray, pairs: list[tuple[dict, dict]]) -> float:
     return float(min(candidates, key=rank))
 
 
+def routing_strength(initial: np.ndarray, head: np.ndarray, mode: str) -> np.ndarray:
+    state = initial
+    for visit in range(3):
+        weight = feedback_weight(mode, visit, 3)
+        state = (1 - weight) * state + weight * (_design(state, visit, 3) @ head)
+        if visit == 0:
+            early = state
+    return np.linalg.norm(state - early, axis=1).astype(np.float64)
+
+
 def fit_depth_selector(
     prompts: Path, trace: Path, sae: Path, heads: Path, train: Path, calibration: Path, out: Path,
 ) -> dict:
@@ -109,15 +119,7 @@ def fit_depth_selector(
     fit = {}
     with np.load(head_file) as weights:
         for mode in MODES:
-            strengths = {}
-            for split, initial in prelude.items():
-                state = initial
-                for visit in range(3):
-                    eta = feedback_weight(mode, visit, 3)
-                    state = (1 - eta) * state + eta * (_design(state, visit, 3) @ weights[mode])
-                    if visit == 0:
-                        early = state
-                strengths[split] = np.linalg.norm(state - early, axis=1).astype(np.float64)
+            strengths = {split: routing_strength(initial, weights[mode], mode) for split, initial in prelude.items()}
             cut = _threshold(strengths["train"], pairs["train"])
             fit[mode] = {"threshold": cut,
                          **{split: _sum_choices(strength >= cut, pairs[split])
