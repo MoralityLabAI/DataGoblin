@@ -291,3 +291,10 @@ patches and lesions with sham and random-feature trials, then independently
 verify affected readouts. The supplied diagnostic reports local spectral
 and finite-dose directional gain. A sampled gain below one does not
 establish a contraction bound across states, passes or task distributions.
+
+
+## NNsight causal pass probes
+
+The pass-aware NNsight readout and matched intervention controls are documented
+in [nnsight_loop_probe.md](nnsight_loop_probe.md). These unverified mechanistic
+receipts are kept separate from teacher responses and student SFT labels.
