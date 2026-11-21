@@ -7,8 +7,11 @@ import os
 from pathlib import Path
 from queue import Empty, Full, Queue
 from threading import Thread
-from time import monotonic
+from time import monotonic, sleep
 from typing import TypedDict
+
+_NVML_ERROR_UNKNOWN = 999
+_RETRY_DELAY_SECONDS = 0.2
 
 
 class GpuSample(TypedDict):
@@ -34,9 +37,15 @@ class _Process(c.Structure):
     ]
 
 
+class _NvmlError(RuntimeError):
+    def __init__(self, name: str, status: int) -> None:
+        super().__init__(f"{name} returned NVML error {status}")
+        self.status = status
+
+
 def _check(name: str, status: int) -> None:
     if status:
-        raise RuntimeError(f"{name} returned NVML error {status}")
+        raise _NvmlError(name, status)
 
 
 class _Device:
@@ -79,6 +88,17 @@ class _Device:
         }
 
 
+def _read_fresh(device: _Device, deadline: float) -> GpuSample:
+    while monotonic() < deadline:
+        try:
+            return device.sample()
+        except _NvmlError as error:
+            if error.status != _NVML_ERROR_UNKNOWN or monotonic() + _RETRY_DELAY_SECONDS >= deadline:
+                raise
+            sleep(_RETRY_DELAY_SECONDS)
+    raise RuntimeError("NVIDIA telemetry reached the five-second deadline")
+
+
 class WindowsNvmlMonitor:
     """Read a fresh sample on demand. A hung driver call cannot hold the guard open."""
 
@@ -97,7 +117,7 @@ class WindowsNvmlMonitor:
             try:
                 if device is None:
                     device = _Device()
-                reply.put_nowait(device.sample())
+                reply.put_nowait(_read_fresh(device, deadline))
             except Exception as error:
                 reply.put_nowait(error)
 

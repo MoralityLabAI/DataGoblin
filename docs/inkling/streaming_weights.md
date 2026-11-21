@@ -107,7 +107,9 @@ of commit, and 1,800 MiB of VRAM. The job is capped at 19 GiB of commit
 and a 5.75 GiB native working set. Stop the owned process if another GPU
 compute job appears or fresh telemetry is unavailable. On a single-NVIDIA
 Windows host, `WindowsNvmlMonitor` reads fresh VRAM, utilization, and
-compute PIDs with a five-second deadline.
+compute PIDs with a five-second deadline. It retries intermittent
+NVML error 999 within that same deadline. A missing sample still stops
+the owned process.
 
 ## Verify the capture
 
