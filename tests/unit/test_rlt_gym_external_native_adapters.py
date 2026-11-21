@@ -7,10 +7,13 @@ import hashlib
 import pytest
 
 from datagoblin.training_gym.rlt_gym.external_checked_exit import (
-    SCHEMA, digest, replay_external_episode,
+    SCHEMA,
+    digest,
+    replay_external_episode,
 )
 from datagoblin.training_gym.rlt_gym.external_native_adapters import (
-    LeanKernelChecker, MCPStateChecker,
+    LeanKernelChecker,
+    MCPStateChecker,
 )
 
 SHA = hashlib.sha256(b"test-only lean certificate").hexdigest()
