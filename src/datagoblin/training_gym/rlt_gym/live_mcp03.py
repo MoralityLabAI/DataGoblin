@@ -103,10 +103,10 @@ def _tool(env: Any, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 
 def run(per_split: int, out: Path) -> dict[str, Any]:
     try:
-        from MCP.mcp03.env import CodeEnv
-        from MCP.mcp03.repo import snapshot_from_dir
         import MCP.mcp03.env as upstream_env
         import MCP.mcp03.repo as upstream_repo
+        from MCP.mcp03.env import CodeEnv
+        from MCP.mcp03.repo import snapshot_from_dir
     except ImportError as error:
         raise RuntimeError("pinned HybridTRMLDT MCP-03 source is required on PYTHONPATH") from error
     if out.exists():
