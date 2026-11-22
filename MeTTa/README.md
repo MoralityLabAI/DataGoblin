@@ -19,6 +19,13 @@ The goal is to teach DataGoblin how MeTTa's declarative facts, pattern matching,
 
 The catalog preserves the original files in their upstream repositories. It is a reproducible intake list, not a claim of 196 reviewed training programs. Source licenses and notices are linked in `ATTRIBUTION.md`.
 
+### Source-preserving reference samples
+
+`reference_samples/` contains **10 exact MIT-licensed upstream MeTTa programs (15,331 bytes)** from pinned interpreter test scripts and the official examples repository. These include symbol matching, backchaining, imported spaces, state handling, ECAN sketches, deontic rules and recursion examples. The code retains its original content and upstream license notices. `reference_samples/MANIFEST.json` binds every copied program to the pinned source Git blob, and the CI tests verify the bytes.
+
+These are small interpreter-learning fixtures, with native runtime execution left pending. The larger 196-file inventory remains a read-only source manifest for subsequent local harvest.
+
+
 ## Generate curation exercises without any upstream checkout
 
 Install the repository locally, then run:
