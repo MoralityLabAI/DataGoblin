@@ -19,8 +19,6 @@ from pathlib import Path
 from typing import Any
 
 from .mathcan_exact_oracle import (
-    LABELS,
-    REGIMES,
     SOURCE_COMMIT,
     check_corpus,
     encode,
