@@ -246,6 +246,8 @@ def verify_upstream(root: Path, lake_bin: Path) -> dict[str, Any]:
     ).strip()
     binary = Path(lean_bin) / "bin/lean"
     if not binary.is_file():
+        binary = binary.with_suffix(".exe")
+    if not binary.is_file():
         raise ValueError("pinned toolchain is missing compiler binary")
     return {
         "mathlib_commit": head, "lean_version": version,
@@ -270,7 +272,7 @@ class MathlibSession(LeanNativeSession):
         try:
             output = subprocess.run(
                 [str(self.lake_bin), "env", "lean", str(source.resolve())],
-                cwd=self.mathlib_root, capture_output=True, text=True, timeout=45,
+                cwd=self.mathlib_root, capture_output=True, encoding="utf-8", timeout=45,
             )
         except subprocess.TimeoutExpired:
             output = subprocess.CompletedProcess(
@@ -289,7 +291,7 @@ class MathlibSession(LeanNativeSession):
             *[f"  {line}" for line in body.splitlines()],
             f"#print axioms {name}",
         ]
-        target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        target.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
         return target
 
     def probe(self, sid: int) -> dict[str, Any]:
@@ -338,7 +340,7 @@ def export_sources(base: Path, roots: list[Root]) -> dict[str, str]:
             + "\n".join(f"  {line}" for line in root.prefix.splitlines())
             + "\n  trace_state\n"
         )
-        file.write_text(code)
+        file.write_text(code, encoding="utf-8", newline="\n")
         checksums[root.source_file] = sha(file.read_bytes())
     return checksums
 
