@@ -16,7 +16,8 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from .collect import ROOT, sha256_bytes
 
