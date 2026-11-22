@@ -1,0 +1,105 @@
+name: MeTTa-07 keyed finite-eval custody rehearsal
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/metta-keyed-finite-eval.yml'
+      - 'MeTTa/training_data/scripts/sealed_finite_eval.py'
+      - 'MeTTa/training_data/tests/test_sealed_finite_eval.py'
+      - 'MeTTa/training_data/SEALED_FINITE_EVAL_PROTOCOL.md'
+      - 'MeTTa/training_data/scripts/finite_semantic_oracle.py'
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/metta-keyed-finite-eval.yml'
+      - 'MeTTa/training_data/scripts/sealed_finite_eval.py'
+      - 'MeTTa/training_data/tests/test_sealed_finite_eval.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-dummy-key-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run no-secret scorer tests
+        run: |
+          python -m pip install 'ruff==0.17.6'
+          ruff check MeTTa/training_data/scripts/sealed_finite_eval.py \
+            MeTTa/training_data/tests/test_sealed_finite_eval.py
+          python -m unittest discover -s MeTTa/training_data/tests \
+            -p 'test_sealed_finite_eval.py' -v
+      - name: Rehearse commitments and negative controls with a public dummy key
+        run: |
+          mkdir -p runs/metta/keyed_public_fixture
+          python - <<'PY'
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          sys.path.insert(0, "MeTTa/training_data/scripts")
+          from finite_semantic_oracle import render
+          from sealed_finite_eval import challenge_bundle, prepare, score
+
+          key = b"PUBLIC-CI-ONLY-NO-SEALED-CLAIMS:" + b"X" * 48
+          with tempfile.TemporaryDirectory() as name:
+              p = Path(name)
+              secret = p / "key.bin"
+              challenge = p / "challenge.jsonl"
+              manifest = p / "commitment.json"
+              predictions = p / "predictions.jsonl"
+              aggregate = p / "aggregate.json"
+              secret.write_bytes(key)
+              prepare(secret, challenge, manifest, 12)
+              rows = [json.loads(line) for line in challenge.read_text().splitlines()]
+              _, _, answers = challenge_bundle(key, 12)
+              predictions.write_text("".join(
+                  json.dumps({
+                      "challenge_id": row["challenge_id"],
+                      "answers": [render(x) for x in answers[row["challenge_id"]]],
+                  }, sort_keys=True) + "\n"
+                  for row in rows
+              ))
+              positive = score(secret, challenge, manifest, predictions, aggregate)
+              assert positive["correct"] == 48
+              lines = predictions.read_text().splitlines()
+              modified = json.loads(lines[0])
+              modified["answers"] = ["Incorrect"]
+              lines[0] = json.dumps(modified, sort_keys=True)
+              predictions.write_text("\n".join(lines) + "\n")
+              negative = score(secret, challenge, manifest, predictions, aggregate)
+              assert negative["correct"] == 47
+              assert negative["incorrect_or_missing"] == 1
+              assert not negative["answers_written_to_report"]
+              assert not negative["secret_written_to_report"]
+          result = {
+              "schema_version": "metta07-public-dummy-custody-check-v1",
+              "synthetic_dummy_key": True,
+              "real_model_inference_executed": False,
+              "real_sealed_custody_attested": False,
+              "root_count": 12,
+              "challenge_count": 48,
+              "positive_control_correct": 48,
+              "mutated_negative_control_correct": 47,
+              "secret_or_answer_labels_in_artifact": False,
+              "training_ready": False,
+          }
+          Path("runs/metta/keyed_public_fixture/report.json").write_text(
+              json.dumps(result, sort_keys=True, indent=2) + "\n"
+          )
+          print(json.dumps(result, sort_keys=True))
+          PY
+      - name: Upload aggregate public rehearsal only
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta07-public-dummy-rehearsal
+          path: runs/metta/keyed_public_fixture/report.json
+          retention-days: 14
+          if-no-files-found: error
