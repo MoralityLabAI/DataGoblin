@@ -33,3 +33,15 @@ Store interpreter version, command, process exit status, stdout/stderr hashes, p
 ## Redistribution and safety
 
 The license directory preserves the upstream licenses and NOTICE files. Every source stays linked to its pinned repository revision. This dataset is public-code material and must not absorb credentials or private user data. The discovery catalog explicitly holds uncertain-license projects outside this snapshot.
+
+## Grow the collection under a budget
+
+The collector only accepts licensed repositories already listed in `discovery_catalog.json`, pins the existing seed commit, checks upstream Git blob digests, and defaults to a dry-run inventory. It deliberately skips large files, generated directories and bulk data paths unless explicitly enabled. All new annotations remain unexecuted and unassigned.
+
+```sh
+python Metta/training_data/scripts/crawl_repo.py --repo zariuq/CeTTa --max-files 100 --max-total-bytes 1000000
+python Metta/training_data/scripts/crawl_repo.py --repo zariuq/CeTTa --max-files 100 --max-total-bytes 1000000 --apply
+python Metta/training_data/scripts/corpus.py --json
+```
+
+Review each generated annotation and the actual program before promoting source language-modeling data; evaluate license and upstream-data-specific rights separately for graph imports. This collector intentionally makes no SFT/rollout verification claim.
