@@ -1,0 +1,106 @@
+name: RLT-HARD-02E kernel-negative List learned stopping
+
+on:
+  push:
+    branches: [research/rlt-hard02e-verified-list-stop-20261122]
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/hard02e_list_stop.py"
+      - "scripts/audit_rlt_hard02e.py"
+      - "tests/unit/test_rlt_hard02e_list_stop.py"
+      - "tests/unit/test_rlt_hard02e_audit.py"
+      - ".github/workflows/rlt-hard02e-verified-list.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/hard02e_list_stop.py"
+      - "scripts/audit_rlt_hard02e.py"
+      - "tests/unit/test_rlt_hard02e_list_stop.py"
+      - "tests/unit/test_rlt_hard02e_audit.py"
+      - ".github/workflows/rlt-hard02e-verified-list.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verified-list-stop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      LEAN_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU ranker and test dependencies
+        run: python -m pip install -e ".[dev,rlt-pilot]"
+      - name: Verify source-root / proof-stop data custody
+        run: |
+          python -m pytest -q \
+            tests/unit/test_rlt_hard02e_list_stop.py \
+            tests/unit/test_rlt_hard02e_audit.py
+      - name: Ruff
+        run: |
+          ruff check \
+            src/datagoblin/training_gym/rlt_gym/hard02e_list_stop.py \
+            scripts/audit_rlt_hard02e.py \
+            tests/unit/test_rlt_hard02e_list_stop.py \
+            tests/unit/test_rlt_hard02e_audit.py
+      - name: Install exact Lean 4.12.0 toolchain
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -fsSL \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.12.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - name: Pin exact Mathlib source commit and obtain cache
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dg-rlt-mathlib
+          git -C /tmp/dg-rlt-mathlib init -q
+          git -C /tmp/dg-rlt-mathlib remote add origin \
+            https://github.com/leanprover-community/mathlib4.git
+          git -C /tmp/dg-rlt-mathlib fetch -q --depth=1 origin \
+            809c3fb3b5c8f5d7dace56e200b426187516535a
+          git -C /tmp/dg-rlt-mathlib checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/dg-rlt-mathlib rev-parse HEAD)" = \
+            809c3fb3b5c8f5d7dace56e200b426187516535a
+          cd /tmp/dg-rlt-mathlib
+          timeout --signal=TERM --kill-after=15s 900s \
+            "$HOME/.elan/bin/lake" exe cache get
+      - name: Train CAL-frozen policies and check all native List menus
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=15s 1600s \
+            python -m datagoblin.training_gym.rlt_gym.hard02e_list_stop \
+            --lake "$HOME/.elan/bin/lake" \
+            --mathlib /tmp/dg-rlt-mathlib \
+            --source-seed 2026112247 --per-split 8 \
+            --out runs/rlt-hard02e-verified-list
+      - name: Independent checksum and native proof/stop replay audit
+        if: always() && github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          if [ -f runs/rlt-hard02e-verified-list/report.json ]; then
+            python scripts/audit_rlt_hard02e.py runs/rlt-hard02e-verified-list \
+              --out runs/rlt-hard02e-verified-list/independent_audit.json
+          else
+            echo "No complete native experiment report available"
+          fi
+      - name: Retain exact source, kernel receipts and independent audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02e-verified-list-dev
+          path: runs/rlt-hard02e-verified-list/
+          if-no-files-found: warn
+          retention-days: 21
