@@ -285,6 +285,7 @@ def run(
     native_report: list[dict[str, Any]] = []
     fitting: list[dict[str, Any]] = []
     cal: list[dict[str, Any]] = []
+    full_quality: dict[str, dict[str, Any]] = {}
     start = time.perf_counter()
     with tempfile.TemporaryDirectory(prefix="dg-rlt-hard02e-") as work:
         session = MathlibSession(lake, mathlib, Path(work), roots)
@@ -297,16 +298,40 @@ def run(
         all_probes = {}
         for idx, root in enumerate(roots, 1):
             all_probes[root.root_id] = session.probe(idx)
-        for split, destination in (("train", fitting), ("calibration", cal)):
+        # The evaluator checks every registered candidate, including held-out
+        # menus. These outcomes are withheld from the learned fit and selector.
+        for split in SPLITS:
             for root in (x for x in roots if x.split == split):
                 checks = [_check(checker, root, j) for j in range(BUDGET)]
-                destination.append({
+                row = {
                     "root": root, "split": split,
                     "goal_pp": all_probes[root.root_id]["goal_pp"],
                     "menu": root.menu, "checks": checks,
-                })
-        qa_train = sum(_labels_present(r["root"], r["checks"]) for r in fitting)
-        qa_cal = sum(_labels_present(r["root"], r["checks"]) for r in cal)
+                }
+                full_quality[root.root_id] = row
+                if split == "train":
+                    fitting.append(row)
+                elif split == "calibration":
+                    cal.append(row)
+        qa_by_split = {
+            split: {
+                "roots": sum(x.split == split for x in roots),
+                "actual_native_positive": sum(
+                    any(a["receipt"]["passed"] for a in r["checks"])
+                    for r in full_quality.values() if r["split"] == split
+                ),
+                "actually_exhausted": sum(
+                    not any(a["receipt"]["passed"] for a in r["checks"])
+                    for r in full_quality.values() if r["split"] == split
+                ),
+                "registered_menu_contract_passed": sum(
+                    _labels_present(r["root"], r["checks"])
+                    for r in full_quality.values() if r["split"] == split
+                ),
+            } for split in SPLITS
+        }
+        qa_train = qa_by_split["train"]["registered_menu_contract_passed"]
+        qa_cal = qa_by_split["calibration"]["registered_menu_contract_passed"]
         # Only native TRAIN transcripts are fed to the learned policies.
         words: tuple[str, ...] = ()
         content = fit_policy(fitting, words, semantic=True)
@@ -328,6 +353,16 @@ def run(
                         root, all_probes[root.root_id]["goal_pp"],
                         checker, arm, content, legacy, words, thresholds,
                     ))
+        # Native evaluation receipts must agree with the evaluator-owned
+        # exhaustive menu receipts, which the trained policy never receives.
+        for row in native_report:
+            reference = {
+                attempt["candidate_id"]: attempt["receipt"]
+                for attempt in full_quality[row["root_id"]]["checks"]
+            }
+            for attempt in row["attempts"]:
+                if attempt["receipt"] != reference[attempt["candidate_id"]]:
+                    raise ValueError("policy evaluation disagrees with held-out native QA")
         # Replay all taken actions from both learned policies in fresh Lean
         # processes. Compare verifier-owned receipts rather than claimed proof states.
         replay_counts = {arm: 0 for arm in ("content_learned", "legacy_learned")}
@@ -362,15 +397,14 @@ def run(
         "test_only_expected_witness": root.expected_witness,
         "test_only_suffix_length": root.suffix_len,
     }, sort_keys=True) + "\n" for root in roots), encoding="utf-8")
+    quality_file = out / "full_menu_quality.jsonl"
+    quality_file.write_text("".join(json.dumps({
+        "root_id": row["root"].root_id, "split": row["split"],
+        "attempts": row["checks"], "registered_witness": row["root"].expected_witness,
+        "native_contract_passed": _labels_present(row["root"], row["checks"]),
+    }, sort_keys=True) + "\n" for row in full_quality.values()), encoding="utf-8")
     receipt_file = out / "receipts.jsonl"
     with receipt_file.open("w", encoding="utf-8") as f:
-        for split, data in (("train", fitting), ("calibration", cal)):
-            for row in data:
-                f.write(json.dumps({
-                    "root_id": row["root"].root_id, "split": split,
-                    "arm": "full_menu_train" if split == "train" else "full_menu_cal",
-                    "attempts": row["checks"],
-                }, sort_keys=True) + "\n")
         for row in native_report:
             f.write(json.dumps(row, sort_keys=True) + "\n")
     summaries = {
@@ -400,6 +434,8 @@ def run(
         "verifier_sha256": verifier_sha,
         "source_roots": len(roots), "roots_per_split": per_split,
         "train": {"roots": len(fitting), "native_label_contracts_passed": qa_train},
+        "source_quality_by_split": qa_by_split,
+        "evaluator_only_complete_menu_checks": BUDGET * len(roots),
         "calibration": {
             "roots": len(cal), "native_label_contracts_passed": qa_cal,
             "thresholds": thresholds,
@@ -414,7 +450,10 @@ def run(
         "source_sha256": root_sha,
         "model_sha256": sha((out / "weights.json").read_bytes()),
         "elapsed_wall_seconds": round(time.perf_counter() - start, 6),
-        "quality_gate_passed": qa_train == len(fitting) and qa_cal == len(cal),
+        "quality_gate_passed": all(
+            row["registered_menu_contract_passed"] == per_split
+            for row in qa_by_split.values()
+        ),
         "limitations": [
             "generated_mathlib_List_length_congruences_only",
             "fixed_five_candidate_menu_with_cheap_symbolic_suffix_matching_baseline",
@@ -425,7 +464,9 @@ def run(
         ],
         "file_sha256": {
             name: sha((out / name).read_bytes())
-            for name in ("sources.jsonl", "receipts.jsonl", "weights.json")
+            for name in (
+                "sources.jsonl", "receipts.jsonl", "weights.json", "full_menu_quality.jsonl"
+            )
         },
     }
     (out / "report.json").write_text(json.dumps(report, sort_keys=True, indent=2) + "\n")
