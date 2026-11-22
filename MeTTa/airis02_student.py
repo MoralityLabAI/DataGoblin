@@ -21,7 +21,7 @@ from typing import Any
 
 import numpy as np
 
-from .airis02_fresh import ARMS, DEFAULT_OUT, canonical, digest
+from .airis02_fresh import ARMS, DEFAULT_OUT
 from .collect import sha256_bytes
 from .sft_oracle import edit, evaluate_subset, exact_optimum
 
