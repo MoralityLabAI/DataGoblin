@@ -5,6 +5,8 @@ on:
     branches: [data/metta-annotated-seed-20261122]
     paths:
       - '.github/workflows/metta-discovery-audit.yml'
+      - 'MeTTa/training_data/scripts/audit_discovery.py'
+      - 'MeTTa/training_data/tests/test_discovery.py'
 
 permissions:
   contents: write
