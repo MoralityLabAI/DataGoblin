@@ -23,6 +23,7 @@ from .sft_oracle import (
     exact_optimum,
     first_state,
     make_task,
+    next_edit,
     replay,
 )
 
@@ -87,6 +88,8 @@ def checked_training_row(
 ) -> dict[str, Any]:
     selected = step["selected"]
     chosen = step["action"]
+    if chosen != next_edit(selected, oracle["selected"]):
+        raise ValueError("teacher edit does not match canonical next action")
     wrong = reject_action(selected, chosen, task)
     if wrong == chosen:
         raise ValueError("preference candidate duplicates teacher edit")
@@ -253,6 +256,7 @@ def audit_bundle(out: Path, *, full_replay: bool = True) -> dict[str, Any]:
     split_roots: dict[str, str] = {}
     count = 0
     stop = 0
+    root_cache: dict[str, tuple[dict[str, Any], dict[str, Any], dict[int, dict[str, Any]]]] = {}
     for line in (out / "train_candidates.jsonl").read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
         root = row["root"]
@@ -266,9 +270,17 @@ def audit_bundle(out: Path, *, full_replay: bool = True) -> dict[str, Any]:
         if split_roots.setdefault(root, row["split"]) != row["split"]:
             raise ValueError("root crosses splits")
         if full_replay:
-            family, seed = root.split(":")[1:]
-            task = make_task(family, int(seed))
-            oracle = exact_optimum(task)
+            if root not in root_cache:
+                family, seed = root.split(":")[1:]
+                task = make_task(family, int(seed))
+                oracle = exact_optimum(task)
+                trace_by_step = {
+                    event["step"]: event for event in replay(
+                        task, first_state(task, int(seed)), oracle["selected"]
+                    )
+                }
+                root_cache[root] = (task, oracle, trace_by_step)
+            task, oracle, trace_by_step = root_cache[root]
             p = json.loads(row["messages"][0]["content"])
             selected = p["current_selected"]
             if p != prompt(task, selected):
@@ -276,11 +288,10 @@ def audit_bundle(out: Path, *, full_replay: bool = True) -> dict[str, Any]:
             chosen = json.loads(row["messages"][1]["content"])
             if chosen != row["preference"]["chosen"]:
                 raise ValueError("preference target differs from SFT completion")
-            rebuilt = checked_training_row(task, root, {
-                "selected": selected,
-                "action": chosen,
-                "step": row["presentation"],
-            }, oracle)
+            event = trace_by_step.get(row["presentation"])
+            if event is None or event["selected"] != selected or event["action"] != chosen:
+                raise ValueError("training presentation differs from canonical trajectory")
+            rebuilt = checked_training_row(task, root, event, oracle)
             if row != rebuilt:
                 raise ValueError("oracle target / receipt or recurrent labels differ on replay")
         count += 1
