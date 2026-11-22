@@ -1,0 +1,114 @@
+name: MeTTa-10 RAM-only TRM/LDT hill-climb and RLT traces
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/metta-ram-hillclimb.yml"
+      - "MeTTa/ram_hillclimb.py"
+      - "MeTTa/ram_hillclimb_native.py"
+      - "MeTTa/ram_hillclimb_export.py"
+      - "MeTTa/RAM_HILLCLIMB.md"
+      - "tests/unit/test_metta_ram_hillclimb.py"
+      - "MeTTa/airis02_student.py"
+      - "MeTTa/sft_oracle.py"
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/metta-ram-hillclimb.yml"
+      - "MeTTa/ram_hillclimb.py"
+      - "MeTTa/ram_hillclimb_native.py"
+      - "MeTTa/ram_hillclimb_export.py"
+      - "tests/unit/test_metta_ram_hillclimb.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-hillclimb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      CUDA_VISIBLE_DEVICES: "-1"
+      PYTHONHASHSEED: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install numerical CPU learner, native MeTTa and test tools
+        run: python -m pip install -e ".[dev]" 'hyperon==0.2.10'
+      - name: Enforce exact oracle and CPU research contracts
+        run: |
+          ruff check MeTTa/ram_hillclimb.py \
+            MeTTa/ram_hillclimb_native.py \
+            MeTTa/ram_hillclimb_export.py \
+            tests/unit/test_metta_ram_hillclimb.py
+          python -m pytest -q tests/unit/test_metta_ram_hillclimb.py
+      - name: Train two small CPU students and evaluate bounded teacher edits
+        run: |
+          set -euo pipefail
+          python -m MeTTa.ram_hillclimb \
+            --train-roots 3 --dev-roots 2 \
+            --max-proposals 4 --ram-limit-mib 8192 \
+            --out runs/metta/ram_hillclimb \
+            > runs_metta10_console.json
+          python -m MeTTa.ram_hillclimb_export \
+            --bundle runs/metta/ram_hillclimb
+          python -m MeTTa.ram_hillclimb_native \
+            --steps runs/metta/ram_hillclimb/hillclimb_steps.jsonl \
+            --out runs/metta/ram_hillclimb/native_proposal_receipt.json
+      - name: Inspect research custody, source exposure and native receipts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("runs/metta/ram_hillclimb")
+          r = json.loads((p / "report.json").read_text())
+          m = json.loads((p / "training_views_manifest.json").read_text())
+          n = json.loads((p / "native_proposal_receipt.json").read_text())
+          assert r["model_trained_on_cpu"] is True
+          assert r["gpu_required"] is False
+          assert r["observed_peak_rss_mib"] < 8192
+          assert r["proposals_executed"] == 4
+          assert r["public_test_roots_materialized"] == 0
+          assert r["ood_conflict_roots_materialized"] == 0
+          assert r["train_cases"] == r["train_repair_traces"]
+          assert r["max_source_presentations_per_root"] <= 4
+          assert r["training_ready"] is False
+          assert m["rows_per_view"] == r["train_cases"]
+          assert m["alternate_views_same_identity"] is True
+          assert m["consume_only_one_view_per_training_run"] is True
+          assert m["development_labels_exported"] is False
+          assert n["attempts"] == 4
+          assert n["native_matches"] == 4
+          assert n["scope"] == "proposal_fact_query_parsing_only"
+          for arm in ("trm", "ldt_proxy"):
+              assert r["training_arms"][arm]["model_trained"] is True
+              assert r["training_arms"][arm]["training_ready"] is False
+              assert r["training_arms"][arm]["dev_aggregate"]["cases"] == 10
+          assert r["training_arms"]["ldt_proxy"]["dev_aggregate"]["new_violation_additions"] == 0
+          print("CPU research-only results:", {
+              arm: r["training_arms"][arm]["dev_aggregate"]
+              for arm in ("trm", "ldt_proxy")
+          })
+          PY
+      - name: Archive synthetic trace/replay evidence only
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta10-cpu-hillclimb-research
+          path: |
+            runs/metta/ram_hillclimb/report.json
+            runs/metta/ram_hillclimb/hillclimb_steps.jsonl
+            runs/metta/ram_hillclimb/train_repair_traces.jsonl
+            runs/metta/ram_hillclimb/train_sft_alternate.jsonl
+            runs/metta/ram_hillclimb/train_rlt_alternate.jsonl
+            runs/metta/ram_hillclimb/training_views_manifest.json
+            runs/metta/ram_hillclimb/native_proposal_receipt.json
+            runs_metta10_console.json
+          retention-days: 14
+          if-no-files-found: error
