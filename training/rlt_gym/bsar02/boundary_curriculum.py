@@ -5,13 +5,14 @@ not the validity of unexecuted Lean proofs. Holdout by entire research round
 and by theorem name. Output is deterministic and safe to rebuild offline.
 """
 
+# ruff: noqa: RUF001  # Preserve original Navier–Stokes prompt wording.
+
 import argparse
 import hashlib
 import json
 import random
 from collections import defaultdict
 from pathlib import Path
-
 
 CATALOG = Path(__file__).with_name("six_round_catalog.json")
 SPLIT_PRIORITY = {"train": 0, "dev": 1, "test": 2}
