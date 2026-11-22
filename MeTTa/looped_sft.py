@@ -80,6 +80,25 @@ def selected_views(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [trace[index] for index in dict.fromkeys(stops)]
 
 
+def query_supervision(task: dict[str, Any], step_number: int) -> dict[str, Any]:
+    """Native-shaped MeTTa match query with an independently computed static target."""
+    skill = task["goals"][step_number % len(task["goals"])]
+    query = (
+        f"!(match &self (, (Provides $record {skill}) "
+        "(Eligible $record True)) $record)"
+    )
+    matches = sorted(
+        item["id"] for item in task["items"]
+        if item["eligible"] and skill in item["topics"]
+    )
+    return {
+        "query": query,
+        "expected_record_ids": matches,
+        "calculated_from": "source_structured_facts",
+        "verified_native_metta": False,
+    }
+
+
 def checked_training_row(
     task: dict[str, Any],
     root: str,
@@ -117,6 +136,7 @@ def checked_training_row(
             {"role": "assistant", "content": canon(action)},
         ],
         "objective": "SFT_NEXT_EDIT_AND_STOP",
+        "metta_query_supervision": query_supervision(task, step["step"]),
         "preference": {"chosen": action, "rejected": wrong},
         "recurrent_supervision": {
             "visible_step": step["step"],
