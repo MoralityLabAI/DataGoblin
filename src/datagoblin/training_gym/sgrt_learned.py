@@ -307,7 +307,7 @@ def ranked_candidates(
 
 
 def evaluate(
-    trained: dict[str, LowRankHead], *, eval_roots: int = 64, budget: int = 8
+    trained: dict[str, LowRankHead], *, eval_roots: int = 64, budget: int = 8, eval_seed: int = PUBLIC_EVAL_SEED
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     if not 4 <= eval_roots <= 256 or not 1 <= budget <= 16:
         raise ValueError("eval roots 4..256, candidate budget 1..16")
@@ -315,7 +315,7 @@ def evaluate(
         raise ValueError("all registered trained arms are required")
     rows: list[dict[str, Any]] = []
     for index in range(eval_roots):
-        task = make_task(seed=PUBLIC_EVAL_SEED, root=index)
+        task = make_task(seed=eval_seed, root=index)
         public = task.public()
         group = "family_ood_mixed" if task.family == "mixed" else "new_roots_seen_families"
         outcomes = {}
@@ -353,6 +353,39 @@ def evaluate(
     return rows, report
 
 
+
+def paired_contrasts(rows: list[dict[str, Any]], *, replicates: int = 1024) -> dict[str, Any]:
+    """Root-paired exploratory bootstrap; fixed RNG and no selection on outputs."""
+    report: dict[str, Any] = {}
+    baseline = "semantic_lowrank"
+    for group in ("new_roots_seen_families", "family_ood_mixed", "all"):
+        eligible = [r for r in rows if group == "all" or r["group"] == group]
+        report[group] = {}
+        for arm in TRAINED_ARMS:
+            if arm == baseline:
+                continue
+            delta = np.array([
+                int(row["arms"][arm]["whole_task_solved"]) - int(row["arms"][baseline]["whole_task_solved"])
+                for row in eligible
+            ], dtype=np.float64)
+            if len(delta) == 0:
+                raise ValueError("root group has no evaluation items")
+            stable_seed = int(hashlib.sha256((group + arm).encode("utf-8")).hexdigest()[:12], 16)
+            rng = np.random.default_rng(stable_seed)
+            indices = rng.integers(0, len(delta), size=(replicates, len(delta)))
+            boot = 100 * np.mean(delta[indices], axis=1)
+            limits = np.quantile(boot, (0.025, 0.975))
+            report[group][arm] = {
+                "roots": len(delta),
+                "absolute_effect_pp": 100 * float(np.mean(delta)),
+                "root_bootstrap_95_pp": [float(limits[0]), float(limits[1])],
+                "wins": int(np.sum(delta > 0)),
+                "losses": int(np.sum(delta < 0)),
+                "ties": int(np.sum(delta == 0)),
+                "status": "exploratory_public_development",
+            }
+    return report
+
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> str:
     with path.open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows:
@@ -367,6 +400,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--eval-roots", type=int, default=64)
     parser.add_argument("--updates", type=int, default=384)
     parser.add_argument("--budget", type=int, default=8)
+    parser.add_argument("--eval-seed", type=int, default=PUBLIC_EVAL_SEED)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.out.exists() and any(args.out.iterdir()):
@@ -377,19 +411,20 @@ def main(argv: list[str] | None = None) -> None:
         models[arm], logs[arm] = fit(
             arm=arm, seed=args.seed, train_roots=args.train_roots, updates=args.updates
         )
-    rows, results = evaluate(models, eval_roots=args.eval_roots, budget=args.budget)
+    rows, results = evaluate(models, eval_roots=args.eval_roots, budget=args.budget, eval_seed=args.eval_seed)
     args.out.mkdir(parents=True, exist_ok=True)
     rows_sha = _write_jsonl(args.out / "evaluation_scores.jsonl", rows)
     report = {
         "schema_version": "dg-sgrt-02-learned-public-development-v1",
         "claim_boundary": "CPU-trained synthetic development, no sealed or 1B-model result",
         "train_seed": PUBLIC_TRAIN_SEED,
-        "evaluation_seed": PUBLIC_EVAL_SEED,
+        "evaluation_seed": args.eval_seed,
         "optimization_seed": args.seed,
         "budget": args.budget,
         "train": logs,
         "results": results,
         "evaluation_rows_sha256": rows_sha,
+        "paired_contrasts_vs_semantic": paired_contrasts(rows),
     }
     (args.out / "report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
