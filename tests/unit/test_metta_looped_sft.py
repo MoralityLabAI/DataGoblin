@@ -9,7 +9,15 @@ import pytest
 
 from MeTTa.collect import scan_forms, sha256_bytes
 from MeTTa.export_looped_frames import export_frames
-from MeTTa.looped_sft import audit_bundle, checked_training_row, make_bundle, prompt, query_supervision, root_id, split_for
+from MeTTa.looped_sft import (
+    audit_bundle,
+    checked_training_row,
+    make_bundle,
+    prompt,
+    query_supervision,
+    root_id,
+    split_for,
+)
 from MeTTa.sft_oracle import (
     FAMILIES,
     edit,
