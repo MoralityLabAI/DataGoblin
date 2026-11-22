@@ -179,7 +179,7 @@ def score(heldout: dict[str, dict[str, Any]], predicted: dict[str, str]) -> dict
 def template_question(row: dict[str, Any]) -> str:
     """Normalize only the model-visible question, dropping all source signature text."""
     question = row["prompt"].split("Claim to evaluate: ", 1)[1]
-    return re.sub(r"\\bh[A-Za-z0-9_]+\\b", "<HYP>", question)
+    return re.sub(r"\bh[A-Za-z0-9_]+\b", "<HYP>", question)
 
 
 def template_only_predictions(catalog_path: Path, heldout: dict[str, dict[str, Any]]) -> dict[str, str]:
