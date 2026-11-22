@@ -41,26 +41,34 @@
       "repo": "singnet/Omega",
       "license": "Apache-2.0",
       "priority": "agent memory and skills"
-    }
-  ],
-  "queued_repositories": [
+    },
     {
       "repo": "zariuq/CeTTa",
       "license": "MIT",
-      "status": "candidate_for_stratified_sampling",
-      "reason": "large independent interpreter/ILP/test collection; exclude synthetic bulk until reviewed"
+      "priority": "reasoning loops, unification, JSON/CSV, context and abstention"
     },
+    {
+      "repo": "trueagi-io/PLN",
+      "license": "MIT",
+      "priority": "probabilistic logic inference examples"
+    },
+    {
+      "repo": "MesTTo/MeTTaScript",
+      "license": "MIT",
+      "priority": "testing, interoperability and scripting examples"
+    },
+    {
+      "repo": "singnet/das",
+      "license": "Apache-2.0",
+      "priority": "small deterministic graph fixtures"
+    }
+  ],
+  "queued_repositories": [
     {
       "repo": "singnet/das-poc",
       "license": "Apache-2.0",
       "status": "candidate_for_bounded_fact_sampling",
       "reason": "large biology KG exports; record ontology provenance and avoid duplicate graph facts"
-    },
-    {
-      "repo": "singnet/das",
-      "license": "Apache-2.0",
-      "status": "candidate_for_bounded_fact_sampling",
-      "reason": "large synthetic sentence fixtures; sample only with lineage separation"
     },
     {
       "repo": "logicmoo/metta-testsuite",
@@ -91,5 +99,14 @@
       "Apache-2.0"
     ],
     "metadata_unit": "per raw .metta file"
+  },
+  "seed_snapshot": {
+    "source_files": 54,
+    "source_bytes": 171611,
+    "detected_source_assertions": 143,
+    "verified_executions": 0,
+    "verified_rollouts": 0,
+    "source_repositories": 12,
+    "note": "Direct file-by-file seed counts; runtime and tokenizer counts remain unmeasured"
   }
 }

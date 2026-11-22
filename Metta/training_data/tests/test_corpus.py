@@ -19,8 +19,8 @@ class MeTTaCorpusTests(unittest.TestCase):
     def test_seed_is_valid_and_unverified(self) -> None:
         rows, summary, errors = validate_corpus(ROOT)
         self.assertFalse(errors, errors)
-        self.assertGreaterEqual(len(rows), 32)
-        self.assertGreaterEqual(summary["repos"], 8)
+        self.assertGreaterEqual(len(rows), 54)
+        self.assertGreaterEqual(summary["repos"], 12)
         self.assertGreater(summary["embedded_assertions_unverified"], 0)
         self.assertEqual(summary["runtime_passed"], 0)
         self.assertEqual(summary["verified_rollouts"], 0)
