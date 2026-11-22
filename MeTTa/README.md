@@ -115,3 +115,9 @@ python -m MeTTa.goertzel_registry --out runs/metta/source_discovery_audit.json
 ```
 
 The original 196-file provenance and the synthetic SFT root splits remain unchanged. Runtime compatibility with PeTTa and native Hyperon 0.2.10, individual source-license review, and verified semantic query execution remain separate admission gates.
+
+## Bounded genetic policy control
+
+[MeTTa-05](MOSES_CONTROL.md) fits original, size-capped symbolic programs to predict whether an existing **synthetic training-root** evidence selection violates the bounded curation oracle. It follows the Pattern Miner experiment and uses disjoint internal discovery and confirmation partitions, retaining independent majority and cost-pressure controls. Rule proposals are advisory, and all resulting data retains `training_ready=false`. The upstream MeTTa-MOSES library is separately implemented in PeTTa/MeTTaLog; this small Python genetic control makes no native equivalence claim.
+
+Run `python -m MeTTa.moses_control --out runs/metta/moses_rule_control` to generate the frozen CPU rule-search receipt.
