@@ -1,0 +1,94 @@
+name: DG-SGRT-02R exploratory seed replication
+
+on:
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/sgrt_learned.py"
+      - "tests/unit/test_sgrt_learned.py"
+      - "training/sgrt_holoarc_01/REPLICATION.md"
+      - ".github/workflows/dg-sgrt-replication.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exploratory-replication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/unit/test_sgrt_learned.py -q
+      - run: ruff check src/datagoblin/training_gym/sgrt_learned.py tests/unit/test_sgrt_learned.py
+      - name: Run declared independent public seed pairs
+        run: |
+          python -m datagoblin.training_gym.sgrt_learned \
+            --seed 41 --eval-seed 61011 --train-roots 128 --updates 384 \
+            --eval-roots 64 --budget 8 --out runs/dg-sgrt-02-repl-41
+          python -m datagoblin.training_gym.sgrt_learned \
+            --seed 67 --eval-seed 61013 --train-roots 128 --updates 384 \
+            --eval-roots 64 --budget 8 --out runs/dg-sgrt-02-repl-67
+          python -m datagoblin.training_gym.sgrt_learned \
+            --seed 89 --eval-seed 61017 --train-roots 128 --updates 384 \
+            --eval-roots 64 --budget 8 --out runs/dg-sgrt-02-repl-89
+      - name: Show all predeclared results and pooled descriptive counts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datagoblin.training_gym.sgrt_learned import TRAINED_ARMS
+
+          seeds = [(41, 61011), (67, 61013), (89, 61017)]
+          reports = []
+          all_rows = []
+          for optimize_seed, eval_seed in seeds:
+              folder = Path(f"runs/dg-sgrt-02-repl-{optimize_seed}")
+              report = json.loads((folder / "report.json").read_text())
+              assert report["optimization_seed"] == optimize_seed
+              assert report["evaluation_seed"] == eval_seed
+              assert all(v["trainable_parameters"] == 2197 for v in report["train"].values())
+              rows = [json.loads(line) for line in (folder / "evaluation_scores.jsonl").read_text().splitlines()]
+              assert len(rows) == 64
+              all_rows.extend(rows)
+              reports.append(report)
+              print("SEED", optimize_seed, "EVAL", eval_seed)
+              for arm in TRAINED_ARMS:
+                  total = report["results"]["all"][arm]["whole_task_solved"]
+                  ood = report["results"]["family_ood_mixed"][arm]["whole_task_solved"]
+                  diff = report["paired_contrasts_vs_semantic"]["all"].get(arm)
+                  print(" ", arm, f"{total}/64", f"OOD {ood}/16",
+                        "delta_pp", None if diff is None else diff["absolute_effect_pp"],
+                        "CI", None if diff is None else diff["root_bootstrap_95_pp"])
+          assert len({row["root_id"] for row in all_rows}) == 192
+          pooled = {}
+          for group in ("all", "family_ood_mixed", "new_roots_seen_families"):
+              pooled[group] = {}
+              for arm in TRAINED_ARMS:
+                  n = sum(r["results"][group][arm]["roots"] for r in reports)
+                  solved = sum(r["results"][group][arm]["whole_task_solved"] for r in reports)
+                  reachable = sum(r["results"][group][arm]["target_reachable"] for r in reports)
+                  pooled[group][arm] = {"n": n, "solved": solved, "reachable": reachable}
+                  print("POOLED", group, arm, solved, "/", n, "reachable", reachable)
+          out = {
+              "schema_version": "dg-sgrt-02r-public-exploratory-v1",
+              "registered_seed_pairs": seeds,
+              "claim_boundary": "post-development exploratory replication, not sealed confirmation",
+              "pooled": pooled,
+          }
+          Path("runs/dg-sgrt-02-replication-summary.json").write_text(
+              json.dumps(out, sort_keys=True, indent=2) + "\n"
+          )
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-sgrt-02r-public-seed-replication
+          path: |
+            runs/dg-sgrt-02-repl-41/
+            runs/dg-sgrt-02-repl-67/
+            runs/dg-sgrt-02-repl-89/
+            runs/dg-sgrt-02-replication-summary.json
+          retention-days: 14
