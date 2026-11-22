@@ -1,0 +1,55 @@
+name: MeTTa paired Looped Transformer benchmark
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/metta-looped-benchmark.yml"
+      - "metta_research_bench/**"
+      - "MeTTa/ram_*.py"
+      - "MeTTa/airis02_*.py"
+      - "MeTTa/sft_oracle.py"
+      - "tests/unit/test_metta*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paired-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONHASHSEED: "0"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Verifiers, Hyperon, and CPU-only PyTorch
+        run: |
+          python -m pip install -e ".[dev]" -r metta_research_bench/requirements.txt
+          python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+      - name: Fetch the pinned Looped Transformer implementation
+        run: |
+          git init --quiet "$RUNNER_TEMP/looped-transformers"
+          git -C "$RUNNER_TEMP/looped-transformers" fetch --quiet --depth 1 \
+            https://github.com/MoralityLabAI/LoopedTransformers.git 950d4d594d87a1f74c6139a928a9b6cb4ab70617
+          git -C "$RUNNER_TEMP/looped-transformers" checkout --quiet --detach FETCH_HEAD
+      - name: Test native rule selection and validate the development taskset
+        run: |
+          python -m pytest tests/unit/test_metta_looped_quality.py tests/unit/test_metta_research_bench.py
+          PYTHONPATH="$PWD" vf-validate metta-research-bench --taskset.split looped_dev \
+            --taskset.roots-per-family 12 --runtime.type subprocess -n 60 \
+            --output-dir "$RUNNER_TEMP/metta-validation"
+      - name: Run the benchmark and paired training smoke tests
+        run: |
+          python -m metta_research_bench --out "$RUNNER_TEMP/metta-bench" \
+            --train-count 2 --dev-count 1 --steps 16 --development-only
+          PYTHONPATH="$PWD:$RUNNER_TEMP/looped-transformers" \
+            python -m metta_research_bench.looped pilot \
+            --out "$RUNNER_TEMP/metta-looped-pilot" --checkpoints "$RUNNER_TEMP/metta-looped-checkpoints"
