@@ -124,6 +124,14 @@ def audit(path: Path) -> dict:
             raise ValueError("training-custody exposure")
         if weights["calibration_threshold"] != report["calibration"]["threshold"]:
             raise ValueError("calibration changed after evaluation")
+        paired = report.get("paired_feature_ablation") is True
+        arms = (*ARMS, "legacy_grounded") if paired else ARMS
+        if paired and (
+            not isinstance(weights.get("legacy_weights"), list)
+            or weights.get("legacy_CAL_threshold") != report["calibration"]["legacy_grounded_threshold"]
+            or report.get("feature_profile") != "lexical_hash_v1"
+        ):
+            raise ValueError("missing TRAIN/CAL matched legacy feature ablation")
         by_slice = Counter()
         native_receipt_count = 0
         for row in ledger:
@@ -135,7 +143,7 @@ def audit(path: Path) -> dict:
                 expected = "train" if arm == "full_menu_fit" else "calibration"
                 if row["split"] != expected or len(row["attempts"]) != 5:
                     raise ValueError("untrusted training / CAL candidate coverage")
-            elif arm in ARMS:
+            elif arm in arms:
                 if row["split"] not in ("ordinary_test", "ood_test"):
                     raise ValueError("test arm leaked into TRAIN/CAL")
             else:
@@ -163,18 +171,19 @@ def audit(path: Path) -> dict:
                 if by_slice[(split, expected_arm)] != report["per_split"]:
                     raise ValueError("incomplete labeled training / CAL population")
             else:
-                for arm in ARMS:
+                for arm in arms:
                     if by_slice[(split, arm)] != report["per_split"]:
                         raise ValueError("missing paired development policy")
         by_row = {(x["root_id"], x["arm"]): x for x in ledger}
         checked = {}
         length_control = {}
         false_stops = {}
+        legacy_false_stops = {}
         for split in ("ordinary_test", "ood_test"):
             root_ids = [x["root_id"] for x in sources if x["split"] == split]
             false_stop = 0
             checks = {}
-            for arm in ARMS:
+            for arm in arms:
                 rows = [by_row[(root_id, arm)] for root_id in root_ids]
                 success = sum(bool(r["attempts"] and r["attempts"][-1]["receipt"]["passed"]) for r in rows)
                 calls = sum(len(r["attempts"]) for r in rows)
@@ -204,6 +213,17 @@ def audit(path: Path) -> dict:
                 ) if any(r["observed"] for r in length_rows) else None,
             }
             false_stops[split] = false_stop
+            if paired:
+                legacy_false_stops[split] = sum(
+                    bool(
+                        by_row[(root_id, "fixed_full")]["attempts"]
+                        and by_row[(root_id, "fixed_full")]["attempts"][-1]["receipt"]["passed"]
+                        and not (
+                            by_row[(root_id, "legacy_grounded")]["attempts"]
+                            and by_row[(root_id, "legacy_grounded")]["attempts"][-1]["receipt"]["passed"]
+                        )
+                    ) for root_id in root_ids
+                )
         return {
             "evidence_verified": True,
             "integrity_manifest_members": len(manifests),
@@ -212,6 +232,8 @@ def audit(path: Path) -> dict:
             "split_metrics": checked,
             "posthoc_length_first_control": length_control,
             "false_stops_vs_full_search": false_stops,
+            "legacy_grounded_false_stops_vs_full_search": legacy_false_stops if paired else None,
+            "paired_feature_ablation": paired,
             "requires_manual_hardness_review": True,
             "sealed_confirmation_opened": False,
         }
