@@ -29,6 +29,10 @@ def test_student_features_are_fixed_shape_and_public_only():
     assert features.shape == (INPUT_DIM,)
     assert np.all(np.isfinite(features))
     assert len(features) < 256
+    mask = legal_action_mask(task, state)
+    assert mask.shape == (ACTION_CLASSES,)
+    assert mask[20]
+    assert int(mask.sum()) == len(task["items"]) + 1
     with pytest.raises(ValueError, match="duplicate selected"):
         encode_public(task, [state[0], state[0]])
     with pytest.raises(ValueError, match="absent"):
