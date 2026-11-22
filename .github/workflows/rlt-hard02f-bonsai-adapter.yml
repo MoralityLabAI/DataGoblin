@@ -8,6 +8,8 @@ on:
       - "src/datagoblin/training_gym/rlt_gym/hard02f_oxibonsai.py"
       - "tests/unit/test_rlt_gym_lean_bonsai.py"
       - "tests/unit/test_rlt_hard02f_oxibonsai.py"
+      - "tests/unit/test_rlt_hard02f_audit.py"
+      - "scripts/audit_rlt_hard02f.py"
       - ".github/workflows/rlt-hard02f-bonsai-adapter.yml"
   pull_request:
     paths:
@@ -15,6 +17,8 @@ on:
       - "src/datagoblin/training_gym/rlt_gym/hard02f_oxibonsai.py"
       - "tests/unit/test_rlt_gym_lean_bonsai.py"
       - "tests/unit/test_rlt_hard02f_oxibonsai.py"
+      - "tests/unit/test_rlt_hard02f_audit.py"
+      - "scripts/audit_rlt_hard02f.py"
       - ".github/workflows/rlt-hard02f-bonsai-adapter.yml"
   workflow_dispatch:
 
@@ -40,7 +44,10 @@ jobs:
         run: |
           python -m pytest -q \
             tests/unit/test_rlt_gym_lean_bonsai.py \
-            tests/unit/test_rlt_hard02f_oxibonsai.py
+            tests/unit/test_rlt_hard02f_oxibonsai.py \
+            scripts/audit_rlt_hard02f.py \
+            tests/unit/test_rlt_hard02f_audit.py \
+            tests/unit/test_rlt_hard02f_audit.py
       - name: Ruff
         run: |
           ruff check \
