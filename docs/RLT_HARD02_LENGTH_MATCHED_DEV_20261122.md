@@ -99,3 +99,24 @@ uses Mathlib v4.12.0, source seed `2026112203`,
 `--matched-menus`, eight roots per split and create-only output.
 The workflow retains the fresh source roots and kernel-certified proofs
 without committing generated data or trained weights to the repository.
+
+## RLT-HARD-02B actual native outcome and fixture failure
+
+[Completed native Actions #44989821104](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44989821104) passed every native Lean / Mathlib / independent audit step. It used source seed `2026112203` and the frozen grounded ranker; CAL selected stopping threshold `0.30`. The archive records **372 actual compiler calls**, **40 independent learned attempt replays**, **39 certified Lean proof source files** and **997.91 cumulative compiler seconds**. The independent audit verified all **74 file hashes** and **218 candidate receipts**, with no learned false STOP relative to full search.
+
+| Arm | Ordinary development | OOD development |
+| --- | ---: | ---: |
+| Learned / CAL-frozen stop | 8/8 certified, 8 candidate checks | 6/8, **32 checks**, 104.08 candidate seconds |
+| Fixed exhaustive order | 8/8, 8 checks | 6/8, **24 checks**, 82.11 seconds |
+| Matched random exhaustive order | 8/8, 8 checks | 6/8, 26 checks, 87.38 seconds |
+| Trivial-first full order | 8/8, 8 checks | 6/8, 24 checks, 82.02 seconds |
+
+**Failure verdict:** the model has no gain over fixed full search and spends **33.3% more checks on OOD**. The OOD learned candidate time is 21.97 seconds greater, about 26.8% more, with equal 6/8 certified coverage.
+
+The ordinary development cohort violates the intended exhaustion construction. Every one of its eight roots passed on the first candidate, including the two roots whose registered witness was omitted. A mutated `simpa [List.length_append] using congrArg ...` tactic still proves the statement because its alternative congruence produces a simplifier-compatible equality. Thus there are **zero truly exhausted ordinary menus under native Lean**, despite two intentionally teacher-witness-omitted menus. Future records must count *native menu-exhaustion labels* rather than infer them from generator flags.
+
+## Feature capacity audit and next representation
+
+A separate source-only [feature capacity audit #44990729864](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44990729864) reproduced the current source seed and original feature extractor. **All 32 roots have only one distinct candidate feature signature after excluding the menu-position column.** That establishes why the matched-length policy cannot recognize tactical differences. The original source-length shortcut is removed, but the old representation then becomes position-dependent.
+
+The registered follow-up is `docs/RLT_HARD02_SEMANTIC_ABLATION_20261122.md`: fresh source seed `2026112211`, a position-invariant full-script hashing feature bank, and a same-root paired ablation against the old grounded features. This is a development iteration prompted by the preceding failures. Its ordinary negative-control deficiency must be repaired before any hard-theorem promotion; source-level feature distinguishability alone is not evidence of reasoning gain.
