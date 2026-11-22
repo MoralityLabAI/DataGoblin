@@ -165,6 +165,57 @@ verifies the output-file digests. The recorded model trace is distinct
 from source-native oracle controls and should be compared on matched
 root lineages before training claims.
 
+## STORY-02 multi-world cohort
+
+The registered cohort uses four pinned, distinct source worlds. All derived
+native builder/Mini tasks and SWMD-MICRO examples from one world inherit
+its registered split, making source-world withholding stronger than
+encounter-level separation within a single world.
+
+| Registered source | Split | Domain |
+| --- | --- | --- |
+| forecast_backstab | train | Diplomacy and forecasts |
+| ashen_aegis | train | Law and moral conflict |
+| fifth_testimony | calibration | Testimony and moral reasoning |
+| last_train_home | ood_test | Character-driven rescue |
+
+Registration is in world_cohort_v1.json. The cohort uses distinct,
+deterministic per-world seeds and pins each source JSON and executable
+upstream script by SHA-256. Native controls and Mini examples are stored
+in separate directories under each world, with an overall manifest.
+Use the default CPU-first pilot:
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_cohort \
+      --source "$GPTSTORYWORLD_SOURCE" \
+      --seed 23 --per-mode 2 --micro-examples 2 \
+      --micro-max-encounters 4 --out runs/storyworld-cohort-v1
+    python -m datagoblin.training_gym.rlt_gym.storyworld_cohort \
+      --source "$GPTSTORYWORLD_SOURCE" --replay runs/storyworld-cohort-v1
+
+The verified 23 November source-pinned CI run yields 32 native tasks,
+112 matched source-native control rollouts, 26 bounded Mini compiler
+examples and 16 train SFT labels. Six larger Mini source compiler
+packets exceed the conservative 8,192-byte prompt cap. They are kept
+in micro_oversize.jsonl with an auditable ID and original byte count,
+and excluded from model packets without truncating source instructions.
+No held-out world contributes a training label.
+
+For an actual model rollout against the registered OOD world, point the
+local player at its child native archive and supply that same source
+world explicitly:
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_local \
+      --source "$GPTSTORYWORLD_SOURCE" \
+      --world storyworlds/tsun01b_last_train_home/tsun01b.sweepweave.json \
+      --archive runs/storyworld-cohort-v1/last_train_home/native \
+      --model inky-mini --mode hypergame --split ood_test --max-roots 2 \
+      --out runs/storyworld-inky-ood
+
+That is a runnable operator command, not a recorded Inky evaluation.
+The benchmark remains a source-visible development holdout. Genuine
+unseen-world testing requires independent world generation with
+private, preregistered provenance.
+
 ## Verification and next experiment
 
     GPTSTORYWORLD_SOURCE=../GPTStoryworld PYTHONPATH=src \
