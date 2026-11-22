@@ -343,12 +343,23 @@ def export_sources(base: Path, roots: list[Root]) -> dict[str, str]:
     return checksums
 
 
-def fit_policy(train: list[dict[str, Any]], words: tuple[str, ...]) -> np.ndarray:
-    from datagoblin.training_gym.rlt_lean_train_rank import features
+def _action_features(
+    goal_pp: str, menu: tuple[str, ...], words: tuple[str, ...], *, semantic: bool,
+) -> np.ndarray:
+    if semantic:
+        from .hard02_semantic_features import features as semantic_features
+        return semantic_features(goal_pp, menu)
+    from datagoblin.training_gym.rlt_lean_train_rank import features as grounded_features
+    return grounded_features(goal_pp, menu, [], words)
+
+
+def fit_policy(
+    train: list[dict[str, Any]], words: tuple[str, ...], *, semantic: bool = False,
+) -> np.ndarray:
     if not train or any(e["split"] != "train" for e in train):
         raise ValueError("policy is fitted on TRAIN only")
     X = np.concatenate([
-        features(row["goal_pp"], row["menu"], [], words) for row in train
+        _action_features(row["goal_pp"], row["menu"], words, semantic=semantic) for row in train
     ])
     y = np.array([float(x["receipt"]["passed"]) for row in train for x in row["checks"]])
     if X.shape[0] != len(y) or y.sum() == 0 or y.sum() == len(y):
@@ -365,14 +376,20 @@ def fit_policy(train: list[dict[str, Any]], words: tuple[str, ...]) -> np.ndarra
     return weights
 
 
-def rank_scores(goal_pp: str, menu: tuple[str, ...], weights: np.ndarray, words: tuple[str, ...]) -> np.ndarray:
-    from datagoblin.training_gym.rlt_lean_train_rank import features
-    return 1 / (1 + np.exp(-np.clip(features(goal_pp, menu, [], words) @ weights, -30, 30)))
+def rank_scores(
+    goal_pp: str, menu: tuple[str, ...], weights: np.ndarray,
+    words: tuple[str, ...], *, semantic: bool = False,
+) -> np.ndarray:
+    x = _action_features(goal_pp, menu, words, semantic=semantic)
+    return 1 / (1 + np.exp(-np.clip(x @ weights, -30, 30)))
 
 
-def order(root: Root, arm: str, goal_pp: str, weights: np.ndarray, words: tuple[str, ...]) -> list[int]:
+def order(
+    root: Root, arm: str, goal_pp: str, weights: np.ndarray,
+    words: tuple[str, ...], *, semantic: bool = False,
+) -> list[int]:
     if arm == "learned":
-        ps = rank_scores(goal_pp, root.menu, weights, words)
+        ps = rank_scores(goal_pp, root.menu, weights, words, semantic=semantic)
         return sorted(range(BUDGET), key=lambda j: (-float(ps[j]), j))
     if arm == "random_full":
         ids = list(range(BUDGET))
@@ -403,7 +420,8 @@ def _check(checker: LeanKernelChecker, root: Root, candidate: int) -> dict[str, 
 
 
 def calibrate(
-    cal: list[dict[str, Any]], weights: np.ndarray, words: tuple[str, ...]
+    cal: list[dict[str, Any]], weights: np.ndarray, words: tuple[str, ...],
+    *, semantic: bool = False,
 ) -> tuple[float, list[dict[str, Any]]]:
     if not cal or any(row["split"] != "calibration" for row in cal):
         raise ValueError("only CAL roots can choose the stopping threshold")
@@ -413,8 +431,8 @@ def calibrate(
         for row in cal:
             root = row["root"]
             labels = {v["candidate_id"]: v["receipt"]["passed"] for v in row["checks"]}
-            ranked = order(root, "learned", row["goal_pp"], weights, words)
-            ps = rank_scores(row["goal_pp"], root.menu, weights, words)
+            ranked = order(root, "learned", row["goal_pp"], weights, words, semantic=semantic)
+            ps = rank_scores(row["goal_pp"], root.menu, weights, words, semantic=semantic)
             for ix, candidate in enumerate(ranked):
                 if ix and max(float(ps[k]) for k in ranked[ix:]) < threshold:
                     break
@@ -434,10 +452,11 @@ def calibrate(
 def online(
     row: dict[str, Any], checker: LeanKernelChecker, arm: str,
     weights: np.ndarray, words: tuple[str, ...], threshold: float,
+    *, semantic: bool = False,
 ) -> dict[str, Any]:
     root: Root = row["root"]
-    ordering = order(root, arm, row["goal_pp"], weights, words)
-    ps = rank_scores(row["goal_pp"], root.menu, weights, words) if arm == "learned" else None
+    ordering = order(root, arm, row["goal_pp"], weights, words, semantic=semantic)
+    ps = rank_scores(row["goal_pp"], root.menu, weights, words, semantic=semantic) if arm == "learned" else None
     attempts = []
     for j, cid in enumerate(ordering):
         if arm == "learned" and j and ps is not None and max(float(ps[k]) for k in ordering[j:]) < threshold:
@@ -456,7 +475,7 @@ def online(
 
 def run(
     lake: Path, mathlib: Path, out: Path, *, per_split: int = 8,
-    seed: int = SEED, matched_menus: bool = False,
+    seed: int = SEED, matched_menus: bool = False, semantic_features: bool = False,
 ) -> dict[str, Any]:
     if out.exists():
         raise FileExistsError("evidence directory must be create-only")
@@ -470,6 +489,9 @@ def run(
         "source": source_hashes, "upstream": env,
         "driver": sha(Path(__file__).read_bytes()),
     }
+    if semantic_features:
+        from . import hard02_semantic_features
+        source_revisions["feature_sha256"] = sha(Path(hard02_semantic_features.__file__).read_bytes())
     verifier_sha = digest(source_revisions)
     with tempfile.TemporaryDirectory(prefix="dg-hard02-") as tmp:
         session = MathlibSession(lake, mathlib, Path(tmp), roots)
@@ -497,13 +519,15 @@ def run(
             {"split": "train", "goal_pp": row["goal_pp"], "menu": row["root"].menu, "checks": row["checks"]}
             for row in train
         ]
-        weights = fit_policy(training, words)
-        threshold, frontier = calibrate(cal, weights, words)
+        weights = fit_policy(training, words, semantic=semantic_features)
+        threshold, frontier = calibrate(cal, weights, words, semantic=semantic_features)
         for split in ("ordinary_test", "ood_test"):
             for root in (r for r in roots if r.split == split):
                 state = {"root": root, "goal_pp": probes[root.root_id]["goal_pp"]}
                 for arm in ("learned", "fixed_full", "random_full", "trivial_first"):
-                    campaign.append(online(state, checker, arm, weights, words, threshold))
+                    campaign.append(online(
+                        state, checker, arm, weights, words, threshold, semantic=semantic_features,
+                    ))
         replayed = 0
         for result in campaign:
             if result["arm"] != "learned":
@@ -527,6 +551,7 @@ def run(
     weights_path.write_text(json.dumps({
         "weights": weights.tolist(), "word_vocabulary": words,
         "training_splits": ["train"], "calibration_threshold": threshold,
+        "feature_profile": "lexical_hash_v1" if semantic_features else "grounded_position_v1",
     }, sort_keys=True, indent=2) + "\n")
     source_records = out / "source_records.jsonl"
     with source_records.open("w") as f:
@@ -568,6 +593,7 @@ def run(
         "evidence_class": "real_mathlib_derived_compiler_states_kernel_proofs",
         "environment": env, "source_seed": seed,
         "candidate_profile": "length_matched_near_miss_v2" if matched_menus else "trivial_controls_v1",
+        "feature_profile": "lexical_hash_v1" if semantic_features else "grounded_position_v1",
         "source_roots": len(roots), "per_split": per_split,
         "split_upstream_files": UPSTREAM_FILES,
         "fit_train": {
@@ -612,11 +638,13 @@ def main() -> None:
     parser.add_argument("--per-split", type=int, default=8)
     parser.add_argument("--source-seed", type=int, default=SEED)
     parser.add_argument("--matched-menus", action="store_true")
+    parser.add_argument("--semantic-features", action="store_true")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     report = run(
         args.lake, args.mathlib, args.out, per_split=args.per_split,
         seed=args.source_seed, matched_menus=args.matched_menus,
+        semantic_features=args.semantic_features,
     )
     print(json.dumps({
         "results": report["development_results"], "source_roots": report["source_roots"],
