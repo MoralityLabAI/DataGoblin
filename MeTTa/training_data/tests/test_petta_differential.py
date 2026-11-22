@@ -12,7 +12,6 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from finite_oracle_pilot import make_world  # noqa: E402
 from finite_semantic_oracle import (  # noqa: E402
     UnsupportedSemantics,
-    parse_one,
     render,
 )
 from petta_differential import (  # noqa: E402
