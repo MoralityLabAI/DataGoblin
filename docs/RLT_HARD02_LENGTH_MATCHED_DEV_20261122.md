@@ -6,11 +6,11 @@ Date: 2026-11-22. Development research; [issue #24](https://github.com/MoralityL
 
 The original native Mathlib experiment executed in
 [Actions #44983534801](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44983534801)
-at source head \`4ac40827c06053ab6b89ce02feecbf95bbe4d9d2\`.
+at source head `4ac40827c06053ab6b89ce02feecbf95bbe4d9d2`.
 It produced 32 source-root episodes, 24 retained certified Lean proof sources,
 16 independent learned-policy attempt replays, and 397 recorded Lean compiler calls.
 The source was pinned to Mathlib commit
-\`809c3fb3b5c8f5d7dace56e200b426187516535a\`
+`809c3fb3b5c8f5d7dace56e200b426187516535a`
 and Lean 4.12.0.
 
 An independently implemented auditor re-downloaded the historical source
@@ -43,9 +43,9 @@ metric or independent confirmation.
 
 ## RLT-HARD-02B: fresh matched-menu development protocol
 
-New source seed: \`2026112203\`; Mathlib/Lean pins are unchanged.
-This source profile is \`length_matched_near_miss_v2\`, selected explicitly
-using \`--matched-menus\`. The original \`trivial_controls_v1\`
+New source seed: `2026112203`; Mathlib/Lean pins are unchanged.
+This source profile is `length_matched_near_miss_v2`, selected explicitly
+using `--matched-menus`. The original `trivial_controls_v1`
 generation remains available for archive reproduction.
 
 All 32 new source roots retain four source-module-disjoint splits
@@ -89,13 +89,13 @@ remain open.
 
 Source contracts:
 
-\`\`\`bash
+```bash
 python -m pytest -q tests/unit/test_rlt_hard02_matched.py
 ruff check src/datagoblin/training_gym/rlt_gym/hard02_mathlib.py tests/unit/test_rlt_hard02_matched.py
-\`\`\`
+```
 
 The native [RLT-HARD-02B workflow](../.github/workflows/rlt-hard02-matched.yml)
-uses Mathlib v4.12.0, source seed \`2026112203\`,
-\`--matched-menus\`, eight roots per split and create-only output.
+uses Mathlib v4.12.0, source seed `2026112203`,
+`--matched-menus`, eight roots per split and create-only output.
 The workflow retains the fresh source roots and kernel-certified proofs
 without committing generated data or trained weights to the repository.
