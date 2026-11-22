@@ -359,8 +359,8 @@ def audit(requests_path: Path, replies_path: Path, out: Path) -> dict[str, Any]:
     valid_actions = sum(len(row["actions"]) for row in receipts)
     cue_correct = sum(
         sum(("deploy" if item["surface_cue"] == "green" else "hold") == gold
-            for item, gold in zip((row["world_a"], row["world_b"]), receipt["actions"]))
-        for row, receipt in zip(public, receipts)
+            for item, gold in zip((row["world_a"], row["world_b"]), receipt["actions"], strict=True))
+        for row, receipt in zip(public, receipts, strict=True)
     )
     return write_manifest(
         out,
@@ -402,7 +402,7 @@ def replay(folder: Path) -> dict[str, Any]:
     candidates = read_jsonl(folder / "train_candidates.jsonl")
     if len(rows) != len(receipts) or len({row["root"] for row in rows}) != len(rows):
         raise ValueError("invalid root cardinality")
-    for row, receipt in zip(rows, receipts):
+    for row, receipt in zip(rows, receipts, strict=True):
         labels = verify_pair(row["world_a"], row["world_b"], row["intervention"])
         source = {
             "world_a": row["world_a"],
