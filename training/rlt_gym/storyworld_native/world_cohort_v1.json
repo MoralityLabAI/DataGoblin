@@ -1,0 +1,33 @@
+{
+  "schema": "datagoblin.storyworld_cohort.registry.v1",
+  "name": "STORY-02-cross-world-native",
+  "source_repository": "MoralityLabAI/GPTStoryworld",
+  "source_commit": "5cd0b480e9a01d07418cdf8cb3bedbc9d38ef906",
+  "split_policy": "All derived examples from a source world belong to its registered split. Hypergame synthetic controls inherit the same split for accounting.",
+  "worlds": [
+    {
+      "id": "forecast_backstab",
+      "path": "storyworlds/diplomacy/forecast_backstab.json",
+      "split": "train",
+      "domain": "diplomacy_forecast"
+    },
+    {
+      "id": "ashen_aegis",
+      "path": "storyworlds/charter_of_ashen_aegis.json",
+      "split": "train",
+      "domain": "law_and_moral_conflict"
+    },
+    {
+      "id": "fifth_testimony",
+      "path": "storyworlds/the_fifth_testimony_p2.json",
+      "split": "calibration",
+      "domain": "testimony_and_moral_reasoning"
+    },
+    {
+      "id": "last_train_home",
+      "path": "storyworlds/tsun01b_last_train_home/tsun01b.sweepweave.json",
+      "split": "ood_test",
+      "domain": "character_driven_rescue"
+    }
+  ]
+}
