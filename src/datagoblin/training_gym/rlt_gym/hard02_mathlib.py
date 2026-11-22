@@ -85,12 +85,19 @@ def _witness(
         expr = terms[0]
         for term in terms[1:]:
             expr = f"({expr} + {term})"
-        statement = f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {expr}"  # noqa: RUF001
-        prefix = "intro a b c h"
         tree = "dvd_add hab hac"
         for _ in range(i + 1 + depth_shift):
             tree = f"dvd_add ({tree}) (dvd_add hab hac)"
-        proof = f"rcases h with ⟨hab, hac⟩\nexact {tree}"
+        if numeric_shift:
+            statement = (  # noqa: RUF001
+                f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {n} → a ∣ ({expr} + {n})"
+            )
+            prefix = "intro a b c h hn"
+            proof = f"rcases h with ⟨hab, hac⟩\nexact dvd_add ({tree}) hn"
+        else:
+            statement = f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {expr}"  # noqa: RUF001
+            prefix = "intro a b c h"
+            proof = f"rcases h with ⟨hab, hac⟩\nexact {tree}"
     return statement, prefix, proof
 
 
