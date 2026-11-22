@@ -41,7 +41,7 @@ def validate_endpoint(endpoint: str) -> str:
     parsed = urlsplit(endpoint)
     if (
         parsed.scheme != "http"
-        or parsed.hostname not in {"localhost", "127.0.0.1", "::1"}
+        or parsed.hostname not in {"127.0.0.1", "::1"}
         or parsed.username is not None
         or parsed.password is not None
         or parsed.query
@@ -83,6 +83,16 @@ def read_challenges(path: Path) -> list[dict[str, Any]]:
     return result
 
 
+class RejectRedirects(urllib.request.HTTPRedirectHandler):
+    """Keep private challenge prompts from following remote 3xx redirects."""
+
+    def redirect_request(
+        self, req: Any, fp: Any, code: int, msg: str,
+        headers: Any, newurl: str,
+    ) -> None:
+        return None
+
+
 def local_post(endpoint: str, payload: dict[str, Any], timeout_sec: int) -> dict[str, Any]:
     req = urllib.request.Request(
         validate_endpoint(endpoint),
@@ -90,7 +100,10 @@ def local_post(endpoint: str, payload: dict[str, Any], timeout_sec: int) -> dict
         headers={"Content-Type": "application/json", "Accept": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=timeout_sec) as response:
+    opener = urllib.request.build_opener(
+        urllib.request.ProxyHandler({}), RejectRedirects(),
+    )
+    with opener.open(req, timeout=timeout_sec) as response:
         raw = response.read(131_073)
     if len(raw) > 131_072:
         raise ValueError("Model response exceeded byte budget")
