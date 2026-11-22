@@ -74,6 +74,8 @@ def test_small_bundle_fits_research_models_after_independent_audit(tmp_path):
     assert report["source_data_admitted"] is False
     assert report["training_ready"] is False
     assert report["holdout_steward_opened"] is False
+    assert report["development_evaluation_world_policy"] == "shared_uniform_intervention"
+    assert len(report["development_evaluation_worlds_sha256"]) == 64
     assert report["train_cases_per_arm"] == 15
     assert report["development_cases_per_arm"] == 10
     assert report["optimizer_steps_per_arm"] == 5
