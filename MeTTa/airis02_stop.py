@@ -16,9 +16,9 @@ from .airis02_student import INPUT_DIM
 
 
 class StopHead:
-    def __init__(self, seed: int):
+    def __init__(self, seed: int, *, input_dim: int = INPUT_DIM):
         rng = np.random.default_rng(seed)
-        self.w = rng.normal(0.0, 0.02 / math.sqrt(INPUT_DIM), size=(INPUT_DIM,))
+        self.w = rng.normal(0.0, 0.02 / math.sqrt(input_dim), size=(input_dim,))
         self.b = np.array(-0.5, dtype=np.float64)
         self.threshold: float | None = None
 
@@ -38,7 +38,7 @@ class StopHead:
             raise ValueError("bounded STOP optimization required")
         if not 0.0 < max_false_stop_rate <= 0.2:
             raise ValueError("STOP false-positive target outside safe bound")
-        if x.shape[1] != INPUT_DIM or len(x) != len(stop_targets):
+        if x.shape[1] != self.w.size or len(x) != len(stop_targets):
             raise ValueError("STOP input/target shape differs")
         if not np.array_equal(stop_targets, stop_targets.astype(bool)):
             raise ValueError("STOP target must be binary")
@@ -85,7 +85,7 @@ class StopHead:
         }
 
     def should_stop(self, x: np.ndarray) -> bool:
-        if self.threshold is None or x.shape != (1, INPUT_DIM):
+        if self.threshold is None or x.shape != (1, self.w.size):
             raise ValueError("STOP gate must be fitted on the correct public state")
         return bool(self.probabilities(x)[0] >= self.threshold)
 
