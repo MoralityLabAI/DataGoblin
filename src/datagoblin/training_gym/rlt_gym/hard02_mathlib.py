@@ -455,11 +455,15 @@ def online(
     *, semantic: bool = False,
 ) -> dict[str, Any]:
     root: Root = row["root"]
-    ordering = order(root, arm, row["goal_pp"], weights, words, semantic=semantic)
-    ps = rank_scores(row["goal_pp"], root.menu, weights, words, semantic=semantic) if arm == "learned" else None
+    policy_arm = "learned" if arm == "legacy_grounded" else arm
+    ordering = order(root, policy_arm, row["goal_pp"], weights, words, semantic=semantic)
+    ps = (
+        rank_scores(row["goal_pp"], root.menu, weights, words, semantic=semantic)
+        if policy_arm == "learned" else None
+    )
     attempts = []
     for j, cid in enumerate(ordering):
-        if arm == "learned" and j and ps is not None and max(float(ps[k]) for k in ordering[j:]) < threshold:
+        if policy_arm == "learned" and j and ps is not None and max(float(ps[k]) for k in ordering[j:]) < threshold:
             break
         checked = _check(checker, root, cid)
         attempts.append(checked)
@@ -521,16 +525,36 @@ def run(
         ]
         weights = fit_policy(training, words, semantic=semantic_features)
         threshold, frontier = calibrate(cal, weights, words, semantic=semantic_features)
+        legacy_weights = None
+        legacy_threshold = None
+        legacy_frontier = None
+        if semantic_features:
+            # Direct within-cohort ablation: identical TRAIN labels, CAL roots
+            # and held-out theorems, with the legacy representation only.
+            legacy_weights = fit_policy(training, words, semantic=False)
+            legacy_threshold, legacy_frontier = calibrate(cal, legacy_weights, words, semantic=False)
         for split in ("ordinary_test", "ood_test"):
             for root in (r for r in roots if r.split == split):
                 state = {"root": root, "goal_pp": probes[root.root_id]["goal_pp"]}
-                for arm in ("learned", "fixed_full", "random_full", "trivial_first"):
-                    campaign.append(online(
-                        state, checker, arm, weights, words, threshold, semantic=semantic_features,
-                    ))
+                arms = ("learned", "fixed_full", "random_full", "trivial_first")
+                if semantic_features:
+                    arms += ("legacy_grounded",)
+                for arm in arms:
+                    if arm == "legacy_grounded":
+                        if legacy_weights is None or legacy_threshold is None:
+                            raise ValueError("missing TRAIN/CAL legacy ablation")
+                        campaign.append(online(
+                            state, checker, arm, legacy_weights, words, legacy_threshold,
+                            semantic=False,
+                        ))
+                    else:
+                        campaign.append(online(
+                            state, checker, arm, weights, words, threshold,
+                            semantic=semantic_features,
+                        ))
         replayed = 0
         for result in campaign:
-            if result["arm"] != "learned":
+            if result["arm"] not in ("learned", "legacy_grounded"):
                 continue
             root = next(r for r in roots if r.root_id == result["root_id"])
             for original in result["attempts"]:
@@ -552,6 +576,8 @@ def run(
         "weights": weights.tolist(), "word_vocabulary": words,
         "training_splits": ["train"], "calibration_threshold": threshold,
         "feature_profile": "lexical_hash_v1" if semantic_features else "grounded_position_v1",
+        "legacy_weights": legacy_weights.tolist() if legacy_weights is not None else None,
+        "legacy_CAL_threshold": legacy_threshold,
     }, sort_keys=True, indent=2) + "\n")
     source_records = out / "source_records.jsonl"
     with source_records.open("w") as f:
@@ -575,7 +601,10 @@ def run(
     by_split = {}
     for split in ("ordinary_test", "ood_test"):
         by_split[split] = {}
-        for arm in ("learned", "fixed_full", "random_full", "trivial_first"):
+        arms = ("learned", "fixed_full", "random_full", "trivial_first")
+        if semantic_features:
+            arms += ("legacy_grounded",)
+        for arm in arms:
             cohort = [r for r in campaign if r["split"] == split and r["arm"] == arm]
             by_split[split][arm] = {
                 "kernel_certified": sum(r["certified"] for r in cohort),
@@ -604,7 +633,12 @@ def run(
                 not any(a["receipt"]["passed"] for a in r["checks"]) for r in train
             ),
         },
-        "calibration": {"threshold": threshold, "frontier": frontier},
+        "calibration": {
+            "threshold": threshold, "frontier": frontier,
+            "legacy_grounded_threshold": legacy_threshold,
+            "legacy_grounded_frontier": legacy_frontier,
+        },
+        "paired_feature_ablation": bool(semantic_features),
         "development_results": by_split,
         "learned_attempts_replayed": replayed,
         "compiler_calls_including_probes_and_audits": compiler_calls + len(roots),
