@@ -224,3 +224,59 @@ evaluation roots or the 154 archived conflict roots.
 
 - Replication lock SHA-256 `fe42fed6c99a242a00e017b36c9ae4c61c016cf79b2394e727cb961940f782f2`
 - Frozen report SHA-256 `e85d2f8be56beb454525dc73dcce5c05b6519c228f70e63c86402f03e21a0f37`
+
+## Lineage-family replication
+
+On the 40 lineage roots in the factorial study, keeping the lineage guard
+yielded 25 versus 22 completions with revision present and 24 versus 23
+with revision absent, each out of 120. The mean paired effect was +1.67
+percentage points. The earlier single-rule study had a separate 40 lineage
+roots and estimated +5.00 points with revision present.
+
+The replication uses 400 fresh lineage roots and the same four arms and
+twelve checkpoints. Each fit used a 44,417-parameter Looped Transformer,
+600 optimizer updates, and 28,800 supervised action tokens. The replication
+uses zero new optimizer updates. The primary contrast is the mean of
+`good − without_lineage` and `without_revision − without_lineage_revision`
+within each root and seed. The two conditional effects and the factorial
+interaction are secondary. A positive primary estimate with a two-sided
+root-level sign-flip p-value below 0.05 is the replication criterion.
+Intervals use a 95% bootstrap over roots, keeping the three seeds paired.
+
+Run `python -m metta_research_bench.looped.lineage_replication` with the
+same paths used by the revision replication and `--prior-revision`
+pointing to its archived report directory. Use a fresh `--out` path. The
+runner verifies the original archives and weights before opening the
+reserve. Its exclusion manifest includes the earlier revision replication.
+Keep weights and generated output outside Git.
+
+### Fresh lineage results
+
+| Training curator | Verified complete / 1,200 | Rate | Premature stops | Policy verifier calls |
+| --- | ---: | ---: | ---: | ---: |
+| Full | 336 | 28.00% | 832 | 4,638 |
+| Drop unique lineage | 293 | 24.42% | 850 | 4,950 |
+| Drop current revision | 329 | 27.42% | 842 | 4,336 |
+| Drop both | 321 | 26.75% | 793 | 5,650 |
+
+The average lineage effect was +2.13 percentage points (95% paired
+interval −0.001 to +4.21, p = 0.0551), above the original +1.67-point
+estimate and short of the preregistered significance threshold. The seed
+estimates were +1.25, +5.50, and −0.38 points.
+
+With revision present, keeping lineage yielded 43 additional completions
+out of 1,200 (+3.58 points, 95% interval +0.58 to +6.33, p = 0.015,
+secondary). With revision absent, it yielded eight additional completions
+(+0.67 points, 95% interval −2.42 to +3.33, p = 0.687, secondary). The
+interaction interval spans zero (+2.92 points, 95% interval −1.00 to
++6.75, p = 0.139), so the conditional difference remains uncertain.
+Every arm made zero unsafe additions under the shared verifier.
+
+The run at `044aa793ae6a479615b300484d4ccff86b98c727` took 234.89 seconds
+with peak RSS of 470.80 MiB. The receipt audit matched all 4,800 trials to
+their checkpoint hashes and Prime Verifiers 0.4.1 traces. It verified
+that the 400 roots were disjoint from 1,396 excluded training and
+evaluation roots and 154 archived conflict roots.
+
+- Replication lock SHA-256 `ea972e8e5a7671f7f33a7d847fe9fd113d8062f6df484448897aa666b28e53b9`
+- Frozen report SHA-256 `dcfe91b048c7a94f8257f23e4e8ce84e614be9af5a95123e0c8489994753bd3f`
