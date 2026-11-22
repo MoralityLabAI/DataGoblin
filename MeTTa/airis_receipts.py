@@ -89,7 +89,7 @@ def audit_bundle(directory: Path, *, full_replay: bool = True) -> dict[str, Any]
             or row.get("zero_change_sham_passed") is not True
         ):
             raise ValueError("case-level admission or sham violation")
-        for arm in ("guided", "uniform"):
+        for arm in ("guided", "uniform", "budget_first"):
             verdict = row.get(arm)
             if (
                 not isinstance(verdict, dict)
