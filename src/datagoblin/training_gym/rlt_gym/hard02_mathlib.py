@@ -135,7 +135,7 @@ def matched_candidate_menu(split: str, witness: str, *, witnessed: bool) -> list
         ]
     else:
         raise ValueError("unregistered Mathlib source split")
-    actions = ([witness] + mutations[:4]) if witnessed else mutations
+    actions = [witness, *mutations[:4]] if witnessed else mutations
     if len(actions) != BUDGET or len(set(actions)) != BUDGET or (witness in actions) != witnessed:
         raise ValueError("malformed or duplicate near-miss proof candidates")
     if any(any(bad in candidate.lower() for bad in ("sorry", "admit", "run_tac", "unsafe"))
