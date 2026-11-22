@@ -9,7 +9,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 import pytest
 
-from scripts.audit_rlt_hard02 import Reader, audit, length_first_control
+from scripts.audit_rlt_hard02 import Reader, audit, expected_menu_exhaustion, length_first_control
 
 
 def test_reject_unsafe_relative_zip_paths(tmp_path: Path):
@@ -86,3 +86,13 @@ def test_length_first_tie_is_index_deterministic():
     assert result["candidate_id"] == 0
     assert result["observed"]
     assert result["certified"] is False
+
+
+def test_preregistered_exhausted_root_indices_are_parsed_from_source_only():
+    for index in range(8):
+        source = {"public_task": {
+            "source_file": f"source_roots/train/MathlibRoot_{index:02d}_" + "a" * 20 + ".lean",
+        }}
+        assert expected_menu_exhaustion(source) == (index % 4 == 3)
+    with pytest.raises(ValueError, match="source root"):
+        expected_menu_exhaustion({"public_task": {"source_file": "invalid.lean"}})
