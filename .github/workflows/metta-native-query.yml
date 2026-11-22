@@ -1,0 +1,40 @@
+name: MeTTa native Hyperon query replay
+
+on:
+  pull_request:
+    paths:
+      - "MeTTa/native_query_replay.py"
+      - "MeTTa/looped_sft.py"
+      - "MeTTa/sft_oracle.py"
+      - ".github/workflows/metta-native-query.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-train-query:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Experimental compatibility probe; a failing native run is recorded as
+    # a failed check but cannot revoke the separate Python-oracle corpus test.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install pinned Hyperon wheel
+        run: python -m pip install hyperon==0.2.10
+      - name: Native MeTTa train-only match query parity
+        run: |
+          python -m MeTTa.native_query_replay \
+            --train-roots-per-family 8 --queries-per-root 2 \
+            --out runs/metta/native_query_receipt.json
+      - name: Preserve native compatibility receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-native-query-parity
+          path: runs/metta/native_query_receipt.json
+          if-no-files-found: warn
+          retention-days: 14
