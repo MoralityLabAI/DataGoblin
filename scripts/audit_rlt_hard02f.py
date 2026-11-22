@@ -175,6 +175,10 @@ def audit(path: Path) -> dict:
         policy_summary = {}
         evaluated = 0
         model_proposals = 0
+        prompt_tokens = 0
+        completion_tokens = 0
+        unknown_model_usage = 0
+        model_invalid_choice_count = 0
         for arm in ARMS:
             cohort = [pairs[(rid, arm)] for rid in by_source]
             for row in cohort:
@@ -204,12 +208,23 @@ def audit(path: Path) -> dict:
                     actual = [p["candidate_id"] for p in row["model_proposals"] if "candidate_id" in p]
                     if actual != ids:
                         raise ValueError("selected model candidate differs from kernel outcomes")
+                    model_invalid_choice_count += int(row.get("invalid_model_choices", 0))
                     for p in row["model_proposals"]:
                         if not (HEX.fullmatch(str(p.get("request_sha256", "")))
                                 and HEX.fullmatch(str(p.get("response_sha256", "")))):
                             raise ValueError("unhashed model prompt or response")
                         if p["choice"] is not None and not 1 <= p["choice"] <= 6:
                             raise ValueError("unregistered model choice")
+                        usage = p.get("usage")
+                        if usage is None:
+                            unknown_model_usage += 1
+                        elif (not isinstance(usage, dict)
+                                or any(type(usage.get(key)) is not int or usage[key] < 0
+                                       for key in ("prompt_tokens", "completion_tokens"))):
+                            raise ValueError("malformed Bonsai model token accounting")
+                        else:
+                            prompt_tokens += usage["prompt_tokens"]
+                            completion_tokens += usage["completion_tokens"]
                 else:
                     if row["model_calls"] != 0:
                         raise ValueError("oracle-only control charged a model invocation")
@@ -238,6 +253,10 @@ def audit(path: Path) -> dict:
             evaluator_positive[rid] and not pairs[(rid, "oxibonsai_q1")]["certified"]
             for rid in by_source
         )
+        explicit_negative_stops = sum(
+            not evaluator_positive[rid] and pairs[(rid, "oxibonsai_q1")]["result"] == "model_stop"
+            for rid in by_source
+        )
         return {
             "schema": "datagoblin.rlt_hard02f_independent_audit.v1",
             "native_kernel_source_verified": True,
@@ -246,6 +265,11 @@ def audit(path: Path) -> dict:
             "native_full_menu_evaluator_checks": qa_checked,
             "native_policy_checks": evaluated,
             "actual_model_inference_calls": model_proposals,
+            "model_prompt_tokens_recorded": prompt_tokens,
+            "model_completion_tokens_recorded": completion_tokens,
+            "model_usage_unavailable_calls": unknown_model_usage,
+            "invalid_model_choice_count": model_invalid_choice_count,
+            "explicit_correct_negative_stops": explicit_negative_stops,
             "live_model_response_hashes_present": True,
             "source_roots": len(source),
             "arms": policy_summary,
