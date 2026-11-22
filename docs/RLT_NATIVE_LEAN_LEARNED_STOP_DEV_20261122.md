@@ -195,3 +195,44 @@ alpha-renaming on its own.
 
 Workflow argument: `--per-split 8 --source-seed 20261126 --alpha-ood`.
 The original v1 and v2 green-run artifacts are preserved.
+
+## Native third cohort: canonicalized binder result
+
+The source-seed 20261126 campaign passed
+[Actions #44980413832](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44980413832)
+with eight offline tests, Ruff, real pinned Lean 4.12.0 compilation,
+313 native compiler calls, and 16 independent learned-attempt replays.
+All 26 artifact SHA-256 checks passed; 24 distinct proof sources were
+retained with their digests.
+
+CAL selected threshold 0.95 again. Ordinary development certified 6/8
+with eight learned checks, against 6/8 in 24 fixed-full checks. On the
+fresh alpha-renamed OOD cohort, the binder-canonicalized learned policy
+certified **6/8 in eight checks**, and the fixed-full policy certified
+6/8 in 32 checks. It stopped after one failed attempt on each of the
+two finite-menu-exhausted OOD roots.
+
+The sequence now has three independently pinned development archives:
+seed 20261124 (numeric OOD success), seed 20261125 (literal-feature
+alpha-renaming failure), seed 20261126 (engineered alpha-invariance
+restores matched proof coverage). These outcomes cannot be pooled as
+a sealed confirmation, since the second and third interventions
+follow explicit inspection of earlier results.
+
+## Scientific interpretation and next gate
+
+The observed gain is in **bounded action selection** for four generated
+Lean Init theorem families. The data establish an actual trained
+classifier and a CAL-frozen stopping rule; each accepted proof is
+recompiled by the Lean kernel checker. The representation has
+explicitly encoded variable-alpha invariance, so its success measures
+the engineered input interface plus learned tactic-family matching.
+
+The next experiment must sample genuinely hard, unfamiliar Lean
+goals (for example, fresh Mathlib or LeanGym theorem roots) and
+generate possible tactic actions from actual proof states. A
+pretrained or trained tactic ranker must choose among native
+actions, with matched verifier budget, separate positive and
+exhausted branches, independent kernel replay, explicit source
+custody and held-out goal-family evaluation. Those harder
+theorem-solving and model-transfer claims remain open.
