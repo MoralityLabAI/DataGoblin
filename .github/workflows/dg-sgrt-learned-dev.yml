@@ -1,0 +1,59 @@
+name: DG-SGRT-02 learned public development
+
+on:
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/sgrt_holoarc.py"
+      - "src/datagoblin/training_gym/sgrt_holoarc_gym.py"
+      - "src/datagoblin/training_gym/sgrt_learned.py"
+      - "tests/unit/test_sgrt_holoarc.py"
+      - "tests/unit/test_sgrt_learned.py"
+      - "training/sgrt_holoarc_01/**"
+      - ".github/workflows/dg-sgrt-learned-dev.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  learned-public-dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/unit/test_sgrt_holoarc.py tests/unit/test_sgrt_learned.py -q
+      - run: ruff check src/datagoblin/training_gym/sgrt_holoarc.py src/datagoblin/training_gym/sgrt_holoarc_gym.py src/datagoblin/training_gym/sgrt_learned.py tests/unit/test_sgrt_holoarc.py tests/unit/test_sgrt_learned.py
+      - name: Public synthetic CPU learned comparison
+        run: |
+          python -m datagoblin.training_gym.sgrt_learned \
+            --seed 23 --train-roots 128 --updates 384 --eval-roots 64 \
+            --budget 8 --out runs/dg-sgrt-02-public
+      - name: Check provenance and equal learned capacity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("runs/dg-sgrt-02-public/report.json").read_text())
+          assert report["claim_boundary"].startswith("CPU-trained synthetic development")
+          assert len(report["train"]) == 5
+          counts = {v["trainable_parameters"] for v in report["train"].values()}
+          assert counts == {2197}, counts
+          assert report["results"]["family_ood_mixed"]["holoarc_gear_lowrank"]["roots"] == 16
+          print("Registered equal-capacity comparison OK", sorted(counts))
+          for group, arms in report["results"].items():
+              print(group)
+              for name, result in arms.items():
+                  print(" ", name, result["whole_task_solved"], "/", result["roots"],
+                        "reachable", result["target_reachable"],
+                        "calls", result["verifier_calls"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-sgrt-02-public-development
+          path: runs/dg-sgrt-02-public/
+          retention-days: 14
