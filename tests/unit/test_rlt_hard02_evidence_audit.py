@@ -9,7 +9,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 import pytest
 
-from scripts.audit_rlt_hard02 import Reader, audit
+from scripts.audit_rlt_hard02 import Reader, audit, length_first_control
 
 
 def test_reject_unsafe_relative_zip_paths(tmp_path: Path):
@@ -54,3 +54,35 @@ def test_reject_missing_source_and_proof_digests(tmp_path: Path):
     }))
     with pytest.raises(ValueError, match="digest manifest"):
         audit(path)
+
+
+def test_length_first_uses_only_verified_executed_candidate_receipts():
+    source = {"menu": ["rfl", "exact True.intro", "intro x\nexact some_very_long_witness x"]}
+    row = {"attempts": [
+        {"candidate_id": 0, "receipt": {"passed": False}},
+        {"candidate_id": 2, "receipt": {
+            "passed": True, "code": "kernel_certified",
+            "evidence": {"kernel_ok": True},
+        }},
+    ]}
+    result = length_first_control(source, row)
+    assert result["observed"] and result["certified"]
+    assert result["kernel_verified"]
+    assert result["candidate_id"] == 2
+    assert result["length"] > result["largest_other_length"]
+
+    unknown = length_first_control(source, {"attempts": [
+        {"candidate_id": 0, "receipt": {"passed": True}},
+    ]})
+    assert not unknown["observed"]
+    assert unknown["certified"] is None
+
+
+def test_length_first_tie_is_index_deterministic():
+    source = {"menu": ["alpha", "bravo", "charl"]}
+    result = length_first_control(source, {"attempts": [
+        {"candidate_id": 0, "receipt": {"passed": False}}
+    ]})
+    assert result["candidate_id"] == 0
+    assert result["observed"]
+    assert result["certified"] is False
