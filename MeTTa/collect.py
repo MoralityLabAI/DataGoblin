@@ -23,7 +23,7 @@ def sha256_bytes(data: bytes) -> str:
 
 def git_blob_sha(data: bytes) -> str:
     prefix = f"blob {len(data)}\0".encode()
-    return hashlib.sha1(prefix + data).hexdigest()  # noqa: S324
+    return hashlib.sha1(prefix + data).hexdigest()
 
 
 def scan_forms(source: str) -> list[tuple[int, int, str]]:
@@ -136,7 +136,7 @@ def make_rows(file_row: dict[str, Any], data: bytes, commit: str) -> list[dict[s
     rows = []
     split = proposed_split(file_row)
     family = canonical_family(file_row)
-    for start, end, atom in scan_forms(text):
+    for start, _end, atom in scan_forms(text):
         offset_line = text.count("\n", 0, start) + 1
         atom_sha = sha256_bytes(atom.encode("utf-8"))
         row_id = sha256_bytes(f'{file_row["source_id"]}:{file_row["path"]}:{start}:{atom_sha}'.encode())
