@@ -1,0 +1,39 @@
+name: MeTTa expanded Goertzel source provenance
+
+on:
+  pull_request:
+    paths:
+      - "MeTTa/goertzel_source_discovery.json"
+      - "MeTTa/goertzel_registry.py"
+      - "MeTTa/README.md"
+      - "tests/unit/test_metta_goertzel_registry.py"
+      - ".github/workflows/metta-goertzel-registry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-registry-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install research verifier
+        run: python -m pip install -e ".[dev]"
+      - name: Validate provenance and rights controls
+        run: |
+          ruff check MeTTa/goertzel_registry.py tests/unit/test_metta_goertzel_registry.py
+          python -m pytest -q tests/unit/test_metta_goertzel_registry.py
+          python -m MeTTa.goertzel_registry --out runs/metta/goertzel_registry_audit.json
+      - name: Retain aggregate receipt only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-goertzel-source-audit
+          path: runs/metta/goertzel_registry_audit.json
+          if-no-files-found: warn
+          retention-days: 14
