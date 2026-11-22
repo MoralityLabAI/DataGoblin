@@ -22,6 +22,8 @@ SPLITS = {
     "looped_dev": (FAMILIES, 62000),
     "looped_frozen": (FAMILIES, 63000),
     "looped_conflict": ((OOD_FAMILY,), 64000),
+    "looped_ablation_frozen": (FAMILIES, 65000),
+    "looped_ablation_conflict": ((OOD_FAMILY,), 66000),
 }
 MAX_REPLY_BYTES = 2048
 
@@ -126,9 +128,10 @@ class CurationTask(vf.Task[CurationData]):
 
 class BenchConfig(vf.TasksetConfig):
     id: str = BENCHMARK_ID
-    split: Literal["development", "frozen", "conflict", "looped_dev", "looped_frozen", "looped_conflict"] = (
-        "development"
-    )
+    split: Literal[
+        "development", "frozen", "conflict", "looped_dev", "looped_frozen", "looped_conflict",
+        "looped_ablation_frozen", "looped_ablation_conflict",
+    ] = "development"
     roots_per_family: int = Field(default=8, ge=1, le=48)
 
 
