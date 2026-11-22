@@ -97,6 +97,8 @@ def test_strict_resource_horizon_and_type_contract():
     with pytest.raises(ValueError, match="lineage horizon"):
         summarize_lineage([EvidenceClaim("a", "a", 1, True),
                            EvidenceClaim("b", "b", 1, False)], max_lineages=1)
+    with pytest.raises(ValueError, match="observation horizon"):
+        summarize_lineage([EvidenceClaim("a", "a", 1, True)] * 5, max_claims=1)
     with pytest.raises(ValueError, match="confidence prior"):
         summarize_lineage([], prior_equivalent_count=0)
     with pytest.raises(ValueError, match="invalid computation"):
