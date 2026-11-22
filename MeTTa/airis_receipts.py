@@ -17,7 +17,6 @@ from .airis_counterfactual import (
     _confirmation_cases,
     canonical,
     discover_policy,
-    digest,
     evaluate_pair,
 )
 from .collect import sha256_bytes
