@@ -83,10 +83,13 @@ def check_memory(limit: int) -> float:
     return round(peak, 2)
 
 
-def fit(trajectories: list[dict], arm: str, config: dict, seed: int, steps: int, limit: int) -> tuple:
+def fit(
+    trajectories: list[dict], arm: str, config: dict, seed: int, steps: int, limit: int,
+    *, batch: tuple[np.ndarray, ...] | None = None,
+) -> tuple:
     start = time.perf_counter()
     cpu = time.process_time()
-    x, y, masks, stop_x, stop_y = make_training_batch(trajectories, config)
+    x, y, masks, stop_x, stop_y = make_training_batch(trajectories, config) if batch is None else batch
     recurrent = arm != "direct"
     model = ActionPolicy(seed, x.shape[-1], recurrent=recurrent)
     depth = config["train_depth"] if recurrent else 1
@@ -155,7 +158,12 @@ def action_scores(
     return state @ model.wo, count, allocations
 
 
-def rollout(models: tuple, arm: str, config: dict, family: str, seed: int, *, depth: int | None = None) -> dict:
+def rollout(
+    models: tuple, arm: str, config: dict, family: str, seed: int,
+    *, depth: int | None = None, decision_limit: int = MAX_DECISIONS,
+) -> dict:
+    if not 1 <= decision_limit <= 10:
+        raise ValueError("Outside registered repair decision limits")
     model, stop, allocator = models
     fixed_depth = depth or (1 if arm == "direct" else config["inference_depth"])
     adaptive = depth is None and config["adaptive_depth"]
@@ -174,7 +182,7 @@ def rollout(models: tuple, arm: str, config: dict, family: str, seed: int, *, de
     )})
     events = []
     metrics["reached_optimum"] = int(selected == optimum)
-    for decision in range(MAX_DECISIONS):
+    for decision in range(decision_limit):
         x, stop_x = features(task, selected)
         metrics["stop_head_calls"] += 1
         if stop.should_stop(stop_x[None, :]):

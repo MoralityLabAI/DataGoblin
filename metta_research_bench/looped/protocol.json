@@ -1,0 +1,19 @@
+{
+  "schema": "paired-looped-curation-v1",
+  "train_roots_per_family": 48,
+  "rollout_cap_per_root": 48,
+  "minimum_matched_train_roots": 225,
+  "minimum_distinct_rollouts": 2500,
+  "minimum_selection_disagreement": 0.20,
+  "minimum_audited_quality_gap": 0.20,
+  "development_roots_per_family": 12,
+  "frozen_roots_per_family": 40,
+  "frozen_conflict_roots": 32,
+  "seeds": [1101, 1102, 1103],
+  "optimizer_updates": 600,
+  "primary_metric": "safe_completion_with_stop",
+  "minimum_frozen_gain": 0.05,
+  "confidence_interval": "95% paired root-clustered percentile bootstrap",
+  "require_positive_lower_bound": true,
+  "max_unsafe_addition_increase": 0
+}
