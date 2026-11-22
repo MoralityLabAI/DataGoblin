@@ -1,0 +1,65 @@
+name: MeTTa-09 Bonsai local model submission adapter
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/metta-local-model-submissions.yml'
+      - 'MeTTa/training_data/scripts/local_model_submit.py'
+      - 'MeTTa/training_data/tests/test_local_model_submit.py'
+      - 'MeTTa/training_data/LOCAL_MODEL_SUBMIT_PROTOCOL.md'
+      - 'MeTTa/training_data/scripts/sealed_finite_eval.py'
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/metta-local-model-submissions.yml'
+      - 'MeTTa/training_data/scripts/local_model_submit.py'
+      - 'MeTTa/training_data/tests/test_local_model_submit.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mock-local-endpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Audit offline client, response parsing and local-only execution
+        run: |
+          python -m pip install 'ruff==0.17.6'
+          ruff check MeTTa/training_data/scripts/local_model_submit.py \
+            MeTTa/training_data/tests/test_local_model_submit.py
+          python -m unittest discover -s MeTTa/training_data/tests \
+            -p 'test_local_model_submit.py' -v
+      - name: Publish rehearsal-only metadata
+        run: |
+          set -euo pipefail
+          mkdir -p runs/metta/local_model_mock
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest = {
+              "schema_version": "metta09-public-client-test-v1",
+              "synthetic_dummy_key": True,
+              "server_network_requests_executed": False,
+              "real_model_weights_loaded": False,
+              "sealed_model_result_attested": False,
+              "test_scope": "mock_transport_and_private_scorer_contracts",
+              "training_ready": False,
+          }
+          Path("runs/metta/local_model_mock/report.json").write_text(
+              json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+          )
+          print(json.dumps(manifest, sort_keys=True))
+          PY
+      - name: Archive public mock harness report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta09-local-model-adapter-mock
+          path: runs/metta/local_model_mock/report.json
+          retention-days: 14
+          if-no-files-found: error
