@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import subprocess
 import sys
 import tempfile
 from collections import Counter
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -170,10 +170,8 @@ def grade_micro(folder: Path, submissions: Path, graded_out: Path) -> dict:
         raw = row.get("output", "")
         parsed: Any = None
         if isinstance(raw, str):
-            try:
+            with suppress(TypeError, ValueError):
                 parsed = json.loads(raw)
-            except (TypeError, ValueError):
-                pass
         accepted = parsed == sealed[root]["expected"]
         schema_valid = isinstance(parsed, dict) and parsed.get("schema") == "SWMD-MICRO-0.1"
         results.append({"root": root, "split": public[root]["split"],
