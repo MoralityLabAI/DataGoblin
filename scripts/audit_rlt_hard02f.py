@@ -209,6 +209,31 @@ def audit(path: Path) -> dict:
                     if actual != ids:
                         raise ValueError("selected model candidate differs from kernel outcomes")
                     model_invalid_choice_count += int(row.get("invalid_model_choices", 0))
+                    # Recompute the complete public model-choice menu after each
+                    # kernel failure, excluding only previously rejected tactics.
+                    # This prevents hidden oracle labels or hidden candidate
+                    # reordering from being laundered into the model's prompt.
+                    failed_choices = set()
+                    source_menu = by_source[row["root_id"]]["menu"]
+                    for p in row["model_proposals"]:
+                        offered = {
+                            1: "STOP (stop proposing Lean proof tactics)",
+                            **{
+                                cid + 2: text for cid, text in enumerate(source_menu)
+                                if cid + 2 not in failed_choices
+                            },
+                        }
+                        if p.get("offered_menu_sha256") != digest(offered):
+                            raise ValueError("model prompt menu provenance differs from public tactics")
+                        choice = p["choice"]
+                        if choice is not None and choice not in offered:
+                            raise ValueError("model repeated an excluded failed proof tactic")
+                        if choice not in (None, 1):
+                            candidate_id = choice - 2
+                            if p.get("candidate_id") != candidate_id:
+                                raise ValueError("model proposal candidate mapping changed")
+                            if not ref[candidate_id]["passed"]:
+                                failed_choices.add(choice)
                     for p in row["model_proposals"]:
                         if not (HEX.fullmatch(str(p.get("request_sha256", "")))
                                 and HEX.fullmatch(str(p.get("response_sha256", "")))):
