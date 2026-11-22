@@ -100,3 +100,31 @@ conflict roots across prior studies.
 
 - Training lock SHA-256 `7cb93a0dda84678e1cae0eb2c5c6895cc0cfedb7a11608e622c729a74ee20384`
 - Frozen report SHA-256 `c087bebc2771652116474cce2148e62d1ed23f746479f63c5d8c408fc984538c`
+
+## Lineage × revision follow-up
+
+The factorial comparison holds every other clause fixed and scores the
+full curator, the two single-rule omissions, and the joint omission on
+the same fresh worlds. The existing nine control checkpoints are reused
+after their selections, weights, initialization, and budgets are checked.
+Three joint-omission fits use the same 10,662 candidates, 240 training
+roots, initialization seeds, 44,417 parameters, 600 updates, and 28,800
+supervised action tokens per fit. No conflict roots are used in training.
+
+The primary estimate on the verified completion-rate scale is joint
+omission minus the sum of the two single omissions plus the full curator.
+A positive value means the joint omission completes more repairs than
+predicted by adding the single-omission changes. The analysis pairs all
+four arms within each seed and root, averages across seeds, then uses a
+root bootstrap interval and a two-sided root-level sign-flip test. The
+primary split uses 200 fresh in-family roots and the separate transfer
+split uses 32 fresh conflict roots. Neither split overlaps the earlier
+paired benchmark or one-rule ablation reserves.
+
+Run `python -m metta_research_bench.looped.interaction train` followed by
+the same command with `frozen`. Both stages use `--reference` and
+`--reference-checkpoints` for the original paired benchmark,
+`--prior-ablation` and `--prior-checkpoints` for the one-rule run, and
+`--out` and `--checkpoints` for the new run. The fresh split is opened only
+after all twelve checkpoint hashes are locked. Keep generated receipts
+and checkpoints outside Git.

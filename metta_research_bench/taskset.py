@@ -24,6 +24,8 @@ SPLITS = {
     "looped_conflict": ((OOD_FAMILY,), 64000),
     "looped_ablation_frozen": (FAMILIES, 65000),
     "looped_ablation_conflict": ((OOD_FAMILY,), 66000),
+    "looped_interaction_frozen": (FAMILIES, 67000),
+    "looped_interaction_conflict": ((OOD_FAMILY,), 68000),
 }
 MAX_REPLY_BYTES = 2048
 
@@ -131,6 +133,7 @@ class BenchConfig(vf.TasksetConfig):
     split: Literal[
         "development", "frozen", "conflict", "looped_dev", "looped_frozen", "looped_conflict",
         "looped_ablation_frozen", "looped_ablation_conflict",
+        "looped_interaction_frozen", "looped_interaction_conflict",
     ] = "development"
     roots_per_family: int = Field(default=8, ge=1, le=48)
 
