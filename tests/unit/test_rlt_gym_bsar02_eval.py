@@ -7,6 +7,7 @@ import pytest
 
 from training.rlt_gym.bsar02.evaluation import (
     ABSTAIN,
+    CATALOG,
     EXPECTED_COUNT,
     LABELS,
     load_holdout,
@@ -14,6 +15,7 @@ from training.rlt_gym.bsar02.evaluation import (
     public_tasks,
     read_predictions,
     score,
+    template_only_predictions,
 )
 
 
@@ -97,3 +99,13 @@ def test_partial_coverage_counts_abstain_as_incorrect(frozen_holdout):
     assert report["coverage"] == pytest.approx(1 / 164)
     assert report["answer_accuracy"] == 1.0
     assert report["abstentions"] == 163
+
+
+def test_question_only_template_baseline_exposes_holdout_leakage(frozen_holdout):
+    predictions = template_only_predictions(CATALOG, frozen_holdout)
+    report = score(frozen_holdout, predictions)
+    assert report["coverage"] == 1
+    # A lookup over question templates in TRAIN suffices, without examining
+    # signatures. This is a deliberate negative control for generalization.
+    assert report["strict_accuracy"] == 1.0
+    assert report["perfect_roots"] == 36
