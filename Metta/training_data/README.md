@@ -68,3 +68,14 @@ python Metta/training_data/scripts/assertions.py
 ```
 
 The generated `assertion_candidates/author_assertions.jsonl` and `reports/assertions.json` retain the source blob hash, runtime hint, task family, exact assertion text, and source-asserted result. They are marked `verification_status=not_run` throughout. A future interpreter replay and independent verifier must certify any resulting SFT target; the extractor cannot serve as a rollout labeler.
+
+## Pinned Hyperon runtime observations
+
+The Hyperon execution pilot uses the published `hyperon==0.2.10` interpreter to run small source tests from `trueagi-io/hyperon-experimental`. Inputs remain byte-identical, and each process has a fixed timeout. The first job has read-only GitHub permissions, and execution subprocesses receive a restricted environment. Results carry runtime version, exit code, elapsed time, full-output hashes and capped output previews:
+
+```sh
+python -m pip install 'hyperon==0.2.10'
+python Metta/training_data/scripts/run_hyperon.py --max-files 20 --timeout-sec 12
+```
+
+Evidence goes into `runtime_receipts/hyperon_0_2_10.jsonl` and `reports/hyperon_0_2_10.json`. Exit code zero means the process completed. An independent verifier must determine whether each assertion passed, and until then every recorded attempt remains ineligible for SFT/rollout training.
