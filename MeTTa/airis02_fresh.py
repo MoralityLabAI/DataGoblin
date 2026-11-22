@@ -33,6 +33,7 @@ SCHEMA = "metta-airis02-fresh-root-v1"
 ARMS = ("uniform", "motif", "budget_first", "moses_gate")
 TRAIN_RANGE = range(512, 704)
 DEV_RANGE = range(704, 768)
+PUBLIC_TEST_RANGE = range(768, 1024)
 STEWARD_RANGE = range(1024, 1152)
 SOURCE_FAMILIES = tuple(f for f in FAMILIES if f != OOD_FAMILY)
 DEFAULT_OUT = ROOT / "runs" / "metta" / "airis02_fresh"
@@ -58,6 +59,8 @@ def partition(family: str, seed: int) -> str:
         return "train_candidate"
     if seed in DEV_RANGE:
         return "development"
+    if seed in PUBLIC_TEST_RANGE:
+        return "public_test_reserved"
     if seed in STEWARD_RANGE:
         return "steward_reserved"
     raise ValueError("seed outside registered AIRIS-02 source ranges")
@@ -92,8 +95,8 @@ def build_row(
     family: str, seed: int, arm: str, motifs: tuple[tuple[str, ...], ...],
 ) -> dict[str, Any]:
     split = partition(family, seed)
-    if split == "steward_reserved":
-        raise ValueError("steward roots cannot be materialized or labeled here")
+    if split in ("steward_reserved", "public_test_reserved"):
+        raise ValueError("reserved roots cannot be materialized or labeled here")
     if arm not in ARMS:
         raise ValueError("unknown intervention arm")
     root = root_id(family, seed)
@@ -212,6 +215,22 @@ def build_bundle(out: Path, *, train_roots_per_family: int = 32,
         json.dumps(steward, sort_keys=True, indent=2) + "\n", encoding="utf-8"
     )
     files["steward_registry.json"] = sha256_bytes((out / "steward_registry.json").read_bytes())
+    public_reserved_roots = [root_id(f, seed) for f in SOURCE_FAMILIES for seed in PUBLIC_TEST_RANGE]
+    public_register = {
+        "schema_version": "metta-airis02-public-test-registration-v1",
+        "root_count": len(public_reserved_roots),
+        "root_ids_sha256": sha256_bytes("\n".join(public_reserved_roots).encode()),
+        "worlds_opened": 0,
+        "teacher_labels_written": 0,
+        "not_cryptographically_sealed": True,
+        "training_ready": False,
+    }
+    (out / "public_test_registry.json").write_text(
+        json.dumps(public_register, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    files["public_test_registry.json"] = sha256_bytes(
+        (out / "public_test_registry.json").read_bytes()
+    )
     return {
         "schema_version": "metta-airis02-bundle-v1",
         "root_exposure_policy": "one_per_arm_max_four_per_root",
@@ -225,6 +244,7 @@ def build_bundle(out: Path, *, train_roots_per_family: int = 32,
         "frozen_motifs_sha256": digest(motifs),
         "frozen_moses_key": FROZEN_MOSES_PROGRAM.key,
         "teacher_labels_in_steward_registry": 0,
+        "teacher_labels_in_public_test_registry": 0,
         "old_sft_seed_overlap": 0,
         "new_training_presentations_original_v1": 0,
         "training_ready": False,
