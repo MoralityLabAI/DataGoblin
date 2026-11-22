@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from MeTTa.collect import scan_forms, sha256_bytes
+from MeTTa.depth_frontier import depth_frontier
 from MeTTa.export_looped_frames import export_frames
 from MeTTa.looped_sft import (
     audit_bundle,
@@ -155,6 +156,19 @@ def test_looped_frame_adapter_is_alternate_view_with_shared_roots(tmp_path: Path
     assert all(x["metadata"]["stop_target"] in (True, False) for x in rows)
     with pytest.raises(ValueError, match="distinct"):
         export_frames(bundle, bundle / "forbidden.jsonl")
+
+
+def test_oracle_depth_frontier_is_monotone_and_custody_safe() -> None:
+    report = depth_frontier(roots_per_family=12)
+    assert report["train_roots_only"] is True
+    assert report["learner_model"] is None
+    assert "conflict" not in report["families"]
+    root_counts = [report["aggregate"][str(k)]["roots"] for k in report["depths"]]
+    exact_counts = [report["aggregate"][str(k)]["exact"] for k in report["depths"]]
+    assert len(set(root_counts)) == 1
+    assert exact_counts == sorted(exact_counts)
+    assert exact_counts[-1] == root_counts[-1]
+    assert report["training_ready"] is False
 
 
 def test_heldout_family_is_disjoint_from_train() -> None:
