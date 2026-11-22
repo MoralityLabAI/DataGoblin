@@ -119,7 +119,10 @@ def test_policy_labels_are_from_existing_data_goblin_authority() -> None:
     for variant, expected in expectations.items():
         record = policy_record(row, variant, **kwargs)
         assert policy.decide(record).disposition.value == expected
-        assert "https://github.com/" in record.provenance_refs[0] or variant == "no_provenance"
+        if variant == "no_provenance":
+            assert record.provenance_refs == ()
+        else:
+            assert record.provenance_refs[0].startswith("https://github.com/")
         assert "!(match &self" in program_for(record)
 
 
