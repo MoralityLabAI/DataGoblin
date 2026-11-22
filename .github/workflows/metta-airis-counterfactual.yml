@@ -40,6 +40,7 @@ jobs:
           p = json.loads((root / 'summary.json').read_text())
           a = json.loads((root / 'audit.json').read_text())
           assert p['actual_paired_cases'] == 96
+          assert p['paired_policy']['budget_first']['paired_roots'] == 96
           assert p['discovery_root_count'] + p['internal_confirmation_root_count'] == 1960
           assert p['training_ready'] is False
           assert p['new_sft_presentations'] == 0
