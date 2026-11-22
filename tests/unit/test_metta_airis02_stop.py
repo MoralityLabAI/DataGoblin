@@ -4,9 +4,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from MeTTa.airis02_fresh import _frozen_motifs, build_row
 from MeTTa.airis02_stop import StopHead
 from MeTTa.airis02_student import INPUT_DIM, LinearStudent, RecurrentStudent, evaluate
-from MeTTa.airis02_fresh import _frozen_motifs, build_row
 
 
 def test_separate_binary_stop_gate_is_deterministic_and_bounded():
