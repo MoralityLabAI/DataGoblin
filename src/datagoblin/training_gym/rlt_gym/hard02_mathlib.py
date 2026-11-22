@@ -11,7 +11,6 @@ import argparse
 import hashlib
 import json
 import random
-import re
 import shutil
 import subprocess
 import tempfile
@@ -62,7 +61,7 @@ def _witness(split: str, i: int) -> tuple[str, str, str]:
     elif split == "calibration":
         statement = (
             "∀ (s t u : Finset Nat), s ⊆ t → "
-            f"((s ∩ ({{{n}}} ∪ u)).card ≤ (t ∪ u).card)"
+            f"((s ∩ ({{{n}}} ∪ u)).card ≤ (t ∪ u).card)"  # noqa: RUF001
         )
         prefix = "intro s t u hst"
         proof = (
@@ -84,7 +83,7 @@ def _witness(split: str, i: int) -> tuple[str, str, str]:
         expr = terms[0]
         for term in terms[1:]:
             expr = f"({expr} + {term})"
-        statement = f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {expr}"
+        statement = f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {expr}"  # noqa: RUF001
         prefix = "intro a b c h"
         tree = "dvd_add hab hac"
         for _ in range(i + 1):
@@ -330,7 +329,9 @@ def _check(checker: LeanKernelChecker, root: Root, candidate: int) -> dict[str, 
     }
 
 
-def calibrate(cal: list[dict[str, Any]], weights: np.ndarray, words: tuple[str, ...]) -> tuple[float, list[dict[str, Any]]]:
+def calibrate(
+    cal: list[dict[str, Any]], weights: np.ndarray, words: tuple[str, ...]
+) -> tuple[float, list[dict[str, Any]]]:
     if not cal or any(row["split"] != "calibration" for row in cal):
         raise ValueError("only CAL roots can choose the stopping threshold")
     frontier = []
@@ -366,9 +367,8 @@ def online(
     ps = rank_scores(row["goal_pp"], root.menu, weights, words) if arm == "learned" else None
     attempts = []
     for j, cid in enumerate(ordering):
-        if arm == "learned" and j and ps is not None:
-            if max(float(ps[k]) for k in ordering[j:]) < threshold:
-                break
+        if arm == "learned" and j and ps is not None and max(float(ps[k]) for k in ordering[j:]) < threshold:
+            break
         checked = _check(checker, root, cid)
         attempts.append(checked)
         if checked["receipt"]["passed"]:
