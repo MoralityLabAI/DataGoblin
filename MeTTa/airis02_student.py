@@ -32,7 +32,7 @@ FIELD_DIM = 15
 GLOBAL_DIM = 13
 INPUT_DIM = MAX_ITEMS * FIELD_DIM + GLOBAL_DIM
 FAMILIES = ("lineage", "coverage", "dependency", "revision", "budget")
-SCHEMA = "metta-airis02-cpu-student-v1"
+SCHEMA = "metta-airis02-cpu-student-v2"
 
 
 def encode_public(task: dict[str, Any], selected: list[str]) -> np.ndarray:
@@ -126,13 +126,37 @@ def decode_action(index: int) -> dict[str, str]:
     return {"op": "remove", "id": f"r{index - MAX_ITEMS}"}
 
 
+def legal_action_mask(task: dict[str, Any], selected: list[str]) -> np.ndarray:
+    """Suppress structurally inapplicable ADD/REMOVE moves using public IDs."""
+    ids = {item["id"] for item in task["items"]}
+    chosen = set(selected)
+    if len(chosen) != len(selected) or not chosen <= ids:
+        raise ValueError("invalid public state for action membership mask")
+    mask = np.zeros(ACTION_CLASSES, dtype=np.bool_)
+    for identifier in ids:
+        index = int(identifier[1:])
+        if identifier in chosen:
+            mask[MAX_ITEMS + index] = True
+        else:
+            mask[index] = True
+    mask[20] = True
+    return mask
+
+
 def _softmax(logits: np.ndarray) -> np.ndarray:
     shifted = logits - np.max(logits, axis=1, keepdims=True)
     weights = np.exp(np.clip(shifted, -700, 0))
     return weights / weights.sum(axis=1, keepdims=True)
 
 
-def _cross_entropy(logits: np.ndarray, target: np.ndarray) -> tuple[float, np.ndarray]:
+def _cross_entropy(
+    logits: np.ndarray, target: np.ndarray,
+    legal_masks: np.ndarray | None = None,
+) -> tuple[float, np.ndarray]:
+    if legal_masks is not None:
+        if legal_masks.shape != logits.shape or not legal_masks[np.arange(len(target)), target].all():
+            raise ValueError("teacher chose structurally inapplicable edit")
+        logits = np.where(legal_masks, logits, -1e6)
     probs = _softmax(logits)
     n = len(target)
     loss = -np.log(np.maximum(probs[np.arange(n), target], 1e-16)).mean()
@@ -162,11 +186,14 @@ class LinearStudent:
             raise ValueError("linear student has one inference pass")
         return x @ self.w + self.b
 
-    def fit(self, x: np.ndarray, y: np.ndarray, *, steps: int, lr: float) -> list[float]:
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, *, steps: int, lr: float,
+        legal_masks: np.ndarray | None = None,
+    ) -> list[float]:
         losses = []
         for step in range(steps):
             logits = self.logits(x)
-            loss, d = _cross_entropy(logits, y)
+            loss, d = _cross_entropy(logits, y, legal_masks)
             dw = x.T @ d + 0.0001 * self.w
             db = d.sum(axis=0)
             dw, db = _clip([dw, db])
@@ -208,12 +235,14 @@ class RecurrentStudent:
     def logits(self, x: np.ndarray, *, loops: int = 4) -> np.ndarray:
         return self._forward(x, loops=loops)[0]
 
-    def fit(self, x: np.ndarray, y: np.ndarray, *, steps: int, lr: float,
-            train_loops: int = 4) -> list[float]:
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, *, steps: int, lr: float,
+        train_loops: int = 4, legal_masks: np.ndarray | None = None,
+    ) -> list[float]:
         losses = []
         for step in range(steps):
             logits, states = self._forward(x, loops=train_loops)
-            loss, grad = _cross_entropy(logits, y)
+            loss, grad = _cross_entropy(logits, y, legal_masks)
             dwo = states[-1].T @ grad + 0.0001 * self.wo
             dbo = grad.sum(axis=0)
             dh = grad @ self.wo.T
@@ -251,14 +280,17 @@ def canonical_eval_key(row: dict) -> str:
     )
 
 
-def _matrix(rows: list[dict]) -> tuple[np.ndarray, np.ndarray]:
+def _matrix(rows: list[dict]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if not rows:
         raise ValueError("empty student training rows")
     if any(row["training_ready"] is not False for row in rows):
         raise ValueError("student dataset exceeds synthetic research custody")
     features = np.stack([encode_public(row["public_world"], row["selected"]) for row in rows])
     labels = np.array([action_index(row["oracle_next_edit"]) for row in rows], dtype=np.int64)
-    return features, labels
+    masks = np.stack([legal_action_mask(row["public_world"], row["selected"]) for row in rows])
+    if not masks[np.arange(len(rows)), labels].all():
+        raise ValueError("oracle teacher action is not structurally available")
+    return features, labels, masks
 
 
 def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
@@ -267,9 +299,10 @@ def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
     task = row["public_world"]
     selected = list(row["selected"])
     oracle = exact_optimum(task)
-    initial = decode_action(int(np.argmax(model.logits(
-        encode_public(task, selected)[None, :], loops=loops)[0]
-    )))
+    first_vector = encode_public(task, selected)[None, :]
+    first_mask = legal_action_mask(task, selected)
+    first_logits = model.logits(first_vector, loops=loops)[0]
+    initial = decode_action(int(np.argmax(np.where(first_mask, first_logits, -1e6))))
     exact_initial = initial == row["oracle_next_edit"]
     attempts = 0
     false_admissions = 0
@@ -278,7 +311,9 @@ def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
     successful_stop = False
     for _ in range(max_edits):
         vector = encode_public(task, selected)[None, :]
-        index = int(np.argmax(model.logits(vector, loops=loops)[0]))
+        action_logits = model.logits(vector, loops=loops)[0]
+        mask = legal_action_mask(task, selected)
+        index = int(np.argmax(np.where(mask, action_logits, -1e6)))
         action = decode_action(index)
         if action["op"] == "stop":
             successful_stop = selected == oracle["selected"]
@@ -347,7 +382,7 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
     if audit["synthetic_research_fit_eligible"] is not True or audit["general_corpus_training_ready"] is not False:
         raise ValueError("synthetic research fit is not independently admissible")
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
-    if manifest.get("schema_version") != "metta-airis02-bundle-v1" or manifest.get("training_ready") is not False:
+    if manifest.get("schema_version") != "metta-airis02-bundle-v2" or manifest.get("training_ready") is not False:
         raise ValueError("unknown or admitted training bundle")
     for filename, expected in manifest["files"].items():
         if sha256_bytes((bundle / filename).read_bytes()) != expected:
@@ -376,6 +411,7 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         "holdout_steward_opened": False,
         "root_split_custody": "distinct_seed_bands_and_root_hashes",
         "optimizer_steps_per_arm": steps,
+        "student_training_policy": "structural_membership_action_mask_plus_hash_fixed_point_stop",
         "learning_rate": lr,
         "training_loops": 4,
         "inference_depths_checked": [2, 4, 8],
@@ -408,11 +444,11 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         a_dev = [row for row in dev if row["arm"] == arm]
         if len(a_train) != manifest["train_roots"] or len(a_dev) != manifest["development_roots"]:
             raise ValueError("unbalanced intervention arms")
-        x, y = _matrix(a_train)
+        x, y, masks = _matrix(a_train)
         linear = LinearStudent(seed)
-        losses = linear.fit(x, y, steps=steps, lr=lr)
+        losses = linear.fit(x, y, steps=steps, lr=lr, legal_masks=masks)
         rec = RecurrentStudent(seed, hidden=hidden)
-        rec_losses = rec.fit(x, y, steps=steps, lr=lr, train_loops=4)
+        rec_losses = rec.fit(x, y, steps=steps, lr=lr, train_loops=4, legal_masks=masks)
         report["trained_models"][arm] = {
             "train_root_sha256": sha256_bytes("\n".join(sorted(row["root"] for row in a_train)).encode()),
             "dev_root_sha256": sha256_bytes("\n".join(sorted(row["root"] for row in a_dev)).encode()),
