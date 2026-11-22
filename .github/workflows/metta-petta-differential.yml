@@ -1,0 +1,103 @@
+name: MeTTa-08 pinned PeTTa and Hyperon differential audit
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/metta-petta-differential.yml'
+      - 'MeTTa/training_data/scripts/petta_differential.py'
+      - 'MeTTa/training_data/tests/test_petta_differential.py'
+      - 'MeTTa/training_data/PETTA_DIFFERENTIAL_PROTOCOL.md'
+      - 'MeTTa/training_data/scripts/finite_semantic_oracle.py'
+      - 'MeTTa/training_data/scripts/finite_oracle_pilot.py'
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/metta-petta-differential.yml'
+      - 'MeTTa/training_data/scripts/petta_differential.py'
+      - 'MeTTa/training_data/tests/test_petta_differential.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-three-way-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test independent comparator and format checks
+        run: |
+          python -m pip install 'ruff==0.17.6' 'hyperon==0.2.10'
+          ruff check MeTTa/training_data/scripts/petta_differential.py \
+            MeTTa/training_data/tests/test_petta_differential.py
+          python -m unittest discover -s MeTTa/training_data/tests \
+            -p 'test_petta_differential.py' -v
+      - name: Retrieve exact PeTTa commit and resolve OCI image digest
+        id: runtime
+        env:
+          PETTA_SHA: ee5cacb6a6ecdd554a1c773aaf47e9a0f8a5af0f
+          PETTA_IMAGE: ghcr.io/patham9/petta-ci:latest
+        run: |
+          set -euo pipefail
+          git init -q /tmp/petta-pinned
+          git -C /tmp/petta-pinned remote add origin https://github.com/trueagi-io/PeTTa.git
+          git -C /tmp/petta-pinned fetch --depth 1 origin "$PETTA_SHA"
+          git -C /tmp/petta-pinned checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/petta-pinned rev-parse HEAD)" = "$PETTA_SHA"
+          docker pull "$PETTA_IMAGE"
+          DIGEST="$(docker image inspect --format '{{index .RepoDigests 0}}' "$PETTA_IMAGE")"
+          case "$DIGEST" in
+            ghcr.io/patham9/petta-ci@sha256:*) ;;
+            *) echo "Invalid OCI digest: $DIGEST" >&2; exit 1 ;;
+          esac
+          echo "image=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "PeTTa source $PETTA_SHA"
+          echo "Container $DIGEST"
+      - name: Run 12 public synthetic worlds in PeTTa and Hyperon
+        env:
+          PETTA_RESOLVED_IMAGE: ${{ steps.runtime.outputs.image }}
+        run: |
+          set -euo pipefail
+          mkdir -p runs/metta/petta_differential
+          python MeTTa/training_data/scripts/petta_differential.py \
+            --petta-repo /tmp/petta-pinned \
+            --petta-image "$PETTA_RESOLVED_IMAGE" \
+            --roots 12 --timeout-sec 25 \
+            --out runs/metta/petta_differential/observations.jsonl \
+            --report runs/metta/petta_differential/report.json \
+            > runs/metta/petta_differential/stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          directory = Path("runs/metta/petta_differential")
+          summary = json.loads((directory / "report.json").read_text())
+          rows = [json.loads(line) for line in (directory / "observations.jsonl").read_text().splitlines()]
+          assert summary["queries"] == 48
+          assert summary["source_roots"] == 12
+          assert len(rows) == 48
+          assert summary["training_ready"] is False
+          assert summary["sealed_eval_eligible"] is False
+          assert summary["model_evaluation_executed"] is False
+          assert summary["petta_oci_image"].startswith("ghcr.io/patham9/petta-ci@sha256:")
+          assert all(row["training_ready"] is False for row in rows)
+          assert all(row["sealed_eval_eligible"] is False for row in rows)
+          print("Cross-runtime differential categories", summary["counts"])
+          print("PeTTa first case:", rows[0]["petta_exit_code"], rows[0]["petta_stdout_lines"], repr(rows[0]["petta_stdout_preview"][:400]), repr(rows[0]["petta_stderr_preview"][:400]))
+          assert summary["counts"].get("petta_runtime_or_alignment_failure", 0) < 48, "All PeTTa cases failed; inspect bounded process diagnostics"
+          PY
+      - name: Publish runtime diagnostics only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta08-petta-hyperon-differential
+          path: |
+            runs/metta/petta_differential/observations.jsonl
+            runs/metta/petta_differential/report.json
+            runs/metta/petta_differential/stdout.json
+          retention-days: 14
+          if-no-files-found: ignore
