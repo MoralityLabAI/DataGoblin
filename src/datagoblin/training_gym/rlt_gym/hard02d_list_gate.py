@@ -9,7 +9,6 @@ candidate re-execution before the cohort's quality gate is promoted.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import random
 import shutil
@@ -152,7 +151,7 @@ def run(lake: Path, mathlib: Path, out: Path, *, roots: int = 8, seed: int = SEE
                 },
             })
         independent_replays = 0
-        for sid, (case, row) in enumerate(zip(cases, rows, strict=True), 1):
+        for case, row in zip(cases, rows, strict=True):
             for original in row["candidate_outcomes"]:
                 updated = _check(checker, case, original["candidate_id"])
                 if original["receipt"] != updated["receipt"]:
