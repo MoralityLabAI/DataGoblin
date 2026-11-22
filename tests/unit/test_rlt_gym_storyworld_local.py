@@ -98,7 +98,7 @@ class StoryworldLiveTests(unittest.TestCase):
                 hidden = spec["hidden_index"]
                 self.assertIsNone(steps[0]["observation"]["visible_state"]["vector"][hidden])
                 self.assertIn(steps[1]["observation"]["visible_state"]["vector"][hidden], (0, 1))
-                self.assertEqual([e["action"] for e in steps][0], "audit")
+                self.assertEqual(steps[0]["action"], "audit")
             self.assertEqual(replay_run(self.native, root / "archive", root / "model")["status"], "verified")
             self.assertEqual({r["grade"]["true_utility"] for r in
                               _read_lines(root / "model/results.jsonl")}, {"9"})
