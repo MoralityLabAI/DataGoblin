@@ -224,3 +224,28 @@ evaluation roots or the 154 archived conflict roots.
 
 - Replication lock SHA-256 `fe42fed6c99a242a00e017b36c9ae4c61c016cf79b2394e727cb961940f782f2`
 - Frozen report SHA-256 `e85d2f8be56beb454525dc73dcce5c05b6519c228f70e63c86402f03e21a0f37`
+
+## Lineage-family replication
+
+On the 40 lineage roots in the factorial study, keeping the lineage guard
+yielded 25 versus 22 completions with revision present and 24 versus 23
+with revision absent, each out of 120. The mean paired effect was +1.67
+percentage points. The earlier single-rule study had a separate 40 lineage
+roots and estimated +5.00 points with revision present.
+
+The replication uses 400 fresh lineage roots and the same four arms and
+twelve checkpoints. Each fit used a 44,417-parameter Looped Transformer,
+600 optimizer updates, and 28,800 supervised action tokens. The replication
+uses zero new optimizer updates. The primary contrast is the mean of
+`good − without_lineage` and `without_revision − without_lineage_revision`
+within each root and seed. The two conditional effects and the factorial
+interaction are secondary. A positive primary estimate with a two-sided
+root-level sign-flip p-value below 0.05 is the replication criterion.
+Intervals use a 95% bootstrap over roots, keeping the three seeds paired.
+
+Run `python -m metta_research_bench.looped.lineage_replication` with the
+same paths used by the revision replication and `--prior-revision`
+pointing to its archived report directory. Use a fresh `--out` path. The
+runner verifies the original archives and weights before opening the
+reserve. Its exclusion manifest includes the earlier revision replication.
+Keep weights and generated output outside Git.

@@ -42,6 +42,7 @@ def test_factorial_contrast_is_paired_and_recovers_joint_effect():
     pytest.importorskip("verifiers.v1")
     pytest.importorskip("torch")
     from metta_research_bench.looped.interaction import ARMS, factorial_metrics
+    from metta_research_bench.looped.lineage_replication import lineage_metrics
 
     rows = []
     for root, rewards in (("r1", (1, 0, 1, 1)), ("r2", (1, 1, 1, 1))):
@@ -57,20 +58,26 @@ def test_factorial_contrast_is_paired_and_recovers_joint_effect():
     assert interaction["estimate"] == 0.5
     assert interaction["additive_joint_prediction"] == 0.5
     assert interaction["paired_roots"] == 2
+    effect = lineage_metrics(rows, [1, 2])["lineage_guard_effect"]
+    assert effect["mean_over_revision"]["estimate"] == 0.25
+    assert effect["revision_present"]["estimate"] == 0.5
+    assert effect["revision_absent"]["estimate"] == 0
     with pytest.raises(ValueError, match="four arms"):
         factorial_metrics(rows[:-1], [1, 2])
 
 
-def test_revision_replication_has_a_larger_revision_only_reserve():
+@pytest.mark.parametrize("family", ["revision", "lineage"])
+def test_family_replication_has_a_larger_single_family_reserve(family):
     pytest.importorskip("verifiers.v1")
     from pydantic import ValidationError
 
-    from metta_research_bench.taskset import REVISION_REPLICATION_ROOTS, REVISION_REPLICATION_SPLIT, SPLITS, BenchConfig
+    from metta_research_bench.taskset import FAMILY_REPLICATION_ROOTS, SPLITS, BenchConfig
 
-    config = BenchConfig(split=REVISION_REPLICATION_SPLIT, roots_per_family=REVISION_REPLICATION_ROOTS)
+    split = f"looped_{family}_replication"
+    config = BenchConfig(split=split, roots_per_family=FAMILY_REPLICATION_ROOTS)
     assert config.roots_per_family == 400
-    assert SPLITS[config.split][0] == ("revision",)
+    assert SPLITS[config.split][0] == (family,)
     with pytest.raises(ValidationError, match="at most 48"):
         BenchConfig(split="looped_interaction_frozen", roots_per_family=49)
     with pytest.raises(ValidationError):
-        BenchConfig(split=REVISION_REPLICATION_SPLIT, roots_per_family=401)
+        BenchConfig(split=split, roots_per_family=401)

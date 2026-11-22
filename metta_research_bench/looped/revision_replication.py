@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import json
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 import torch
@@ -31,7 +32,10 @@ REPLICATION = {
 }
 
 
-async def run(args: argparse.Namespace) -> dict:
+async def run_replication(
+    args: argparse.Namespace, family: str, protocol: dict, analyze: Callable[[list[dict], list[int]], dict],
+    *, extra_excluded: set[str] | None = None,
+) -> dict:
     started = time.perf_counter()
     commit, dirty = revision()
     if dirty:
@@ -39,7 +43,7 @@ async def run(args: argparse.Namespace) -> dict:
     lock_raw = (args.interaction / "locked_interaction.json").read_bytes()
     report_raw = (args.interaction / "frozen_interaction_report.json").read_bytes()
     if (digest(lock_raw), digest(report_raw)) != (
-        REPLICATION["interaction_lock_sha256"], REPLICATION["interaction_report_sha256"],
+        protocol["interaction_lock_sha256"], protocol["interaction_report_sha256"],
     ):
         raise ValueError("Replication requires the exact archived interaction run")
     lock, archived = json.loads(lock_raw), json.loads(report_raw)
@@ -58,44 +62,62 @@ async def run(args: argparse.Namespace) -> dict:
     excluded = set(lock["excluded_source_hashes"])
     for split in (archived["primary"], archived["conflict_transfer"]):
         excluded.update(row["source_sha256"] for row in split["sources"])
+    if extra_excluded is not None:
+        excluded.update(extra_excluded)
     preflight = {
-        "commit": commit, "protocol": REPLICATION, "fit_receipts": lock["fits"],
+        "commit": commit, "protocol": protocol, "fit_receipts": lock["fits"],
         "matched_training": lock["matched_protocol"], "architecture": lock["architecture"],
         "optimizer": lock["optimizer"], "evaluation": lock["evaluation"],
         "excluded_source_hashes": sorted(excluded), "new_optimizer_updates": 0,
     }
     args.out.mkdir(parents=True, exist_ok=False)
-    lock_file = args.out / "locked_revision_replication.json"
+    lock_file = args.out / f"locked_{family}_replication.json"
     write_json(lock_file, preflight)
 
-    def analyze(rows: list[dict]) -> dict:
-        result = factorial_metrics(rows, seeds)
-        if set(result["family_safe_completions"]) != {"revision"}:
-            raise ValueError("Replication must score revision roots only")
-        result["full_minus_joint"] = contrasts(
-            rows, {"good": "good", JOINT: JOINT}, {**REPLICATION, "original_difference_rules": []},
-        )[JOINT]
-        return result
+    def analyze_reserve(rows: list[dict]) -> dict:
+        if {row["family"] for row in rows} != {family}:
+            raise ValueError(f"Replication must score {family} roots only")
+        return analyze(rows, seeds)
 
-    result, _ = await evaluate(args.out, REPLICATION["split"], REPLICATION["roots"],
-                               models, expected, excluded, analyze=analyze)
+    result, _ = await evaluate(args.out, protocol["split"], protocol["roots"],
+                               models, expected, excluded, analyze=analyze_reserve)
     report = {
-        "locked_replication_sha256": digest(lock_file.read_bytes()), "revision": result,
+        "locked_replication_sha256": digest(lock_file.read_bytes()), family: result,
         "evaluation_peak_mib": check_memory(LIMIT), "wall_seconds": time.perf_counter() - started,
     }
-    write_json(args.out / "frozen_revision_replication.json", report)
+    write_json(args.out / f"frozen_{family}_replication.json", report)
     return report
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+def revision_metrics(rows: list[dict], seeds: list[int]) -> dict:
+    result = factorial_metrics(rows, seeds)
+    result["full_minus_joint"] = contrasts(
+        rows, {"good": "good", JOINT: JOINT}, {**REPLICATION, "original_difference_rules": []},
+    )[JOINT]
+    return result
+
+
+def replication_parser(description: str) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=description)
     for argument in ("reference", "reference-checkpoints", "interaction", "prior-checkpoints", "checkpoints", "out"):
         parser.add_argument(f"--{argument}", type=Path, required=True)
-    args = parser.parse_args()
+    return parser
+
+
+def configure_inference() -> None:
     install_memory_ceiling(LIMIT)
     torch.set_num_threads(2)
     torch.set_num_interop_threads(1)
     torch.use_deterministic_algorithms(True)
+
+
+async def run(args: argparse.Namespace) -> dict:
+    return await run_replication(args, "revision", REPLICATION, revision_metrics)
+
+
+def main() -> int:
+    args = replication_parser(__doc__).parse_args()
+    configure_inference()
     report = asyncio.run(run(args))
     print(json.dumps({key: report["revision"][key] for key in ("interaction", "full_minus_joint")}))
     return 0
