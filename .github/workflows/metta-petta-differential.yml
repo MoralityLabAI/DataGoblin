@@ -87,6 +87,8 @@ jobs:
           assert all(row["training_ready"] is False for row in rows)
           assert all(row["sealed_eval_eligible"] is False for row in rows)
           print("Cross-runtime differential categories", summary["counts"])
+          print("PeTTa first case:", rows[0]["petta_exit_code"], rows[0]["petta_stdout_lines"], repr(rows[0]["petta_stdout_preview"][:400]), repr(rows[0]["petta_stderr_preview"][:400]))
+          assert summary["counts"].get("petta_runtime_or_alignment_failure", 0) < 48, "All PeTTa cases failed; inspect bounded process diagnostics"
           PY
       - name: Publish runtime diagnostics only
         if: always()
