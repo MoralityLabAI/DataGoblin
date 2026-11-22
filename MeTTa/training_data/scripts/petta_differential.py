@@ -57,12 +57,12 @@ def container_command(
     ]
     if source_path is not None:
         command += ["-v", f"{source_path.resolve()}:/input/world.metta:ro"]
-    return command + [image]
+    return [*command, image]
 
 
 def get_petta_version(repo: Path, image: str) -> str:
     result = subprocess.run(
-        container_command(repo, image) + ["swipl", "--version"],
+        [*container_command(repo, image), "swipl", "--version"],
         capture_output=True, text=True, timeout=60, check=True,
     )
     text = result.stdout.strip()
@@ -83,8 +83,7 @@ def run_petta(
         source.write_bytes(raw)
         try:
             outcome = subprocess.run(
-                container_command(repo, image, source)
-                + ["sh", "/petta/run.sh", "/input/world.metta", "--silent"],
+                [*container_command(repo, image, source), "sh", "/petta/run.sh", "/input/world.metta", "--silent"],
                 capture_output=True, check=False, timeout=timeout_sec,
             )
             return {
