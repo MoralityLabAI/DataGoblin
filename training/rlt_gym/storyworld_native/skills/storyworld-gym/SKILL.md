@@ -36,6 +36,35 @@ Never send the sealed private_bit, the unchosen futures, or hidden grade to the 
 7. Replay the full archive from the exact same source and seed. Quarantine any source SHA mismatch or hash failure.
 8. Compare model completion against matched source controls on held-out lineages, and include actual verifier calls, full HG-02 utility, false accepts, and stable context budgets in promotion reports.
 
+## Cross-world source custody
+
+Use the checked-in world_cohort_v1.json registry and the
+storyworld_cohort.py collector for cross-world studies. The registry
+assigns an entire source world to train, calibration or OOD test.
+The original mini compiler is the source of its canonical SFT labels,
+while the collector excludes prompt packets that exceed 8,192 bytes.
+Read each micro_oversize.jsonl before claiming complete curriculum
+coverage. Holdout-world native_train_targets and micro_train_sft
+streams must be empty. Verify the source world and registry hashes
+before interpreting any scores.
+
+## Optional local Inkling player
+
+The storyworld_local.py command takes a native archive, model alias and
+loopback-only llama.cpp endpoint. It sends the model one public
+observation per HG-02 turn and applies its proposed legal action through
+the source-native simulator. The hidden bit stays sealed until a
+source-owned audit. Each response is logged with raw text, parser result,
+public state, request identity, sampler, and usage when supplied.
+Builder/Mini mode requires PICK followed by one candidate identifier.
+
+Use --resume only with identical run configuration to continue a
+partial result, and --replay-run to check every recorded action and
+source grade offline. The source and model weights remain unchanged.
+GitHub Actions uses a deterministic fake player to exercise the
+protocol; a successful CI run is engineering evidence, never an Inky
+capability score.
+
 ## Runtime and evidence
 
 Use CPU-only source-native controls by default. Optional model rollouts should use the already-running local llama.cpp endpoint and a fixed Inkling/Inky Mini model identity. Keep model context at or below 8K for Mini and at most 16K across all modes. Do not restart the inference server or use a paid fallback. Capture raw outputs and token usage when supplied by the endpoint.
