@@ -552,16 +552,16 @@ def run(
                             state, checker, arm, weights, words, threshold,
                             semantic=semantic_features,
                         ))
-        replayed = 0
+        replayed_by_arm = {"learned": 0, "legacy_grounded": 0}
         for result in campaign:
-            if result["arm"] not in ("learned", "legacy_grounded"):
+            if result["arm"] not in replayed_by_arm:
                 continue
             root = next(r for r in roots if r.root_id == result["root_id"])
             for original in result["attempts"]:
                 check = _check(checker, root, original["candidate_id"])
                 if check["receipt"] != original["receipt"]:
                     raise ValueError("independent Lean source replay mismatch")
-                replayed += 1
+                replayed_by_arm[result["arm"]] += 1
         proof_dir = out / "certified_proofs"
         proof_dir.mkdir()
         certified_sources = {}
@@ -640,7 +640,8 @@ def run(
         },
         "paired_feature_ablation": bool(semantic_features),
         "development_results": by_split,
-        "learned_attempts_replayed": replayed,
+        "learned_attempts_replayed": replayed_by_arm["learned"],
+        "independent_policy_replays_by_arm": replayed_by_arm,
         "compiler_calls_including_probes_and_audits": compiler_calls + len(roots),
         "compiler_seconds": round(compiler_time, 5),
         "certified_source_sha256": certified_sources,
