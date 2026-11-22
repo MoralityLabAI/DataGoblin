@@ -139,3 +139,9 @@ The source corpus and the existing 1,960 synthetic curation roots are separate d
 [MeTTa-AIRIS-01](AIRIS_COUNTERFACTUAL.md) adds paired one-fact interventions to the existing synthetic curation worlds. A Pattern Miner-guided chooser and a matched seeded uniform chooser select from the same public candidate interventions on each root; the independent bounded Python collection oracle evaluates the changed worlds and canonical next repairs. Discovery motifs and internal confirmation roots are separated by a deterministic train-only split, while reserved development, test and OOD roots remain unused. The synthetic receipts have `training_ready=false` and create zero additional SFT presentations.
 
 See [the first measured 96-root report](AIRIS_RESULTS_20261122.md), including its fixed-budget control and negative interpretation. Run `python -m MeTTa.airis_counterfactual --cases 96 --out runs/metta/airis_counterfactual`, followed by `python -m MeTTa.airis_receipts --bundle runs/metta/airis_counterfactual`.
+
+## AIRIS-02: fresh-root toy student comparison
+
+[AIRIS-02](AIRIS02_FRESH_STUDENT.md) registers disjoint synthetic root bands beyond the original MeTTa-SFT and AIRIS-01 source seeds. It compares four equal-root intervention policies with tiny direct and weight-tied recurrent NumPy repair heads. A separate full source-root replay audit gates research-only fitting, and the public-test and steward reserves remain identity-only with zero teacher labels opened. The generated examples retain `training_ready=false`, and the CPU scores are development diagnostics rather than sealed generalization results.
+
+Run `python -m MeTTa.airis02_fresh --out runs/metta/airis02_fresh`, followed by the `MeTTa.airis02_audit` and `MeTTa.airis02_student` modules.

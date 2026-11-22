@@ -1,0 +1,89 @@
+name: AIRIS-02 fresh-root CPU recurrent student
+
+on:
+  pull_request:
+    paths:
+      - 'MeTTa/airis02_*.py'
+      - 'MeTTa/AIRIS02_FRESH_STUDENT.md'
+      - 'tests/unit/test_metta_airis02_*.py'
+      - '.github/workflows/metta-airis02-student.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fresh-root-student-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install CPU-only research packages
+        run: python -m pip install -e ".[dev]"
+      - name: Lint and deterministic unit contracts
+        run: |
+          ruff check MeTTa/airis02_fresh.py MeTTa/airis02_audit.py MeTTa/airis02_student.py MeTTa/airis02_stop.py tests/unit/test_metta_airis02_fresh.py tests/unit/test_metta_airis02_student.py tests/unit/test_metta_airis02_stop.py tests/unit/test_metta_airis02_verifier.py
+          python -m pytest -q tests/unit/test_metta_airis02_fresh.py tests/unit/test_metta_airis02_student.py tests/unit/test_metta_airis02_stop.py tests/unit/test_metta_airis02_verifier.py
+      - name: Generate matched fresh-root synthetic curriculum
+        run: |
+          python -m MeTTa.airis02_fresh --train-roots 32 --dev-roots 12 --out runs/metta/airis02_fresh
+      - name: Independent synthetic-oracle root replay and custody audit
+        run: |
+          python -m MeTTa.airis02_audit --bundle runs/metta/airis02_fresh --out runs/metta/airis02_fresh/audit.json
+      - name: Train tiny direct and weight-tied recurrent students on verified toy roots
+        run: |
+          python -m MeTTa.airis02_student --bundle runs/metta/airis02_fresh --steps 48 --seed 20261122 --hidden 18 --out runs/metta/airis02_fresh/student_development.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("runs/metta/airis02_fresh")
+          bundle = json.loads((root / "manifest.json").read_text())
+          audit = json.loads((root / "audit.json").read_text())
+          report = json.loads((root / "student_development.json").read_text())
+          assert bundle["train_roots"] == 160
+          assert bundle["development_roots"] == 60
+          assert bundle["train_presentations_total"] == 640
+          assert bundle["train_stop_presentations"] > 0
+          assert bundle["development_stop_presentations"] > 0
+          assert bundle["teacher_labels_in_steward_registry"] == 0
+          assert bundle["teacher_labels_in_public_test_registry"] == 0
+          assert audit["synthetic_research_fit_eligible"] is True
+          assert audit["steward_labels_used"] == 0
+          assert audit["public_test_labels_used"] == 0
+          assert report["model_trained"] is True
+          assert report["learned_stop_policy"] == "independent_train_only_calibrated_binary_head"
+          assert report["student_training_policy"] == "structural_membership_action_mask_plus_hash_fixed_point_stop"
+          assert report["train_cases_per_arm"] == 160
+          assert report["development_cases_per_arm"] == 60
+          assert report["training_ready"] is False
+          assert report["holdout_steward_opened"] is False
+          assert report["development_evaluation_world_policy"] == "shared_uniform_intervention"
+          assert len(report["development_evaluation_worlds_sha256"]) == 64
+          assert all(v["recurrent"]["development"]["4"]["cases"] == 60
+                     for v in report["trained_models"].values())
+          assert all(v["stop_head"]["train_false_stop_rate"] <= 0.05
+                     for v in report["trained_models"].values())
+          assert all(v["recurrent"]["learned_stop_development"]["4"]["cases"] == 60
+                     for v in report["trained_models"].values())
+          assert all(v["recurrent"]["verified_stop_development"]["new_violation_additions"] == 0
+                     for v in report["trained_models"].values())
+          assert all(v["recurrent"]["verified_stop_development"]["cases"] == 60
+                     for v in report["trained_models"].values())
+          print("AIRIS-02 research-only verified fit: PASS")
+          PY
+      - name: Publish aggregate receipts without research labels
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: airis02-cpu-student-receipts
+          path: |
+            runs/metta/airis02_fresh/manifest.json
+            runs/metta/airis02_fresh/audit.json
+            runs/metta/airis02_fresh/student_development.json
+            runs/metta/airis02_fresh/public_test_registry.json
+            runs/metta/airis02_fresh/steward_registry.json
+          if-no-files-found: warn
+          retention-days: 14
