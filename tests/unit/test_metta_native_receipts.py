@@ -98,5 +98,5 @@ def test_certificate_join_rejects_steward_eval_leak(tmp_path: Path) -> None:
         json.dumps(data["rows"], sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     path.write_text(json.dumps(data))
-    with pytest.raises(ValueError, match="partition or shard|incomplete roots"):
+    with pytest.raises(ValueError, match=r"partition or shard|incomplete roots"):
         join_native(tmp_path, shard_count=3, roots_per_family=12, queries_per_root=3)
