@@ -62,6 +62,10 @@ def run_native(
                     "source_sha256": sha256_bytes(task["program"].encode()),
                     "native_results": len(observed),
                     "static_expected_results": len(expected),
+                    "native_bindings": observed,
+                    "native_bindings_sha256": sha256_bytes(
+                        json.dumps(observed, ensure_ascii=False, separators=(",", ":")).encode()
+                    ),
                     "matches": True,
                 })
             checked += 1
