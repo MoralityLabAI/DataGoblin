@@ -23,6 +23,10 @@ The source world comes from the independent synthetic curation generator. Every 
 
 The **MOSES-gated control** uses the frozen small program from the earlier train-only result: if selected set size exceeds two or revision keys collide, choose the budget-first mechanism; otherwise prefer lineage, then eligibility. It is a hand-specified mapping from a frozen observational classifier to a control intervention. It does not implement native MOSES action evolution or causal reasoning. Motif ranking was selected on the preceding seed-0–511 train roots; no new development labels are used in selecting that policy.
 
+The v1 student pilot exposed an action-validity and stopping failure: all 60 public development episodes in each arm attempted an inapplicable edit, and none completed a solve with STOP. The [archived pilot](AIRIS02_PILOT_V1.md) preserves that result. The v2 corrective study uses a *public structural membership mask*: ADD targets must be absent candidate IDs and REMOVE targets must already be selected; STOP remains legal. This removes malformed membership moves from the decoder without granting the verifier's constraint or optimality decisions to the model.
+
+A deterministic root-hash schedule designates about one fifth of fresh roots for fixed-point teaching. On those roots, the independent oracle's optimal set replaces the initial selected set **within the existing one presentation per arm**, giving genuine positive STOP targets without extra root exposures. Its origin is recorded in the row and rechecked by the source-root auditor. Intervention selection still uses the independently sampled source state. All four arms use the same fixed-point-root schedule, while their optimal sets can differ after their distinct one-fact interventions.
+
 The student receives a fixed-length, explicitly structured public-feature vector. It contains candidate presence, selected status, eligibility, costs, quality, revision epoch, lineage collisions, prerequisite counts, topic coverage and coarse global resource quantities. Oracle outputs, optimal sets and target actions are excluded from these input features.
 
 ## Independent fit gate
@@ -33,14 +37,14 @@ The gate returns synthetic_research_fit_eligible=true for this isolated toy expe
 
 ## Initial student experiment
 
-The code trains two tiny randomly initialized models entirely on CPU:
+The code trains two tiny randomly initialized models entirely on CPU, with a legal-action-masked cross-entropy objective:
 
 - A direct linear 21-class repair-action predictor.
 - A weight-tied recurrent tanh model with one shared hidden transition trained by exact manual backpropagation through four iterations. The same frozen weights are evaluated at depths 2, 4, and 8.
 
 For each intervention arm, models receive exactly the same architecture, initialization seed, optimizer steps and root count. **All trained models are scored on the same set of uniform-intervened public development worlds**, which controls the evaluation-distribution confound. Within-arm diagnostics are retained separately. The direct and recurrent architectures have different parameter counts, which are recorded; their relative performance is descriptive. This is a **real small CPU training run** on synthetic worlds, with no pretrained weights, GPU lease, hidden reasoning traces, or native Hyperon execution. It does **not** implement an adaptive-compute learned stopping head: STOP is an action class and recurrence depth is fixed at inference.
 
-The evaluator obtains the exact oracle independently of the model's predictions. At up to eight proposed repairs it records first-edit correctness, completed solutions with explicit STOP, premature stopping, inapplicable edits, unsafe additions, final valid sets, goal coverage, remaining oracle edit distance and actual internal inference loops. Incomplete and invalid rollouts count against the model.
+The evaluator obtains the exact oracle independently of the model's predictions. Masking checks only public candidate membership, leaving the oracle's eligibility, dependency, budget, and optimality constraints as genuinely independent grading criteria. At up to eight proposed repairs it records first-edit correctness, completed solutions with explicit STOP, premature stopping, inapplicable edits, unsafe additions, final valid sets, goal coverage, remaining oracle edit distance and actual internal inference loops. Incomplete and invalid rollouts count against the model.
 
 Equal examples, fixed vector width and optimizer updates do not establish equal source-token budgets. The original public MeTTa program strings vary in length, and no native tokenizer parity is claimed.
 
