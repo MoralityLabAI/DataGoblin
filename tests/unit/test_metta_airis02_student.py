@@ -86,6 +86,8 @@ def test_small_bundle_fits_research_models_after_independent_audit(tmp_path):
         assert len(value["linear"]["checkpoint_sha256"]) == 64
         assert len(value["recurrent"]["checkpoint_sha256"]) == 64
         assert set(value["recurrent"]["development"]) == {"2", "4", "8"}
+        assert value["linear"]["within_arm_diagnostic"]["cases"] == 10
+        assert value["recurrent"]["within_arm_diagnostic"]["cases"] == 10
         for arm in [value["linear"]["development"], *value["recurrent"]["development"].values()]:
             assert arm["cases"] == 10
             assert 0 <= arm["solved_and_stopped"] <= 10
