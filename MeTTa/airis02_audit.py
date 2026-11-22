@@ -31,7 +31,7 @@ def audit_bundle(path: Path, *, full_replay: bool = True) -> dict[str, Any]:
     manifest_file = path / "manifest.json"
     manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
     if (
-        manifest.get("schema_version") != "metta-airis02-bundle-v1"
+        manifest.get("schema_version") != "metta-airis02-bundle-v2"
         or manifest.get("training_ready") is not False
         or manifest.get("teacher_labels_in_steward_registry") != 0
         or manifest.get("teacher_labels_in_public_test_registry") != 0
@@ -66,6 +66,7 @@ def audit_bundle(path: Path, *, full_replay: bool = True) -> dict[str, Any]:
         raise ValueError("frozen original-train motif source drift")
     by_split: dict[str, list[dict]] = {}
     by_arm: dict[str, dict[str, int]] = {}
+    stop_presentations: dict[str, int] = {}
     for filename, split in (
         ("train_candidate.jsonl", "train_candidate"),
         ("development_labels_research.jsonl", "development"),
@@ -75,6 +76,7 @@ def audit_bundle(path: Path, *, full_replay: bool = True) -> dict[str, Any]:
         seen: set[tuple[str, str]] = set()
         counts: Counter[str] = Counter()
         by_arm[split] = dict(Counter(row["arm"] for row in rows))
+        stop_presentations[split] = 0
         for row in rows:
             if (
                 row.get("schema_version") != SCHEMA
@@ -95,6 +97,17 @@ def audit_bundle(path: Path, *, full_replay: bool = True) -> dict[str, Any]:
                 raise ValueError("source-root split or identity mismatch")
             if row["presentation_number"] != ARMS.index(arm):
                 raise ValueError("presentation accounting mismatch")
+            if type(row.get("stop_curriculum")) is not bool:
+                raise ValueError("missing fixed-point curriculum custody")
+            if row["stop_curriculum"]:
+                if (
+                    row.get("selection_origin") != "verified_fixed_point_stop_curriculum"
+                    or row["oracle_next_edit"] != {"op": "stop", "id": "none"}
+                ):
+                    raise ValueError("fixed-point STOP target mismatch")
+                stop_presentations[split] += 1
+            elif row.get("selection_origin") != "independent_public_initial":
+                raise ValueError("independent source selection provenance mismatch")
             key = (row["root"], arm)
             if key in seen:
                 raise ValueError("duplicate source-root arm presentation")
@@ -113,6 +126,11 @@ def audit_bundle(path: Path, *, full_replay: bool = True) -> dict[str, Any]:
     if len(train_roots) != manifest.get("train_roots") or len(dev_roots) != manifest.get("development_roots"):
         raise ValueError("root-count manifest drift")
     if (
+        stop_presentations["train_candidate"] != manifest.get("train_stop_presentations")
+        or stop_presentations["development"] != manifest.get("development_stop_presentations")
+    ):
+        raise ValueError("STOP curriculum source count drift")
+    if (
         len(by_split["train_candidate"]) != manifest.get("train_presentations_total")
         or len(by_split["development"]) != manifest.get("development_diagnostic_presentations")
     ):
@@ -130,6 +148,8 @@ def audit_bundle(path: Path, *, full_replay: bool = True) -> dict[str, Any]:
         "public_test_labels_used": 0,
         "steward_labels_used": 0,
         "maximum_root_presentations": len(ARMS),
+        "train_stop_presentations": stop_presentations["train_candidate"],
+        "development_stop_presentations": stop_presentations["development"],
         "input_manifest_sha256": sha256_bytes(manifest_file.read_bytes()),
         "verifier_type": "independent_exact_synthetic_python_oracle",
     }
