@@ -1,0 +1,54 @@
+name: MeTTa bounded MOSES-style rule control
+
+on:
+  pull_request:
+    paths:
+      - 'MeTTa/moses_control.py'
+      - 'MeTTa/MOSES_CONTROL.md'
+      - 'tests/unit/test_metta_moses_control.py'
+      - '.github/workflows/metta-moses-control.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-grammar-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research verifier
+        run: python -m pip install -e ".[dev]"
+      - name: Lint and validate genetic program controls
+        run: |
+          ruff check MeTTa/moses_control.py tests/unit/test_metta_moses_control.py
+          python -m pytest -q tests/unit/test_metta_moses_control.py
+      - name: Evolve original bounded grammar on training roots only
+        run: |
+          python -m MeTTa.moses_control --roots-per-family 512 --seed 20261122 --population 40 --generations 12 --out runs/metta/moses_rule_control
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("runs/metta/moses_rule_control/rule_search.json").read_text())
+          assert p["discovery_roots"] + p["confirmation_roots"] == 1960
+          assert p["reserved_root_labels_accessed"] == 0
+          assert p["new_training_presentations"] == 0
+          assert p["training_ready"] is False
+          assert p["model_trained"] is False
+          assert p["upstream_metta_moses_executed"] is False
+          assert p["best_program"]["nodes"] <= 3
+          assert p["internal_confirmation"]["roots"] == p["confirmation_roots"]
+          print("synthetic train-only program-evolution custody: PASS")
+          PY
+      - name: Preserve advisory receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-moses-bounded-control
+          path: runs/metta/moses_rule_control/
+          if-no-files-found: warn
+          retention-days: 14
