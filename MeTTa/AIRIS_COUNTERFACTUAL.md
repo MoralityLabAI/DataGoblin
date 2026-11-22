@@ -6,7 +6,7 @@
 
 The existing Pattern Miner ranks observable motifs associated with failed initial synthetic evidence selections. The MOSES-style control predicts invalidity. MeTTa-AIRIS-01 asks a narrower, causal question: **Does changing one world fact cause a change in the collection verifier's recorded constraint violation or canonical next repair?** Every original and counterfactual world is regenerated from the existing synthetic curation task generator and checked by its bounded exact Python oracle.
 
-One root supplies two counterfactual attempts against **the same initial state**. The motif-guided selector uses only public features and discovery-ranked motifs; a seeded uniform selector samples among the same root's admissible intervention mechanisms. The verifier runs only after both interventions have been frozen.
+One root supplies three counterfactual attempts against **the same initial state**. The motif-guided selector uses only public features and discovery-ranked motifs; a seeded uniform selector samples among the same root's admissible intervention mechanisms. A third pre-registered control chooses the **token-budget intervention whenever available**, exposing how easily a deterministic threshold-crossing mutation can flip its targeted constraint. The verifier runs after all three interventions have been frozen.
 
 A resulting change is an intervention on a toy deterministic world. It is not evidence that a similar causal relation exists in a real document corpus, agent rollout, or external graph.
 
