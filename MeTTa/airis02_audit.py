@@ -14,8 +14,15 @@ from pathlib import Path
 from typing import Any
 
 from .airis02_fresh import (
-    ARMS, FROZEN_MOSES_PROGRAM, SCHEMA, SOURCE_FAMILIES,
-    _frozen_motifs, build_row, canonical, partition, root_id,
+    ARMS,
+    FROZEN_MOSES_PROGRAM,
+    SCHEMA,
+    SOURCE_FAMILIES,
+    _frozen_motifs,
+    build_row,
+    canonical,
+    partition,
+    root_id,
 )
 from .collect import sha256_bytes
 
