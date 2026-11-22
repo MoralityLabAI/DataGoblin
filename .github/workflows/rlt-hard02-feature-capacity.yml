@@ -6,6 +6,10 @@ on:
     paths:
       - "scripts/audit_rlt_hard02_feature_capacity.py"
       - "tests/unit/test_rlt_hard02_feature_capacity.py"
+      - "tests/unit/test_rlt_hard02_semantic_features.py"
+      - "src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py"
+      - "tests/unit/test_rlt_hard02_semantic_features.py"
+      - "src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py"
       - ".github/workflows/rlt-hard02-feature-capacity.yml"
   pull_request:
     paths:
@@ -33,9 +37,9 @@ jobs:
       - name: Install grounded ranker features and tests
         run: python -m pip install -e ".[dev,rlt-pilot]"
       - name: Test frozen matched-menu feature identifiability
-        run: python -m pytest -q tests/unit/test_rlt_hard02_feature_capacity.py
+        run: python -m pytest -q tests/unit/test_rlt_hard02_feature_capacity.py tests/unit/test_rlt_hard02_semantic_features.py
       - name: Ruff
-        run: ruff check scripts/audit_rlt_hard02_feature_capacity.py tests/unit/test_rlt_hard02_feature_capacity.py
+        run: ruff check scripts/audit_rlt_hard02_feature_capacity.py tests/unit/test_rlt_hard02_feature_capacity.py src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py tests/unit/test_rlt_hard02_semantic_features.py
       - name: Freeze source-only feature-capacity receipt
         run: |
           python scripts/audit_rlt_hard02_feature_capacity.py \
