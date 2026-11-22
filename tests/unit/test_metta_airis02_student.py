@@ -76,6 +76,7 @@ def test_small_bundle_fits_research_models_after_independent_audit(tmp_path):
     report = run_students(tmp_path, steps=5, lr=0.1, seed=5, hidden=8)
     assert report["model_trained"] is True
     assert report["student_training_policy"] == "structural_membership_action_mask_plus_hash_fixed_point_stop"
+    assert report["learned_stop_policy"] == "independent_train_only_calibrated_binary_head"
     assert report["synthetic_research_fit_eligible"] is True
     assert report["source_data_admitted"] is False
     assert report["training_ready"] is False
