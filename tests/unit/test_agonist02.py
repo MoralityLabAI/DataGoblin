@@ -11,6 +11,7 @@ from Agonist.agn02 import (
     COHORT,
     STUDENT_SEEDS,
     _assign_cohorts,
+    _examples,
     _student_decisions,
     check_value,
     construct_roots,
@@ -61,6 +62,17 @@ def test_check_has_value_only_when_structural_action_possible():
     assert check_value(root) > 0
     root = {**root, "world_b": {**root["world_b"], "state": {**state, "safety_approved": False}}}
     assert check_value(root) == -100
+
+
+
+def test_future_check_information_is_masked_during_earlier_actions():
+    root = construct_roots(17, make_tastes(17))[0]
+    initial, revised, check = _examples(root)
+    assert all(float(value) == 0.0 for value in initial[1][6:])
+    assert all(float(value) == 0.0 for value in revised[1][6:])
+    assert any(float(value) > 0.0 for value in check[1][6:])
+    assert initial[0] == revised[0] == 0
+    assert check[0] == 1
 
 
 def test_learned_selector_is_actual_training_and_eval_is_heldout():
