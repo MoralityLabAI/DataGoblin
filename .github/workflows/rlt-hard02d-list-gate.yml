@@ -1,0 +1,85 @@
+name: RLT-HARD-02D native List negative-control gate
+
+on:
+  push:
+    branches: [research/rlt-hard-mathlib02-20261122]
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/hard02d_list_gate.py"
+      - "tests/unit/test_rlt_hard02d_list_gate.py"
+      - ".github/workflows/rlt-hard02d-list-gate.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/hard02d_list_gate.py"
+      - "tests/unit/test_rlt_hard02d_list_gate.py"
+      - ".github/workflows/rlt-hard02d-list-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  strict-native-list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      LEAN_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin and testing stack
+        run: python -m pip install -e ".[dev]"
+      - name: Check fresh source registration and negative certificate boundaries
+        run: python -m pytest -q tests/unit/test_rlt_hard02d_list_gate.py
+      - name: Ruff
+        run: |
+          ruff check src/datagoblin/training_gym/rlt_gym/hard02d_list_gate.py \
+            tests/unit/test_rlt_hard02d_list_gate.py
+      - name: Install exact Lean 4.12.0
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -fsSL \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.12.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - name: Pin Mathlib source and fetch cached kernel dependencies
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dg-rlt-mathlib
+          git -C /tmp/dg-rlt-mathlib init -q
+          git -C /tmp/dg-rlt-mathlib remote add origin \
+            https://github.com/leanprover-community/mathlib4.git
+          git -C /tmp/dg-rlt-mathlib fetch -q --depth=1 origin \
+            809c3fb3b5c8f5d7dace56e200b426187516535a
+          git -C /tmp/dg-rlt-mathlib checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/dg-rlt-mathlib rev-parse HEAD)" = \
+            809c3fb3b5c8f5d7dace56e200b426187516535a
+          cd /tmp/dg-rlt-mathlib
+          timeout --signal=TERM --kill-after=15s 900s \
+            "$HOME/.elan/bin/lake" exe cache get
+      - name: Exhaustively check all near-miss List proofs and independently replay
+        if: github.event_name == 'push'
+        run: |
+          timeout --signal=TERM --kill-after=15s 900s \
+            python -m datagoblin.training_gym.rlt_gym.hard02d_list_gate \
+            --lake "$HOME/.elan/bin/lake" \
+            --mathlib /tmp/dg-rlt-mathlib \
+            --seed 2026112219 --roots 8 \
+            --out runs/rlt-hard02d-list-gate
+      - name: Retain compiler receipts, failures and certified proof files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02d-strict-list
+          path: runs/rlt-hard02d-list-gate/
+          if-no-files-found: warn
+          retention-days: 21
