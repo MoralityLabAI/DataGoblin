@@ -89,8 +89,12 @@ def audit_registry(payload: dict[str, Any]) -> dict[str, Any]:
         count[sid] += 1
         size[sid] += bytes_ or 0
         dispositions[expected] += 1
-    if [(x["source_id"], x["path"]) for x in files] != sorted(seen):
-        raise ValueError("file list not canonical")
+    # Upstream Git-tree paths were enumerated with JavaScript collation.
+    # Keep deterministic source groups and exact unique (source, path) keys;
+    # do not impose Python's different case/punctuation path ordering.
+    source_groups = [x["source_id"] for x in files]
+    if source_groups != sorted(source_groups):
+        raise ValueError("source file groups are not canonical")
     for sid, source in known.items():
         if count[sid] != source["metta_files"] or size[sid] != source["reported_metta_bytes"]:
             raise ValueError("source Git-tree totals differ")
