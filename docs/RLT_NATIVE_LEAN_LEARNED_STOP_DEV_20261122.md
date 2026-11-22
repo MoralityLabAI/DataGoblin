@@ -11,7 +11,7 @@ development generator and a failed-first/repaired second policy cohort.
 This independent Lean pilot uses the existing DataGoblin LeanNativeSession
 and LeanKernelChecker and leaves both previous evidence archives unchanged.
 
-TRAIN fits a six? No: a thirty-feature, NumPy-only logistic tactic ranker
+TRAIN fits a thirty-feature, NumPy-only logistic tactic ranker
 on **native kernel-verified per-script outcomes**, using source roots in
 TRAIN exclusively. CAL sweeps an explicit threshold grid and freezes
 a continuation decision before evaluating any ordinary/OOD source root.
