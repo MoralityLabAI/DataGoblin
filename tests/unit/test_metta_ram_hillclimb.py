@@ -129,6 +129,29 @@ def test_genuine_numpy_training_and_host_lattice_gate() -> None:
     assert peak_rss_mib() < 8192
 
 
+def test_train_only_stop_head_is_a_real_cpu_learned_control() -> None:
+    bundle = make_bundle(1, 1)
+    for arm in ARMS:
+        config = dict(DEFAULTS[arm])
+        config["stop_policy"] = "train_calibrated"
+        model, result = fit_candidate(
+            arm, config, bundle["train"], bundle["dev"],
+            seed=20261122, ram_limit_mib=8192,
+        )
+        receipt = result["train_only_stop_calibration"]
+        assert receipt is not None
+        assert receipt["threshold_selected_on"] == "training_only"
+        assert receipt["no_development_label_calibration"] is True
+        assert receipt["train_positive"] > 0
+        assert receipt["train_negative"] > 0
+        assert result["real_cpu_gradient_updates"] == 32
+        assert len(receipt["checkpoint_sha256"]) == 64
+        assert model.digest() == result["checkpoint_sha256"]
+        assert result["training_ready"] is False
+        if arm == "ldt_proxy":
+            assert result["dev_aggregate"]["new_violation_additions"] == 0
+
+
 def test_full_hillclimb_replays_exact_train_traces_and_keeps_test_names_only() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         output = Path(tmp) / "gym"
