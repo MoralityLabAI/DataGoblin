@@ -54,9 +54,11 @@ def generate(catalog: dict, seed: int = 20261122) -> list[dict]:
              "SOURCE_DECLARATION_PRESENT",
              "This exact declaration was transcribed from the pinned source."),
             ("false_global_lift",
-             "Does this declaration alone establish unconditional global smoothness for every unforced three-dimensional Navier–Stokes initial datum?",
+             ("Does this declaration alone establish unconditional global smoothness for "
+              "every unforced three-dimensional Navier–Stokes initial datum?"),
              "UNSUPPORTED_PDE_LIFT",
-             "The declaration provides no theorem over smooth Navier–Stokes solutions and no global PDE a priori estimate."),
+             ("The declaration provides no theorem over smooth Navier–Stokes solutions "
+              "and no global PDE a priori estimate."),),
             ("false_real_domain",
              "Does its displayed signature itself quantify over real-valued smooth vector fields on the three-torus?",
              "MISSING_ANALYTIC_TYPE_BRIDGE",
@@ -74,7 +76,8 @@ def generate(catalog: dict, seed: int = 20261122) -> list[dict]:
                  "NAMED_PREMISE_PRESENT",
                  "The named hypothesis occurs in the displayed theorem statement."),
                 ("premise_erasure",
-                 "Can a direct application of this theorem omit providing its hypothesis " + premise + " without obtaining it from context?",
+                 ("Can a direct application of this theorem omit providing its hypothesis "
+                  + premise + " without obtaining it from context?"),
                  "MISSING_PREMISE",
                  "An application requires the specified hypothesis or a proof deriving it."),
             ])
