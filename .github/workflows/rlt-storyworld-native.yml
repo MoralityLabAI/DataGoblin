@@ -1,0 +1,48 @@
+name: Storyworld native three-mode gym
+
+on:
+  push:
+    branches:
+      - research/storyworld-native-three-mode-gym-20261123
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/storyworld_native.py"
+      - "tests/unit/test_rlt_gym_storyworld_native.py"
+      - "training/rlt_gym/storyworld_native/**"
+      - ".github/workflows/rlt-storyworld-native.yml"
+
+jobs:
+  native-storyworld:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout DataGoblin
+        uses: actions/checkout@v4
+      - name: Checkout pinned GPTStoryworld files
+        uses: actions/checkout@v4
+        with:
+          repository: MoralityLabAI/GPTStoryworld
+          ref: 5cd0b480e9a01d07418cdf8cb3bedbc9d38ef906
+          path: GPTStoryworld
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            codex-skills/storyworld-building/scripts/sweepweave_validator.py
+            codex-skills/storyworld-building/scripts/json_to_swmd.py
+            codex-skills/small-storyworld-builder/scripts/swmd_encounter_index.py
+            verifiers_envs/storyworld-hypergames-env/src/spiral_ln/hypergames_single_player.py
+            verifiers_envs/storyworld-hypergames-env/src/spiral_ln/evaluation_hypergames.py
+            storyworlds/diplomacy/forecast_backstab.json
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Native tests and source-pinned replay
+        env:
+          PYTHONPATH: src
+          GPTSTORYWORLD_SOURCE: GPTStoryworld
+          GPTSTORYWORLD_EXPECT_SHA: 5cd0b480e9a01d07418cdf8cb3bedbc9d38ef906
+        run: |
+          python -m unittest discover -s tests/unit -p 'test_rlt_gym_storyworld_native.py' -v
+          python -m datagoblin.training_gym.rlt_gym.storyworld_native --source GPTStoryworld --expect-source-commit "$GPTSTORYWORLD_EXPECT_SHA" --per-mode 2 --seed 23 --out "$RUNNER_TEMP/dg-sw-native"
+          python -m datagoblin.training_gym.rlt_gym.storyworld_native --source GPTStoryworld --expect-source-commit "$GPTSTORYWORLD_EXPECT_SHA" --replay "$RUNNER_TEMP/dg-sw-native"
