@@ -43,7 +43,7 @@ ARMS = ("content_learned", "legacy_learned", "fixed_full", "random_full",
         "fixed_one", "suffix_length_rule")
 MAX_K = 9
 TACTIC_K = re.compile(r"congrArg \(fun m : Nat => m \+ ([0-9])\) h$")
-SUFFIX = re.compile(r"\(xs \+\+ \[([0-9, ]+)\]\)\.length")
+SUFFIX = re.compile(r"\((?:xs|ys) \+\+ \[([0-9, ]+)\]\)\.length")
 
 
 @dataclass(frozen=True)
