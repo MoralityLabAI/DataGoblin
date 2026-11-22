@@ -106,3 +106,13 @@ python MeTTa/training_data/scripts/native_assertions.py
 ```
 
 The output `native_assertion_verdicts/hyperon_0_2_10.jsonl` stores interpreter-observed assertion results and source spans. It checks the original Git blob, full stdout/stderr hashes, exact runtime version, output count alignment and `[()]` assertion result semantics. A source test may exit successfully while returning a native `Error`; unresolved evaluations remain unobserved. Native assertion passes are empirical interpreter results, while independent expected-output and training-release gates remain separate. All generated rows retain `training_ready=false`.
+
+## Source-conditioned native query candidate packets
+
+The `scripts/native_query_packets.py` exporter takes the completed per-assertion Hyperon observations, checks the original source span, and extracts each successful assertion into a supervised query/expected-expression **candidate**. Context is the sequential source prefix ending immediately before the target assertion, so the target answer is withheld from its input. `training_candidates/hyperon_source_query_pairs.jsonl` uses `instruction`, `input`, `output`, and source metadata for an eventual looped-model training adapter. The exceptions JSONL retains failed, unobserved, and over-budget instances.
+
+```sh
+python MeTTa/training_data/scripts/native_query_packets.py
+```
+
+All packets remain `training_ready=false` and `split=unassigned` until overlap, lineage, semantics, and data admission are reviewed. The root identity is the original source file. Runtime agreement on author assertions is evidence of interpreter behavior; independent math/reference correctness and actual model gains require their own checks.
