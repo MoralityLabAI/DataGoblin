@@ -183,8 +183,7 @@ omission, to distinguish overall policy loss from nonadditivity. The
 runner uses two-sided sign flips and 95% root-bootstrap intervals as in
 the original factorial study. A negative primary estimate with a
 two-sided p-value below 0.05 is the criterion for replicating the drop.
-The previous frozen roots are excluded and are never pooled into the
-new estimate.
+The estimate uses only the new roots.
 
 Run `python -m metta_research_bench.looped.revision_replication` with
 `--reference`, `--reference-checkpoints`, `--prior-checkpoints`,
@@ -194,3 +193,34 @@ points at the archived joint-omission weights. The runner verifies the
 original archive digests and every checkpoint hash before opening the
 reserve. Keep the generated report, receipts, traces, and checkpoints
 outside Git.
+
+### Fresh revision results
+
+| Training curator | Verified complete / 1,200 | Rate | Premature stops | Policy verifier calls |
+| --- | ---: | ---: | ---: | ---: |
+| Full | 701 | 58.42% | 456 | 5,625 |
+| Drop unique lineage | 670 | 55.83% | 497 | 5,572 |
+| Drop current revision | 488 | 40.67% | 592 | 7,049 |
+| Drop both | 481 | 40.08% | 575 | 7,721 |
+
+The new additive prediction was 457 completions and the joint omission
+yielded 481. The interaction was +2.00 percentage points
+(95% root-bootstrap interval −1.59 to +5.75, two-sided p = 0.321). The
+interval excludes the discovery estimate of −9.17 points. The three seed
+estimates were +9.00, −0.25, and −2.75 points.
+
+The full-to-joint completion drop did replicate. The full curator led the
+joint omission by 18.33 points (95% interval 14.58 to 22.17, p = 0.00005).
+Removing the revision guard cost 17.75 points with lineage present and
+15.75 with lineage absent. The smaller lineage losses were 2.58 and 0.58
+points with revision present and absent, respectively. All arms made zero
+unsafe additions under the shared verifier.
+
+The run at `987648d3338f9fa17dfa8050042f3e9b0fa93cb6` took 55.83 seconds
+with peak RSS of 471.21 MiB. The independent receipt audit verified all
+4,800 trials against the twelve archived checkpoints and Prime Verifiers
+0.4.1 traces, with no source overlap across the 996 locked training and
+evaluation roots or the 154 archived conflict roots.
+
+- Replication lock SHA-256 `fe42fed6c99a242a00e017b36c9ae4c61c016cf79b2394e727cb961940f782f2`
+- Frozen report SHA-256 `e85d2f8be56beb454525dc73dcce5c05b6519c228f70e63c86402f03e21a0f37`
