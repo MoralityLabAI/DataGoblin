@@ -87,7 +87,8 @@ def test_rule_stops_on_negative_without_kernel_or_private_flag():
         }
 
     # No verifier calls for the public-symbolic prediction of an exhausted menu.
-    never_used = lambda *_args: pytest.fail("unexpected verifier invocation")
+    def never_used(*_args):
+        return pytest.fail("unexpected verifier invocation")
     result = _online(negative, f"⊢ {negative.statement}", never_used,
                      "suffix_length_rule", np.zeros(208), np.zeros(30), (), {})
     assert result["attempts"] == []
