@@ -208,7 +208,7 @@ def _examples(root: dict[str, Any]) -> list[tuple[int, np.ndarray, int]]:
 
 def _sigmoid(value: float) -> float:
     bounded = max(-40.0, min(40.0, value))
-    return 1.0 / (1.0 + np.exp(-bounded))
+    return float(1.0 / (1.0 + np.exp(-bounded)))
 
 
 def fit_student(roots: list[dict[str, Any]], seed: int, updates: int = 240) -> np.ndarray:
@@ -232,7 +232,7 @@ def fit_student(roots: list[dict[str, Any]], seed: int, updates: int = 240) -> n
 def _student_decisions(weights: np.ndarray, root: dict[str, Any]) -> tuple[bool, bool, bool]:
     examples = _examples(root)
     return tuple(
-        (_sigmoid(float(weights[head] @ features)) >= 0.5) == bool(label)
+        bool((_sigmoid(float(weights[head] @ features)) >= 0.5) == bool(label))
         for head, features, label in examples
     )
 
@@ -472,7 +472,7 @@ def simulate(
         "training_updates_per_student": updates,
         "selection_count": selection_count,
         "cohorts": COHORT,
-        "student_seeds": STUDENT_SEEDS,
+        "student_seeds": list(STUDENT_SEEDS),
         "source_tastes": "original_fixture" if tastes is None else "operator_supplied",
         "teacher_inference_calls": 0,
         "teacher_tokens": None,
