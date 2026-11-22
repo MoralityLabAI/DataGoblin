@@ -43,7 +43,7 @@ def test_train_only_one_root_one_observation():
 def test_miner_refuses_duplicate_and_reserved_lineages():
     observations = generate_observations(roots_per_family=14)
     with pytest.raises(ValueError, match="repeated source lineage"):
-        mine_motifs(observations + [observations[0]], min_support=2)
+        mine_motifs([*observations, observations[0]], min_support=2)
     with pytest.raises(ValueError, match="reserved root"):
         mine_motifs([replace(observations[0], split="test_reserved"), *observations[1:]], min_support=2)
     with pytest.raises(ValueError, match="reserved root"):
