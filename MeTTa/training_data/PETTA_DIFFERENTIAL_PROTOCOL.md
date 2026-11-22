@@ -32,9 +32,11 @@ The initial trial covers 12 public source roots with four `match &self` queries
 each, giving 48 query instances. The four families exercise branch enumeration,
 repeated-variable equality, nested pattern projection and empty results.
 
-Hyperon prints one bracketed result list per evaluation; PeTTa's `swrite`
-prints a MeTTa expression of results, with `()` for an empty set. The two
-formats are parsed separately into structural expression values.
+Hyperon prints one bracketed result list per evaluation. PeTTa's CLI
+prints each successful answer on a separate line, with **zero lines** for an
+empty answer set and no query-boundary markers. PeTTa therefore executes each
+query in a fresh process containing the same source facts plus one query.
+Both formats are parsed separately into structural expression values.
 
 All comparisons use the same alpha-normalized, order-independent result
 multiset. Observed failure, output misalignment, parse errors and timeouts
