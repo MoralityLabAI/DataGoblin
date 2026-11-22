@@ -185,7 +185,7 @@ def evolve(rows: list[Observation], *, seed: int = 20261122,
     initial += [Program("lit", (lit,)) for lit in literal_options]
     # Seed a bounded, deterministic mix of simple two-atom programs.
     initial += [make_program("and", (left, right))
-                for left, right in zip(literal_options[::2], literal_options[1::2])]
+                for left, right in zip(literal_options[::2], literal_options[1::2], strict=True)]
     population = {p.key: p for p in initial}
     cache: dict[str, dict[str, float | int]] = {}
     full_archive: dict[str, Program] = dict(population)
