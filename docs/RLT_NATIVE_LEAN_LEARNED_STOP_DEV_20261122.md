@@ -101,3 +101,57 @@ an operator-supplied pinned Lean executable:
 
 A source directory may not already exist. The CI run keeps all proofs
 in ephemeral workspaces until the archive is written and verified.
+
+## First kernel-native development result
+
+The original seed-20261124 native campaign passed
+[Actions #44980029581](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44980029581).
+It invoked the pinned Lean 4.12.0 compiler 300 times and independently
+replayed all 16 learned-policy held-out attempts with identical receipts.
+All 26 recorded file digests (including 24 certified proof sources)
+matched the downloaded artifact. Accepted proofs carried either no
+axioms or the explicitly audited `propext` dependency, which is
+permitted by the repository's LeanKernelChecker.
+
+TRAIN had 6/8 menu witnesses and CAL had 6/8. The CAL-frozen threshold
+was 0.95. Development evaluation:
+
+| Arm | Ordinary certified / attempts | OOD numeric shift certified / attempts |
+| --- | --- | --- |
+| Learned | 6/8, 8 checks | 6/8, 8 checks |
+| Fixed full | 6/8, 28 checks | 6/8, 23 checks |
+| Random full | 6/8, 31 checks | 6/8, 27 checks |
+| Fixed one | 1/8, 8 checks | 2/8, 8 checks |
+
+This is a valid first development gain on finite-menus: the trained
+ranker identified all available scripted witnesses on the first try,
+then stopped on the exhausted cases, using 16 checks instead of the
+51 needed by the full fixed-order menu. The model's formula features
+are literal, hand-written pattern predicates. This is a **known
+potential shortcut**, and it provides no evidence of generalization
+to reworded or genuinely difficult Lean theorems.
+
+## Registered second development iteration
+
+After inspecting the first result, the next study adds a structural
+perturbation. Source seed `20261125`, per-split 8, and `--alpha-ood`
+must be fixed before executing the new OOD tasks. On OOD only, the
+public quantifier and bound occurrences rename `a b c` to `u v w`.
+The registered tactic scripts still introduce local `a b c` through
+`intro`, so the same theorem family and proofs remain in scope.
+There is no change to the trusted Lean checker, candidate menu or
+reward policy.
+
+The hypothesis is that a ranker depending on literal string
+features will fail to find some alpha-equivalent proofs. The new
+TRAIN and CAL roots are disjoint from the previous cohort. This
+follow-up is motivated by the v1 result, remains development-only,
+and will be reported alongside the original evidence.
+
+The second run's preregistered command is:
+
+    python -m datagoblin.training_gym.rlt_gym.native_lean_stop \
+      --lean /absolute/path/to/lean --per-split 8 \
+      --source-seed 20261125 --alpha-ood \
+      --out /new/empty/parent/rlt-native-lean-alpha-ood
+
