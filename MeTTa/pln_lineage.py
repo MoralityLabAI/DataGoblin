@@ -14,9 +14,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Iterable
 from typing import Any
 
 from .collect import ROOT, sha256_bytes
