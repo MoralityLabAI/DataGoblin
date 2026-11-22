@@ -233,7 +233,7 @@ def _online(
         "arm": arm, "attempts": attempts,
         "certified": bool(attempts and attempts[-1]["receipt"]["passed"]),
         "stopped_before_budget": bool(
-            (low_value_stop or arm == "suffix_length_rule" and not attempts)
+            (low_value_stop or (arm == "suffix_length_rule" and not attempts))
             and not (attempts and attempts[-1]["receipt"]["passed"])
         ),
         "candidate_wall_seconds": round(sum(a["wall_seconds"] for a in attempts), 6),
