@@ -1,0 +1,157 @@
+name: RLT-HARD-02F actual Bonsai-8B Q1 CPU inference + native Lean
+
+on:
+  push:
+    branches: [research/rlt-hard02f-oxibonsai-q1-20261122]
+    paths:
+      - ".github/workflows/rlt-hard02f-q1-live.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actual-q1-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      LEAN_NUM_THREADS: "1"
+      CARGO_BUILD_JOBS: "2"
+      RUST_LOG: "warn"
+      MODEL_SHA: "284a335aa3fb2ced3b1b01fcb40b08aa783e3b70832767f0dd2e3fdfa134bd54"
+      OXI_COMMIT: "1d10c48e14754ff6999158f8fa13c7c92b40b0dc"
+      LEAN_COMMIT: "809c3fb3b5c8f5d7dace56e200b426187516535a"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin and source contract checks
+        run: |
+          python -m pip install -e ".[dev,rlt-pilot]"
+          python -m pytest -q tests/unit/test_rlt_hard02f_oxibonsai.py tests/unit/test_rlt_gym_lean_bonsai.py
+          ruff check src/datagoblin/training_gym/rlt_gym/hard02f_oxibonsai.py
+      - name: Fetch and build exact OxiBonsai native CPU engine
+        run: |
+          set -euo pipefail
+          rustc --version
+          cargo --version
+          git init -q /tmp/oxibonsai
+          git -C /tmp/oxibonsai remote add origin https://github.com/cool-japan/oxibonsai.git
+          git -C /tmp/oxibonsai fetch -q --depth=1 origin "$OXI_COMMIT"
+          git -C /tmp/oxibonsai checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/oxibonsai rev-parse HEAD)" = "$OXI_COMMIT"
+          cd /tmp/oxibonsai
+          timeout --signal=TERM --kill-after=20s 1900s \
+            cargo build --release -p oxibonsai-cli --bin oxibonsai --no-default-features --features server
+          test -x target/release/oxibonsai
+          target/release/oxibonsai --version
+          sha256sum target/release/oxibonsai | tee /tmp/oxibonsai-binary.sha256
+          sha256sum Cargo.lock | tee /tmp/oxibonsai-cargo-lock.sha256
+      - name: Download exact published Bonsai Q1 GGUF and Qwen3 tokenizer
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bonsai-q1
+          timeout --signal=TERM --kill-after=20s 1100s \
+            curl -fsSL --retry 4 --retry-all-errors \
+            -o /tmp/bonsai-q1/Bonsai-8B.gguf \
+            https://huggingface.co/prism-ml/Bonsai-8B-gguf/resolve/main/Bonsai-8B-Q1_0.gguf
+          echo "$MODEL_SHA  /tmp/bonsai-q1/Bonsai-8B.gguf" | sha256sum -c -
+          timeout --signal=TERM --kill-after=20s 180s \
+            curl -fsSL --retry 3 \
+            -o /tmp/bonsai-q1/tokenizer.json \
+            https://huggingface.co/Qwen/Qwen3-8B/resolve/main/tokenizer.json
+          test -s /tmp/bonsai-q1/tokenizer.json
+          sha256sum /tmp/bonsai-q1/tokenizer.json
+          /tmp/oxibonsai/target/release/oxibonsai info \
+            --model /tmp/bonsai-q1/Bonsai-8B.gguf --json \
+            > /tmp/oxibonsai-model-info.json
+      - name: Install Lean v4.12 and pinned Mathlib binary cache
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -fsSL \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.12.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          mkdir -p /tmp/dg-rlt-mathlib
+          git -C /tmp/dg-rlt-mathlib init -q
+          git -C /tmp/dg-rlt-mathlib remote add origin https://github.com/leanprover-community/mathlib4.git
+          git -C /tmp/dg-rlt-mathlib fetch -q --depth=1 origin "$LEAN_COMMIT"
+          git -C /tmp/dg-rlt-mathlib checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/dg-rlt-mathlib rev-parse HEAD)" = "$LEAN_COMMIT"
+          cd /tmp/dg-rlt-mathlib
+          timeout --signal=TERM --kill-after=20s 900s "$HOME/.elan/bin/lake" exe cache get
+      - name: Start one resident OxiBonsai model instance on loopback
+        run: |
+          set -euo pipefail
+          /tmp/oxibonsai/target/release/oxibonsai serve \
+            --model /tmp/bonsai-q1/Bonsai-8B.gguf \
+            --tokenizer /tmp/bonsai-q1/tokenizer.json \
+            --host 127.0.0.1 --port 18783 --pool-size 1 \
+            --max-seq-len 4096 --request-timeout-ms 240000 \
+            > /tmp/oxibonsai-server.log 2>&1 &
+          echo "$!" > /tmp/oxibonsai-server.pid
+          for i in $(seq 1 120); do
+            if curl --fail --silent http://127.0.0.1:18783/health >/dev/null; then
+              break
+            fi
+            if ! kill -0 "$(cat /tmp/oxibonsai-server.pid)" 2>/dev/null; then
+              tail -80 /tmp/oxibonsai-server.log || true
+              exit 1
+            fi
+            sleep 3
+          done
+          curl --fail --silent http://127.0.0.1:18783/health
+          echo
+          curl --fail --silent http://127.0.0.1:18783/v1/models | head -c 1000
+          echo
+      - name: Actual Bonsai model choices versus native kernel baselines
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 2400s \
+            python -m datagoblin.training_gym.rlt_gym.hard02f_oxibonsai \
+              --lake "$HOME/.elan/bin/lake" \
+              --mathlib /tmp/dg-rlt-mathlib \
+              --binary /tmp/oxibonsai/target/release/oxibonsai \
+              --checkpoint /tmp/bonsai-q1/Bonsai-8B.gguf \
+              --tokenizer /tmp/bonsai-q1/tokenizer.json \
+              --transport http --port 18783 --timeout 240 \
+              --source-seed 2026112247 --split ood_test \
+              --roots 4 --attempts 2 \
+              --out runs/rlt-hard02f-q1-native-pilot
+      - name: Preserve non-model source and binary provenance
+        if: always()
+        run: |
+          mkdir -p runs/rlt-hard02f-ci-provenance
+          for p in /tmp/oxibonsai-binary.sha256 /tmp/oxibonsai-cargo-lock.sha256 /tmp/oxibonsai-model-info.json; do
+            if test -f "$p"; then cp "$p" runs/rlt-hard02f-ci-provenance/; fi
+          done
+          if test -f /tmp/oxibonsai-server.log; then
+            tail -n 150 /tmp/oxibonsai-server.log > runs/rlt-hard02f-ci-provenance/server-log-tail.txt
+          fi
+          if test -f /tmp/bonsai-q1/tokenizer.json; then
+            sha256sum /tmp/bonsai-q1/tokenizer.json > runs/rlt-hard02f-ci-provenance/tokenizer.sha256
+          fi
+          if test -f /tmp/bonsai-q1/Bonsai-8B.gguf; then
+            sha256sum /tmp/bonsai-q1/Bonsai-8B.gguf > runs/rlt-hard02f-ci-provenance/checkpoint.sha256
+          fi
+      - name: Stop resident OxiBonsai daemon
+        if: always()
+        run: |
+          if test -f /tmp/oxibonsai-server.pid; then
+            kill "$(cat /tmp/oxibonsai-server.pid)" 2>/dev/null || true
+          fi
+      - name: Retain bounded evidence and diagnostics without model weights
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02f-live-oxibonsai-q1-pilot
+          path: |
+            runs/rlt-hard02f-q1-native-pilot/
+            runs/rlt-hard02f-ci-provenance/
+          if-no-files-found: warn
+          retention-days: 21
