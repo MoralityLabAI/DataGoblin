@@ -347,6 +347,7 @@ def evaluate_pair(family: str, seed: int, motifs: list[tuple[str, ...]],
     features = structural_features(task, selected)
     guided = choose_guided(options, features, motifs)
     uniform = choose_uniform(options, root=root, seed=control_seed)
+    budget_first = next((x for x in options if x.mechanism == "budget"), options[0])
     before = evaluate_subset(task, selected)
     # Identity sham: proves both arms start from precisely the same world.
     if before != evaluate_subset(deepcopy(task), selected):
@@ -354,6 +355,7 @@ def evaluate_pair(family: str, seed: int, motifs: list[tuple[str, ...]],
     optimal = exact_optimum(task)
     a = _verify_arm(task, selected, guided, before, optimal)
     b = _verify_arm(task, selected, uniform, before, optimal)
+    c = _verify_arm(task, selected, budget_first, before, optimal)
     return {
         "root": root,
         "family": family,
@@ -367,6 +369,7 @@ def evaluate_pair(family: str, seed: int, motifs: list[tuple[str, ...]],
         "control_same_intervention": guided == uniform,
         "guided": a,
         "uniform": b,
+        "budget_first": c,
         "zero_change_sham_passed": True,
         "training_ready": False,
         "new_sft_presentations": 0,
@@ -423,7 +426,7 @@ def run_experiment(*, roots_per_family: int = 512, case_limit: int = 96,
     positive = Counter()
     mechanism_counts = Counter()
     for row in receipts:
-        for arm in ("guided", "uniform"):
+        for arm in ("guided", "uniform", "budget_first"):
             mechanism_counts[(arm, row[arm]["mechanism"])] += 1
             positive[(arm, "target")] += int(row[arm]["target_violation_changed"])
             positive[(arm, "signature")] += int(row[arm]["violation_signature_changed"])
@@ -433,6 +436,9 @@ def run_experiment(*, roots_per_family: int = 512, case_limit: int = 96,
         positive[("pair", "uniform_only")] += int(b and not a)
         positive[("pair", "ties")] += int(a == b)
         positive[("pair", "same_intervention")] += int(row["control_same_intervention"])
+        c = row["budget_first"]["target_violation_changed"]
+        positive[("pair", "guided_only_vs_budget")] += int(a and not c)
+        positive[("pair", "budget_only_vs_guided")] += int(c and not a)
     n = len(receipts)
     policy_scores = {
         arm: {
@@ -442,7 +448,7 @@ def run_experiment(*, roots_per_family: int = 512, case_limit: int = 96,
             "full_violation_signature_changes": positive[(arm, "signature")],
             "oracle_next_edit_changes": positive[(arm, "first_edit")],
             "mechanisms": {m: mechanism_counts[(arm, m)] for m in MECHANISMS},
-        } for arm in ("guided", "uniform")
+        } for arm in ("guided", "uniform", "budget_first")
     }
     report = {
         "schema_version": SCHEMA,
@@ -469,6 +475,11 @@ def run_experiment(*, roots_per_family: int = 512, case_limit: int = 96,
             "uniform_only_target_flip": positive[("pair", "uniform_only")],
             "ties": positive[("pair", "ties")],
             "same_intervention": positive[("pair", "same_intervention")],
+            "guided_only_vs_budget": positive[("pair", "guided_only_vs_budget")],
+            "budget_only_vs_guided": positive[("pair", "budget_only_vs_guided")],
+            "guided_minus_budget_target_flip_rate": round(
+                (positive[("guided", "target")] - positive[("budget_first", "target")]) / n, 6
+            ),
             "guided_minus_uniform_target_flip_rate": round(
                 (positive[("guided", "target")] - positive[("uniform", "target")]) / n, 6
             ),
@@ -519,6 +530,7 @@ def main() -> int:
         "confirm_pool_roots": report["internal_confirmation_root_count"],
         "guided_flips": report["paired_policy"]["guided"]["targeted_violation_flips"],
         "uniform_flips": report["paired_policy"]["uniform"]["targeted_violation_flips"],
+        "budget_first_flips": report["paired_policy"]["budget_first"]["targeted_violation_flips"],
         "rate_delta": report["paired_outcomes"]["guided_minus_uniform_target_flip_rate"],
         "training_ready": False,
     }, sort_keys=True))
