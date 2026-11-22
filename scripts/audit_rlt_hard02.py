@@ -50,6 +50,34 @@ class Reader:
             self.archive.close()
 
 
+
+def length_first_control(source: dict, exhaustive: dict) -> dict:
+    """Score a one-check length heuristic using only executed native receipts.
+
+    A candidate absent from the exhaustive arm is marked unobserved rather
+    than being assigned a synthetic verification result.
+    """
+    menu = source["menu"]
+    choice = max(range(len(menu)), key=lambda i: (len(menu[i].encode("utf-8")), -i))
+    tested = {row["candidate_id"]: row["receipt"] for row in exhaustive["attempts"]}
+    if choice not in tested:
+        return {"candidate_id": choice, "observed": False, "certified": None}
+    receipt = tested[choice]
+    return {
+        "candidate_id": choice,
+        "observed": True,
+        "certified": bool(receipt["passed"]),
+        "kernel_verified": bool(
+            receipt["passed"] and receipt["code"] == "kernel_certified"
+            and receipt["evidence"].get("kernel_ok") is True
+        ),
+        "length": len(menu[choice].encode("utf-8")),
+        "largest_other_length": max(
+            len(action.encode("utf-8")) for index, action in enumerate(menu) if index != choice
+        ),
+    }
+
+
 def audit(path: Path) -> dict:
     reader = Reader(path)
     try:
@@ -140,6 +168,7 @@ def audit(path: Path) -> dict:
                         raise ValueError("missing paired development policy")
         by_row = {(x["root_id"], x["arm"]): x for x in ledger}
         checked = {}
+        length_control = {}
         false_stops = {}
         for split in ("ordinary_test", "ood_test"):
             root_ids = [x["root_id"] for x in sources if x["split"] == split]
@@ -160,6 +189,20 @@ def audit(path: Path) -> dict:
                         and not (learned_attempts and learned_attempts[-1]["receipt"]["passed"])):
                     false_stop += 1
             checked[split] = checks
+            length_rows = [
+                length_first_control(by_id[root_id], by_row[(root_id, "fixed_full")])
+                for root_id in root_ids
+            ]
+            length_control[split] = {
+                "roots": len(length_rows),
+                "observed": sum(r["observed"] for r in length_rows),
+                "kernel_certified": sum(r["kernel_verified"] for r in length_rows if r["observed"]),
+                "counterfactual_checks": len(length_rows),
+                "min_length_margin": min(
+                    r["length"] - r["largest_other_length"]
+                    for r in length_rows if r["observed"]
+                ) if any(r["observed"] for r in length_rows) else None,
+            }
             false_stops[split] = false_stop
         return {
             "evidence_verified": True,
@@ -167,6 +210,7 @@ def audit(path: Path) -> dict:
             "source_roots": len(sources),
             "kernel_receipts_checked": native_receipt_count,
             "split_metrics": checked,
+            "posthoc_length_first_control": length_control,
             "false_stops_vs_full_search": false_stops,
             "requires_manual_hardness_review": True,
             "sealed_confirmation_opened": False,
