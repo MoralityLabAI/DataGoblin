@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from finite_semantic_oracle import render  # noqa: E402
 from local_model_submit import (  # noqa: E402
+    RejectRedirects,
     parse_completion,
     prompt_payload,
     read_challenges,
@@ -28,10 +29,12 @@ class LocalModelSubmitTests(unittest.TestCase):
 
     def test_requires_loopback_server(self) -> None:
         self.assertEqual(validate_endpoint(self.ENDPOINT), self.ENDPOINT)
+        self.assertIsNone(RejectRedirects().redirect_request(None, None, 302, "moved", {}, "https://remote.example/v1/chat/completions"))
         self.assertTrue(
             validate_endpoint("http://[::1]:8080/v1/chat/completions")
         )
         for target in (
+            "http://localhost:8000/v1/chat/completions",
             "https://127.0.0.1:8000/v1/chat/completions",
             "http://192.168.1.20:8000/v1/chat/completions",
             "http://localhost.attacker.com:8000/v1/chat/completions",
