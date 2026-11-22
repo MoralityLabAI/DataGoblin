@@ -67,7 +67,9 @@ def summarize_lineage(
         raise ValueError("invalid computation resource bounds")
     seen: dict[str, EvidenceClaim] = {}
     repeated_ids = 0
-    for claim in claims:
+    for observation_index, claim in enumerate(claims):
+        if observation_index >= max_claims * 4:
+            raise ValueError("evidence observation horizon exceeded")
         if not isinstance(claim, EvidenceClaim):
             raise ValueError("expected typed evidence claims")
         if len(seen) >= max_claims and claim.evidence_id not in seen:
