@@ -46,7 +46,7 @@ jobs:
           GPTSTORYWORLD_SOURCE: GPTStoryworld
           GPTSTORYWORLD_EXPECT_SHA: 5cd0b480e9a01d07418cdf8cb3bedbc9d38ef906
         run: |
-          ruff check src/datagoblin/training_gym/rlt_gym/storyworld_native.py src/datagoblin/training_gym/rlt_gym/storyworld_micro.py tests/unit/test_rlt_gym_storyworld_native.py tests/unit/test_rlt_gym_storyworld_micro.py
+          ruff check src/datagoblin/training_gym/rlt_gym/storyworld_native.py src/datagoblin/training_gym/rlt_gym/storyworld_micro.py src/datagoblin/training_gym/rlt_gym/storyworld_local.py tests/unit/test_rlt_gym_storyworld_native.py tests/unit/test_rlt_gym_storyworld_micro.py tests/unit/test_rlt_gym_storyworld_local.py
           python -m unittest discover -s tests/unit -p 'test_rlt_gym_storyworld*.py' -v
           python -m datagoblin.training_gym.rlt_gym.storyworld_native --source GPTStoryworld --expect-source-commit "$GPTSTORYWORLD_EXPECT_SHA" --per-mode 2 --seed 23 --out "$RUNNER_TEMP/dg-sw-native"
           python -m datagoblin.training_gym.rlt_gym.storyworld_native --source GPTStoryworld --expect-source-commit "$GPTSTORYWORLD_EXPECT_SHA" --replay "$RUNNER_TEMP/dg-sw-native"
