@@ -9,6 +9,7 @@ to the companion gym.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import pairwise
 from typing import Literal
 
 import numpy as np
@@ -182,7 +183,7 @@ def trace_transport(
     states = [state.copy()]
     product = np.eye(FIBER_DIM, dtype=np.float64)
     maximum_drift = 0.0
-    for before, after in zip(points[:-1], points[1:], strict=True):
+    for before, after in pairwise(points):
         q = step_transport(after - before, mode=mode)
         product = q @ product
         state = q @ state
