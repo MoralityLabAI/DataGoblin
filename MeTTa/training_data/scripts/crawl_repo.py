@@ -85,6 +85,32 @@ def existing_snapshot_ids(root: Path) -> tuple[set[str], set[str]]:
     return ids, blob_shas
 
 
+def choose_sources(
+    candidates: list[tuple[str, int, str]],
+    existing_ids: set[str],
+    existing_blob_shas: set[str],
+    slug: str,
+    max_files: int,
+    max_total_bytes: int,
+) -> list[tuple[str, int, str]]:
+    """Deduplicate against the corpus and within this batch by exact Git blob."""
+    chosen: list[tuple[str, int, str]] = []
+    taken_shas = set(existing_blob_shas)
+    taken_ids = set(existing_ids)
+    total = 0
+    for path, size, sha in candidates:
+        source_id = f"{slug}:{path}"
+        if source_id in taken_ids or sha in taken_shas:
+            continue
+        if len(chosen) >= max_files or total + size > max_total_bytes:
+            continue
+        chosen.append((path, size, sha))
+        taken_ids.add(source_id)
+        taken_shas.add(sha)
+        total += size
+    return chosen
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", required=True, help="An approved owner/repo listed in discovery_catalog.json")
@@ -136,15 +162,8 @@ def main() -> int:
             candidates.append((path, size, item["sha"]))
     candidates.sort(key=lambda item: item[0])
     seen, blob_digests = existing_snapshot_ids(root)
-    planned: list[tuple[str, int, str]] = []
-    total = 0
-    for path, size, sha in candidates:
-        if f"{slug}:{path}" in seen or sha in blob_digests:
-            continue
-        if len(planned) >= args.max_files or total + size > args.max_total_bytes:
-            continue
-        planned.append((path, size, sha))
-        total += size
+    planned = choose_sources(candidates, seen, blob_digests, slug, args.max_files, args.max_total_bytes)
+    total = sum(size for _, size, _ in planned)
     if not args.apply:
         print(json.dumps({
             "mode": "dry_run", "repo": args.repo, "source_commit": commit,

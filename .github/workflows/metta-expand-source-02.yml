@@ -5,6 +5,8 @@ on:
     branches: [data/metta-annotated-seed-20261122]
     paths:
       - '.github/workflows/metta-expand-source-02.yml'
+      - 'MeTTa/training_data/scripts/crawl_repo.py'
+      - 'MeTTa/training_data/tests/test_crawl_repo.py'
 
 permissions:
   contents: write
