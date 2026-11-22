@@ -122,7 +122,7 @@ class FiniteOracleTests(unittest.TestCase):
         self.assertNotEqual(first["source_sha256"], other["source_sha256"])
         self.assertEqual(len(first["queries"]), 4)
         self.assertEqual(len(first["references"]), 4)
-        self.assertTrue(all(row for row in first["references"][:3]) or True)
+        self.assertGreaterEqual(len(first["references"][1]), 3)
         self.assertEqual(first["references"][3], [])
         self.assertTrue(first["source_sha256"])
 
