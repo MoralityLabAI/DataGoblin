@@ -22,11 +22,14 @@ from .sft_oracle import FAMILIES, OOD_FAMILY, make_task
 def run_native(
     *, roots_per_family: int, queries_per_root: int,
     max_train_roots_per_family: int | None = None,
+    shard_count: int = 1, shard_index: int = 0,
 ) -> dict[str, Any]:
     if not 1 <= roots_per_family <= 512 or not 1 <= queries_per_root <= 5:
         raise ValueError("invalid bounded native replay workload")
     if max_train_roots_per_family is not None and not 1 <= max_train_roots_per_family <= roots_per_family:
         raise ValueError("invalid training-root sample cap")
+    if not 1 <= shard_count <= 64 or not 0 <= shard_index < shard_count:
+        raise ValueError("invalid native replay shard")
     from hyperon import MeTTa  # optional import: native runner only
 
     version = importlib.metadata.version("hyperon")
@@ -36,7 +39,7 @@ def run_native(
             continue
         checked = 0
         for seed in range(roots_per_family):
-            if split_for(family, seed) != "train_candidate":
+            if seed % shard_count != shard_index or split_for(family, seed) != "train_candidate":
                 continue
             task = make_task(family, seed)
             for step in range(min(queries_per_root, len(task["goals"]))):
@@ -75,6 +78,8 @@ def run_native(
         "verified_query_instances": len(results),
         "verified_training_roots": len({row["root"] for row in results}),
         "roots_per_family": roots_per_family,
+        "shard_count": shard_count,
+        "shard_index": shard_index,
         "max_train_roots_per_family": max_train_roots_per_family,
         "queries_per_root": queries_per_root,
         "runtime_query_compatibility": "passed",
@@ -92,12 +97,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--roots-per-family", type=int, default=512)
     parser.add_argument("--max-train-roots-per-family", type=int)
+    parser.add_argument("--shard-count", type=int, default=1)
+    parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--queries-per-root", type=int, default=3)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "metta" / "native_query_receipt.json")
     args = parser.parse_args()
     receipt = run_native(
         roots_per_family=args.roots_per_family, queries_per_root=args.queries_per_root,
         max_train_roots_per_family=args.max_train_roots_per_family,
+        shard_count=args.shard_count, shard_index=args.shard_index,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
