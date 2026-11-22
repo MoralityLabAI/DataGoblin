@@ -13,7 +13,7 @@ from MeTTa.airis_receipts import audit_bundle
 def _fixture(directory: Path):
     report, rows = run_experiment(roots_per_family=48, case_limit=8,
                                   min_support=2, top_k=6, seed=73)
-    directory.mkdir(parents=True)
+    directory.mkdir(parents=True, exist_ok=True)
     (directory / "summary.json").write_text(json.dumps(report, sort_keys=True) + "\n")
     (directory / "internal_confirmation_only.jsonl").write_text(
         "".join(canonical(row) + "\n" for row in rows)
