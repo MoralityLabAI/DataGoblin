@@ -77,6 +77,11 @@ jobs:
               --mathlib /tmp/dg-rlt-mathlib \
               --per-split 8 --source-seed 2026112203 --matched-menus \
               --out runs/rlt-hard02-matched
+      - name: Independently re-audit fresh kernel receipts and length heuristic
+        if: github.event_name == 'push'
+        run: |
+          python scripts/audit_rlt_hard02.py runs/rlt-hard02-matched \
+            --out runs/rlt-hard02-matched/independent_audit.json
       - name: Archive candidate receipts, proof sources, and pinned mathlib hashes
         if: always()
         uses: actions/upload-artifact@v4
