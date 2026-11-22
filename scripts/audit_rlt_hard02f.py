@@ -11,7 +11,6 @@ import argparse
 import hashlib
 import json
 import re
-from collections import Counter
 from pathlib import Path
 from zipfile import ZipFile
 
