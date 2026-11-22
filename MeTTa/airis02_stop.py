@@ -61,7 +61,7 @@ class StopHead:
         # Strict > quantile allows at most the upper tail of observed training
         # negatives to stop. No development label is read to tune this gate.
         # Freeze an exact finite-sample upper bound on empirical TRAIN FPR.
-        allowed = int(math.floor(max_false_stop_rate * len(negative_scores)))
+        allowed = math.floor(max_false_stop_rate * len(negative_scores))
         ordered = np.sort(negative_scores)
         limit = float(ordered[len(ordered) - allowed - 1])
         self.threshold = float(np.nextafter(max(limit, 0.2), np.inf))
