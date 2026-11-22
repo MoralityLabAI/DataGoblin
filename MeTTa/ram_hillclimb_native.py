@@ -13,7 +13,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
-from .ram_hillclimb import metta_proposal
+from .ram_hillclimb import _metta_atom, metta_proposal
 
 PACKAGE_VERSION = "0.2.10"
 
@@ -61,8 +61,7 @@ def replay(
         ):
             raise ValueError("Proposal bytes differ from the host-owned grammar")
         arm, field = proposal["arm"], proposal["field"]
-        value = str(proposal["value"]).replace(".", "_")
-        value = ("v" if isinstance(proposal["value"], float) else "n") + value
+        value = _metta_atom(proposal["value"])
         expected = f"[(Proposal {arm} {field} {value})]"
         with tempfile.TemporaryDirectory(prefix="ram-metta10-") as folder:
             program = Path(folder) / "proposal.metta"
