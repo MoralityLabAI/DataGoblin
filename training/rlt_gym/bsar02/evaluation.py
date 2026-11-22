@@ -103,7 +103,7 @@ def read_predictions(path: Path, expected: set[str]) -> dict[str, str]:
             raise ValueError(f"Unknown or non-test task id on line {number}: {identity}")
         if identity in found:
             raise ValueError(f"Duplicate task id on line {number}: {identity}")
-        if label not in LABELS + (ABSTAIN,):
+        if label not in (*LABELS, ABSTAIN):
             raise ValueError(f"Unknown predicted label on line {number}: {label}")
         found[identity] = label
     return found
