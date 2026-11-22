@@ -68,6 +68,17 @@ The source-file root stays attached to every derivative. Split assignment keeps 
 
 `seed/curation_graph.metta` gives an original native MeTTa fact/query example that joins source, license, provenance, split and custody atoms. It proposes relevant candidates through `match &self`. The graph never admits records, removes data or prunes an evaluation branch. Run it with the pinned Hyperon interpreter and archive the native execution receipt before turning any query-output example into runtime-grounded supervision.
 
+## Looped-transformer SFT curation program
+
+[**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
+
+```bash
+python -m MeTTa.looped_sft build --roots-per-family 512 --out runs/metta/looped_sft
+python -m MeTTa.looped_sft audit --out runs/metta/looped_sft
+```
+
+These are synthetic candidate supervision records. Native MeTTa execution and trained-model improvements remain future validation gates.
+
 ## Next curation curriculum
 
 | Exercise | Learner task | Required check |
