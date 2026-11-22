@@ -8,8 +8,15 @@ import pytest
 
 from MeTTa.airis02_fresh import ARMS, _frozen_motifs, build_bundle, build_row
 from MeTTa.airis02_student import (
-    ACTION_CLASSES, INPUT_DIM, LinearStudent, RecurrentStudent,
-    action_index, decode_action, encode_public, evaluate, run_students,
+    ACTION_CLASSES,
+    INPUT_DIM,
+    LinearStudent,
+    RecurrentStudent,
+    action_index,
+    decode_action,
+    encode_public,
+    evaluate,
+    run_students,
 )
 from MeTTa.sft_oracle import first_state, make_task
 
