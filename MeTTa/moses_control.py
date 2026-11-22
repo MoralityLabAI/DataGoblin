@@ -12,7 +12,6 @@ selected program and frozen controls, never for search or early stopping.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import random
 from dataclasses import dataclass
@@ -20,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from .collect import ROOT, sha256_bytes
+from .looped_sft import root_id, split_for
 from .pattern_miner import Observation, _internal_partition, generate_observations
 
 SCHEMA = "metta-moses-bounded-control-v1"
@@ -154,6 +154,14 @@ def _validate_rows(rows: list[Observation]) -> tuple[list[Observation], list[Obs
         raise ValueError("insufficient unique source roots")
     if any(row.split != "train_candidate" or row.family == "conflict" for row in rows):
         raise ValueError("reserved source lineage or heldout label encountered")
+    for row in rows:
+        parts = row.root.split(":")
+        if len(parts) != 3 or parts[0] != "metta-sft-v1" or not parts[2].isdigit():
+            raise ValueError("invalid source-root identity")
+        seed = int(parts[2])
+        if (parts[1] != row.family or root_id(row.family, seed) != row.root
+                or split_for(row.family, seed) != "train_candidate"):
+            raise ValueError("reserved or mismatched source-root partition")
     if any(not row.features or tuple(sorted(set(row.features))) != row.features for row in rows):
         raise ValueError("malformed observable features")
     discovery = [x for x in rows if _internal_partition(x.root) == "discovery"]
@@ -183,7 +191,10 @@ def evolve(rows: list[Observation], *, seed: int = 20261122,
     full_archive: dict[str, Program] = dict(population)
 
     def rank(p: Program) -> tuple[float, float, int, str]:
-        metrics = cache.setdefault(p.key, confusion(p, discovery))
+        metrics = cache.get(p.key)
+        if metrics is None:
+            metrics = confusion(p, discovery)
+            cache[p.key] = metrics
         return (-fitness(p, metrics), -float(metrics["balanced_accuracy"]), p.nodes, p.key)
 
     history = []
