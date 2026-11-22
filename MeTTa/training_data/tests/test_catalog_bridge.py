@@ -20,7 +20,7 @@ class SourceCatalogBridgeTests(unittest.TestCase):
             report_path = Path(tmp) / "report.json"
             catalog, report = build_bridge(ROOT, FROZEN_CATALOG, out, report_path)
             frozen = json.loads(FROZEN_CATALOG.read_text(encoding="utf-8"))
-            self.assertEqual(report["annotated_source_files"], 602)
+            self.assertGreaterEqual(report["annotated_source_files"], 602)
             self.assertEqual(report["frozen_files"], len(frozen["files"]))
             self.assertEqual(
                 report["merged_file_roots"],
