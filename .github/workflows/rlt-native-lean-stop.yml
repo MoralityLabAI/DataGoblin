@@ -58,13 +58,13 @@ jobs:
           LEAN_BIN="$LEAN_PREFIX/bin/lean"
           timeout --signal=TERM --kill-after=15s 1100s \
             python -m datagoblin.training_gym.rlt_gym.native_lean_stop \
-            --lean "$LEAN_BIN" --per-split 8 --source-seed 20261125 --alpha-ood \
+            --lean "$LEAN_BIN" --per-split 8 --source-seed 20261126 --alpha-ood \
             --out runs/rlt-native-lean-stop
       - name: Retain source roots, fitted weights, native receipts and kernel proofs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dg-rlt-native-lean-alpha-ood-dev
+          name: dg-rlt-native-lean-alpha-normalized-dev
           path: runs/rlt-native-lean-stop/
           if-no-files-found: warn
           retention-days: 21
