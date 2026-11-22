@@ -59,7 +59,7 @@ jobs:
           timeout --signal=TERM --kill-after=15s 600s \
             env PYTHONPATH="/tmp/dg-pinned-hybrid:$PWD/src" \
             python -m datagoblin.training_gym.rlt_gym.blind_mcp_pilot \
-            --per-split 8 --out runs/rlt-blind-mcp-development.json
+            --per-split 8 --source-seed 20261123 --out runs/rlt-blind-mcp-development.json
       - name: Retain development report only (no private gold keys)
         if: always()
         uses: actions/upload-artifact@v4
