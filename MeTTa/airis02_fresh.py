@@ -8,6 +8,7 @@ teacher labels and are never materialized by this module.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from collections import Counter
 from pathlib import Path
@@ -33,7 +34,7 @@ from .sft_oracle import (
     next_edit,
 )
 
-SCHEMA = "metta-airis02-fresh-root-v1"
+SCHEMA = "metta-airis02-fresh-root-v2"
 ARMS = ("uniform", "motif", "budget_first", "moses_gate")
 TRAIN_RANGE = range(512, 704)
 DEV_RANGE = range(704, 768)
@@ -105,7 +106,8 @@ def build_row(
         raise ValueError("unknown intervention arm")
     root = root_id(family, seed)
     task = make_task(family, seed)
-    selected = first_state(task, seed)
+    source_selected = first_state(task, seed)
+    selected = list(source_selected)
     options = propose_interventions(task, selected)
     if not options:
         raise ValueError("fresh root lacks any structural intervention")
@@ -115,9 +117,16 @@ def build_row(
     changed = apply_intervention(task, proposal)
     if digest(task) == digest(changed):
         raise ValueError("one-fact edit leaves world unchanged")
+    verified = exact_optimum(changed)
+    # A root-hash gate, independent of label values, picks one fixed-point
+    # teaching state per arm. It REPLACES that root's existing presentation.
+    stop_curriculum = (
+        int(hashlib.sha256(("airis02-stop-school-v1/" + root).encode()).hexdigest()[:8], 16) % 5 == 0
+    )
+    if stop_curriculum:
+        selected = list(verified["selected"])
     before = evaluate_subset(task, selected)
     after = evaluate_subset(changed, selected)
-    verified = exact_optimum(changed)
     chosen = next_edit(selected, verified["selected"])
     if chosen["op"] not in ("add", "remove", "stop"):
         raise ValueError("invalid exact-oracle repair label")
@@ -134,7 +143,12 @@ def build_row(
         "source_lineage_sha256": digest(root),
         "source_kind": "new_synthetic_curation_world",
         "public_world": changed,
+        "source_selected": source_selected,
         "selected": selected,
+        "selection_origin": (
+            "verified_fixed_point_stop_curriculum" if stop_curriculum else "independent_public_initial"
+        ),
+        "stop_curriculum": stop_curriculum,
         "intervention": {"mechanism": proposal.mechanism, "field": proposal.field,
                          "item_id": proposal.item_id, "before": proposal.before,
                          "after": proposal.after},
@@ -239,12 +253,14 @@ def build_bundle(out: Path, *, train_roots_per_family: int = 32,
         (out / "public_test_registry.json").read_bytes()
     )
     manifest = {
-        "schema_version": "metta-airis02-bundle-v1",
+        "schema_version": "metta-airis02-bundle-v2",
         "root_exposure_policy": "one_per_arm_max_four_per_root",
         "train_roots": len(train) // len(ARMS),
         "development_roots": len(dev) // len(ARMS),
         "train_presentations_total": len(train),
         "development_diagnostic_presentations": len(dev),
+        "train_stop_presentations": sum(r["oracle_next_edit"]["op"] == "stop" for r in train),
+        "development_stop_presentations": sum(r["oracle_next_edit"]["op"] == "stop" for r in dev),
         "arms": list(ARMS),
         "roots_per_family_train": train_roots_per_family,
         "roots_per_family_dev": dev_roots_per_family,
