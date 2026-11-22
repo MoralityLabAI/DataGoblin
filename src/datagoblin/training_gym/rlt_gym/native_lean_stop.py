@@ -143,9 +143,23 @@ def generate_roots(*, per_split: int = 8, seed: int = SOURCE_SEED, alpha_ood: bo
     return result
 
 
+def canonicalize_binders(statement: str) -> str:
+    """Normalize bound Nat variable spelling before extracting public syntax features."""
+    match = re.match(
+        r"^∀\s+([A-Za-z_][A-Za-z_0-9]*)\s+([A-Za-z_][A-Za-z_0-9]*)"
+        r"\s+([A-Za-z_][A-Za-z_0-9]*)\s*:\s*Nat\s*,", statement,
+    )
+    if match is None or len(set(match.groups())) != 3:
+        raise ValueError("unsupported Lean binder syntax in registered source root")
+    canonical = dict(zip(match.groups(), ("a", "b", "c"), strict=True))
+    return re.sub(r"\b[A-Za-z_][A-Za-z_0-9]*\b",
+                  lambda m: canonical.get(m.group(), m.group()), statement)
+
+
 def features(statement: str, tactic: str) -> np.ndarray:
-    """Use public formula structure and script tokens, never outcome/fixture labels."""
-    formula = [float(token in statement) for token in FAMILY_PATTERNS]
+    """Use alpha-invariant public formula structure and candidate-script tokens."""
+    normalized = canonicalize_binders(statement)
+    formula = [float(token in normalized) for token in FAMILY_PATTERNS]
     tactics = [float(token in tactic) for token in SCRIPT_PATTERNS]
     return np.array(
         [1.0, *formula, *tactics, *(a * b for a in formula for b in tactics)],
@@ -428,6 +442,7 @@ def run(lean_exe: Path, out: Path, *, per_split: int = 8, seed: int = SOURCE_SEE
         "verifier_sha256": verifier_sha, "source_seed": seed,
         "source_roots": len(root_specs), "per_split": per_split,
         "ood_alpha_renamed": alpha_ood,
+        "formula_feature_binder_normalization": "canonicalize_three_Nat_binders",
         "budget_per_root": PER_ROOT_BUDGET,
         "train": {"roots": len(train), "menu_exhausted": negative_train,
                   "kernel_witnessed": len(train) - negative_train},
