@@ -76,7 +76,9 @@ def reject_action(selected: list[str], chosen: dict[str, str], task: dict[str, A
 def selected_views(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
     # One root contributes at most four *distinct* presentations across all
     # supervision heads, including STOP; no separate duplicate preference file.
-    stops = (0, 1, max(0, len(trace) - 2), len(trace) - 1)
+    if not trace:
+        raise ValueError("empty curation trace")
+    stops = (0, min(1, len(trace) - 1), max(0, len(trace) - 2), len(trace) - 1)
     return [trace[index] for index in dict.fromkeys(stops)]
 
 
