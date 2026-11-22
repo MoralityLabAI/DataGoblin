@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import random
 from collections import Counter
 from copy import deepcopy
 from dataclasses import dataclass
@@ -189,6 +188,12 @@ def apply_intervention(task: dict, intervention: Intervention) -> dict:
     validate_task(task)
     if intervention.mechanism not in TARGETS:
         raise ValueError("unregistered intervention")
+    expected_field = {"budget": "token_budget", "eligibility": "eligible",
+                      "lineage": "lineage", "dependency": "requires", "revision": "epoch"}
+    if intervention.field != expected_field[intervention.mechanism]:
+        raise ValueError("mechanism and fact field disagree")
+    if (intervention.item_id is None) != (intervention.mechanism == "budget"):
+        raise ValueError("intervention subject disagrees with mechanism")
     altered = deepcopy(task)
     if intervention.item_id is None:
         if intervention.field != "token_budget" or altered["token_budget"] != intervention.before:
