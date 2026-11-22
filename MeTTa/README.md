@@ -105,3 +105,9 @@ The GitHub workflow `metta-corpus.yml` runs the CPU tests, checks the source cat
 ## Goertzel Pattern-Miner curriculum and follow-on lanes
 
 [MeTTa-03](GOERTZEL_SYNERGY.md) mines root-level, observable conjunctions from the existing synthetic curation training partition, with a separate synthetic Python-oracle validity check and disjoint internal discovery/confirmation roots. It emits advisory MeTTa motif facts with lineage receipts without adding any SFT presentations. The report also maps next research integrations for MOSES, NARS/PLN, AIRIS, MetaMo/OpenPsi, ECAN and HiBaCaML. Run `python -m MeTTa.pattern_miner --out runs/metta/pattern_miner` to regenerate the proposed motifs. All outputs remain `training_ready=false`.
+
+## Bounded genetic policy control
+
+[MeTTa-05](MOSES_CONTROL.md) fits original, size-capped symbolic programs to predict whether an existing **synthetic training-root** evidence selection violates the bounded curation oracle. It follows the Pattern Miner experiment and uses disjoint internal discovery and confirmation partitions, retaining independent majority and cost-pressure controls. Rule proposals are advisory, and all resulting data retains `training_ready=false`. The upstream MeTTa-MOSES library is separately implemented in PeTTa/MeTTaLog; this small Python genetic control makes no native equivalence claim.
+
+Run `python -m MeTTa.moses_control --out runs/metta/moses_rule_control` to generate the frozen CPU rule-search receipt.
