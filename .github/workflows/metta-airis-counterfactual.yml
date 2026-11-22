@@ -1,0 +1,60 @@
+name: MeTTa AIRIS counterfactual research gym
+
+on:
+  pull_request:
+    paths:
+      - 'MeTTa/airis_counterfactual.py'
+      - 'MeTTa/airis_receipts.py'
+      - 'MeTTa/AIRIS_COUNTERFACTUAL.md'
+      - 'tests/unit/test_metta_airis_counterfactual.py'
+      - 'tests/unit/test_metta_airis_receipts.py'
+      - '.github/workflows/metta-airis-counterfactual.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paired-world-oracle-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install verifier and lint
+        run: python -m pip install -e ".[dev]"
+      - name: Check structural and custody contracts
+        run: |
+          ruff check MeTTa/airis_counterfactual.py MeTTa/airis_receipts.py tests/unit/test_metta_airis_counterfactual.py tests/unit/test_metta_airis_receipts.py
+          python -m pytest -q tests/unit/test_metta_airis_counterfactual.py tests/unit/test_metta_airis_receipts.py
+      - name: Freeze 96 paired train-only confirmation worlds
+        run: |
+          python -m MeTTa.airis_counterfactual --roots-per-family 512 --cases 96 --seed 20261122 --min-support 20 --top-k 24 --out runs/metta/airis_counterfactual
+          python -m MeTTa.airis_receipts --bundle runs/metta/airis_counterfactual --out runs/metta/airis_counterfactual/audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('runs/metta/airis_counterfactual')
+          p = json.loads((root / 'summary.json').read_text())
+          a = json.loads((root / 'audit.json').read_text())
+          assert p['actual_paired_cases'] == 96
+          assert p['paired_policy']['budget_first']['paired_roots'] == 96
+          assert p['discovery_root_count'] + p['internal_confirmation_root_count'] == 1960
+          assert p['training_ready'] is False
+          assert p['new_sft_presentations'] == 0
+          assert p['internal_confirmation_labels_used_for_policy'] is False
+          assert p['reserved_dev_test_ood_roots_accessed'] == 0
+          assert p['all_zero_change_shams_passed'] is True
+          assert a['valid'] and a['oracle_replayed']
+          print('AIRIS paired oracle and split custody: PASS')
+          PY
+      - name: Preserve synthetic research-only receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-airis-paired-counterfactual
+          path: runs/metta/airis_counterfactual/
+          if-no-files-found: warn
+          retention-days: 14
