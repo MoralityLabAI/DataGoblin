@@ -6,7 +6,7 @@ from itertools import product
 from typing import Literal
 
 import verifiers.v1 as vf
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from MeTTa.airis02_student import action_index
 from MeTTa.ram_hillclimb import FAMILIES, OOD_FAMILY, canonical, digest, root_name
@@ -15,6 +15,8 @@ from MeTTa.sft_oracle import first_state, make_task, next_edit
 
 BENCHMARK_ID = "metta-research-bench"
 MAX_DECISIONS = 10
+REVISION_REPLICATION_SPLIT = "looped_revision_replication"
+REVISION_REPLICATION_ROOTS = 400
 SPLITS = {
     "development": (FAMILIES, 34000),
     "frozen": (FAMILIES, 51000),
@@ -26,6 +28,7 @@ SPLITS = {
     "looped_ablation_conflict": ((OOD_FAMILY,), 66000),
     "looped_interaction_frozen": (FAMILIES, 67000),
     "looped_interaction_conflict": ((OOD_FAMILY,), 68000),
+    REVISION_REPLICATION_SPLIT: (("revision",), 69000),
 }
 MAX_REPLY_BYTES = 2048
 
@@ -133,9 +136,15 @@ class BenchConfig(vf.TasksetConfig):
     split: Literal[
         "development", "frozen", "conflict", "looped_dev", "looped_frozen", "looped_conflict",
         "looped_ablation_frozen", "looped_ablation_conflict",
-        "looped_interaction_frozen", "looped_interaction_conflict",
+        "looped_interaction_frozen", "looped_interaction_conflict", "looped_revision_replication",
     ] = "development"
-    roots_per_family: int = Field(default=8, ge=1, le=48)
+    roots_per_family: int = Field(default=8, ge=1, le=REVISION_REPLICATION_ROOTS)
+
+    @model_validator(mode="after")
+    def check_root_limit(self):
+        if self.split != REVISION_REPLICATION_SPLIT and self.roots_per_family > 48:
+            raise ValueError("This split supports at most 48 roots per family")
+        return self
 
 
 class MeTTaResearchBench(vf.Taskset[CurationTask, BenchConfig]):
