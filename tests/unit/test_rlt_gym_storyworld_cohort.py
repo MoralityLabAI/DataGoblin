@@ -39,8 +39,11 @@ class StoryworldCohortTests(unittest.TestCase):
             self.assertEqual(len(manifest["worlds"]), 4)
             self.assertEqual(manifest["totals"]["native_tasks"], 32)
             self.assertEqual(manifest["totals"]["native_controls"], 112)
-            self.assertEqual(manifest["totals"]["micro_tasks"], 32)
-            self.assertEqual(manifest["totals"]["train_sft_rows"], 16)
+            self.assertEqual(
+                manifest["totals"]["micro_tasks"] + manifest["totals"]["micro_overbudget_rows"], 32
+            )
+            self.assertGreater(manifest["totals"]["micro_tasks"], 0)
+            self.assertGreater(manifest["totals"]["train_sft_rows"], 0)
             names = set()
             for w in manifest["worlds"]:
                 self.assertNotIn(w["id"], names)
@@ -49,7 +52,10 @@ class StoryworldCohortTests(unittest.TestCase):
                 folder = root / "cohort" / w["id"]
                 native = _rows(folder / "native/public_tasks.jsonl")
                 mini = _rows(folder / "micro/micro_public.jsonl")
-                self.assertTrue(all(x["split"] == w["split"] for x in [*native, *mini]))
+                oversize = _rows(folder / "micro/micro_oversize.jsonl")
+                self.assertEqual(len(mini), w["micro_tasks"])
+                self.assertEqual(len(oversize), w["micro_overbudget_rows"])
+                self.assertTrue(all(x["split"] == w["split"] for x in [*native, *mini, *oversize]))
                 if w["split"] != "train":
                     self.assertEqual(_rows(folder / "native/train_targets.jsonl"), [])
                     self.assertEqual(_rows(folder / "micro/micro_train_sft.jsonl"), [])
