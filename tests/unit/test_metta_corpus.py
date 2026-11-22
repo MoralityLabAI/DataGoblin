@@ -14,6 +14,20 @@ from MeTTa.curation_gym import VARIANTS, build_cases, policy_record, program_for
 CATALOG = ROOT / "MeTTa" / "source_catalog.json"
 
 
+def test_vendored_reference_samples_are_exact_git_blobs() -> None:
+    manifest = json.loads((ROOT / "MeTTa" / "reference_samples" / "MANIFEST.json").read_text(encoding="utf-8"))
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    pinned = {(f["source_id"], f["path"]): f for f in catalog["files"]}
+    assert manifest["measured"]["files"] == 10
+    for entry in manifest["files"]:
+        destination = ROOT / entry["vendored_path"]
+        data = destination.read_bytes()
+        assert len(data) == entry["bytes"]
+        assert git_blob_sha(data) == entry["git_blob_sha"]
+        assert pinned[(entry["source_id"], entry["path"])]["git_blob_sha"] == entry["git_blob_sha"]
+        assert (ROOT / entry["license_file"]).read_text(encoding="utf-8").startswith("MIT License")
+
+
 def test_pinned_source_inventory_is_accounted_for() -> None:
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     assert catalog["measured"]["total_files"] == 196
