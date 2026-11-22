@@ -1,0 +1,2242 @@
+{
+  "schema_version": "metta-source-catalog-v1",
+  "snapshot_date": "2026-11-22",
+  "notice": "Exact Git trees inspected; file contents not imported by this catalog. License receipt is repository-level and does not prove content-level rights for derived works. No rows authorized as training.",
+  "sources": [
+    {
+      "source_id": "hyperon_reference",
+      "repository": "trueagi-io/hyperon-experimental",
+      "commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "license": "MIT",
+      "license_url": "https://github.com/trueagi-io/hyperon-experimental/blob/3f76dc460da6961f57f69f6c3e550c59c74ada83/LICENSE",
+      "default_partition": "reference",
+      "fetch_mode": "readonly_local_checkout"
+    },
+    {
+      "source_id": "metta_examples",
+      "repository": "trueagi-io/metta-examples",
+      "commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "license": "MIT",
+      "license_url": "https://github.com/trueagi-io/metta-examples/blob/799ad9dbf92987cabeede6d1eca02ac7f8abb0ad/LICENSE",
+      "default_partition": "reference",
+      "fetch_mode": "readonly_local_checkout"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "repository": "MoralityLabAI/metta-storyworld",
+      "commit": "2a7917010867b83df52156233e391a120b3e4213",
+      "license": "MIT",
+      "license_url": "https://github.com/MoralityLabAI/metta-storyworld/blob/2a7917010867b83df52156233e391a120b3e4213/LICENSE",
+      "default_partition": "ood_reserved",
+      "fetch_mode": "readonly_local_checkout"
+    }
+  ],
+  "files": [
+    {
+      "source_id": "hyperon_reference",
+      "path": "integration_tests/das/animals.metta",
+      "git_blob_sha": "95c1093e690575ed05bfe6ca8bc72b3a36836479",
+      "bytes": 2002,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:integration_tests/das/animals.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "integration_tests/das/test.metta",
+      "git_blob_sha": "3a8f0fdfafc2fd792be7a856a742c5fe9b465816",
+      "bytes": 741,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:integration_tests/das/test.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/builtin_mods/catalog.metta",
+      "git_blob_sha": "d9e8734b591a15f4a2617e33e396e58669831c6d",
+      "bytes": 631,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/builtin_mods/catalog.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/builtin_mods/das.metta",
+      "git_blob_sha": "f594d59d302d7aac0b6bc8637cf31f165d5d4b4d",
+      "bytes": 2648,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/builtin_mods/das.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/builtin_mods/fileio.metta",
+      "git_blob_sha": "c5eec5968033374b667e002954af56c906a4a339",
+      "bytes": 1919,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/builtin_mods/fileio.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/builtin_mods/json.metta",
+      "git_blob_sha": "672dbee2b911f63de74cd63401b54df9b4e4045e",
+      "bytes": 1667,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/builtin_mods/json.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/builtin_mods/random.metta",
+      "git_blob_sha": "13c0ea577d915a56d751b93679f5a67dc10162af",
+      "bytes": 1413,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/builtin_mods/random.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/builtin_mods/skel.metta",
+      "git_blob_sha": "06ba82e32c66616f1f5ef09fc6e93fd0bb04b26b",
+      "bytes": 501,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/builtin_mods/skel.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/environment.default.metta",
+      "git_blob_sha": "a7d1d9c0cc8544b7e938749ad7c4b3a52dc79bd8",
+      "bytes": 607,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/environment.default.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/init.default.metta",
+      "git_blob_sha": "cf07948341c393272ad8530c91f5037d9d468ca2",
+      "bytes": 91,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/init.default.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/src/metta/runner/stdlib/stdlib.metta",
+      "git_blob_sha": "69600a0f3da97d8c634be6a6fb83174cc202cf36",
+      "bytes": 59489,
+      "category": "language_runtime",
+      "canonical_root": "hyperon_reference:lib/src/metta/runner/stdlib/stdlib.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "lib/tests/test_stdlib.metta",
+      "git_blob_sha": "f09e3fb516a8f2f6dd1ab8559f533e26a40eb9d9",
+      "bytes": 3952,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:lib/tests/test_stdlib.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "mkdocs.metta",
+      "git_blob_sha": "afc3a5649096658a6181f99dbd97ac0279622849",
+      "bytes": 2565,
+      "category": "example",
+      "canonical_root": "hyperon_reference:mkdocs.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/agents/tests/agent.metta",
+      "git_blob_sha": "6566b87007d57b919a954daf7f63729f067db13e",
+      "bytes": 45,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/agents/tests/agent.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/agents/tests/test_0_passive_agents.metta",
+      "git_blob_sha": "ef2cbb72c6feba298e54732f556487f4bece936a",
+      "bytes": 808,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/agents/tests/test_0_passive_agents.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/agents/tests/test_4_agent1.metta",
+      "git_blob_sha": "fa9bc3e6af34b38053395bea6806c35169d5e0d3",
+      "bytes": 378,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/agents/tests/test_4_agent1.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/agents/tests/test_4_agent2.metta",
+      "git_blob_sha": "e6ca5c59f77f041ab91e07b64c8baccd3ff011ed",
+      "bytes": 156,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/agents/tests/test_4_agent2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/agents/tests/test_4_events.metta",
+      "git_blob_sha": "b2d79073db57689d97d4da331c357032385ce871",
+      "bytes": 518,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/agents/tests/test_4_events.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/snet_io/snet/naint/text-generation.metta",
+      "git_blob_sha": "e4f7a77990951d6ae8a0787237a1ecc92541c2c5",
+      "bytes": 2422,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/snet_io/snet/naint/text-generation.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/snet_io/test_snet_call.metta",
+      "git_blob_sha": "6cbdddb7e822cb27dbf40e11546e61ba641e10ff",
+      "bytes": 2045,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/snet_io/test_snet_call.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/hyperon/exts/snet_io/test_snet_meta.metta",
+      "git_blob_sha": "74c692b50c2ba59844f90acfdb7e8f715280b307",
+      "bytes": 1342,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/hyperon/exts/snet_io/test_snet_meta.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/bhv_binding/01_example_majority.metta",
+      "git_blob_sha": "9629b2dd8366e10011d5145788bac68c881741d6",
+      "bytes": 199,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/bhv_binding/01_example_majority.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/bhv_binding/02_example_perm.metta",
+      "git_blob_sha": "7c87a2ddb96070a3912a856036169b7d14b3da43",
+      "bytes": 348,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/bhv_binding/02_example_perm.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/bhv_binding/03_example_dict.metta",
+      "git_blob_sha": "cd1dd14aa573402d818833b75d4b7f75c3cd16b6",
+      "bytes": 377,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/bhv_binding/03_example_dict.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/bhv_binding/04_example_dollar_of_mexico.metta",
+      "git_blob_sha": "ce4fc5b829c775393e7fc3ea88d026a61d7cae24",
+      "bytes": 801,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/bhv_binding/04_example_dollar_of_mexico.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/jetta/enum_lambda.metta",
+      "git_blob_sha": "90886b0a9a34f873f3be48c09c42bf0abe529e79",
+      "bytes": 602,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/jetta/enum_lambda.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/jetta/test_basic_jetta.metta",
+      "git_blob_sha": "4e3a083f7ffa4e1aa7dc8f77ddd6c352d00eda37",
+      "bytes": 2327,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/jetta/test_basic_jetta.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/jetta/test_expr_compile.metta",
+      "git_blob_sha": "6acee94645ef0808be81d47bad2a662ee146b842",
+      "bytes": 735,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/jetta/test_expr_compile.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/jetta/test_lambda.metta",
+      "git_blob_sha": "6923834b73888177176544ae3e412f8c6225a26d",
+      "bytes": 1367,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/jetta/test_lambda.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/jetta/test_nondet.metta",
+      "git_blob_sha": "0d4b94abf8478f404acb47cb4b833799c66b1e23",
+      "bytes": 701,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/jetta/test_nondet.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/mork/test_mork.metta",
+      "git_blob_sha": "1a6fae84766e41be4650904d1cb9b70d74ec6c0c",
+      "bytes": 336,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/mork/test_mork.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/neurospace/test_nspace.metta",
+      "git_blob_sha": "f43b76738122c42d62179570b8a4d87302de24db",
+      "bytes": 1648,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/neurospace/test_nspace.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/numpy/nm_test.metta",
+      "git_blob_sha": "57a65c9062af3e21e4754bf0ac2c5a9595e62236",
+      "bytes": 1257,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/numpy/nm_test.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/pytorch/tm_test.metta",
+      "git_blob_sha": "83cb303d68c74f5c608b01318e6c9d15fce02482",
+      "bytes": 4268,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/pytorch/tm_test.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/resolve/r.metta",
+      "git_blob_sha": "baf40dd358d0aa46be5dde03b60b963cf9554ce1",
+      "bytes": 841,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/resolve/r.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/sql_space/sql_space_test.metta",
+      "git_blob_sha": "61fc9191f151b5ebcefc2d842d4b1f0eed0aca65",
+      "bytes": 1329,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/sql_space/sql_space_test.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/sandbox/test_gnd_conv.metta",
+      "git_blob_sha": "3d74c4c26ab737db48ad73554ac9025489a45fad",
+      "bytes": 316,
+      "category": "example",
+      "canonical_root": "hyperon_reference:python/sandbox/test_gnd_conv.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/ext_sub/module.metta",
+      "git_blob_sha": "9beef0f5eea478121733e01d44bb51276059ac8d",
+      "bytes": 33,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/ext_sub/module.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/a1_symbols.metta",
+      "git_blob_sha": "fb5e14a30436cf5e5d3e4e8128dd2e4c4e116e0e",
+      "bytes": 2436,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/a1_symbols.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/a2_opencoggy.metta",
+      "git_blob_sha": "7376689ef2961d664ae4af13922f839892e3756f",
+      "bytes": 915,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/a2_opencoggy.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/a3_twoside.metta",
+      "git_blob_sha": "da1773abc21e26de7aeb4282a257c0c435871480",
+      "bytes": 1611,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/a3_twoside.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/b0_chaining_prelim.metta",
+      "git_blob_sha": "210f758c2853899392bba2b6f43a4fe4d694bfab",
+      "bytes": 1428,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/b0_chaining_prelim.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/b1_equal_chain.metta",
+      "git_blob_sha": "9188f72227ab1be52edb2d7169c17e682f11f6c8",
+      "bytes": 2578,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/b1_equal_chain.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/b2_backchain.metta",
+      "git_blob_sha": "0ebae59be44326fc4aafb57a95d91dd599f0f349",
+      "bytes": 2946,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/b2_backchain.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/b3_direct.metta",
+      "git_blob_sha": "029766c7b777df7e84d8f9620ed6d247d65e92f4",
+      "bytes": 1618,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/b3_direct.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/b4_nondeterm.metta",
+      "git_blob_sha": "d7dad02929e6ada839667f6128b3b000d8fca22c",
+      "bytes": 4562,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/b4_nondeterm.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/b5_types_prelim.metta",
+      "git_blob_sha": "84a8dcadf538c21911d579d9468683fe0df8f30c",
+      "bytes": 8400,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/b5_types_prelim.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/c1_grounded_basic.metta",
+      "git_blob_sha": "eb574989379425221a9210b6f3354baeb3e30586",
+      "bytes": 5222,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/c1_grounded_basic.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/c2_spaces_kb.metta",
+      "git_blob_sha": "c0ffa20edf7dbded0c666c7ae104259c6dfc2dee",
+      "bytes": 264,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/c2_spaces_kb.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/c2_spaces.metta",
+      "git_blob_sha": "9617ea14afde3855e7b81d43dba058aeaa00a0d2",
+      "bytes": 1811,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/c2_spaces.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/c3_pln_stv.metta",
+      "git_blob_sha": "0caf06708967b7f3686892a51d161df4bcaf1dcb",
+      "bytes": 2708,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/c3_pln_stv.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/d1_gadt.metta",
+      "git_blob_sha": "bea7aae4a9651745af8c432782d25428aca57fcb",
+      "bytes": 2467,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/d1_gadt.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/d2_higherfunc.metta",
+      "git_blob_sha": "40df912947aa72fad6e0291031c1e405f7459127",
+      "bytes": 7205,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/d2_higherfunc.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/d3_deptypes.metta",
+      "git_blob_sha": "35438156ab0466ce29172002b7583c6fd821e420",
+      "bytes": 2274,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/d3_deptypes.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/d4_type_prop.metta",
+      "git_blob_sha": "98c447c976b11d09dc42fa37bd286de40004874c",
+      "bytes": 5571,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/d4_type_prop.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/d5_auto_types.metta",
+      "git_blob_sha": "3e3953eb7e69cd7593555617899bee60e8646bee",
+      "bytes": 2478,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/d5_auto_types.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/e1_kb_write.metta",
+      "git_blob_sha": "c2b8c6a8a46d354c15a2aa506c8606e713dbf347",
+      "bytes": 902,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/e1_kb_write.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/e2_states.metta",
+      "git_blob_sha": "f1a87526f92fba6cbf8d40eb9a020e303062af4c",
+      "bytes": 3571,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/e2_states.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/e3_match_states.metta",
+      "git_blob_sha": "6700c5d15ac393c4e25ccedad6245c16f56b1697",
+      "bytes": 2383,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/e3_match_states.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/f1_imports.metta",
+      "git_blob_sha": "e72bcf72406894fdc6144f338b3698125dab0001",
+      "bytes": 5004,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/f1_imports.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/f1_moduleA.metta",
+      "git_blob_sha": "506da96b9746f55f2a6c6da56b82236f9744aa1a",
+      "bytes": 418,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/f1_moduleA.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/f1_moduleB.metta",
+      "git_blob_sha": "b6af75fe34d5b7062f868ac12d31ca8ea41ea8e9",
+      "bytes": 282,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/f1_moduleB.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/f1_moduleC.metta",
+      "git_blob_sha": "be371ae98b13de6e262fc7f5e1383feddfbe2e5a",
+      "bytes": 292,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/f1_moduleC.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/scripts/g1_docs.metta",
+      "git_blob_sha": "19c59e5810ea155425183c4a752aa6566c94af1b",
+      "bytes": 3613,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/scripts/g1_docs.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/test_include.metta",
+      "git_blob_sha": "70fe1fe25fd695c734ca77dc940ccc6357ea6ba6",
+      "bytes": 64,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/test_include.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "python/tests/test_load.metta",
+      "git_blob_sha": "405851a218dbddf268edc4f59047595d159be729",
+      "bytes": 63,
+      "category": "interpreter_test",
+      "canonical_root": "hyperon_reference:python/tests/test_load.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "hyperon_reference",
+      "path": "repl/src/repl.default.metta",
+      "git_blob_sha": "55a69f64653fccf61b2fcc837d5c6aff4d8b4150",
+      "bytes": 1174,
+      "category": "example",
+      "canonical_root": "hyperon_reference:repl/src/repl.default.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/adameve_simple.metta",
+      "git_blob_sha": "d56c48e31ab656d40c33b5278d21e60abd967740",
+      "bytes": 47828,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/adameve_simple.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/adameve.metta",
+      "git_blob_sha": "0c522fe182fdec57a494cb8229176f52ac2bf202",
+      "bytes": 402249,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/adameve.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "large_file_manual_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/baseline_formulation.metta",
+      "git_blob_sha": "1fbef1a3625c6091eda00bae1a24274a251bd06e",
+      "bytes": 1230,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/baseline_formulation.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/introduction.metta",
+      "git_blob_sha": "33c52da08502d0465465390566b3f8f289fc2852",
+      "bytes": 526,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/introduction.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/lordOfTheRings_simple.metta",
+      "git_blob_sha": "26071349517228d01d8718b97667953e15c068fe",
+      "bytes": 11911,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/lordOfTheRings_simple.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/lordOfTheRings.metta",
+      "git_blob_sha": "588eff60d4deaf594e8ed355b39294a4acf5153c",
+      "bytes": 109377,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/lordOfTheRings.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "large_file_manual_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/royal92_simple.metta",
+      "git_blob_sha": "49f6ffbe61341cf794720a92d490a7610e174e5d",
+      "bytes": 372545,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/royal92_simple.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "large_file_manual_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/royal92.metta",
+      "git_blob_sha": "c2a0f6ca012d8c2d060288734adf08c27aca3f5a",
+      "bytes": 2703888,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/royal92.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "large_file_manual_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/sergey_rodionov_formulation.metta",
+      "git_blob_sha": "0feaca7fea583b78c726a141cfc6dab22fd36dbc",
+      "bytes": 1751,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/sergey_rodionov_formulation.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/simple_conversion.metta",
+      "git_blob_sha": "9fb5ca217918e66f86b775e4138a4b8b744ca89a",
+      "bytes": 1451,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/simple_conversion.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/simpsons_simple.metta",
+      "git_blob_sha": "4f9cbfa97e40bebbd658349e8380a376fa7e3604",
+      "bytes": 1865,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/simpsons_simple.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/simpsons.metta",
+      "git_blob_sha": "d04840d4878d163aff66490e7138da7dcd093d74",
+      "bytes": 8755,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/simpsons.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "aunt-kg/toy.metta",
+      "git_blob_sha": "313e00f9b115ac3d719ebe6d3b155a8fae6f6b25",
+      "bytes": 187,
+      "category": "example",
+      "canonical_root": "metta_examples:aunt-kg/toy.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "collatz/classical.metta",
+      "git_blob_sha": "40354281f243eeb336c9703641cd21ff05ad5078",
+      "bytes": 142,
+      "category": "example",
+      "canonical_root": "metta_examples:collatz/classical.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "collatz/peano.metta",
+      "git_blob_sha": "91644cf2c0f60a7a5091c254fed3d8ab76faf54b",
+      "bytes": 743,
+      "category": "example",
+      "canonical_root": "metta_examples:collatz/peano.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "combinator-calculi/tree.metta",
+      "git_blob_sha": "4e0deea42f588d7c58a82a25cf2a561c485d1868",
+      "bytes": 2535,
+      "category": "example",
+      "canonical_root": "metta_examples:combinator-calculi/tree.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "combinator-calculi/y_comb_examples.metta",
+      "git_blob_sha": "16c583cdbbf5ed41a37d84af326e6b58f41ca5ee",
+      "bytes": 2464,
+      "category": "example",
+      "canonical_root": "metta_examples:combinator-calculi/y_comb_examples.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/ct_dts.metta",
+      "git_blob_sha": "1202e7fae2d867bf07adec4bf49d490563be0ea8",
+      "bytes": 2026,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/ct_dts.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/deontic_operators.metta",
+      "git_blob_sha": "68d28a26c35cbd5ebad1c1e69e93b86ff6ec80ae",
+      "bytes": 451,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/deontic_operators.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/examples.metta",
+      "git_blob_sha": "7b8219a72963ab394f7dc9d39a1709c35d662cca",
+      "bytes": 1018,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/examples.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/functional_examples/cd_dts_example_4.metta",
+      "git_blob_sha": "74ea4eba83300e8b3993365f715d6a217df868d8",
+      "bytes": 714,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/functional_examples/cd_dts_example_4.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/functional_examples/infer2.metta",
+      "git_blob_sha": "ab33ccc09e8da86e7ac1aea3b8a9958735df6724",
+      "bytes": 1297,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/functional_examples/infer2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/functional_examples/sea_fence_1.metta",
+      "git_blob_sha": "f2b373cae4b0caa55707630d64b22c148db85163",
+      "bytes": 814,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/functional_examples/sea_fence_1.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/functional_examples/sea_fence_2.metta",
+      "git_blob_sha": "26cba2f632bef5d45242acb4d8f6bfa61af50736",
+      "bytes": 445,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/functional_examples/sea_fence_2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/infer.metta",
+      "git_blob_sha": "ddd20eefa808bede6054f9f8d635e60fe8c291c1",
+      "bytes": 1451,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/infer.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/ctDTS.metta",
+      "git_blob_sha": "a4cff1da0f9877bd94c7eca1b83618fa74f8d943",
+      "bytes": 6545,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/ctDTS.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/endgame_mip_amendment.metta",
+      "git_blob_sha": "69c212319bb02543fcf7d174d9b7266fdac468d9",
+      "bytes": 1072,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/endgame_mip_amendment.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/governance_scope.metta",
+      "git_blob_sha": "3de7c11275e68cf3ba756e72224d82db42fce2c8",
+      "bytes": 1404,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/governance_scope.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/scope_bunded_mutable_alignment.metta",
+      "git_blob_sha": "73f29e07d32cbecc11f4eb26c633cc1656654bdc",
+      "bytes": 335,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/scope_bunded_mutable_alignment.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/asc_rules/asc_rules.metta",
+      "git_blob_sha": "4c37097454466cc58f821604ca662d625dcad09d",
+      "bytes": 3381,
+      "category": "rules",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/asc_rules/asc_rules.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/genesis_account.metta",
+      "git_blob_sha": "792a5c51af1e3e6259c4d1cc3a6e3c7cb00cb750",
+      "bytes": 759,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/genesis_account.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/include_test.metta",
+      "git_blob_sha": "37d26234a17715a0e4d142a2dfdb30c6a2d97ea5",
+      "bytes": 186,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/include_test.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/infer2.metta",
+      "git_blob_sha": "8caafd2302b8f7a07dda2298761633b7d2400abd",
+      "bytes": 1320,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/infer2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/spark_artifact_edits.metta",
+      "git_blob_sha": "ca7c3c6ce4d7a105de35854a364ac8968639891e",
+      "bytes": 1873,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/spark_artifact_edits.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/token_distribution_obligation.metta",
+      "git_blob_sha": "3262164c6f44f9eeee320b2247cc5a38ec104b8a",
+      "bytes": 934,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/token_distribution_obligation.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/token_emissions.metta",
+      "git_blob_sha": "7d31a013089f0c9639e8a9301b7ebbdb66c12582",
+      "bytes": 445,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/sky_primitives/spark_artifact/token_emissions.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/stability_advisory.metta",
+      "git_blob_sha": "9865351585a5db2a562bcda9e2fab41ee1a7485b",
+      "bytes": 3014,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/stability_advisory.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/maker_atlas_examples/support_advisory_council_membership_management.metta",
+      "git_blob_sha": "e06332e2715a4f5abbafc494f02a9bf3ef0e36f1",
+      "bytes": 3865,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/maker_atlas_examples/support_advisory_council_membership_management.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/rudimental_modal_logic.metta",
+      "git_blob_sha": "cbb65ab8d91d56153d99c57e6753ecd0e6f55615",
+      "bytes": 697,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/rudimental_modal_logic.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/rules.metta",
+      "git_blob_sha": "797e64f88fbf2b969ce941d970a6605518097f89",
+      "bytes": 1126,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/rules.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/bind.metta",
+      "git_blob_sha": "2b0a6f7bdef4ed8fca4ffaa1b15a2a5229191a2f",
+      "bytes": 1742,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/bind.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/construct.metta",
+      "git_blob_sha": "eea85f406c7d41c3076e83fffecb129f0cf32868",
+      "bytes": 655,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/construct.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/filter.metta",
+      "git_blob_sha": "6b13974b0fb4b257812b799f37b77c39e873ceb4",
+      "bytes": 930,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/filter.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/inference_test.metta",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "bytes": 0,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/inference_test.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/multiple_level_tr_clo.metta",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "bytes": 0,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/multiple_level_tr_clo.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/not_exist.metta",
+      "git_blob_sha": "2045517ca185a7f219c90716247d12a76e7af747",
+      "bytes": 403,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/not_exist.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/test_recursion.metta",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "bytes": 0,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/test_recursion.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/transitive_closure_clr.metta",
+      "git_blob_sha": "95eb1eb8ac58bae922f8e7a79a72dab7549dff35",
+      "bytes": 1517,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/transitive_closure_clr.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/transitive_closure_clr2.metta",
+      "git_blob_sha": "6b2b80ee29dc0bd8493053e894e0372b6e7834dd",
+      "bytes": 2359,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/transitive_closure_clr2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/transitive_closure.metta",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "bytes": 0,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/transitive_closure.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/union.metta",
+      "git_blob_sha": "a48cade62fdc39d4b7a86a668b6a9fc17eedbc3b",
+      "bytes": 869,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/union.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "deontic_logic/sparql2metta/very_simple_inference_engine.metta",
+      "git_blob_sha": "525c08dd57b3a9a953f1f3c7eae0cd6a3c28ae67",
+      "bytes": 733,
+      "category": "example",
+      "canonical_root": "metta_examples:deontic_logic/sparql2metta/very_simple_inference_engine.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "ecan/concept_attention.metta",
+      "git_blob_sha": "dcc6303af74119c37e1dba1a81f8ee699c6346f3",
+      "bytes": 1023,
+      "category": "example",
+      "canonical_root": "metta_examples:ecan/concept_attention.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "edges-to-edges/InteractiveDisneyStrategy.metta",
+      "git_blob_sha": "31d33419579aa2682360a527ed40cf8a05ce31e2",
+      "bytes": 5904,
+      "category": "example",
+      "canonical_root": "metta_examples:edges-to-edges/InteractiveDisneyStrategy.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "edges-to-edges/nte.metta",
+      "git_blob_sha": "c45f90839978ec256ef8bd39b7b0ad017c5e4309",
+      "bytes": 977,
+      "category": "example",
+      "canonical_root": "metta_examples:edges-to-edges/nte.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "evolution_computations/evolution_strategy.metta",
+      "git_blob_sha": "43e53a67fba2d7c474d983a7f61bf6b12f025691",
+      "bytes": 4717,
+      "category": "example",
+      "canonical_root": "metta_examples:evolution_computations/evolution_strategy.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "evolution_computations/genetic_algorithm.metta",
+      "git_blob_sha": "88b52777278a0f75fbf5a7b6d77570f5ce110b13",
+      "bytes": 5207,
+      "category": "example",
+      "canonical_root": "metta_examples:evolution_computations/genetic_algorithm.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "fizzbuzz/classical.metta",
+      "git_blob_sha": "e11b0f74052fcd955c95bedef5b3aaef5bc28eac",
+      "bytes": 439,
+      "category": "example",
+      "canonical_root": "metta_examples:fizzbuzz/classical.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "fizzbuzz/constructive.metta",
+      "git_blob_sha": "60560a1a9b4b92067f143521be82249565ff95f3",
+      "bytes": 972,
+      "category": "example",
+      "canonical_root": "metta_examples:fizzbuzz/constructive.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "fizzbuzz/simple.metta",
+      "git_blob_sha": "6b9671edae6e2a701436104a5654d61d53df9e02",
+      "bytes": 309,
+      "category": "example",
+      "canonical_root": "metta_examples:fizzbuzz/simple.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "functors/query.metta",
+      "git_blob_sha": "15c2d4087a48348a41347822d43e502e82f4c742",
+      "bytes": 6890,
+      "category": "example",
+      "canonical_root": "metta_examples:functors/query.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "game_of_clue/game_of_clue.metta",
+      "git_blob_sha": "678c16aab7d49f6d3aa5ba1c2c352cd129fc8ad1",
+      "bytes": 6909,
+      "category": "example",
+      "canonical_root": "metta_examples:game_of_clue/game_of_clue.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "logic/puzzle.metta",
+      "git_blob_sha": "20952f37ed51d39ad1b1b9d8d82a9e817b423d44",
+      "bytes": 3483,
+      "category": "example",
+      "canonical_root": "metta_examples:logic/puzzle.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "metta_amr/metta_to_amr/amr-connect.metta",
+      "git_blob_sha": "ddd592c1bd29ca4aa28cebaf05ee996c2f6ce454",
+      "bytes": 532,
+      "category": "example",
+      "canonical_root": "metta_examples:metta_amr/metta_to_amr/amr-connect.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "metta_amr/metta_to_amr/dep-types.metta",
+      "git_blob_sha": "d24a378509cc4167350c7e8e7ef6f4d3b21154c0",
+      "bytes": 1328,
+      "category": "example",
+      "canonical_root": "metta_examples:metta_amr/metta_to_amr/dep-types.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "metta_amr/metta_to_amr/instances.metta",
+      "git_blob_sha": "274fce44956903a1a581cd79ebece1c93d1af467",
+      "bytes": 1093,
+      "category": "example",
+      "canonical_root": "metta_examples:metta_amr/metta_to_amr/instances.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "metta_amr/metta_to_amr/user.metta",
+      "git_blob_sha": "cef6157fcfed0ecfb068636d94be6fc52707abe2",
+      "bytes": 885,
+      "category": "example",
+      "canonical_root": "metta_examples:metta_amr/metta_to_amr/user.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "noughts-and-crosses/tic-tac-toe.metta",
+      "git_blob_sha": "a0688fbeaf38b2769361f20b9ca35a89d0cac73b",
+      "bytes": 8658,
+      "category": "example",
+      "canonical_root": "metta_examples:noughts-and-crosses/tic-tac-toe.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "perfect-numbers/basic.metta",
+      "git_blob_sha": "e097285d63ff99a66dea70da34af2d1d7531d18b",
+      "bytes": 607,
+      "category": "example",
+      "canonical_root": "metta_examples:perfect-numbers/basic.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "prob-dep-types/inf_order_probs.metta",
+      "git_blob_sha": "f6bc60475647b1329a8c6e4407a5b63164c55031",
+      "bytes": 4496,
+      "category": "example",
+      "canonical_root": "metta_examples:prob-dep-types/inf_order_probs.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "prob-dep-types/prob_dep_types.metta",
+      "git_blob_sha": "91ca306990cce96cadd69c615d06327daa749941",
+      "bytes": 3040,
+      "category": "example",
+      "canonical_root": "metta_examples:prob-dep-types/prob_dep_types.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "python_from_metta/default.metta",
+      "git_blob_sha": "627afd345c3b6ffa98a2c0af2a5b688ac9218a9f",
+      "bytes": 143,
+      "category": "example",
+      "canonical_root": "metta_examples:python_from_metta/default.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "python_from_metta/fs.metta",
+      "git_blob_sha": "718444be30360e20854b5e4291012a4ff660b91b",
+      "bytes": 2359,
+      "category": "example",
+      "canonical_root": "metta_examples:python_from_metta/fs.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "python_from_metta/requests.metta",
+      "git_blob_sha": "2590592efae35a7d4764586e2c8cfcecf2c55b54",
+      "bytes": 5468,
+      "category": "example",
+      "canonical_root": "metta_examples:python_from_metta/requests.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "recursion-schemes/src/base.metta",
+      "git_blob_sha": "be3d8e568c9b992f09826ac10772923b02b6023c",
+      "bytes": 172,
+      "category": "example",
+      "canonical_root": "metta_examples:recursion-schemes/src/base.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "recursion-schemes/src/examples/benchmark.metta",
+      "git_blob_sha": "8387f6107ba2d89910826d9ee4e25e401fb885a1",
+      "bytes": 819,
+      "category": "example",
+      "canonical_root": "metta_examples:recursion-schemes/src/examples/benchmark.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "recursion-schemes/src/examples/expression.metta",
+      "git_blob_sha": "541524448d962554ee3a56b1b5137984c2c50c3d",
+      "bytes": 1879,
+      "category": "example",
+      "canonical_root": "metta_examples:recursion-schemes/src/examples/expression.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "recursion-schemes/src/schemes.metta",
+      "git_blob_sha": "ebbe648e1c86cdd9e8a0cc28610d35ca61dd117d",
+      "bytes": 772,
+      "category": "example",
+      "canonical_root": "metta_examples:recursion-schemes/src/schemes.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "red-black-lambda/lambda-theory.metta",
+      "git_blob_sha": "a2dc732371a3d6d13ae410e23929b6f0f61719e6",
+      "bytes": 761,
+      "category": "example",
+      "canonical_root": "metta_examples:red-black-lambda/lambda-theory.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "red-black-lambda/red-black.metta",
+      "git_blob_sha": "2e2a927f4462373696f0cb2272ea7a933af0ae23",
+      "bytes": 581,
+      "category": "example",
+      "canonical_root": "metta_examples:red-black-lambda/red-black.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_1_1.metta",
+      "git_blob_sha": "e6fdd94ff9f64145d20c77e3dd7db1eb1bdc4515",
+      "bytes": 4560,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_1_1.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_1_2.metta",
+      "git_blob_sha": "488101d8b5841d69a2ef84e7b82704e1df1de8f9",
+      "bytes": 19637,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_1_2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_1_3_2.metta",
+      "git_blob_sha": "905bf21cc99822e159f40a8127ce0aff6e9353b7",
+      "bytes": 9105,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_1_3_2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_1_3.metta",
+      "git_blob_sha": "c7f7618d9ec5b6020cadd19b44f516a3614aa964",
+      "bytes": 20895,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_1_3.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_2_1.metta",
+      "git_blob_sha": "ef7022d86d0355ad1ea2b0ec34a69c3965c3bfba",
+      "bytes": 22986,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_2_1.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_2_2.metta",
+      "git_blob_sha": "6c9c38e22b7101f5769b761be2491e2899a27f4f",
+      "bytes": 51616,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_2_2.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_2_3.metta",
+      "git_blob_sha": "1c05a3dd6db39f341dcaaab3b950bf587247f462",
+      "bytes": 38401,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_2_3.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "SICP_book/chapter_2_4.metta",
+      "git_blob_sha": "9ca588c0a819903e0980670f9f4711389b76e40c",
+      "bytes": 24789,
+      "category": "example",
+      "canonical_root": "metta_examples:SICP_book/chapter_2_4.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [
+        "derived_book_material_rights_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "stack-based/interpreter.metta",
+      "git_blob_sha": "4fedf141cfdad6f449cc9e5d26ca113689610cc5",
+      "bytes": 226,
+      "category": "example",
+      "canonical_root": "metta_examples:stack-based/interpreter.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "stack-based/rewrites.metta",
+      "git_blob_sha": "b8e1dd3bac86bcf6794c4ea0eedf11aa6a13ee65",
+      "bytes": 1301,
+      "category": "example",
+      "canonical_root": "metta_examples:stack-based/rewrites.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-flat/blocks-domain_flat.metta",
+      "git_blob_sha": "d07bcdd15581946ad455af02266d35161333acda",
+      "bytes": 1520,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-flat/blocks-domain_flat.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-flat/logistics-i-1_flat.metta",
+      "git_blob_sha": "e7fee36f4237031f3aef184fc529c801c230515f",
+      "bytes": 3548,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-flat/logistics-i-1_flat.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-flat/queries_flat.metta",
+      "git_blob_sha": "efffef9cc3e7e7a1eb1967cd36b2cfe01a4c4e6f",
+      "bytes": 1012,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-flat/queries_flat.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-improved/blocks-i-0.metta",
+      "git_blob_sha": "617909ae6365a5e13eedb7d0f1551a20dca983e9",
+      "bytes": 1637,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-improved/blocks-i-0.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-improved/blocks-i-1.metta",
+      "git_blob_sha": "581f1bbf8c4ca55feb4c24ad3fa1a20731290c17",
+      "bytes": 1694,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-improved/blocks-i-1.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-improved/logistics-i-1.metta",
+      "git_blob_sha": "72e1cb822815882e23d2ea024a875436ea0be78d",
+      "bytes": 3484,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-improved/logistics-i-1.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "strips/strips-to-metta-improved/queries.metta",
+      "git_blob_sha": "4233013e8dd89d2bd3e51a2778c85e9eb9bce638",
+      "bytes": 9556,
+      "category": "example",
+      "canonical_root": "metta_examples:strips/strips-to-metta-improved/queries.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "sudoku-n-by-n/sudoku-n-by-n.metta",
+      "git_blob_sha": "7ed2785a83ba1f24b54b0f1f110251f595f736a9",
+      "bytes": 50684,
+      "category": "example",
+      "canonical_root": "metta_examples:sudoku-n-by-n/sudoku-n-by-n.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "traverser/basic.metta",
+      "git_blob_sha": "cafb08df93fbd76a69ab7d18dc881bb6602dec9a",
+      "bytes": 1982,
+      "category": "example",
+      "canonical_root": "metta_examples:traverser/basic.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "traverser/creation.metta",
+      "git_blob_sha": "0856542ff724380ebd433795541c7c39c48e15e6",
+      "bytes": 1708,
+      "category": "example",
+      "canonical_root": "metta_examples:traverser/creation.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_examples",
+      "path": "traverser/tinkerpop-modern.metta",
+      "git_blob_sha": "3d8c876336f8b3fa0730059f6bf96c79b2656564",
+      "bytes": 2688,
+      "category": "example",
+      "canonical_root": "metta_examples:traverser/tinkerpop-modern.metta",
+      "proposed_split": "unassigned_until_root_dedup",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/agents/archetypes.metta",
+      "git_blob_sha": "d7fdf8fae473e8d428afccdf8cb46cc45171a098",
+      "bytes": 175,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/agents/archetypes.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/agents/guard.metta",
+      "git_blob_sha": "95bf9f152eb1fd6968a2e733856181b581e83e22",
+      "bytes": 194,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/agents/guard.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/agents/merchant.metta",
+      "git_blob_sha": "6c2b7a77a688a2772061e011b7e4105086996001",
+      "bytes": 243,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/agents/merchant.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/agents/player.metta",
+      "git_blob_sha": "277ca24194349b31164d244c25ce773a2a00e040",
+      "bytes": 281,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/agents/player.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/engine/queries.metta",
+      "git_blob_sha": "2ea7741467eb765fa5e426d1befa82501d655723",
+      "bytes": 472,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/engine/queries.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/engine/scoring.metta",
+      "git_blob_sha": "5e804c2c83f7c6c00ffbe8b95585008996443063",
+      "bytes": 476,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/engine/scoring.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/engine/step.metta",
+      "git_blob_sha": "5c0d8bc277f7b562b8d7001c8053a742beb62037",
+      "bytes": 953,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/engine/step.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/engine/visibility.metta",
+      "git_blob_sha": "c87c9184f8da299081f7cb132c8503070d07eadb",
+      "bytes": 568,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/engine/visibility.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/local_llm_storyworld_play/play_diary_mcp_retrieval_exp_2026-05-01/nav_probe/storyworld_player_packet.metta",
+      "git_blob_sha": "855051c013a93605935b356bec1344593585e47c",
+      "bytes": 11065,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/local_llm_storyworld_play/play_diary_mcp_retrieval_exp_2026-05-01/nav_probe/storyworld_player_packet.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/local_llm_storyworld_play/scarlett_letter_nplay_2026-05-01/nav_probe/storyworld_player_packet.metta",
+      "git_blob_sha": "c801379d8cdc52965d45c2ca72ca5faf8be6612f",
+      "bytes": 10216,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/local_llm_storyworld_play/scarlett_letter_nplay_2026-05-01/nav_probe/storyworld_player_packet.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/long_horizon_storyworlds/alife_seed_bridge_2026-05-01/alife_seed_facts.metta",
+      "git_blob_sha": "5894684e385535230b92468fe9e8c026f6393c18",
+      "bytes": 8439,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/long_horizon_storyworlds/alife_seed_bridge_2026-05-01/alife_seed_facts.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/agents/proposer.metta",
+      "git_blob_sha": "5bebb6055540b56b114b890be13ea2c6fd2960fa",
+      "bytes": 721,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/agents/proposer.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/agents/repairer.metta",
+      "git_blob_sha": "926e41248176b4ab8d908e85b72e1c82d16f1322",
+      "bytes": 651,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/agents/repairer.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/agents/verifier.metta",
+      "git_blob_sha": "3791ed55bafbec1fb5b078b531d8a547ad201648",
+      "bytes": 615,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/agents/verifier.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/ontology.metta",
+      "git_blob_sha": "1671a2d82a09592bb5cd3949640d20c093cbf286",
+      "bytes": 1704,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/ontology.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/queries/keygate_queries.metta",
+      "git_blob_sha": "77a4b3378608437aaa673ccd45675d451d8aad01",
+      "bytes": 822,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/queries/keygate_queries.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/rules/keygate_rules.metta",
+      "git_blob_sha": "1238bc82005637f347b7caa95b367dafa28f73b8",
+      "bytes": 1323,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/rules/keygate_rules.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/research/vpd_keygate_village/world/vpd_keygate_village.metta",
+      "git_blob_sha": "fa061722be237463dd007332c7d77a331223b2cd",
+      "bytes": 1118,
+      "category": "research_trace",
+      "canonical_root": "metta_storyworld:metta-storyworld/research/vpd_keygate_village/world/vpd_keygate_village.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [
+        "research_trace_or_eval_review"
+      ],
+      "eligibility": "quarantine"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/rules/commerce.metta",
+      "git_blob_sha": "e1f0aef2226af9da6a61822b051514ba3464882a",
+      "bytes": 779,
+      "category": "rules",
+      "canonical_root": "metta_storyworld:metta-storyworld/rules/commerce.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/rules/movement.metta",
+      "git_blob_sha": "4b07dabdff17c5a51857d8f02e84947de9e54da4",
+      "bytes": 533,
+      "category": "rules",
+      "canonical_root": "metta_storyworld:metta-storyworld/rules/movement.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/rules/observation.metta",
+      "git_blob_sha": "f686cec217e024d0c7baddb9719253f5e5007112",
+      "bytes": 925,
+      "category": "rules",
+      "canonical_root": "metta_storyworld:metta-storyworld/rules/observation.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/rules/sanctions.metta",
+      "git_blob_sha": "23a0a331979d6f2d3b54fb7a1cbf2af2e5eb20fb",
+      "bytes": 701,
+      "category": "rules",
+      "canonical_root": "metta_storyworld:metta-storyworld/rules/sanctions.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/rules/social.metta",
+      "git_blob_sha": "8c2d135a7f2d69f8c4df9cd29dd6496fbc14fd66",
+      "bytes": 874,
+      "category": "rules",
+      "canonical_root": "metta_storyworld:metta-storyworld/rules/social.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/world/affordances.metta",
+      "git_blob_sha": "0e84a2a0df423ed9327ca86804fa8a3ba35bc1b9",
+      "bytes": 351,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/world/affordances.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/world/initial_state.metta",
+      "git_blob_sha": "af29d38cadcf40243937b5c64d000b987c73ca36",
+      "bytes": 287,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/world/initial_state.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/world/norms.metta",
+      "git_blob_sha": "e4349f90d3e7a328ba2f74ea5573bc2c5f27da1d",
+      "bytes": 336,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/world/norms.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/world/ontology.metta",
+      "git_blob_sha": "3c31a81e693988095cbbfe0518fec75ddefbf1fc",
+      "bytes": 1160,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/world/ontology.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    },
+    {
+      "source_id": "metta_storyworld",
+      "path": "metta-storyworld/world/scenarios/market_square.metta",
+      "git_blob_sha": "257badcaea83dddf5b0d69fd1023ff19eed1ee7c",
+      "bytes": 548,
+      "category": "world_model",
+      "canonical_root": "metta_storyworld:metta-storyworld/world/scenarios/market_square.metta",
+      "proposed_split": "ood_reserved",
+      "review_flags": [],
+      "eligibility": "discovery_candidate"
+    }
+  ],
+  "measured": {
+    "total_files": 196,
+    "total_git_reported_bytes": 4281494,
+    "quarantine": 22,
+    "discovery_candidates": 174
+  }
+}
