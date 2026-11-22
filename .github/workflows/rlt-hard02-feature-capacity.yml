@@ -6,15 +6,15 @@ on:
     paths:
       - "scripts/audit_rlt_hard02_feature_capacity.py"
       - "tests/unit/test_rlt_hard02_feature_capacity.py"
-      - "tests/unit/test_rlt_hard02_semantic_features.py"
       - "src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py"
       - "tests/unit/test_rlt_hard02_semantic_features.py"
-      - "src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py"
       - ".github/workflows/rlt-hard02-feature-capacity.yml"
   pull_request:
     paths:
       - "scripts/audit_rlt_hard02_feature_capacity.py"
       - "tests/unit/test_rlt_hard02_feature_capacity.py"
+      - "src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py"
+      - "tests/unit/test_rlt_hard02_semantic_features.py"
       - ".github/workflows/rlt-hard02-feature-capacity.yml"
   workflow_dispatch:
 
