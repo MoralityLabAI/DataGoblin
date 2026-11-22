@@ -11,7 +11,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from collections import defaultdict
+import re
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -175,6 +176,26 @@ def score(heldout: dict[str, dict[str, Any]], predicted: dict[str, str]) -> dict
     }
 
 
+def template_question(row: dict[str, Any]) -> str:
+    """Normalize only the model-visible question, dropping all source signature text."""
+    question = row["prompt"].split("Claim to evaluate: ", 1)[1]
+    return re.sub(r"\\bh[A-Za-z0-9_]+\\b", "<HYP>", question)
+
+
+def template_only_predictions(catalog_path: Path, heldout: dict[str, dict[str, Any]]) -> dict[str, str]:
+    """Fit a deliberately weak template lookup on TRAIN only to detect prompt leakage."""
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    labels: dict[str, Counter[str]] = defaultdict(Counter)
+    for example in generate(catalog):
+        if example["split"] == "train":
+            labels[template_question(example)][example["gold_label"]] += 1
+    prediction = {}
+    for key, example in heldout.items():
+        choices = labels.get(template_question(example))
+        prediction[key] = choices.most_common(1)[0][0] if choices else ABSTAIN
+    return prediction
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--catalog", type=Path, default=CATALOG)
@@ -186,6 +207,8 @@ def main() -> int:
     ev.add_argument("--output", type=Path)
     base = sub.add_parser("majority-baseline", help="Produce a declared non-model baseline")
     base.add_argument("--output-dir", type=Path, required=True)
+    tm = sub.add_parser("template-baseline", help="Measure question-template label leakage from train split")
+    tm.add_argument("--output-dir", type=Path, required=True)
     args = p.parse_args()
     holdout = load_holdout(args.catalog)
     if args.command == "prepare":
@@ -198,6 +221,16 @@ def main() -> int:
         result = score(holdout, read_predictions(out, set(holdout)))
         result["producer"] = "CONSTANT_LABEL_BASELINE; no model execution"
         (args.output_dir / "majority_metrics.json").write_text(
+            json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+    elif args.command == "template-baseline":
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        out = args.output_dir / "template_predictions.jsonl"
+        predictions = template_only_predictions(args.catalog, holdout)
+        _write_jsonl(out, [{"id": key, "label": value} for key, value in sorted(predictions.items())])
+        result = score(holdout, read_predictions(out, set(holdout)))
+        result["producer"] = "TRAIN_ONLY_QUESTION_TEMPLATE_LOOKUP_CONTROL; no model execution"
+        (args.output_dir / "template_metrics.json").write_text(
             json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
     else:
