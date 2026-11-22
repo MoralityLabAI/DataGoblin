@@ -26,13 +26,18 @@ def build_fake_shards(directory: Path, *, horizon: int = 12, shards: int = 3) ->
                 task = make_task(family, seed)
                 for step in range(3):
                     target = query_supervision(task, step)
-                    count = len(target["expected_record_ids"])
+                    bindings = target["expected_record_ids"]
+                    count = len(bindings)
                     rows.append({
                         "root": root_id(family, seed),
                         "query_sha256": sha256_bytes(target["query"].encode()),
                         "source_sha256": sha256_bytes(task["program"].encode()),
                         "native_results": count,
                         "static_expected_results": count,
+                        "native_bindings": bindings,
+                        "native_bindings_sha256": sha256_bytes(
+                            json.dumps(bindings, ensure_ascii=False, separators=(",", ":")).encode()
+                        ),
                         "matches": True,
                     })
         data = {
@@ -85,6 +90,22 @@ def test_certificate_join_rejects_tampered_native_row_even_if_digest_updated(tmp
     ).hexdigest()
     path.write_text(json.dumps(data))
     with pytest.raises(ValueError, match="coverage incomplete"):
+        join_native(tmp_path, shard_count=3, roots_per_family=12, queries_per_root=3)
+
+
+def test_certificate_join_rejects_forged_native_binding_even_with_rehashed_receipt(tmp_path: Path) -> None:
+    build_fake_shards(tmp_path)
+    path = tmp_path / "native_query_receipt_0.json"
+    data = json.loads(path.read_text())
+    data["rows"][0]["native_bindings"] = ["forged-record-id"]
+    data["rows"][0]["native_bindings_sha256"] = sha256_bytes(
+        json.dumps(["forged-record-id"], ensure_ascii=False, separators=(",", ":")).encode()
+    )
+    data["receipts_sha256"] = hashlib.sha256(
+        json.dumps(data["rows"], sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="native mismatch"):
         join_native(tmp_path, shard_count=3, roots_per_family=12, queries_per_root=3)
 
 
