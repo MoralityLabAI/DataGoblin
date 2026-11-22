@@ -115,3 +115,22 @@ source and false-stop auditor. This is a development-only run.
 ## Native negative-control interpretation boundary
 
 The completed RLT-HARD-02B run subsequently showed that all ordinary development roots were kernel-certifiable on their first candidate, including two designed to have exhausted menus. The mutated `simpa` scripts still established those theorems. The RLT-HARD-02C paired ablation uses the same ordinary generator family, and its ordinary success counts must therefore be treated as **positive-control coverage only**, with no claim about learned stopping on exhausted negatives. The OOD divisibility cohort retained genuinely exhausted menus in the preceding native run. Every new cohort must be checked from compiler receipts before model-value claims are promoted. The v3 paired ablation is a *development failure-analysis experiment*, not a sealed confirmation.
+
+
+## Native RLT-HARD-02C results, new source seed 2026112211
+
+[Hosted native run #44991041535](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44991041535) passed. Its checked-out Mathlib commit was `809c3fb3b5c8f5d7dace56e200b426187516535a`, with Lean 4.12.0. The downloaded source artifact has ZIP SHA-256 `dcf43611d60a41154ab9a374216786afd99f4cbeee856264d213070cac991a4f`.
+
+The independent audit confirmed all **80 source/output hashes**, **257 native candidate receipts**, **zero false learned stops** relative to fixed full search and no opened sealed confirmation. The archive retains **45 certified Lean proof-source files**, **455 compiler calls** and independent attempt replays for both learned arms: 25 for the content-aware ranker and 31 for the legacy-grounded ranker.
+
+| Arm | Ordinary certified / checks | OOD certified / checks | OOD candidate seconds |
+| --- | ---: | ---: | ---: |
+| Content-aware learned, CAL threshold 0.30 | 8/8, 8 | **6/8, 17** | **54.48212** |
+| Legacy-grounded learned, CAL threshold 0.30 | 8/8, 8 | 6/8, 23 | 68.68887 |
+| Fixed full search | 8/8, 8 | 6/8, 33 | 91.98929 |
+| Random full search | 8/8, 8 | 6/8, 31 | 87.31490 |
+| Trivial-first full search | 8/8, 8 | 6/8, 33 | 91.96379 |
+
+The content-aware ranker preserved native proof coverage and required 26.1% fewer OOD candidate checks than the legacy ranker, a reduction from 23 to 17; compared with fixed full search it saved 48.5% of checks. Actual OOD candidate wall time fell by 20.7% relative to the legacy ranker (14.21 seconds). All of these are **development comparisons**, on newly generated, source-disjoint theorem roots with a fixed five-action vocabulary.
+
+The ordinary 8/8 scores remain an invalid negative-control population: witness-omitted near-miss `simpa` candidates still proved those List goals. The kernel-verified strict List correction is kept separately as RLT-HARD-02D and has **not** been retroactively substituted into this fixed source seed. This study supports a measured value of candidate-content features in the OOD split. It does not establish recurrent post-failure reasoning, free-form tactic generation, hard Mathlib transfer or sealed confirmation.
