@@ -59,7 +59,9 @@ def atom_safe(raw: object) -> str:
     return "".join(c if c.isascii() and (c.isalnum() or c in "_-") else "_" for c in str(raw))
 
 
-def policy_record(file_row: dict[str, Any], variant: str, *, source_commit: str) -> DataCollectionRecord:
+def policy_record(
+    file_row: dict[str, Any], variant: str, *, source_commit: str, source_repository: str,
+) -> DataCollectionRecord:
     if variant not in VARIANTS:
         raise ValueError(f"unknown variant: {variant}")
     root = f'{file_row["source_id"]}:{file_row["path"]}'
@@ -97,7 +99,7 @@ def policy_record(file_row: dict[str, Any], variant: str, *, source_commit: str)
         "verification_receipt_sha256": None,
         "verification_subject_sha256": None,
         "verification_custody": "NONE",
-        "provenance_refs": (f'https://github.com/{file_row["source_id"]}',),
+        "provenance_refs": (f'https://github.com/{source_repository}/blob/{source_commit}/{file_row["path"]}',),
         "dedup_group": root,
         "intended_split": "ordinary_test" if split == "dev_reserved" else ("ood_test" if is_eval else "train"),
         "retention_days": 365,
@@ -151,7 +153,10 @@ def build_cases(
     for file_row in catalog["files"][:max_files]:
         source_id = file_row["source_id"]
         for variant in VARIANTS:
-            record = policy_record(file_row, variant, source_commit=sources[source_id]["commit"])
+            record = policy_record(
+                file_row, variant, source_commit=sources[source_id]["commit"],
+                source_repository=sources[source_id]["repository"],
+            )
             verdict = policy.decide(record)
             candidate = {
                 "schema_version": "metta-curation-task-v1",
