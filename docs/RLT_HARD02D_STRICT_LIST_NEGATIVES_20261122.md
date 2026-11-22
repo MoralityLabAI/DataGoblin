@@ -68,3 +68,14 @@ python -m datagoblin.training_gym.rlt_gym.hard02d_list_gate \
 ```
 
 Retained evidence is authoritative for pass/fail interpretation.
+
+
+## Native acceptance and independent re-audit
+
+The preregistered source seed `2026112219` passed the full [native Lean workflow #44991836744](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44991836744). Exactly six of eight theorem menus had one accepted candidate, and both witness-omitted menus had zero accepted candidates. All other candidate scripts failed. All five scripts were tested for every root, and every one of the 40 candidate receipts was independently kernel-replayed.
+
+The native campaign used **100 Lean compiler calls**, retained **six certified proof source files**, and recorded **257.97 aggregate compiler seconds**. Its artifact ZIP SHA-256 is `eb4b0273248e03a6d5db05b2599db00074faae8c47b0a85e3ae1b46cb7f8be05`. Wrong congruence terms produced Lean type mismatches in the saved failed-candidate traces.
+
+[Independent archive audit #44992393407](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44992393407) independently downloaded the native source artifact, rechecked **15/15 SHA-256 file manifests**, validated all **40 native candidate receipts**, confirmed the 40 earlier replay records and reproduced the six-positive/two-exhausted verdict. All audit tests, Ruff and artifact verification passed. The independent verdict ZIP SHA-256 is `838f228f65e7c8c55acc1a3366a018a9cd816d083363b8435f17facc24736e65`.
+
+The result establishes valid negative-menu construction for this new List proof family. This is **quality-control evidence**, with no learned ranker trained or evaluated on this source cohort. It is a prerequisite for future hard Mathlib/LeanGym comparisons.
