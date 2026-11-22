@@ -12,8 +12,10 @@ on:
   pull_request:
     paths:
       - "src/datagoblin/training_gym/rlt_gym/hard02_mathlib.py"
+      - "src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py"
       - "tests/unit/test_rlt_hard02_semantic_features.py"
-      - ".github/workflows/rlt-hard02-matched.yml"
+      - "tests/unit/test_rlt_hard02_semantic_policy.py"
+      - ".github/workflows/rlt-hard02-semantic.yml"
   workflow_dispatch:
 
 permissions:
