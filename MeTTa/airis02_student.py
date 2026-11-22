@@ -32,7 +32,7 @@ FIELD_DIM = 15
 GLOBAL_DIM = 13
 INPUT_DIM = MAX_ITEMS * FIELD_DIM + GLOBAL_DIM
 FAMILIES = ("lineage", "coverage", "dependency", "revision", "budget")
-SCHEMA = "metta-airis02-cpu-student-v2"
+SCHEMA = "metta-airis02-cpu-student-v3"
 
 
 def encode_public(task: dict[str, Any], selected: list[str]) -> np.ndarray:
@@ -293,28 +293,43 @@ def _matrix(rows: list[dict]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return features, labels, masks
 
 
-def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
-             *, loops: int, max_edits: int = 8) -> dict[str, Any]:
-    """Score model actions with the environment's independent bounded oracle."""
+def _choose_action(
+    model: LinearStudent | RecurrentStudent, task: dict, selected: list[str],
+    *, loops: int, stop_head: Any | None = None,
+) -> dict[str, str]:
+    """Use a learned STOP proposal plus a public structural action mask."""
+    vector = encode_public(task, selected)[None, :]
+    if stop_head is not None and stop_head.should_stop(vector):
+        return {"op": "stop", "id": "none"}
+    logits = model.logits(vector, loops=loops)[0]
+    mask = legal_action_mask(task, selected)
+    if stop_head is not None:
+        mask[20] = False
+    return decode_action(int(np.argmax(np.where(mask, logits, -1e6))))
+
+
+def _rollout(
+    model: LinearStudent | RecurrentStudent, row: dict,
+    *, loops: int, max_edits: int = 8, stop_head: Any | None = None,
+) -> dict[str, Any]:
+    """Judge an entire attempted repair with the environment-owned oracle."""
     task = row["public_world"]
     selected = list(row["selected"])
     oracle = exact_optimum(task)
-    first_vector = encode_public(task, selected)[None, :]
-    first_mask = legal_action_mask(task, selected)
-    first_logits = model.logits(first_vector, loops=loops)[0]
-    initial = decode_action(int(np.argmax(np.where(first_mask, first_logits, -1e6))))
+    initial = _choose_action(model, task, selected, loops=loops, stop_head=stop_head)
     exact_initial = initial == row["oracle_next_edit"]
     attempts = 0
+    decisions = 0
     false_admissions = 0
     premature_stop = 0
     invalid_action = 0
     successful_stop = False
-    for _ in range(max_edits):
-        vector = encode_public(task, selected)[None, :]
-        action_logits = model.logits(vector, loops=loops)[0]
-        mask = legal_action_mask(task, selected)
-        index = int(np.argmax(np.where(mask, action_logits, -1e6)))
-        action = decode_action(index)
+    ever_optimal = selected == oracle["selected"]
+    for step in range(max_edits):
+        action = initial if step == 0 else _choose_action(
+            model, task, selected, loops=loops, stop_head=stop_head
+        )
+        decisions += 1
         if action["op"] == "stop":
             successful_stop = selected == oracle["selected"]
             premature_stop = int(not successful_stop)
@@ -329,6 +344,7 @@ def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
             break
         selected = edit(selected, action)
         attempts += 1
+        ever_optimal |= selected == oracle["selected"]
         if action["op"] == "add" and not evaluate_subset(task, selected)["valid"]:
             false_admissions += 1
     final = evaluate_subset(task, selected)
@@ -336,6 +352,7 @@ def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
     return {
         "exact_first_edit": int(exact_initial),
         "solved_and_stopped": int(successful_stop),
+        "ever_reached_optimum": int(ever_optimal),
         "premature_stop": premature_stop,
         "inapplicable_action": invalid_action,
         "unsafe_addition": false_admissions,
@@ -344,13 +361,16 @@ def _rollout(model: LinearStudent | RecurrentStudent, row: dict,
         "oracle_goals_covered": oracle_coverage,
         "remaining_canonical_edits": len(set(selected) ^ set(oracle["selected"])),
         "repair_edits": attempts,
-        "inference_iterations": (attempts + 1) * loops,
+        "inference_iterations": decisions * loops,
+        "learned_stop_head_calls": decisions if stop_head is not None else 0,
     }
 
 
-def evaluate(model: LinearStudent | RecurrentStudent, rows: list[dict], *,
-             loops: int) -> dict[str, Any]:
-    measures = [_rollout(model, row, loops=loops) for row in rows]
+def evaluate(
+    model: LinearStudent | RecurrentStudent, rows: list[dict],
+    *, loops: int, stop_head: Any | None = None,
+) -> dict[str, Any]:
+    measures = [_rollout(model, row, loops=loops, stop_head=stop_head) for row in rows]
     if not measures:
         raise ValueError("empty evaluation split")
     count = len(measures)
@@ -359,6 +379,7 @@ def evaluate(model: LinearStudent | RecurrentStudent, rows: list[dict], *,
         "cases": count,
         "exact_first_edit": sums["exact_first_edit"],
         "solved_and_stopped": sums["solved_and_stopped"],
+        "ever_reached_optimum": sums["ever_reached_optimum"],
         "premature_stops": sums["premature_stop"],
         "inapplicable_actions": sums["inapplicable_action"],
         "unsafe_additions": sums["unsafe_addition"],
@@ -367,6 +388,7 @@ def evaluate(model: LinearStudent | RecurrentStudent, rows: list[dict], *,
         "mean_remaining_canonical_edits": round(sums["remaining_canonical_edits"] / count, 5),
         "mean_repair_edits": round(sums["repair_edits"] / count, 5),
         "mean_inference_iterations": round(sums["inference_iterations"] / count, 5),
+        "mean_learned_stop_head_calls": round(sums["learned_stop_head_calls"] / count, 5),
     }
 
 
@@ -401,6 +423,10 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         or len(dev) != manifest["development_diagnostic_presentations"]
     ):
         raise ValueError("unmatched materialized row counts")
+    # The separate binary STOP head uses only independently verified TRAIN
+    # labels; no development root can influence threshold selection.
+    from .airis02_stop import StopHead
+
     report = {
         "schema_version": SCHEMA,
         "model_trained": True,
@@ -412,6 +438,7 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         "root_split_custody": "distinct_seed_bands_and_root_hashes",
         "optimizer_steps_per_arm": steps,
         "student_training_policy": "structural_membership_action_mask_plus_hash_fixed_point_stop",
+        "learned_stop_policy": "independent_train_only_calibrated_binary_head",
         "learning_rate": lr,
         "training_loops": 4,
         "inference_depths_checked": [2, 4, 8],
@@ -432,6 +459,7 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
             "Development roots are publicly regenerable; no sealed accuracy claimed.",
             "Recurrent depths 2/4/8 share the weights fitted at depth 4.",
             "STOP is an action class, not an adaptive computation-time exit head.",
+            "The added binary STOP head learns action-level halting; it does not vary recurrent compute depth.",
             "Direct and recurrent models have different parameter counts; "
             "matched updates apply within each architecture.",
             "Inputs are fixed-size structured synthetic facts, not native MeTTa tokens.",
@@ -449,14 +477,22 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         losses = linear.fit(x, y, steps=steps, lr=lr, legal_masks=masks)
         rec = RecurrentStudent(seed, hidden=hidden)
         rec_losses = rec.fit(x, y, steps=steps, lr=lr, train_loops=4, legal_masks=masks)
+        stop_head = StopHead(seed)
+        stop_receipt = stop_head.fit(x, y == 20, steps=steps, lr=lr)
         report["trained_models"][arm] = {
             "train_root_sha256": sha256_bytes("\n".join(sorted(row["root"] for row in a_train)).encode()),
             "dev_root_sha256": sha256_bytes("\n".join(sorted(row["root"] for row in a_dev)).encode()),
+            "stop_head": {
+                **stop_receipt,
+                "parameters": stop_head.params,
+                "checkpoint_sha256": stop_head.digest(),
+            },
             "linear": {
                 "parameters": linear.params,
                 "checkpoint_sha256": linear.digest(),
                 "final_training_loss": losses[-1],
                 "development": evaluate(linear, shared_dev, loops=1),
+                "learned_stop_development": evaluate(linear, shared_dev, loops=1, stop_head=stop_head),
                 "within_arm_diagnostic": evaluate(linear, a_dev, loops=1),
             },
             "recurrent": {
@@ -464,6 +500,10 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
                 "checkpoint_sha256": rec.digest(),
                 "final_training_loss": rec_losses[-1],
                 "development": {str(k): evaluate(rec, shared_dev, loops=k) for k in (2, 4, 8)},
+                "learned_stop_development": {
+                    str(k): evaluate(rec, shared_dev, loops=k, stop_head=stop_head)
+                    for k in (2, 4, 8)
+                },
                 "within_arm_diagnostic": evaluate(rec, a_dev, loops=4),
             },
             "training_targets": dict(sorted(Counter(int(y_i) for y_i in y).items())),
@@ -506,6 +546,9 @@ def main() -> int:
             "linear_solved": item["linear"]["development"]["solved_and_stopped"],
             "recurrent_4_solved": item["recurrent"]["development"]["4"]["solved_and_stopped"],
             "recurrent_4_first_edit": item["recurrent"]["development"]["4"]["exact_first_edit"],
+            "recurrent_4_learned_stop_solved": item["recurrent"]["learned_stop_development"]["4"][
+                "solved_and_stopped"
+            ],
         } for arm, item in report["trained_models"].items()},
         "training_ready": False,
     }, sort_keys=True))
