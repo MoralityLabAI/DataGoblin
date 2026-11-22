@@ -349,7 +349,10 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
     dev = load("development_labels_research.jsonl")
     if {row["root"] for row in train} & {row["root"] for row in dev}:
         raise ValueError("train/development root leakage")
-    if len(train) != manifest["train_presentations_total"] or len(dev) != manifest["development_diagnostic_presentations"]:
+    if (
+        len(train) != manifest["train_presentations_total"]
+        or len(dev) != manifest["development_diagnostic_presentations"]
+    ):
         raise ValueError("unmatched materialized row counts")
     report = {
         "schema_version": SCHEMA,
@@ -377,7 +380,8 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
             "Development roots are publicly regenerable; no sealed accuracy claimed.",
             "Recurrent depths 2/4/8 share the weights fitted at depth 4.",
             "STOP is an action class, not an adaptive computation-time exit head.",
-            "Direct and recurrent models have different parameter counts; matched updates apply within each architecture.",
+            "Direct and recurrent models have different parameter counts; "
+            "matched updates apply within each architecture.",
             "Inputs are fixed-size structured synthetic facts, not native MeTTa tokens.",
             "Equal source-root counts and optimizer steps do not establish equal source-token budgets.",
         ],
@@ -412,9 +416,15 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
     first = report["trained_models"][ARMS[0]]
     for arm in ARMS[1:]:
         item = report["trained_models"][arm]
-        if item["train_root_sha256"] != first["train_root_sha256"] or item["dev_root_sha256"] != first["dev_root_sha256"]:
+        if (
+            item["train_root_sha256"] != first["train_root_sha256"]
+            or item["dev_root_sha256"] != first["dev_root_sha256"]
+        ):
             raise ValueError("different source root allocations across intervention arms")
-        if item["linear"]["parameters"] != first["linear"]["parameters"] or item["recurrent"]["parameters"] != first["recurrent"]["parameters"]:
+        if (
+            item["linear"]["parameters"] != first["linear"]["parameters"]
+            or item["recurrent"]["parameters"] != first["recurrent"]["parameters"]
+        ):
             raise ValueError("model capacity differs across intervention arms")
     return report
 
