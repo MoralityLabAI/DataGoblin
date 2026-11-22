@@ -178,8 +178,10 @@ def construct_roots(seed: int, tastes: list[dict[str, Any]]) -> list[dict[str, A
     return roots
 
 
-def _features(world: dict[str, Any], check_case: dict[str, int]) -> np.ndarray:
+def _features(world: dict[str, Any], check_case: dict[str, int] | None = None) -> np.ndarray:
     state = world["state"]
+    # The later value-of-information case is visible only at the check stage.
+    check_case = check_case or {"hazard_percent": 0, "check_cost": 0, "mistake_cost": 0}
     return np.asarray(
         (
             1.0,
@@ -200,8 +202,8 @@ def _features(world: dict[str, Any], check_case: dict[str, int]) -> np.ndarray:
 def _examples(root: dict[str, Any]) -> list[tuple[int, np.ndarray, int]]:
     labels = exact_actions(root)
     return [
-        (0, _features(root["world_a"], root["check_case"]), int(labels[0] == "deploy")),
-        (0, _features(root["world_b"], root["check_case"]), int(labels[1] == "deploy")),
+        (0, _features(root["world_a"]), int(labels[0] == "deploy")),
+        (0, _features(root["world_b"]), int(labels[1] == "deploy")),
         (1, _features(root["world_b"], root["check_case"]), int(labels[2] == "check")),
     ]
 
