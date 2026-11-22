@@ -226,7 +226,18 @@ def audit(path: Path) -> dict:
             for rid in by_source
         )
         if report["false_model_stops_against_fixed"] != false_stop:
-            raise ValueError("model STOP errors disagree with the full-search control")
+            raise ValueError("model STOP errors disagree with fixed-order budgeted control")
+        # The "fixed_full" arm is truncated to the same max_attempts budget
+        # as the model. The full five-candidate QA ledger remains the actual
+        # counterfactual for measuring whether a correct proof was reachable.
+        evaluator_positive = {
+            rid: any(attempt["receipt"]["passed"] for attempt in row["attempts"])
+            for rid, row in by_source.items()
+        }
+        false_stops_complete = sum(
+            evaluator_positive[rid] and not pairs[(rid, "oxibonsai_q1")]["certified"]
+            for rid in by_source
+        )
         return {
             "schema": "datagoblin.rlt_hard02f_independent_audit.v1",
             "native_kernel_source_verified": True,
@@ -238,7 +249,9 @@ def audit(path: Path) -> dict:
             "live_model_response_hashes_present": True,
             "source_roots": len(source),
             "arms": policy_summary,
-            "false_stops_vs_full": false_stop,
+            "false_stops_vs_budgeted_fixed_order": false_stop,
+            "false_stops_vs_evaluator_complete_menu": false_stops_complete,
+            "fixed_full_arm_is_budget_truncated": report["per_root_attempt_budget"] < 5,
             "server_checkpoint_verified_by": binding["server_checkpoint_attestation"],
             "sealed_confirmation_opened": False,
         }
