@@ -14,8 +14,12 @@ import hashlib
 import json
 import os
 import platform
-import resource
 import sys
+
+try:
+    import resource
+except ImportError:  # Windows has no resource module.
+    resource = None
 import time
 from collections import Counter
 from pathlib import Path
@@ -243,6 +247,15 @@ def metta_proposal(proposal: dict[str, Any], ram_limit_mib: int) -> str:
 
 
 def peak_rss_mib() -> float:
+    if resource is None:
+        try:
+            import psutil
+        except ImportError as exc:
+            raise RuntimeError(
+                "Windows needs psutil for RSS monitoring (pip install psutil), "
+                "or run under WSL with a Linux hard memory cap"
+            ) from exc
+        return round(psutil.Process().memory_info().rss / 1048576, 2)
     maximum = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return round(maximum / (1024 * 1024 if sys.platform == "darwin" else 1024), 2)
 
@@ -252,8 +265,8 @@ def install_memory_ceiling(ram_limit_mib: int) -> dict[str, Any]:
         raise ValueError("RAM limit must be between 512 MiB and 12 GiB")
     maximum_bytes = ram_limit_mib * 1024 * 1024
     enabled = False
-    if sys.platform.startswith("linux"):
-        soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    if sys.platform.startswith("linux") and resource is not None:
+        _soft, hard = resource.getrlimit(resource.RLIMIT_AS)
         new_soft = min(maximum_bytes, hard) if hard != resource.RLIM_INFINITY else maximum_bytes
         if new_soft < maximum_bytes:
             raise ValueError("Existing process hard limit is below the requested RAM ceiling")
