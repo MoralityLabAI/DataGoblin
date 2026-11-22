@@ -1,0 +1,299 @@
+{
+  "bulk_or_generated_bytes": 648906792,
+  "bulk_or_generated_files": 592,
+  "by_repo": [
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 283481961,
+      "commit": "85d62e8bdd184061b9ea1d0672c56697683508f0",
+      "license_spdx": "Apache-2.0",
+      "metta_bytes": 283481961,
+      "metta_files": 18,
+      "repository": "singnet/das-poc"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 144317693,
+      "commit": "a9b3a81186529fd99649e437809bdb6f58fce2fd",
+      "license_spdx": "MIT",
+      "metta_bytes": 159119166,
+      "metta_files": 3712,
+      "repository": "zariuq/CeTTa"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 117537418,
+      "commit": "639131f920b5e009d604cd8114272dfe51e39c94",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 127908141,
+      "metta_files": 1480,
+      "repository": "logicmoo/metta-testsuite"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 55114426,
+      "commit": "d3a3c0e369df052e31992fcdbafdec4a42d1a3ad",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 55430161,
+      "metta_files": 79,
+      "repository": "iCog-Labs-Dev/metta-attention"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 36207969,
+      "commit": "7a17cc0668adb7dda3deb2aa58715f9e6cdc6539",
+      "license_spdx": "Apache-2.0",
+      "metta_bytes": 36207969,
+      "metta_files": 6,
+      "repository": "singnet/das"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 6979301,
+      "commit": "0518d9c40f2b06027a1735e726b770d449bb626a",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 8169091,
+      "metta_files": 166,
+      "repository": "iCog-Labs-Dev/conceptBlending"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "c4c837d0c846a83395e4cb02ed74cafa44072e1c",
+      "license_spdx": "MIT",
+      "metta_bytes": 4687815,
+      "metta_files": 645,
+      "repository": "godelclaw/godelclaw"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 2703888,
+      "commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "license_spdx": "MIT",
+      "metta_bytes": 4057279,
+      "metta_files": 101,
+      "repository": "trueagi-io/metta-examples"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "c519fede9851e136e4918643a6d7047aad5eea76",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 2907885,
+      "metta_files": 240,
+      "repository": "logicmoo/metta-src-conversions"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 1697801,
+      "commit": "69e447fba2c4522697b9056713faea17d534f73d",
+      "license_spdx": "AGPL-3.0",
+      "metta_bytes": 2743717,
+      "metta_files": 132,
+      "repository": "iCog-Labs-Dev/hyperon-miner"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "b3ba1aa47b4463def5289967000cc4b3fd2c3809",
+      "license_spdx": "MIT",
+      "metta_bytes": 2298736,
+      "metta_files": 1681,
+      "repository": "bgoertzel-sing/petta-chem"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 7866,
+      "commit": "dfc6728c7d996295eb13f0a9c80fe0f45b53e268",
+      "license_spdx": "NOASSERTION",
+      "metta_bytes": 1572129,
+      "metta_files": 129,
+      "repository": "trueagi-io/chaining"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "74dbe9b8873adab46904f8e480d32650d0f28497",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 1555946,
+      "metta_files": 160,
+      "repository": "trueagi-io/metta-wam"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "76c0e923aedd85823e099e733c0e928fe2aafc68",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 1329140,
+      "metta_files": 210,
+      "repository": "iCog-Labs-Dev/metta-moses"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "3b7f8ecaa3299f0e3ed2a519cca650b822b5a2ae",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 1311538,
+      "metta_files": 187,
+      "repository": "VectorialAI/metta-LLmoses"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 758504,
+      "commit": "1f7b1cacd4daa5915b79061075a10d150fe40a44",
+      "license_spdx": "Apache-2.0",
+      "metta_bytes": 1249959,
+      "metta_files": 17,
+      "repository": "singnet/ai-dsl"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 76069,
+      "commit": "abe13439196bccdb48b6636773a46ec9772a7aaf",
+      "license_spdx": "MIT",
+      "metta_bytes": 863236,
+      "metta_files": 195,
+      "repository": "MesTTo/MeTTaScript"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "cde213fe8a2c56449d4ded594569b0d7356d108b",
+      "license_spdx": "Apache-2.0",
+      "metta_bytes": 538635,
+      "metta_files": 132,
+      "repository": "MesTTo/MeTTa-Library-Pack"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 157,
+      "commit": "ee5cacb6a6ecdd554a1c773aaf47e9a0f8a5af0f",
+      "license_spdx": "MIT",
+      "metta_bytes": 512211,
+      "metta_files": 553,
+      "repository": "trueagi-io/PeTTa"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "f59d3c5c167d4aecd60b0a808e4ee9a90b4de63f",
+      "license_spdx": "MIT",
+      "metta_bytes": 373634,
+      "metta_files": 94,
+      "repository": "iCog-Labs-Dev/PeTTa-OpenPSI"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 6939,
+      "commit": "153afdae240d5235cdd045112f5d04b4bfb397a0",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 362571,
+      "metta_files": 81,
+      "repository": "iCog-Labs-Dev/Pattern-miner-mm2"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "50f9525ff734fde95a3d91e528e1101f1a61ca75",
+      "license_spdx": "NOASSERTION",
+      "metta_bytes": 318222,
+      "metta_files": 60,
+      "repository": "trueagi-io/pln-experimental"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "3b356c5e51d4490b587351721a8cd4187da5817a",
+      "license_spdx": "UNKNOWN",
+      "metta_bytes": 272077,
+      "metta_files": 66,
+      "repository": "iCog-Labs-Dev/hyperon-openpsi"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 16800,
+      "commit": "efee4bec53f7d38414255f7478f3d509816ecc45",
+      "license_spdx": "Apache-2.0",
+      "metta_bytes": 222710,
+      "metta_files": 64,
+      "repository": "F1R3FLY-io/MeTTa-Compiler"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "bf97e50a68aa5059457092dfbe70699b7dd1dbe2",
+      "license_spdx": "MIT",
+      "metta_bytes": 221348,
+      "metta_files": 48,
+      "repository": "iCog-Labs-Dev/MetaMo"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "license_spdx": "MIT",
+      "metta_bytes": 177685,
+      "metta_files": 67,
+      "repository": "trueagi-io/hyperon-experimental"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "81e177536933c189ef2dd9865b4f08a60a570f9b",
+      "license_spdx": "Apache-2.0",
+      "metta_bytes": 77141,
+      "metta_files": 29,
+      "repository": "singnet/Omega"
+    },
+    {
+      "admission": "discovery_only",
+      "bulk_or_generated_bytes": 0,
+      "commit": "ab458c96c8c5500175545cca4960216bf4bbe43c",
+      "license_spdx": "MIT",
+      "metta_bytes": 38996,
+      "metta_files": 17,
+      "repository": "trueagi-io/PLN"
+    }
+  ],
+  "deduplicated_git_blob_bytes": 692996326,
+  "discovery_only": true,
+  "distinct_git_blobs": 9944,
+  "duplicated_git_blob_occurrences": 425,
+  "git_blobs_seen_across_repositories": 190,
+  "gross_git_source_bytes": 698009099,
+  "indexed_metta_files": 10369,
+  "indexed_repositories": 28,
+  "license_buckets": {
+    "AGPL-3.0": {
+      "bytes": 2743717,
+      "files": 132,
+      "repositories": 1
+    },
+    "Apache-2.0": {
+      "bytes": 321778375,
+      "files": 266,
+      "repositories": 6
+    },
+    "MIT": {
+      "bytes": 172350106,
+      "files": 7113,
+      "repositories": 10
+    },
+    "NOASSERTION": {
+      "bytes": 1890351,
+      "files": 189,
+      "repositories": 2
+    },
+    "UNKNOWN": {
+      "bytes": 199246550,
+      "files": 2669,
+      "repositories": 9
+    }
+  },
+  "notes": "Git-tree byte totals are measured, tokenizer counts are not. Bulk graph exports, generated corpora, unknown licenses, and derived content require file-specific provenance and rights review. Repeated blob SHAs across forks and copies are deduplicated by exact Git bytes.",
+  "schema_version": "metta-public-discovery-audit-v1",
+  "small_candidate_bytes": 14238108,
+  "small_permissively_licensed_metadata_candidates": 6773,
+  "token_count": null,
+  "training_ready": false
+}
