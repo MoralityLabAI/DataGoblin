@@ -10,14 +10,12 @@ from __future__ import annotations
 import argparse
 import json
 import random
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from Agonist.gym import (
-    SCHEMA as AGN01_SCHEMA,
     canonical,
     digest,
     new_dir,
