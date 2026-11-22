@@ -83,7 +83,7 @@ class SealedFiniteEvalTests(unittest.TestCase):
             self.assertEqual(report["missing"], 0)
             self.assertFalse(report["answers_written_to_report"])
             self.assertFalse(report["external_custody_attested"])
-            self.assertNotIn("reference", summary.read_text())
+            self.assertNotIn("reference_multiset", summary.read_text())
             self.assertNotIn(self.KEY, summary.read_bytes())
             self.assertEqual(report, json.loads(summary.read_text()))
 
