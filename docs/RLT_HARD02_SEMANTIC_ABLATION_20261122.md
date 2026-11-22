@@ -111,3 +111,7 @@ python -m datagoblin.training_gym.rlt_gym.hard02_mathlib \
 It retains `report.json`, full source roots, kernel proof sources,
 training weights and native receipts, and independently runs the
 source and false-stop auditor. This is a development-only run.
+
+## Native negative-control interpretation boundary
+
+The completed RLT-HARD-02B run subsequently showed that all ordinary development roots were kernel-certifiable on their first candidate, including two designed to have exhausted menus. The mutated `simpa` scripts still established those theorems. The RLT-HARD-02C paired ablation uses the same ordinary generator family, and its ordinary success counts must therefore be treated as **positive-control coverage only**, with no claim about learned stopping on exhausted negatives. The OOD divisibility cohort retained genuinely exhausted menus in the preceding native run. Every new cohort must be checked from compiler receipts before model-value claims are promoted. The v3 paired ablation is a *development failure-analysis experiment*, not a sealed confirmation.
