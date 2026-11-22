@@ -360,7 +360,8 @@ def replay_archive(native: Native, folder: Path, private_seed_file: Path | None 
         raise ValueError("artifact inventory mismatch")
     if manifest["profile"] == "private_seeded" and private_seed_file is None:
         raise ValueError("private seed file required for reproducibility")
-    if private_seed_file is not None and hashlib.sha256(private_seed_file.read_bytes()).hexdigest() != manifest["seed_commitment"]:
+    if (private_seed_file is not None
+            and hashlib.sha256(private_seed_file.read_bytes()).hexdigest() != manifest["seed_commitment"]):
         raise ValueError("private seed commitment mismatch")
     with tempfile.TemporaryDirectory(prefix="dg-sw-replay-") as temp:
         fresh = collect(native, Path(temp) / "regenerated", seed=manifest["seed"] or 0,
