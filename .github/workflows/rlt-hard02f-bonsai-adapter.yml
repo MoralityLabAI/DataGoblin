@@ -1,0 +1,50 @@
+name: RLT-HARD-02F Bonsai Q1 adapter contracts
+
+on:
+  push:
+    branches: [research/rlt-hard02f-oxibonsai-q1-20261122]
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/lean_bonsai.py"
+      - "src/datagoblin/training_gym/rlt_gym/hard02f_oxibonsai.py"
+      - "tests/unit/test_rlt_gym_lean_bonsai.py"
+      - "tests/unit/test_rlt_hard02f_oxibonsai.py"
+      - ".github/workflows/rlt-hard02f-bonsai-adapter.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/lean_bonsai.py"
+      - "src/datagoblin/training_gym/rlt_gym/hard02f_oxibonsai.py"
+      - "tests/unit/test_rlt_gym_lean_bonsai.py"
+      - "tests/unit/test_rlt_hard02f_oxibonsai.py"
+      - ".github/workflows/rlt-hard02f-bonsai-adapter.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bonsai-interface:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU ranker and test dependencies
+        run: python -m pip install -e ".[dev,rlt-pilot]"
+      - name: PR3 adapter and native kernel-custody unit tests
+        run: |
+          python -m pytest -q \
+            tests/unit/test_rlt_gym_lean_bonsai.py \
+            tests/unit/test_rlt_hard02f_oxibonsai.py
+      - name: Ruff
+        run: |
+          ruff check \
+            src/datagoblin/training_gym/rlt_gym/lean_bonsai.py \
+            src/datagoblin/training_gym/rlt_gym/hard02f_oxibonsai.py \
+            tests/unit/test_rlt_gym_lean_bonsai.py \
+            tests/unit/test_rlt_hard02f_oxibonsai.py
