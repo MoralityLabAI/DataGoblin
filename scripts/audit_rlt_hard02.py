@@ -154,9 +154,10 @@ def audit(path: Path) -> dict:
                     raise ValueError(f"aggregate mismatches native receipt ledger: {split}/{arm}")
                 checks[arm] = {"certified": success, "checks": calls}
             for root_id in root_ids:
-                l = by_row[(root_id, "learned")]["attempts"]
-                f = by_row[(root_id, "fixed_full")]["attempts"]
-                if f and f[-1]["receipt"]["passed"] and not (l and l[-1]["receipt"]["passed"]):
+                learned_attempts = by_row[(root_id, "learned")]["attempts"]
+                exhaustive_attempts = by_row[(root_id, "fixed_full")]["attempts"]
+                if (exhaustive_attempts and exhaustive_attempts[-1]["receipt"]["passed"]
+                        and not (learned_attempts and learned_attempts[-1]["receipt"]["passed"])):
                     false_stop += 1
             checked[split] = checks
             false_stops[split] = false_stop
