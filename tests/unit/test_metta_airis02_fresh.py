@@ -77,6 +77,9 @@ def test_full_audit_replays_all_train_and_public_dev_labels(tmp_path):
     assert manifest["train_roots"] == 15
     assert manifest["development_roots"] == 10
     assert manifest["train_presentations_total"] == 15 * len(ARMS)
+    assert 0 <= manifest["train_stop_presentations"] <= 15 * len(ARMS)
+    assert audit["train_stop_presentations"] == manifest["train_stop_presentations"]
+    assert audit["development_stop_presentations"] == manifest["development_stop_presentations"]
     assert audit["train_source_roots"] == 15
     assert audit["development_source_roots"] == 10
     assert audit["synthetic_research_fit_eligible"] is True
