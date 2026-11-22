@@ -5,7 +5,7 @@ not the validity of unexecuted Lean proofs. Holdout by entire research round
 and by theorem name. Output is deterministic and safe to rebuild offline.
 """
 
-# ruff: noqa: RUF001  # Preserve original Navier–Stokes prompt wording.
+# ruff: noqa: RUF001  # Preserve original Navier-Stokes prompt wording.
 
 import argparse
 import hashlib
