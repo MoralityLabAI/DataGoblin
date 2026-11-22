@@ -153,5 +153,6 @@ jobs:
           path: |
             runs/rlt-hard02f-q1-native-pilot/
             runs/rlt-hard02f-ci-provenance/
+            runs/hard02f-original-audit.json
           if-no-files-found: warn
           retention-days: 21

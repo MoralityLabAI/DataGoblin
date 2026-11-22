@@ -42,6 +42,8 @@ from datagoblin.training_gym.rlt_gym.lean_bonsai import (
     CHECKPOINT_SHA256,
     DirectOxiBonsai,
     OxiBonsai,
+    build_prompt,
+    parse_choice,
 )
 
 SCHEMA = "datagoblin.rlt_hard02f_oxibonsai_q1_native.v1"
@@ -50,6 +52,38 @@ MAX_MODEL_CHOICES = 5
 STOP_ID = 1
 # Menu is always 1=STOP, 2..6 are the fixed original 0..4 proof candidates.
 ARMS = ("oxibonsai_q1", "fixed_full", "random_full", "suffix_length_rule")
+
+
+class ResidentPrefill(OxiBonsai):
+    """Run the same resident engine with an explicit no-thinking assistant prefix."""
+
+    def choose(self, statement: str, menu: dict[int, str], failed: dict[int, str]) -> dict[str, Any]:
+        prompt = build_prompt(statement, menu, failed)
+        # The benchmark owns statements and tactics. Reject embedded ChatML markers.
+        if "<|" in prompt:
+            raise ValueError("reserved model prompt marker in registered source")
+        framed = (
+            f"<|im_start|>user\n{prompt}<|im_end|>\n"
+            "<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        )
+        if len(framed.encode()) > 3500:
+            raise ValueError("registered prompt exceeds the 3500-byte context limit")
+        payload = {"prompt": framed, "temperature": 0.0, "max_tokens": 8, "stream": False}
+        started = time.perf_counter()
+        response = self.request("/v1/completions", payload)
+        choice, = response["choices"]
+        answer = choice["text"]
+        if not isinstance(answer, str):
+            raise ValueError("invalid OxiBonsai completion")
+        usage = response.get("usage")
+        if not isinstance(usage, dict):
+            usage = None
+        return {
+            "choice": parse_choice(answer, menu), "usage": usage,
+            "request_sha256": digest(payload), "response_sha256": digest(response),
+            "finish_reason": choice.get("finish_reason"), "wall_s": time.perf_counter() - started,
+            "response_text": answer,
+        }
 
 
 class ModelTacticChooser(Protocol):
@@ -85,8 +119,10 @@ class ModelIdentity:
 
 def preflight(
     *, binary: Path, model: Path, tokenizer: Path,
-    transport: str, port: int, timeout: float,
+    transport: str, port: int, timeout: float, prefill: bool = False,
 ) -> tuple[ModelTacticChooser, ModelIdentity]:
+    if prefill and transport != "http":
+        raise ValueError("assistant prefill requires the resident HTTP runtime")
     if transport not in ("stdio", "http"):
         raise ValueError("OxiBonsai transport must be stdio or local HTTP")
     if not 1 <= port <= 65535 or not 1 <= timeout <= 600:
@@ -113,7 +149,7 @@ def preflight(
         observed = None
         attestation = "process_arguments_bind_checkpoint_exactly"
     else:
-        engine = OxiBonsai(port=port, timeout=timeout)
+        engine = (ResidentPrefill if prefill else OxiBonsai)(port=port, timeout=timeout)
         observed = engine.model_id()
         if not observed:
             raise ValueError("local server did not advertise its model")
@@ -189,6 +225,8 @@ def bonsai_episode(
             "model_wall_seconds": round(float(wall), 6),
             "offered_menu_sha256": digest(offered),
         }
+        if "response_text" in response:
+            row["response_text"] = response["response_text"]
         if choice is None:
             invalid += 1
             result = "invalid_model_output"
@@ -268,7 +306,7 @@ def run(
     *, lake: Path, mathlib: Path, out: Path, model: Path, binary: Path,
     tokenizer: Path, transport: str = "stdio", port: int = 18783,
     timeout: float = 240, roots: int = 4, seed: int = SOURCE_SEED,
-    split: str = "ood_test", max_attempts: int = 4,
+    split: str = "ood_test", max_attempts: int = 4, prefill: bool = False,
 ) -> dict[str, Any]:
     if out.exists():
         raise FileExistsError("Bonsai native evaluation must write create-only output")
@@ -281,7 +319,7 @@ def run(
     checkout = verify_upstream(mathlib.resolve(), lake.resolve())
     engine, identity = preflight(
         binary=binary, model=model, tokenizer=tokenizer,
-        transport=transport, port=port, timeout=timeout,
+        transport=transport, port=port, timeout=timeout, prefill=prefill,
     )
     whole = generate(per_split=8, seed=seed)
     cases = [r for r in whole if r.split == split][:roots]
@@ -376,6 +414,7 @@ def run(
         "upstream_mathlib_commit": MATHLIB_COMMIT, "source_seed": seed,
         "oxibonsai_repo_commit": UPSTREAM_OXI_SHA,
         "source_split": split, "source_roots": roots, "per_root_attempt_budget": max_attempts,
+        "prompt_protocol": "qwen_assistant_prefill_v2" if prefill else "original_v1",
         "source_revision_sha256": upstream_sha,
         "model_identity": identity.public_receipt(),
         "arms": scored, "false_model_stops_against_fixed": false_stops,
@@ -416,6 +455,7 @@ def main() -> None:
     parser.add_argument("--transport", choices=("stdio", "http"), default="stdio")
     parser.add_argument("--port", type=int, default=18783)
     parser.add_argument("--timeout", type=float, default=240)
+    parser.add_argument("--prefill", action="store_true", help="Use the registered resident assistant-prefix variant")
     parser.add_argument("--roots", type=int, default=4)
     parser.add_argument("--source-seed", type=int, default=SOURCE_SEED)
     parser.add_argument("--split", choices=("ordinary_test", "ood_test"), default="ood_test")
@@ -426,7 +466,7 @@ def main() -> None:
         model=args.checkpoint, binary=args.binary, tokenizer=args.tokenizer,
         transport=args.transport, port=args.port, timeout=args.timeout,
         roots=args.roots, seed=args.source_seed, split=args.split,
-        max_attempts=args.attempts,
+        max_attempts=args.attempts, prefill=args.prefill,
     )
     print(json.dumps({
         "roots": result["source_roots"],

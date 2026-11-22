@@ -278,6 +278,10 @@ def audit(path: Path) -> dict:
             evaluator_positive[rid] and not pairs[(rid, "oxibonsai_q1")]["certified"]
             for rid in by_source
         )
+        explicit_false_stops = sum(
+            evaluator_positive[rid] and pairs[(rid, "oxibonsai_q1")]["result"] == "model_stop"
+            for rid in by_source
+        )
         explicit_negative_stops = sum(
             not evaluator_positive[rid] and pairs[(rid, "oxibonsai_q1")]["result"] == "model_stop"
             for rid in by_source
@@ -295,6 +299,12 @@ def audit(path: Path) -> dict:
             "model_usage_unavailable_calls": unknown_model_usage,
             "invalid_model_choice_count": model_invalid_choice_count,
             "explicit_correct_negative_stops": explicit_negative_stops,
+            "explicit_false_stops_vs_complete_menu": explicit_false_stops,
+            "oracle_reachable_misses": false_stops_complete,
+            "end_to_end_completion_tokens_per_second": (
+                completion_tokens / policy_summary["oxibonsai_q1"]["model_wall_seconds"]
+                if policy_summary["oxibonsai_q1"]["model_wall_seconds"] else None
+            ),
             "live_model_response_hashes_present": True,
             "source_roots": len(source),
             "arms": policy_summary,
