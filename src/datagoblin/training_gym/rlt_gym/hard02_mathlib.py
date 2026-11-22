@@ -44,9 +44,11 @@ def sha(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def _witness(split: str, i: int) -> tuple[str, str, str]:
+def _witness(
+    split: str, i: int, *, numeric_shift: int = 0, depth_shift: int = 0
+) -> tuple[str, str, str]:
     """Fresh derived theorem and a test-only witness candidate (held off the model)."""
-    n = 311 + i * 71
+    n = 311 + i * 71 + numeric_shift
     if split == "train":
         statement = (
             "∀ (s t u : Set Nat) (f : Nat → Nat), "
@@ -79,17 +81,75 @@ def _witness(split: str, i: int) -> tuple[str, str, str]:
             "congrArg (fun m : Nat => m + 1) h"
         )
     else:
-        terms = ["(b + c)"] * (i + 2)
+        terms = ["(b + c)"] * (i + 2 + depth_shift)
         expr = terms[0]
         for term in terms[1:]:
             expr = f"({expr} + {term})"
         statement = f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {expr}"  # noqa: RUF001
         prefix = "intro a b c h"
         tree = "dvd_add hab hac"
-        for _ in range(i + 1):
+        for _ in range(i + 1 + depth_shift):
             tree = f"dvd_add ({tree}) (dvd_add hab hac)"
         proof = f"rcases h with ⟨hab, hac⟩\nexact {tree}"
     return statement, prefix, proof
+
+
+
+def matched_candidate_menu(split: str, witness: str, *, witnessed: bool) -> list[str]:
+    """Five near-miss proof scripts with exactly matched UTF-8 byte lengths.
+
+    The generator uses source-observable candidate text. Only native Lean
+    compiler/kernel receipts supply outcome labels; the construction's
+    witness flag is withheld from the learned policy and public task.
+    """
+    if split == "train":
+        mutations = [
+            witness.replace("hst hx.1", "hst hx.2"),
+            witness.replace("htu (hst", "hst (htu"),
+            witness.replace("htu (hst", "htu (htu"),
+            witness.replace("htu (hst", "hst (hst"),
+            witness.replace("intro y hy", "intro y hx"),
+        ]
+    elif split == "calibration":
+        mutations = [
+            witness.replace("inter_subset_left", "inter_subset_right"),
+            witness.replace("subset_union_left", "subset_union_right"),
+            witness.replace("hst.trans", "hst.symm"),
+            witness.replace("card_le_card", "card_lt_card"),
+            witness.replace("inter_subset_left", "inter_subset_right").replace(
+                "subset_union_left", "subset_union_right"
+            ),
+        ]
+    elif split == "ordinary_test":
+        mutations = [witness.replace("m + 1", f"m + {n}") for n in (0, 2, 3, 4, 5)]
+    elif split == "ood_test":
+        opening, marker, proof = witness.partition("\nexact ")
+        if not marker:
+            raise ValueError("OOD witness has no explicit proof body")
+        mutations = [
+            opening + marker + proof.replace("dvd_add hab hac", "dvd_add hac hab"),
+            opening + marker + proof.replace("hab", "hac"),
+            opening + marker + proof.replace("hac", "hab"),
+            opening + marker + proof.replace("dvd_add", "dvd_mul", 1),
+            opening + marker + proof.replace("dvd_add", "dvd_mul"),
+        ]
+    else:
+        raise ValueError("unregistered Mathlib source split")
+    actions = ([witness] + mutations[:4]) if witnessed else mutations
+    if len(actions) != BUDGET or len(set(actions)) != BUDGET or witness in actions != witnessed:
+        raise ValueError("malformed or duplicate near-miss proof candidates")
+    if any(any(bad in candidate.lower() for bad in ("sorry", "admit", "run_tac", "unsafe"))
+           for candidate in actions):
+        raise ValueError("untrusted tactic in near-miss candidate menu")
+    # Whitespace neutralizes script-length shortcuts without introducing
+    # fabricated proof success, model hints or extra executable tactics.
+    max_length = max(len(candidate.encode("utf-8")) for candidate in actions)
+    padded = [candidate + " " * (max_length - len(candidate.encode("utf-8"))) for candidate in actions]
+    if len({len(candidate.encode("utf-8")) for candidate in padded}) != 1:
+        raise ValueError("candidate length matching failed")
+    return padded
+
+
 
 
 @dataclass(frozen=True)
@@ -113,7 +173,7 @@ class Root:
         }
 
 
-def generate(*, per_split: int = 8, seed: int = SEED) -> list[Root]:
+def generate(*, per_split: int = 8, seed: int = SEED, matched_menus: bool = False) -> list[Root]:
     if type(per_split) is not int or not 4 <= per_split <= 16 or per_split % 4:
         raise ValueError("per_split must be a multiple of 4 in 4..16")
     if type(seed) is not int or seed < 0:
@@ -121,12 +181,18 @@ def generate(*, per_split: int = 8, seed: int = SEED) -> list[Root]:
     roots = []
     for split in SPLITS:
         for i in range(per_split):
-            statement, prefix, witness = _witness(split, i)
-            # Two menu-exhausted sources per eight. The theorem itself remains
-            # provable; this controls learnable continuation cost.
-            actions = ["rfl", "simp", "constructor", "exact True.intro"]
-            actions.append(witness if i % 4 != 3 else "exact False.elim (by assumption)")
-            marker = sha(f"{seed}/{split}/{i}/{statement}".encode())[:20]
+            if matched_menus:
+                statement, prefix, witness = _witness(
+                    split, i, numeric_shift=17 + seed % 41, depth_shift=1 + seed % 3
+                )
+                actions = matched_candidate_menu(split, witness, witnessed=i % 4 != 3)
+            else:
+                statement, prefix, witness = _witness(split, i)
+                # Original positive control: one long proof and four trivial actions.
+                actions = ["rfl", "simp", "constructor", "exact True.intro"]
+                actions.append(witness if i % 4 != 3 else "exact False.elim (by assumption)")
+            registration = f"{seed}/{split}/{i}/{statement}"
+            marker = sha((registration + ("/matched" if matched_menus else "")).encode())[:20]
             random.Random(int(marker, 16)).shuffle(actions)
             source_file = f"source_roots/{split}/MathlibRoot_{i:02d}_{marker}.lean"
             roots.append(Root(
@@ -381,11 +447,14 @@ def online(
     }
 
 
-def run(lake: Path, mathlib: Path, out: Path, *, per_split: int = 8, seed: int = SEED) -> dict[str, Any]:
+def run(
+    lake: Path, mathlib: Path, out: Path, *, per_split: int = 8,
+    seed: int = SEED, matched_menus: bool = False,
+) -> dict[str, Any]:
     if out.exists():
         raise FileExistsError("evidence directory must be create-only")
     env = verify_upstream(mathlib.resolve(), lake.resolve())
-    roots = generate(per_split=per_split, seed=seed)
+    roots = generate(per_split=per_split, seed=seed, matched_menus=matched_menus)
     out.mkdir(parents=True)
     source_hashes = export_sources(out, roots)
     probes = {}
@@ -491,6 +560,7 @@ def run(lake: Path, mathlib: Path, out: Path, *, per_split: int = 8, seed: int =
         "schema": "datagoblin.rlt_hard02_mathlib_first_dev.v1",
         "evidence_class": "real_mathlib_derived_compiler_states_kernel_proofs",
         "environment": env, "source_seed": seed,
+        "candidate_profile": "length_matched_near_miss_v2" if matched_menus else "trivial_controls_v1",
         "source_roots": len(roots), "per_split": per_split,
         "split_upstream_files": UPSTREAM_FILES,
         "fit_train": {
@@ -534,9 +604,13 @@ def main() -> None:
     parser.add_argument("--mathlib", type=Path, required=True)
     parser.add_argument("--per-split", type=int, default=8)
     parser.add_argument("--source-seed", type=int, default=SEED)
+    parser.add_argument("--matched-menus", action="store_true")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    report = run(args.lake, args.mathlib, args.out, per_split=args.per_split, seed=args.source_seed)
+    report = run(
+        args.lake, args.mathlib, args.out, per_split=args.per_split,
+        seed=args.source_seed, matched_menus=args.matched_menus,
+    )
     print(json.dumps({
         "results": report["development_results"], "source_roots": report["source_roots"],
         "training": report["fit_train"], "compiler_calls": report["compiler_calls_including_probes_and_audits"],
