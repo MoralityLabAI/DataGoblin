@@ -58,3 +58,13 @@ python Metta/training_data/scripts/count_tokens.py --encoding o200k_base
 ```
 
 The report and one-token-count-per-source manifest live in `reports/o200k_base.json` and `token_counts/o200k_base.jsonl`. The count describes raw source-language-modeling tokens, separately from generated rollout tokens; use the actual Bonsai/Qwen tokenizer for their native training budgets.
+
+## Extract upstream author-asserted examples
+
+Many `.metta` test files include explicit `!(assertEqual ...)`, `!(assertEqualToResult ...)`, and `!(test ...)` claims. Extract them with source line spans and parsed query/expected-expression pairs:
+
+```sh
+python Metta/training_data/scripts/assertions.py
+```
+
+The generated `assertion_candidates/author_assertions.jsonl` and `reports/assertions.json` retain the source blob hash, runtime hint, task family, exact assertion text, and source-asserted result. They are marked `verification_status=not_run` throughout. A future interpreter replay and independent verifier must certify any resulting SFT target; the extractor cannot serve as a rollout labeler.
