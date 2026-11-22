@@ -67,7 +67,8 @@ def collect_cohort(source: Path, registry: Path, out: Path, *, seed: int = 23,
         prepared.append((row, native))
     out.mkdir(parents=True)
     records = []
-    totals = {"native_tasks": 0, "native_controls": 0, "micro_tasks": 0, "train_sft_rows": 0}
+    totals = {"native_tasks": 0, "native_controls": 0, "micro_tasks": 0,
+              "train_sft_rows": 0, "micro_overbudget_rows": 0}
     for row, native in prepared:
         name = row["id"]
         split = row["split"]
@@ -85,12 +86,14 @@ def collect_cohort(source: Path, registry: Path, out: Path, *, seed: int = 23,
         controls_count = native_manifest["artifacts"]["baseline_rollouts.jsonl"]["rows"]
         micro_count = micro_manifest["artifacts"]["micro_public.jsonl"]["rows"]
         train_count = micro_manifest["artifacts"]["micro_train_sft.jsonl"]["rows"]
+        overbudget = micro_manifest["artifacts"]["micro_oversize.jsonl"]["rows"]
         if split != "train" and (train_count or native_manifest["artifacts"]["train_targets.jsonl"]["rows"]):
             raise ValueError("held-out world produced supervised train examples")
         totals["native_tasks"] += native_count
         totals["native_controls"] += controls_count
         totals["micro_tasks"] += micro_count
         totals["train_sft_rows"] += train_count
+        totals["micro_overbudget_rows"] += overbudget
         records.append({
             "id": name, "split": split, "domain": row.get("domain", ""),
             "path": row["path"], "world_seed": world_seed,
@@ -99,6 +102,7 @@ def collect_cohort(source: Path, registry: Path, out: Path, *, seed: int = 23,
             "micro_manifest_sha256": _sha_file(folder / "micro/manifest.json"),
             "native_tasks": native_count, "micro_tasks": micro_count,
             "train_sft_rows": train_count, "control_rollouts": controls_count,
+            "micro_overbudget_rows": overbudget,
         })
     summary = {
         "schema": SCHEMA, "evidence": "source_native_multiworld_cpu_controls",
