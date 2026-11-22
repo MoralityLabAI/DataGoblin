@@ -103,6 +103,68 @@ validation. Existing GPTStoryworld authored worlds are public data, so
 the source-held-out encounters are development controls rather than
 unseen-world confirmation.
 
+## Local Inky Mini model rollout (opt-in)
+
+The turn-by-turn runner at
+src/datagoblin/training_gym/rlt_gym/storyworld_local.py reuses an
+**already running** loopback OpenAI-compatible llama.cpp endpoint. It never
+starts a server, downloads weights or calls a remote fallback. Supply the
+server's actual model alias, quant and revision manually. It restricts
+HTTP requests to the localhost endpoint with an explicit port, rejects
+redirects, caps response size and prompts, and forces temperature zero.
+
+First collect a native suite as documented above, then run a small paired
+HG-02 evaluation. The calibration split is useful for wiring and debugging.
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_local \
+      --source "$GPTSTORYWORLD_SOURCE" --archive runs/storyworld-native-23 \
+      --model inky-mini --model-revision <actual-revision> --quant <actual-quant> \
+      --endpoint http://127.0.0.1:8080/v1/chat/completions \
+      --mode hypergame --split calibration --max-roots 2 \
+      --context-budget 8192 --output-tokens 96 --out runs/storyworld-inky-hg02
+
+At each HG turn, the runner sends the current model-visible native
+observation, reads one legal action, passes it to the source-owned simulator
+and sends the next observation. The hidden bit remains sealed until the
+native audit action reveals its coordinate. The runner stores every raw
+output, action parse, visible state and token usage. True utility and false
+acceptance are scored only after the episode. Both secret-bit twins of a
+scenario remain grouped and are either selected together or left out.
+
+Use separate output directories for builder and Mini:
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_local \
+      --source "$GPTSTORYWORLD_SOURCE" --archive runs/storyworld-native-23 \
+      --model inky-mini --mode mini --split calibration --max-roots 1 \
+      --context-budget 8192 --out runs/storyworld-inky-mini
+
+The builder and Mini response grammar is exactly PICK <candidate ID>.
+Parsing failures count as failures and remain in the trace. The server
+may report its token counts and actual model name, which are included
+in each event. A recording of actual runs requires a supplied live
+endpoint; the GitHub Actions tests exercise only a fake policy.
+
+A network interruption leaves a partial events.jsonl. Resume it without
+repeating completed turns using the exact original settings and --resume:
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_local \
+      --source "$GPTSTORYWORLD_SOURCE" --archive runs/storyworld-native-23 \
+      --model inky-mini --mode hypergame --split calibration --max-roots 2 \
+      --context-budget 8192 --output-tokens 96 \
+      --out runs/storyworld-inky-hg02 --resume
+
+Run a fully offline regrade after completion:
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_local \
+      --source "$GPTSTORYWORLD_SOURCE" --archive runs/storyworld-native-23 \
+      --replay-run runs/storyworld-inky-hg02
+
+The replay reconstructs public observations from the sealed simulator,
+checks actions against the raw response, recomputes native grades and
+verifies the output-file digests. The recorded model trace is distinct
+from source-native oracle controls and should be compared on matched
+root lineages before training claims.
+
 ## Verification and next experiment
 
     GPTSTORYWORLD_SOURCE=../GPTStoryworld PYTHONPATH=src \
