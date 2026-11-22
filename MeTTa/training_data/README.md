@@ -96,3 +96,13 @@ python -m MeTTa.curation_gym \
 ```
 
 Overlapping upstream file roots are coalesced only when repository, path, and Git blob match. New sources enter the bridge with `eligibility=quarantine` and `training_ready=false`; tests ensure that no new file is automatically approved. The generated fixtures have deterministic etiquette-policy supervision in development custody, distinct from native MeTTa execution and from original-language SFT. `reports/catalog_bridge.json` records counts and exact catalog hashes.
+
+## Native assertion results from the pinned Hyperon pilot
+
+Audit the 20 source-level Hyperon execution receipts against the source's top-level evaluation order:
+
+```sh
+python MeTTa/training_data/scripts/native_assertions.py
+```
+
+The output `native_assertion_verdicts/hyperon_0_2_10.jsonl` stores interpreter-observed assertion results and source spans. It checks the original Git blob, full stdout/stderr hashes, exact runtime version, output count alignment and `[()]` assertion result semantics. A source test may exit successfully while returning a native `Error`; unresolved evaluations remain unobserved. Native assertion passes are empirical interpreter results, while independent expected-output and training-release gates remain separate. All generated rows retain `training_ready=false`.
