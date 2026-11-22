@@ -332,11 +332,21 @@ def fit_candidate(
         loops = 1
         gated = True
         model_scope = "linear_learner_plus_host_verified_lattice_refinement_proxy"
+    stop_head = None
+    stop_receipt: dict[str, Any] | None = None
+    if config["stop_policy"] == "train_calibrated":
+        # This sees only the TRAIN fixed-point labels, never development.
+        stop_head = StopHead(seed)
+        stop_receipt = stop_head.fit(
+            x, y == 20, steps=config["steps"], lr=config["lr"],
+        )
+        stop_receipt["parameters"] = stop_head.params
+        stop_receipt["checkpoint_sha256"] = stop_head.digest()
     elapsed_ms = int((time.monotonic() - start) * 1000)
     family_metrics = {
         family: evaluate(
             model, [row for row in dev if row["family"] == family],
-            loops=loops, verifier_guard=gated,
+            loops=loops, stop_head=stop_head, verifier_guard=gated,
         )
         for family in FAMILIES
     }
@@ -362,7 +372,8 @@ def fit_candidate(
         "config": dict(config),
         "model_scope": model_scope,
         "model_trained": True,
-        "real_cpu_gradient_updates": config["steps"],
+        "real_cpu_gradient_updates": config["steps"] * (2 if stop_head else 1),
+        "train_only_stop_calibration": stop_receipt,
         "training_examples": len(train),
         "parameter_count": model.params,
         "checkpoint_sha256": model.digest(),
