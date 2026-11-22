@@ -98,6 +98,9 @@ def test_small_bundle_fits_research_models_after_independent_audit(tmp_path):
         assert value["stop_head"]["threshold_selected_on"] == "training_only"
         assert value["stop_head"]["train_false_stop_rate"] <= 0.05
         assert value["linear"]["learned_stop_development"]["cases"] == 10
+        assert value["linear"]["verified_stop_development"]["new_violation_additions"] == 0
+        assert value["recurrent"]["verified_stop_development"]["cases"] == 10
+        assert value["recurrent"]["verified_stop_development"]["new_violation_additions"] == 0
         assert value["linear"]["within_arm_diagnostic"]["cases"] == 10
         assert value["recurrent"]["within_arm_diagnostic"]["cases"] == 10
         for arm in [value["linear"]["development"], *value["recurrent"]["development"].values()]:
