@@ -97,3 +97,22 @@ development experiments; neither is sealed confirmation.
 Promotion remains blocked until a learned policy improves over the exact
 behavior rule and shows real online wall-time or tool-budget savings on
 independent, less templated repository tasks.
+
+## Native second-cohort outcome
+
+The fresh v2 push [#44974899488](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44974899488)
+passed all steps and made 1,408 MCP-03 in-process tool calls. Source seed
+`20261123` and CAL-selected threshold `0.95` were recorded in the
+artifact. The newly generated ordinary and OOD development cohorts
+each scored **8/8** for both the learned gate and the exact-behavior
+rule; TRAIN and CAL also each scored 8/8.
+
+The number of counterfactual symbol reads was identical between the learned
+and exact-rule policies in every split: TRAIN 225, CAL 204, ordinary
+227, OOD 171. Thus the learned gate has **no measured advantage** over
+the engineered exact-rule baseline. Those reads come from prefixes of
+complete native source traces. Online execution-cost gains remain untested.
+
+The first run's 7/8 and 6/8 held-out regressions remain recorded.
+As a post-failure development iteration, the second run is not a sealed
+confirmation. Promotion to hard/repository-scale tasks remains open.
