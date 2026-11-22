@@ -83,3 +83,16 @@ Evidence goes into `runtime_receipts/hyperon_0_2_10.jsonl` and `reports/hyperon_
 ## Relation to the main MeTTa curation gym
 
 The sibling `source_catalog.json`, `looped_sft.py` and `native_query_replay.py` provide a separate discovery inventory, synthetic curation correction trajectories, and independently replayed native MeTTa query fixtures. Overlapping exact Git blobs and repeated presentations must share a lineage identifier, even across the source and generated views. Source-only data in this directory remains outside verified SFT until admitted by the existing etiquette and verifier gates.
+
+## Connect this corpus to the frozen MeTTa curation gym
+
+The default `MeTTa/source_catalog.json` and its existing 1,960-item synthetic curriculum are unchanged. To build an opt-in combined source catalog, first validate the 602 source snapshots and then run:
+
+```sh
+python MeTTa/training_data/scripts/catalog_bridge.py
+python -m MeTTa.curation_gym \
+  --catalog MeTTa/training_data/exports/expanded_source_catalog.json \
+  --out runs/metta/expanded_source_curation
+```
+
+Overlapping upstream file roots are coalesced only when repository, path, and Git blob match. New sources enter the bridge with `eligibility=quarantine` and `training_ready=false`; tests ensure that no new file is automatically approved. The generated fixtures have deterministic etiquette-policy supervision in development custody, distinct from native MeTTa execution and from original-language SFT. `reports/catalog_bridge.json` records counts and exact catalog hashes.
