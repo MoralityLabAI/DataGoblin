@@ -28,8 +28,17 @@ jobs:
       - name: Native MeTTa train-only match query parity
         run: |
           python -m MeTTa.native_query_replay \
-            --train-roots-per-family 8 --queries-per-root 2 \
+            --roots-per-family 512 --queries-per-root 3 \
             --out runs/metta/native_query_receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path("runs/metta/native_query_receipt.json").read_text())
+          assert receipt["verified_training_roots"] == 1960
+          assert receipt["verified_query_instances"] == 5880
+          assert receipt["train_partition_only"] is True
+          assert receipt["runtime_query_compatibility"] == "passed"
+          PY
       - name: Preserve native compatibility receipt
         if: always()
         uses: actions/upload-artifact@v4
