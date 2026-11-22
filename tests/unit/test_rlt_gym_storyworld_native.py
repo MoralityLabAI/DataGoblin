@@ -47,6 +47,7 @@ class StoryworldNativeTests(unittest.TestCase):
             self.assertFalse(score_builder(self.native, task, sealed, "PICK __UNKNOWN__")["accepted"])
             if task["mode"] == "mini":
                 self.assertIn("__BROKEN_TARGET__", task["public"]["swmd_card"])
+                self.assertNotIn(" -> " + sealed["gold_target"] + " |", task["public"]["swmd_card"])
                 self.assertNotIn("PICK " + sealed["gold_target"], task["public"]["swmd_card"])
         self.assertEqual(len(by_lineage), 6)
         self.assertTrue(all(len(splits) == 1 for splits in by_lineage.values()))
