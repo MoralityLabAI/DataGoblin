@@ -137,9 +137,20 @@ def _card(native: Native, eid: str, oid: str, rid: str) -> str:
     prefix = f"ORX {oid}/{rid} -> "
     if sum(row.startswith(prefix) for row in rows) != 1:
         raise ValueError("SWMD source card lacks exactly one matching reaction")
-    return "\n".join(row.replace(row.split(" -> ", 1)[1].split(" | ", 1)[0],
-                                  "__BROKEN_TARGET__", 1) if row.startswith(prefix) else row
-                     for row in rows)
+    # Other reactions may share this successor. Mask them as well so the
+    # answer cannot be recovered by copying a sibling ORX line.
+    original = _reaction(native.world, eid, oid, rid)[2]["consequence_id"]
+    redacted = []
+    for row in rows:
+        if row.startswith("ORX ") and " -> " in row and " | " in row:
+            front, tail = row.split(" -> ", 1)
+            successor, rest = tail.split(" | ", 1)
+            if row.startswith(prefix):
+                row = front + " -> __BROKEN_TARGET__ | " + rest
+            elif successor.strip() == original:
+                row = front + " -> __REDACTED_SIBLING__ | " + rest
+        redacted.append(row)
+    return "\n".join(redacted)
 
 
 def _public_builder(native: Native, edge: tuple[str, str, str, str],
