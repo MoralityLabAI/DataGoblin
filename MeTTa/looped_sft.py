@@ -301,6 +301,12 @@ def audit_bundle(out: Path, *, full_replay: bool = True) -> dict[str, Any]:
                 }
                 root_cache[root] = (task, oracle, trace_by_step)
             task, oracle, trace_by_step = root_cache[root]
+            family, seed = root.split(":")[1:]
+            if split_for(family, int(seed)) != "train_candidate":
+                raise ValueError("train row belongs to a reserved root")
+            allowed = {event["step"] for event in selected_views(list(trace_by_step.values()))}
+            if row["presentation"] not in allowed:
+                raise ValueError("unregistered training presentation")
             p = json.loads(row["messages"][0]["content"])
             selected = p["current_selected"]
             if p != prompt(task, selected):
@@ -329,6 +335,8 @@ def audit_bundle(out: Path, *, full_replay: bool = True) -> dict[str, Any]:
         if full_replay:
             family, seed = root.split(":")[1:]
             task = make_task(family, int(seed))
+            if row["split"] != split_for(family, int(seed)):
+                raise ValueError("reserved root partition differs from frozen split rule")
             if row != heldout_record(task, root, first_state(task, int(seed)), row["split"]):
                 raise ValueError("reserved task drift")
         reserved += 1
