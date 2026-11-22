@@ -94,3 +94,45 @@ its own instance, optimizer, verifier call, time, and memory budgets.
 Each row is an interface for future experiments. The pilot's results cover
 the executed synthetic curation gym and report native MeTTa fact replay
 separately from model training and transfer.
+
+## Recorded CPU pilot
+
+The initial run at `5008361` used 15 training roots, 32 reference action
+updates, and two initializations on the same ten development roots. Each
+arm completed zero repairs. The expanded run used 40 training roots,
+200 labeled states, and 64 reference action updates. It retained the same
+development roots, seeds 1101 and 1102, and eight decision limit.
+Hyperon 0.2.10 matched all 200 MeTTa transition facts. The expanded run
+took 17.31 seconds wall time and peaked at 251.70 MiB with native replay.
+
+| Expanded development | Verified and stopped | Premature STOP | Exact first edit | Unsafe adds | Proposal checks | Action passes |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Direct control | 3/20 | 12 | 3 | 10 | 80 | 65 |
+| TRM control | 0/20 | 8 | 4 | 7 | 104 | 384 |
+| Selected TRM | 3/20 | 12 | 5 | 0 | 88 | 284 |
+| LDT proxy control | 0/20 | 9 | 4 | 0 | 107 | 376 |
+| Selected LDT proxy | 2/20 | 11 | 6 | 0 | 117 | 400 |
+
+These are 20 paired observations over ten roots. The controls share the
+action training budget. The selected TRM adds 32 allocator optimizer
+updates per fit. Its development improvement comes with more premature
+STOPs overall. MeTTa-10 reached 0/10 on the same development roots with
+a smaller optimizer budget and a different definition of verifier queries.
+
+The eight proposal steps, in order, were:
+
+| Arm | Field | Value | Decision |
+| --- | --- | --- | --- |
+| direct | `avoid_revisits` | `true` | Rejected. Same completions and four more premature STOPs |
+| trm | `avoid_revisits` | `true` | Accepted. Two completions |
+| ldt_proxy | `avoid_revisits` | `true` | Accepted. Two completions |
+| trm | `inference_depth` | `2` | Rejected. Both completions lost |
+| ldt_proxy | `feedback` | `true` | Rejected. One completion lost. Both arms had one progressing post-veto edit. Feedback required four extra score evaluations |
+| trm | `adaptive_depth` | `true` | Accepted. Three completions, 48 fewer passes and ten fewer proposal checks than fixed-depth TRM with revisit filtering |
+| direct | `supervision` | `"initial"` | Rejected. First-edit accuracy rose from 3 to 10 while completions fell from three to zero and unsafe adds increased |
+| ldt_proxy | `stop_fpr` | `0.05` | Accepted. Two fewer premature STOPs, same completions, and 14 more proposal checks |
+
+The trained champion digests reproduced before frozen conflict evaluation.
+Each arm completed 0/4, over two conflict roots and two seeds. The bounded
+search ended after eight proposals. These results support development
+selection on curation roots. Transfer remained unverified.
