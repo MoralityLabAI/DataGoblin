@@ -1,0 +1,66 @@
+name: RLT-HARD-02A archived Mathlib evidence re-audit
+
+on:
+  push:
+    branches: [research/rlt-hard-mathlib02-20261122]
+    paths:
+      - "scripts/audit_rlt_hard02.py"
+      - "tests/unit/test_rlt_hard02_evidence_audit.py"
+      - ".github/workflows/rlt-hard02-audit.yml"
+  pull_request:
+    paths:
+      - "scripts/audit_rlt_hard02.py"
+      - "tests/unit/test_rlt_hard02_evidence_audit.py"
+      - ".github/workflows/rlt-hard02-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  archive-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check independent evidence auditor tests
+        run: python -m pip install -e ".[dev]" && python -m pytest -q tests/unit/test_rlt_hard02_evidence_audit.py
+      - name: Lint audit code
+        run: ruff check scripts/audit_rlt_hard02.py tests/unit/test_rlt_hard02_evidence_audit.py
+      - name: Fetch exact archived native Mathlib evidence from successful run
+        uses: actions/download-artifact@v4
+        with:
+          name: dg-rlt-hard02-mathlib-dev
+          run-id: 44983534801
+          repository: MoralityLabAI/DataGoblin
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: runs/hard02-archive
+      - name: Independently validate all source receipts and length-first baseline
+        run: |
+          python scripts/audit_rlt_hard02.py runs/hard02-archive --out runs/hard02-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("runs/hard02-audit.json").read_text())
+          assert r["evidence_verified"] is True
+          assert r["source_roots"] == 32
+          assert r["false_stops_vs_full_search"] == {"ordinary_test": 0, "ood_test": 0}
+          for split in ("ordinary_test", "ood_test"):
+              control = r["posthoc_length_first_control"][split]
+              learned = r["split_metrics"][split]["learned"]
+              assert control["observed"] == 8
+              assert control["kernel_certified"] == learned["certified"] == 6
+              assert control["counterfactual_checks"] == learned["checks"] == 8
+          PY
+      - name: Retain independent archive audit receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02-independent-audit
+          path: runs/hard02-audit.json
+          if-no-files-found: warn
+          retention-days: 21

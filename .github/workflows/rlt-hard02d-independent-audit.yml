@@ -1,0 +1,69 @@
+name: RLT-HARD-02D independent native List proof audit
+
+on:
+  push:
+    branches: [research/rlt-hard-mathlib02-20261122]
+    paths:
+      - "scripts/audit_rlt_hard02d_list.py"
+      - "tests/unit/test_rlt_hard02d_audit.py"
+      - ".github/workflows/rlt-hard02d-independent-audit.yml"
+  pull_request:
+    paths:
+      - "scripts/audit_rlt_hard02d_list.py"
+      - "tests/unit/test_rlt_hard02d_audit.py"
+      - ".github/workflows/rlt-hard02d-independent-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  independent-proof-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin and evidence auditor tests
+        run: |
+          python -m pip install -e ".[dev]"
+          python -m pytest -q tests/unit/test_rlt_hard02d_audit.py
+      - name: Ruff
+        run: ruff check scripts/audit_rlt_hard02d_list.py tests/unit/test_rlt_hard02d_audit.py
+      - name: Fetch exact pinned native List kernel receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: dg-rlt-hard02d-strict-list
+          run-id: 44991836744
+          repository: MoralityLabAI/DataGoblin
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: runs/strict-list-native
+      - name: Independently check all source hashes, kernel outcomes and replay receipts
+        run: |
+          python scripts/audit_rlt_hard02d_list.py runs/strict-list-native \
+            --out runs/rlt-hard02d-independent-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row = json.loads(Path("runs/rlt-hard02d-independent-audit.json").read_text())
+          assert row["source_and_kernel_integrity_passed"]
+          assert row["native_quality_gate_passed"]
+          assert row["source_roots"] == 8
+          assert row["file_sha256_checks"] == 15
+          assert row["native_candidate_receipts"] == 40
+          assert row["independent_native_replays"] == 40
+          assert row["kernel_positive_roots"] == 6
+          assert row["kernel_negative_roots"] == 2
+          assert row["sealed_confirmation_opened"] is False
+          PY
+      - name: Retain independent source and proof audit verdict
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02d-independent-proof-audit
+          path: runs/rlt-hard02d-independent-audit.json
+          if-no-files-found: warn
+          retention-days: 21

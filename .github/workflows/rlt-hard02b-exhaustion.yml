@@ -1,0 +1,66 @@
+name: RLT-HARD-02B kernel-verified exhaustion audit
+
+on:
+  push:
+    branches: [research/rlt-hard-mathlib02-20261122]
+    paths:
+      - "scripts/audit_rlt_hard02.py"
+      - "tests/unit/test_rlt_hard02_evidence_audit.py"
+      - ".github/workflows/rlt-hard02b-exhaustion.yml"
+  pull_request:
+    paths:
+      - "scripts/audit_rlt_hard02.py"
+      - "tests/unit/test_rlt_hard02_evidence_audit.py"
+      - ".github/workflows/rlt-hard02b-exhaustion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  exhaustion-verdict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify offline evidence auditor
+        run: python -m pip install -e ".[dev]" && python -m pytest -q tests/unit/test_rlt_hard02_evidence_audit.py
+      - name: Ruff
+        run: ruff check scripts/audit_rlt_hard02.py tests/unit/test_rlt_hard02_evidence_audit.py
+      - name: Retrieve exact historical matched Mathlib native receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: dg-rlt-hard02-matched-dev
+          run-id: 44989821104
+          repository: MoralityLabAI/DataGoblin
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: runs/native-matched
+      - name: Prove failed negative controls and null learned-value finding
+        run: |
+          python scripts/audit_rlt_hard02.py runs/native-matched --out runs/rlt-hard02b-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("runs/rlt-hard02b-audit.json").read_text())
+          assert r["evidence_verified"] and r["integrity_manifest_members"] == 74
+          assert r["source_roots"] == 32
+          assert r["registered_exhaustion_contract_passed"] is False
+          assert r["negative_control_audit"]["ordinary_test"]["expected_exhausted"] == 2
+          assert r["negative_control_audit"]["ordinary_test"]["kernel_exhausted"] == 0
+          assert len(r["negative_control_audit"]["ordinary_test"]["expected_but_certified"]) == 2
+          assert r["negative_control_audit"]["ood_test"]["contract_passed"] is True
+          assert r["split_metrics"]["ood_test"]["learned"] == {"certified": 6, "checks": 32}
+          assert r["split_metrics"]["ood_test"]["fixed_full"] == {"certified": 6, "checks": 24}
+          PY
+      - name: Preserve independently audited failure receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02b-exhaustion-audit
+          path: runs/rlt-hard02b-audit.json
+          if-no-files-found: warn
+          retention-days: 21
