@@ -46,6 +46,8 @@ jobs:
           assert bundle["train_roots"] == 160
           assert bundle["development_roots"] == 60
           assert bundle["train_presentations_total"] == 640
+          assert bundle["train_stop_presentations"] > 0
+          assert bundle["development_stop_presentations"] > 0
           assert bundle["teacher_labels_in_steward_registry"] == 0
           assert bundle["teacher_labels_in_public_test_registry"] == 0
           assert audit["synthetic_research_fit_eligible"] is True
