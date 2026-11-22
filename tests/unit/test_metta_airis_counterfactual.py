@@ -116,6 +116,7 @@ def test_paired_root_never_receives_training_or_admission_authority():
     assert row["zero_change_sham_passed"] is True
     assert row["guided"]["one_fact_delta"] == 1
     assert row["uniform"]["one_fact_delta"] == 1
+    assert row["budget_first"]["one_fact_delta"] == 1
     assert row["guided"]["native_metta_executed"] is False
     assert len(row["source_world_sha256"]) == 64
     assert len(row["guided"]["world_sha256"]) == 64
