@@ -133,3 +133,9 @@ Run `python -m MeTTa.pln_lineage --out runs/metta/pln_lineage_shadow.json` for a
 The [`training_data/`](training_data/README.md) subtree imports **1,375 pinned MeTTa sources** from 12 public repositories, covering **2,207,624 source bytes** and **636,487 tokens measured using `o200k_base`**. It extracts **2,130 upstream author assertions (1,786 distinct source texts; 2,125 parsed pairs)** with query/expected fields and original source spans. Hyperon 0.2.10 process receipts cover 20 pinned source files, separately from the 5,880/5,880 native query checks already recorded for the synthetic curation gym. Author assertion correctness remains to be independently verified.
 
 The source corpus and the existing 1,960 synthetic curation roots are separate datasets; hash-bound duplicate lineage prevents accidental double training exposure. See `training_data/README.md` for source custody, tokenizer reports, license files and collection scripts.
+
+## AIRIS-style counterfactual verification
+
+[MeTTa-AIRIS-01](AIRIS_COUNTERFACTUAL.md) adds paired one-fact interventions to the existing synthetic curation worlds. A Pattern Miner-guided chooser and a matched seeded uniform chooser select from the same public candidate interventions on each root; the independent bounded Python collection oracle evaluates the changed worlds and canonical next repairs. Discovery motifs and internal confirmation roots are separated by a deterministic train-only split, while reserved development, test and OOD roots remain unused. The synthetic receipts have `training_ready=false` and create zero additional SFT presentations.
+
+Run `python -m MeTTa.airis_counterfactual --cases 96 --out runs/metta/airis_counterfactual`, followed by `python -m MeTTa.airis_receipts --bundle runs/metta/airis_counterfactual`.
