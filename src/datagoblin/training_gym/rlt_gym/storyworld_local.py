@@ -56,7 +56,8 @@ def local_transport(endpoint: str, timeout: float) -> Chat:
     validated_endpoint(endpoint)
     if not 0 < timeout <= 600:
         raise ValueError("timeout must be 0..600 seconds")
-    opener = urllib.request.build_opener(_NoRedirect)
+    # Keep local model requests local even when HTTP_PROXY is set globally.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect)
 
     def call(payload: dict[str, Any]) -> dict[str, Any]:
         request = urllib.request.Request(
