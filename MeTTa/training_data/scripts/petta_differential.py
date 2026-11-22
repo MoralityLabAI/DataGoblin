@@ -97,44 +97,51 @@ def run_petta(
             }
 
 
-def parse_petta_output(line: str) -> list[Any]:
-    """PeTTa swrite prints a MeTTa expression of result values: () or (a b)."""
-    parsed = parse_one(line.strip())
-    if not isinstance(parsed, tuple):
-        raise UnsupportedSemantics("Expected PeTTa swrite list expression")
-    return list(parsed)
+def query_program(world: dict[str, Any], query_index: int) -> str:
+    """One PeTTa process per query because its CLI prints one line per result."""
+    queries = world["queries"]
+    if not 0 <= query_index < len(queries):
+        raise ValueError("Query index outside generated world")
+    lines = world["program"].splitlines()
+    if lines[-len(queries):] != [f"!{q}" for q in queries]:
+        raise ValueError("Generated world query suffix differs from intended fixture")
+    return "\n".join([*lines[:-len(queries)], f"!{queries[query_index]}"]) + "\n"
 
 
-def assess_petta(world: dict[str, Any], run: dict[str, Any]) -> list[dict[str, Any]]:
-    lines = run["stdout"].decode("utf-8", "replace").splitlines()
+def parse_petta_output(output: str) -> list[Any]:
+    """PeTTa CLI emits each result as its own MeTTa expression line."""
+    return [
+        parse_one(line.strip())
+        for line in output.splitlines()
+        if line.strip()
+    ]
+
+
+def assess_petta(reference: list[Any], run: dict[str, Any]) -> dict[str, Any]:
     clean = (
         run["exit_code"] == 0
         and run["timed_out"] is False
+        and not run["stderr"]
         and len(run["stdout"]) <= 65_536
-        and len(lines) == len(world["queries"])
     )
-    results: list[dict[str, Any]] = []
-    for ix, reference in enumerate(world["references"]):
-        signature: dict[str, int] | None = None
-        if clean:
-            try:
-                observed = parse_petta_output(lines[ix])
-                signature = result_signature(observed)
-                status = (
-                    "agree" if signature == result_signature(reference)
-                    else "mismatch"
-                )
-            except UnsupportedSemantics:
-                status = "unsupported_output"
-        else:
-            status = "runtime_or_alignment_failure"
-        results.append({
-            "status": status,
-            "signature": signature,
-            "output_sha256": sha256(lines[ix].encode()) if clean else None,
-        })
-    return results
-
+    actual: dict[str, int] | None = None
+    if clean:
+        try:
+            actual = result_signature(
+                parse_petta_output(run["stdout"].decode("utf-8", "replace"))
+            )
+            status = (
+                "agree" if actual == result_signature(reference) else "mismatch"
+            )
+        except UnsupportedSemantics:
+            status = "unsupported_output"
+    else:
+        status = "runtime_or_alignment_failure"
+    return {
+        "status": status,
+        "signature": actual,
+        "output_sha256": sha256(run["stdout"]) if clean else None,
+    }
 
 def assess_hyperon(world: dict[str, Any], run: dict[str, Any]) -> list[dict[str, Any]]:
     from finite_semantic_oracle import parse_result_line
@@ -178,13 +185,12 @@ def run_suite(
     counts: Counter[str] = Counter()
     for seed in range(roots):
         world = make_world(seed)
-        pe = run_petta(world["program"], repo, image, timeout_sec)
         hy = native_run(world["program"], timeout_sec)
-        pe_results = assess_petta(world, pe)
         hy_results = assess_hyperon(world, hy)
-        for ix, (pe_row, hy_row) in enumerate(
-            zip(pe_results, hy_results, strict=True)
-        ):
+        for ix, hy_row in enumerate(hy_results):
+            single_program = query_program(world, ix)
+            pe = run_petta(single_program, repo, image, timeout_sec)
+            pe_row = assess_petta(world["references"][ix], pe)
             same = (
                 pe_row["signature"] == hy_row["signature"]
                 if pe_row["signature"] is not None and hy_row["signature"] is not None
@@ -199,6 +205,7 @@ def run_suite(
                 "root": world["root"], "query_index": ix,
                 "query_sha256": sha256(world["queries"][ix].encode()),
                 "source_sha256": world["source_sha256"],
+                "single_query_source_sha256": sha256(single_program.encode()),
                 "reference_signature_sha256": sha256(
                     json.dumps(
                         result_signature(world["references"][ix]), sort_keys=True
