@@ -1,19 +1,19 @@
 {
   "by_repo": {
     "F1R3FLY-io/MeTTa-Compiler": {
-      "bytes": 135527,
-      "files": 31,
-      "tokens": 33948
+      "bytes": 205910,
+      "files": 59,
+      "tokens": 52559
     },
     "MesTTo/MeTTa-Library-Pack": {
-      "bytes": 222763,
-      "files": 79,
-      "tokens": 56669
+      "bytes": 361487,
+      "files": 123,
+      "tokens": 91279
     },
     "MesTTo/MeTTaScript": {
-      "bytes": 85230,
-      "files": 74,
-      "tokens": 25535
+      "bytes": 154946,
+      "files": 148,
+      "tokens": 49428
     },
     "iCog-Labs-Dev/MetaMo": {
       "bytes": 190814,
@@ -21,9 +21,9 @@
       "tokens": 58422
     },
     "singnet/Omega": {
-      "bytes": 13709,
-      "files": 3,
-      "tokens": 3541
+      "bytes": 53951,
+      "files": 26,
+      "tokens": 13418
     },
     "singnet/ai-dsl": {
       "bytes": 10299,
@@ -36,14 +36,14 @@
       "tokens": 2047
     },
     "trueagi-io/PLN": {
-      "bytes": 5815,
-      "files": 3,
-      "tokens": 1673
+      "bytes": 20868,
+      "files": 16,
+      "tokens": 6053
     },
     "trueagi-io/PeTTa": {
-      "bytes": 79733,
-      "files": 184,
-      "tokens": 22911
+      "bytes": 220016,
+      "files": 404,
+      "tokens": 67085
     },
     "trueagi-io/hyperon-experimental": {
       "bytes": 72959,
@@ -51,14 +51,14 @@
       "tokens": 18363
     },
     "trueagi-io/metta-examples": {
-      "bytes": 10659,
-      "files": 9,
-      "tokens": 3448
+      "bytes": 45831,
+      "files": 32,
+      "tokens": 13891
     },
     "zariuq/CeTTa": {
-      "bytes": 439053,
-      "files": 143,
-      "tokens": 124951
+      "bytes": 864103,
+      "files": 491,
+      "tokens": 261383
     }
   },
   "by_task_family_tokens": {
@@ -68,48 +68,48 @@
     "agent_state_dynamics": 917,
     "agent_workflow": 747,
     "agent_world_model": 1834,
-    "assertion_semantics": 27192,
+    "assertion_semantics": 159158,
     "atomspace_edge_cases": 1794,
     "atomspace_mutation": 264,
     "atomspace_queries": 646,
-    "backward_chaining": 6777,
+    "backward_chaining": 7379,
     "counterfactual_planning": 360,
     "database_queries": 966,
     "determinism_analysis": 410,
     "dictionary_transform": 1871,
     "evidence_retrieval": 967,
     "foreign_function_interop": 210,
-    "general_metta_source": 229818,
+    "general_metta_source": 350295,
     "graph_curation": 209,
-    "graph_query": 18890,
+    "graph_query": 26636,
     "graph_transform": 230,
     "json_curation": 4470,
-    "knowledge_graph_curation": 8975,
+    "knowledge_graph_curation": 11979,
     "knowledge_graph_facts": 2047,
     "learned_stopping": 629,
     "library_operations": 381,
     "looped_reasoning": 182,
-    "mutable_state": 6118,
-    "probabilistic_inference": 8724,
+    "mutable_state": 6607,
+    "probabilistic_inference": 14135,
     "property_testing": 720,
     "reasoning": 595,
     "resolution_proving": 691,
     "service_composition": 2141,
-    "symbolic_unification": 4395,
+    "symbolic_unification": 4907,
     "table_curation": 3162,
-    "type_inference": 11831,
+    "type_inference": 24044,
     "weighted_reasoning": 754
   },
   "encoding": "o200k_base",
-  "measured_source_tokens": 354067,
+  "measured_source_tokens": 636487,
   "measurement": "exact tokenizer encode of pinned source text",
   "schema_version": "1.0",
-  "source_bytes": 1273001,
-  "source_files": 602,
+  "source_bytes": 2207624,
+  "source_files": 1375,
   "source_repositories": 12,
   "tokenizer_library": "tiktoken",
   "tokenizer_library_version": "0.12.0",
-  "upstream_test_assertions_unverified": 927,
+  "upstream_test_assertions_unverified": 2130,
   "verified_rollout_tokens": 0,
   "warning": "These counts use the specified tokenizer, not the Bonsai/Qwen native tokenizer."
 }
