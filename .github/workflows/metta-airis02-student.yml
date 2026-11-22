@@ -64,6 +64,10 @@ jobs:
           assert len(report["development_evaluation_worlds_sha256"]) == 64
           assert all(v["recurrent"]["development"]["4"]["cases"] == 60
                      for v in report["trained_models"].values())
+          assert all(v["stop_head"]["train_false_stop_rate"] <= 0.05
+                     for v in report["trained_models"].values())
+          assert all(v["recurrent"]["learned_stop_development"]["4"]["cases"] == 60
+                     for v in report["trained_models"].values())
           print("AIRIS-02 research-only verified fit: PASS")
           PY
       - name: Publish aggregate receipts without research labels
