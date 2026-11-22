@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 from .airis_counterfactual import (
-    MECHANISMS,
     apply_intervention,
     choose_guided,
     choose_uniform,
@@ -25,8 +24,13 @@ from .collect import ROOT, sha256_bytes
 from .moses_control import Program
 from .pattern_miner import generate_observations, mine_motifs, structural_features
 from .sft_oracle import (
-    FAMILIES, OOD_FAMILY, evaluate_subset, exact_optimum,
-    first_state, make_task, next_edit,
+    FAMILIES,
+    OOD_FAMILY,
+    evaluate_subset,
+    exact_optimum,
+    first_state,
+    make_task,
+    next_edit,
 )
 
 SCHEMA = "metta-airis02-fresh-root-v1"
