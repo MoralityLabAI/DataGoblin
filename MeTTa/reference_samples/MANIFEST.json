@@ -1,0 +1,130 @@
+{
+  "schema_version": "metta-vendored-fixtures-v1",
+  "notice": "Source-preserving MIT reference samples, selected from pinned catalog. These remain static source examples, not verified curation labels or model results.",
+  "files": [
+    {
+      "source_id": "hyperon_reference",
+      "repository": "trueagi-io/hyperon-experimental",
+      "source_commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "path": "python/tests/scripts/a1_symbols.metta",
+      "git_blob_sha": "fb5e14a30436cf5e5d3e4e8128dd2e4c4e116e0e",
+      "bytes": 2436,
+      "vendored_path": "MeTTa/reference_samples/hyperon_reference/python/tests/scripts/a1_symbols.metta",
+      "license_file": "MeTTa/reference_samples/hyperon_reference/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "hyperon_reference",
+      "repository": "trueagi-io/hyperon-experimental",
+      "source_commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "path": "python/tests/scripts/b2_backchain.metta",
+      "git_blob_sha": "0ebae59be44326fc4aafb57a95d91dd599f0f349",
+      "bytes": 2946,
+      "vendored_path": "MeTTa/reference_samples/hyperon_reference/python/tests/scripts/b2_backchain.metta",
+      "license_file": "MeTTa/reference_samples/hyperon_reference/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "hyperon_reference",
+      "repository": "trueagi-io/hyperon-experimental",
+      "source_commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "path": "python/tests/scripts/c2_spaces.metta",
+      "git_blob_sha": "9617ea14afde3855e7b81d43dba058aeaa00a0d2",
+      "bytes": 1811,
+      "vendored_path": "MeTTa/reference_samples/hyperon_reference/python/tests/scripts/c2_spaces.metta",
+      "license_file": "MeTTa/reference_samples/hyperon_reference/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "hyperon_reference",
+      "repository": "trueagi-io/hyperon-experimental",
+      "source_commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "path": "python/tests/scripts/c2_spaces_kb.metta",
+      "git_blob_sha": "c0ffa20edf7dbded0c666c7ae104259c6dfc2dee",
+      "bytes": 264,
+      "vendored_path": "MeTTa/reference_samples/hyperon_reference/python/tests/scripts/c2_spaces_kb.metta",
+      "license_file": "MeTTa/reference_samples/hyperon_reference/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "hyperon_reference",
+      "repository": "trueagi-io/hyperon-experimental",
+      "source_commit": "3f76dc460da6961f57f69f6c3e550c59c74ada83",
+      "path": "python/tests/scripts/e2_states.metta",
+      "git_blob_sha": "f1a87526f92fba6cbf8d40eb9a020e303062af4c",
+      "bytes": 3571,
+      "vendored_path": "MeTTa/reference_samples/hyperon_reference/python/tests/scripts/e2_states.metta",
+      "license_file": "MeTTa/reference_samples/hyperon_reference/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "metta_examples",
+      "repository": "trueagi-io/metta-examples",
+      "source_commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "path": "ecan/concept_attention.metta",
+      "git_blob_sha": "dcc6303af74119c37e1dba1a81f8ee699c6346f3",
+      "bytes": 1023,
+      "vendored_path": "MeTTa/reference_samples/metta_examples/ecan/concept_attention.metta",
+      "license_file": "MeTTa/reference_samples/metta_examples/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "metta_examples",
+      "repository": "trueagi-io/metta-examples",
+      "source_commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "path": "deontic_logic/rules.metta",
+      "git_blob_sha": "797e64f88fbf2b969ce941d970a6605518097f89",
+      "bytes": 1126,
+      "vendored_path": "MeTTa/reference_samples/metta_examples/deontic_logic/rules.metta",
+      "license_file": "MeTTa/reference_samples/metta_examples/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "metta_examples",
+      "repository": "trueagi-io/metta-examples",
+      "source_commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "path": "fizzbuzz/classical.metta",
+      "git_blob_sha": "e11b0f74052fcd955c95bedef5b3aaef5bc28eac",
+      "bytes": 439,
+      "vendored_path": "MeTTa/reference_samples/metta_examples/fizzbuzz/classical.metta",
+      "license_file": "MeTTa/reference_samples/metta_examples/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "metta_examples",
+      "repository": "trueagi-io/metta-examples",
+      "source_commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "path": "fizzbuzz/constructive.metta",
+      "git_blob_sha": "60560a1a9b4b92067f143521be82249565ff95f3",
+      "bytes": 972,
+      "vendored_path": "MeTTa/reference_samples/metta_examples/fizzbuzz/constructive.metta",
+      "license_file": "MeTTa/reference_samples/metta_examples/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    },
+    {
+      "source_id": "metta_examples",
+      "repository": "trueagi-io/metta-examples",
+      "source_commit": "799ad9dbf92987cabeede6d1eca02ac7f8abb0ad",
+      "path": "collatz/peano.metta",
+      "git_blob_sha": "91644cf2c0f60a7a5091c254fed3d8ab76faf54b",
+      "bytes": 743,
+      "vendored_path": "MeTTa/reference_samples/metta_examples/collatz/peano.metta",
+      "license_file": "MeTTa/reference_samples/metta_examples/LICENSE",
+      "status": "source_snapshot_no_native_verification",
+      "training_ready": false
+    }
+  ],
+  "measured": {
+    "files": 10,
+    "bytes": 15331
+  }
+}
