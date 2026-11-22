@@ -1,0 +1,51 @@
+name: RLT-HARD-02B matched-menu feature-capacity audit
+
+on:
+  push:
+    branches: [research/rlt-hard-mathlib02-20261122]
+    paths:
+      - "scripts/audit_rlt_hard02_feature_capacity.py"
+      - "tests/unit/test_rlt_hard02_feature_capacity.py"
+      - ".github/workflows/rlt-hard02-feature-capacity.yml"
+  pull_request:
+    paths:
+      - "scripts/audit_rlt_hard02_feature_capacity.py"
+      - "tests/unit/test_rlt_hard02_feature_capacity.py"
+      - ".github/workflows/rlt-hard02-feature-capacity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feature-capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install grounded ranker features and tests
+        run: python -m pip install -e ".[dev,rlt-pilot]"
+      - name: Test frozen matched-menu feature identifiability
+        run: python -m pytest -q tests/unit/test_rlt_hard02_feature_capacity.py
+      - name: Ruff
+        run: ruff check scripts/audit_rlt_hard02_feature_capacity.py tests/unit/test_rlt_hard02_feature_capacity.py
+      - name: Freeze source-only feature-capacity receipt
+        run: |
+          python scripts/audit_rlt_hard02_feature_capacity.py \
+            --seed 2026112203 --per-split 8 \
+            --out runs/rlt-hard02-feature-capacity.json
+      - name: Retain source-only feature audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02-feature-capacity
+          path: runs/rlt-hard02-feature-capacity.json
+          if-no-files-found: warn
+          retention-days: 21
