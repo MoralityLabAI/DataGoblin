@@ -1,0 +1,131 @@
+{
+  "survey_date": "2026-11-22",
+  "method": "GitHub public repository tree inventories, manual candidate selection, pinned raw source snapshots",
+  "seeded_repositories": [
+    {
+      "repo": "trueagi-io/hyperon-experimental",
+      "license": "MIT",
+      "priority": "runtime tests and query supervision"
+    },
+    {
+      "repo": "trueagi-io/metta-examples",
+      "license": "MIT",
+      "priority": "KG conversions and declarative queries"
+    },
+    {
+      "repo": "trueagi-io/PeTTa",
+      "license": "MIT",
+      "priority": "determinism and negative compile-time tests"
+    },
+    {
+      "repo": "singnet/ai-dsl",
+      "license": "Apache-2.0",
+      "priority": "proof search and service composition"
+    },
+    {
+      "repo": "iCog-Labs-Dev/MetaMo",
+      "license": "MIT",
+      "priority": "agent state and registries"
+    },
+    {
+      "repo": "MesTTo/MeTTa-Library-Pack",
+      "license": "Apache-2.0",
+      "priority": "JSON, CSV, dictionary, database operations"
+    },
+    {
+      "repo": "F1R3FLY-io/MeTTa-Compiler",
+      "license": "Apache-2.0",
+      "priority": "knowledge-base and pattern matching tests"
+    },
+    {
+      "repo": "singnet/Omega",
+      "license": "Apache-2.0",
+      "priority": "agent memory and skills"
+    },
+    {
+      "repo": "zariuq/CeTTa",
+      "license": "MIT",
+      "priority": "reasoning loops, unification, JSON/CSV, context and abstention"
+    },
+    {
+      "repo": "trueagi-io/PLN",
+      "license": "MIT",
+      "priority": "probabilistic logic inference examples"
+    },
+    {
+      "repo": "MesTTo/MeTTaScript",
+      "license": "MIT",
+      "priority": "testing, interoperability and scripting examples"
+    },
+    {
+      "repo": "singnet/das",
+      "license": "Apache-2.0",
+      "priority": "small deterministic graph fixtures"
+    }
+  ],
+  "queued_repositories": [
+    {
+      "repo": "singnet/das-poc",
+      "license": "Apache-2.0",
+      "status": "candidate_for_bounded_fact_sampling",
+      "reason": "large biology KG exports; record ontology provenance and avoid duplicate graph facts"
+    },
+    {
+      "repo": "logicmoo/metta-testsuite",
+      "license": "unknown",
+      "status": "blocked_pending_license_review",
+      "reason": "large testsuite contains duplicated examples and language-model training text"
+    },
+    {
+      "repo": "iCog-Labs-Dev/metta-moses",
+      "license": "unknown",
+      "status": "blocked_pending_license_review",
+      "reason": "substantial program-search examples"
+    },
+    {
+      "repo": "trueagi-io/pln-experimental",
+      "license": "NOASSERTION",
+      "status": "blocked_pending_license_review",
+      "reason": "probabilistic reasoning and theorem generation"
+    }
+  ],
+  "collection_policy": {
+    "train_custody": "source_only_pending_review",
+    "execution_claims": "not_run",
+    "rollouts": "none",
+    "splits": "unassigned",
+    "approved_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "metadata_unit": "per raw .metta file"
+  },
+  "seed_snapshot": {
+    "source_files": 602,
+    "source_bytes": 1273001,
+    "measured_o200k_tokens": 354067,
+    "tokenizer": "tiktoken 0.12.0 / o200k_base",
+    "detected_source_assertions": 927,
+    "parsed_author_assertions": 927,
+    "distinct_author_assertions": 841,
+    "verified_executions": 0,
+    "verified_rollouts": 0,
+    "source_repositories": 12,
+    "source_commit": "adb22948a55661f41b7eac1a386ad732d8c67cda",
+    "note": "Pinned source-only collection; model-specific tokenizer counts and interpreter receipts are independent future stages."
+  },
+  "current_measured_snapshot": {
+    "source_files": 1375,
+    "source_bytes": 2207624,
+    "measured_o200k_tokens": 636487,
+    "tokenizer": "tiktoken 0.12.0 / o200k_base",
+    "detected_source_assertions": 2130,
+    "parsed_author_assertions": 2125,
+    "distinct_author_assertions": 1786,
+    "source_repositories": 12,
+    "source_admission": "source_only_pending_review",
+    "bridge_roots": 1513,
+    "new_quarantined_bridge_roots": 1317,
+    "batch02_workflow": "https://github.com/MoralityLabAI/DataGoblin/actions/runs/44981720269"
+  }
+}

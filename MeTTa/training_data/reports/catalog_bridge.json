@@ -1,0 +1,26 @@
+{
+  "annotated_source_files": 1375,
+  "frozen_catalog_sha256": "9c2f62e82c1ed97f0ea0b4da59d3cd4913044c58cb66c1b86669ce7e75f9d519",
+  "frozen_files": 196,
+  "label_custody": "source_discovery_only",
+  "merged_catalog_sha256": "1b3713668f4b1f0e08854206b6cf0bb1edaef27626aa1154f80d4825700e3761",
+  "merged_file_roots": 1513,
+  "new_by_repo": {
+    "F1R3FLY-io/MeTTa-Compiler": 59,
+    "MesTTo/MeTTa-Library-Pack": 123,
+    "MesTTo/MeTTaScript": 148,
+    "iCog-Labs-Dev/MetaMo": 45,
+    "singnet/Omega": 26,
+    "singnet/ai-dsl": 2,
+    "singnet/das": 3,
+    "trueagi-io/PLN": 16,
+    "trueagi-io/PeTTa": 404,
+    "zariuq/CeTTa": 491
+  },
+  "new_quarantined_file_roots": 1317,
+  "note": "No source-derived assertion has independent interpreter+oracle verification.",
+  "overlapping_exact_file_roots": 58,
+  "schema_version": "metta-catalog-bridge-v1",
+  "split_status": "unassigned_until_root_dedup",
+  "training_ready": false
+}

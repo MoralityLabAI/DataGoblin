@@ -1,0 +1,15 @@
+{
+  "assertions_independently_verified": 0,
+  "attempted_sources": 20,
+  "detected_error_marker_lines": 1,
+  "label": "execution_receipts_only",
+  "note": "Process exit and text diagnostics do not establish assertion correctness or usable SFT labels.",
+  "process_exit_nonzero": 0,
+  "process_exit_zero": 20,
+  "process_timeouts": 0,
+  "runtime_package": "hyperon",
+  "runtime_package_version": "0.2.10",
+  "schema_version": "1.0",
+  "source_repo": "trueagi-io/hyperon-experimental",
+  "verified_training_rollouts": 0
+}

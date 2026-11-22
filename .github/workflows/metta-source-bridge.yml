@@ -1,0 +1,62 @@
+name: MeTTa opt-in source catalog bridge
+
+on:
+  push:
+    branches: [data/metta-annotated-seed-20261122]
+    paths:
+      - '.github/workflows/metta-source-bridge.yml'
+      - 'MeTTa/training_data/exports/expanded_source_catalog.json'
+
+permissions:
+  contents: write
+
+jobs:
+  bridge-and-gym-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data/metta-annotated-seed-20261122
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install DataGoblin and validate source bridge
+        run: |
+          python -m pip install -e '.[dev]'
+          python -m unittest discover -s MeTTa/training_data/tests -v
+          ruff check MeTTa/training_data/scripts MeTTa/training_data/tests
+          python MeTTa/training_data/scripts/catalog_bridge.py
+      - name: Exercise opt-in larger source-envelope gym
+        run: |
+          python -m MeTTa.curation_gym \
+            --catalog MeTTa/training_data/exports/expanded_source_catalog.json \
+            --out runs/metta/expanded_source_curation
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          base = Path("runs/metta/expanded_source_curation")
+          manifest = json.loads((base / "manifest.json").read_text())
+          catalog = json.loads(Path("MeTTa/training_data/exports/expanded_source_catalog.json").read_text())
+          assert manifest["cases"] == len(catalog["files"]) * 10
+          assert manifest["training_ready"] is False
+          assert manifest["evaluation_labels_written"] == 0
+          print(json.dumps(manifest, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metta-expanded-source-policy-candidates
+          retention-days: 14
+          path: |
+            runs/metta/expanded_source_curation/cases.jsonl
+            runs/metta/expanded_source_curation/manifest.json
+      - name: Commit source catalog bridge and counts
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add MeTTa/training_data/exports/expanded_source_catalog.json MeTTa/training_data/reports/catalog_bridge.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(metta): pin expanded source registry for opt-in curation gym'
+            git push origin HEAD:data/metta-annotated-seed-20261122
+          fi

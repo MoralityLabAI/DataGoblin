@@ -1,0 +1,66 @@
+name: MeTTa source expansion batch 02
+
+on:
+  push:
+    branches: [data/metta-annotated-seed-20261122]
+    paths:
+      - '.github/workflows/metta-expand-source-02.yml'
+      - 'MeTTa/training_data/scripts/crawl_repo.py'
+      - 'MeTTa/training_data/tests/test_crawl_repo.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: metta-source-expansion-batch-02
+  cancel-in-progress: false
+
+jobs:
+  bounded-intake-and-reindex:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data/metta-annotated-seed-20261122
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Import additional pinned licensed executable MeTTa files
+        run: |
+          set -euo pipefail
+          CRAWL="MeTTa/training_data/scripts/crawl_repo.py"
+          python "$CRAWL" --repo zariuq/CeTTa --path-prefix tests/petta/ --max-files 280 --max-file-bytes 16000 --max-total-bytes 380000 --apply
+          python "$CRAWL" --repo zariuq/CeTTa --path-prefix tests/langdef/ --max-files 90 --max-file-bytes 16000 --max-total-bytes 175000 --apply
+          python "$CRAWL" --repo trueagi-io/PeTTa --path-prefix examples/ --max-files 220 --max-file-bytes 8000 --max-total-bytes 230000 --apply
+          python "$CRAWL" --repo MesTTo/MeTTaScript --path-prefix packages/ --max-files 75 --max-file-bytes 12000 --max-total-bytes 170000 --apply
+          python "$CRAWL" --repo singnet/Omega --max-files 30 --max-file-bytes 10000 --max-total-bytes 100000 --apply
+          python "$CRAWL" --repo trueagi-io/metta-examples --path-prefix deontic_logic/ --max-files 65 --max-file-bytes 12000 --max-total-bytes 180000 --apply
+          python "$CRAWL" --repo MesTTo/MeTTa-Library-Pack --max-files 65 --max-file-bytes 13000 --max-total-bytes 160000 --apply
+          python "$CRAWL" --repo F1R3FLY-io/MeTTa-Compiler --max-files 40 --max-file-bytes 16000 --max-total-bytes 160000 --apply
+          python "$CRAWL" --repo trueagi-io/PLN --max-files 20 --max-file-bytes 12000 --max-total-bytes 60000 --apply
+          python MeTTa/training_data/scripts/corpus.py --json
+      - name: Verify all source metadata, rights and regression tests
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s MeTTa/training_data/tests -v
+          python -m pip install --disable-pip-version-check 'ruff==0.17.6' 'tiktoken==0.12.0'
+          ruff check MeTTa/training_data/scripts MeTTa/training_data/tests
+      - name: Refresh exact tokenizer count and original-assertion labels
+        run: |
+          set -euo pipefail
+          python MeTTa/training_data/scripts/count_tokens.py --encoding o200k_base
+          python MeTTa/training_data/scripts/assertions.py
+          python MeTTa/training_data/scripts/catalog_bridge.py
+      - name: Commit source-only intake and measured inventories
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add MeTTa/training_data/raw MeTTa/training_data/annotations
+          git add MeTTa/training_data/token_counts MeTTa/training_data/reports
+          git add MeTTa/training_data/assertion_candidates MeTTa/training_data/exports/expanded_source_catalog.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(metta): expand pinned licensed source training candidates and refresh receipts'
+            git push origin HEAD:data/metta-annotated-seed-20261122
+          fi

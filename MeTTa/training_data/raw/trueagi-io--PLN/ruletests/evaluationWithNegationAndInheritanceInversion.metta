@@ -1,0 +1,21 @@
+!(translatePredicate (retractall (Predicate (fun Predicate))))
+!(import! &self (library lib_import))
+!(git-import! "https://github.com/trueagi-io/PLN.git")
+!(import! &self (library PLN lib_pln))
+
+;1. Set up PLN reasoning context
+(= (STV (Concept X)) (stv 0.5 1.0))
+(= (STV (Concept D)) (stv 0.5 1.0))
+
+;2. Query PLN
+!(test (PLN.Query (; for now just for application of rule ";Usage of inheritance for predicates"
+                   (Sentence ((Evaluation (Predicate IsFat)
+                                          (List (Concept X))) (stv 1.0 0.9)) (1))
+                   (Sentence ((Not (Inheritance (Concept X)
+                                                (Concept D))) (stv 0.2 0.9)) (2)))
+                  ; |- (Inheritance (Concept X) (Concept D))  (stv 0.8 0.9)  by not elimination rule
+                  ; |- (Inheritance (Concept D) (Concept X))                 by Inheritance Inversion Rule
+                  ; question about evaluation of predicate
+                  (Evaluation (Predicate IsFat)
+                              (List (Concept D))) 4)
+       ((stv 0.8 0.38880000000000003) (1 2)))

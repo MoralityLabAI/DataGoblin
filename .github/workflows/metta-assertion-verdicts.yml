@@ -1,0 +1,39 @@
+name: MeTTa native assertion verdicts
+
+on:
+  push:
+    branches: [data/metta-annotated-seed-20261122]
+    paths:
+      - '.github/workflows/metta-assertion-verdicts.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align-runtime-assertions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data/metta-annotated-seed-20261122
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check corpus provenance and align actual Hyperon results
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s MeTTa/training_data/tests -v
+          python MeTTa/training_data/scripts/native_assertions.py
+      - name: Lint native result interpretation
+        run: |
+          python -m pip install 'ruff==0.17.6'
+          ruff check MeTTa/training_data/scripts/native_assertions.py MeTTa/training_data/tests/test_native_assertions.py
+      - name: Commit native observation rows and receipt summary
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add MeTTa/training_data/native_assertion_verdicts MeTTa/training_data/reports/hyperon_assertion_verdicts.json
+          git commit -m 'data(metta): audit per-assertion native Hyperon result observations'
+          git push origin HEAD:data/metta-annotated-seed-20261122

@@ -1,0 +1,38 @@
+name: MeTTa author-assertion extraction
+
+on:
+  push:
+    branches: [data/metta-annotated-seed-20261122]
+    paths:
+      - '.github/workflows/metta-assertion-mining.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  extract-upstream-claims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data/metta-annotated-seed-20261122
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate and extract author test cases as unverified candidates
+        run: |
+          set -euo pipefail
+          python Metta/training_data/scripts/corpus.py --json
+          python -m unittest discover -s Metta/training_data/tests -v
+          python Metta/training_data/scripts/assertions.py
+      - name: Commit extracted test candidates and report
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Metta/training_data/assertion_candidates Metta/training_data/reports/assertions.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(metta): extract unverified source assertions with spans and provenance'
+            git push origin HEAD:data/metta-annotated-seed-20261122
+          fi

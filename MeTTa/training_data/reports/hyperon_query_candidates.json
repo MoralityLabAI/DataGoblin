@@ -1,0 +1,18 @@
+{
+  "approval_scope": "source_query_candidates_pending_policy_and_leakage_review",
+  "exceptions": 5,
+  "heldout_labels_written": 0,
+  "independent_semantic_oracle": false,
+  "max_context_bytes": 16384,
+  "native_observations_by_status": {
+    "native_assertion_error": 1,
+    "native_assertion_pass": 187,
+    "not_observed": 4
+  },
+  "packets": 187,
+  "root_splits_assigned": 0,
+  "schema_version": "metta-native-query-candidates-v1",
+  "source_assertion_observations": 192,
+  "source_lineage_roots": 20,
+  "training_ready": false
+}

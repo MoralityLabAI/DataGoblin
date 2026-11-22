@@ -1,0 +1,37 @@
+{
+  "by_assertion_kind": {
+    "assertEqual": 208,
+    "assertEqualMsg": 3,
+    "assertEqualToResult": 90,
+    "test": 1829
+  },
+  "by_task_family": {
+    "agent_registry": 22,
+    "agent_state_dynamics": 8,
+    "agent_workflow": 13,
+    "assertion_semantics": 808,
+    "atomspace_mutation": 18,
+    "atomspace_queries": 10,
+    "backward_chaining": 11,
+    "determinism_analysis": 4,
+    "general_metta_source": 829,
+    "graph_query": 19,
+    "knowledge_graph_curation": 2,
+    "mutable_state": 53,
+    "probabilistic_inference": 36,
+    "reasoning": 8,
+    "symbolic_unification": 5,
+    "type_inference": 278,
+    "weighted_reasoning": 6
+  },
+  "candidate_assertions": 2130,
+  "distinct_assertion_texts": 1786,
+  "exact_duplicate_assertion_occurrences": 344,
+  "note": "Expected outputs are upstream author claims, not interpreter-verified labels.",
+  "parsed_query_expected_pairs": 2125,
+  "schema_version": "1.0",
+  "source_files": 1375,
+  "unparsed_or_unbalanced_assertions": 5,
+  "verification_status": "not_run",
+  "verified_rollouts": 0
+}

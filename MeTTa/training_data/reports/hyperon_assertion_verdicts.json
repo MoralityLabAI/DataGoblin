@@ -1,0 +1,16 @@
+{
+  "evidence": "interpreter stdout aligned with source top-level evaluation order",
+  "independent_semantic_oracle_labels": 0,
+  "native_assertions": 192,
+  "outcome_counts": {
+    "native_assertion_error": 1,
+    "native_assertion_pass": 187,
+    "not_observed": 4
+  },
+  "schema_version": "metta-native-assertion-observation-v1",
+  "source_execution_receipts": 20,
+  "source_runtime": "hyperon==0.2.10",
+  "source_top_level_evaluations": 206,
+  "training_ready": false,
+  "verified_training_rollouts": 0
+}

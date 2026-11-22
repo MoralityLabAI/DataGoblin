@@ -127,3 +127,9 @@ Run `python -m MeTTa.moses_control --out runs/metta/moses_rule_control` to gener
 [MeTTa-06](PLN_LINEAGE_SHADOW.md) introduces a small CPU-only evidence ledger inspired by MeTTa PLN's EvidenceID and two-component truth-value framework. It deduplicates repeated evidence IDs and claims sharing a lineage, supersedes older observed revisions for an advisory score, and flags same-version disagreement for review. The reported strength and confidence are explicitly uncalibrated, derived from declared lineages rather than native PLN inference, and preserve `authorization=none` with `training_ready=false`.
 
 Run `python -m MeTTa.pln_lineage --out runs/metta/pln_lineage_shadow.json` for a deterministic synthetic fixture.
+
+## Licensed annotated training-data intake
+
+The [`training_data/`](training_data/README.md) subtree imports **1,375 pinned MeTTa sources** from 12 public repositories, covering **2,207,624 source bytes** and **636,487 tokens measured using `o200k_base`**. It extracts **2,130 upstream author assertions (1,786 distinct source texts; 2,125 parsed pairs)** with query/expected fields and original source spans. Hyperon 0.2.10 process receipts cover 20 pinned source files, separately from the 5,880/5,880 native query checks already recorded for the synthetic curation gym. Author assertion correctness remains to be independently verified.
+
+The source corpus and the existing 1,960 synthetic curation roots are separate datasets; hash-bound duplicate lineage prevents accidental double training exposure. See `training_data/README.md` for source custody, tokenizer reports, license files and collection scripts.
