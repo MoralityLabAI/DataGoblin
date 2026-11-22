@@ -1,3 +1,95 @@
+<!-- Data Goblin mascot: canonical editable ASCII source in assets/data_goblin_wry_ascii.txt -->
+
+```text
+   :                                                                                                                                                        :
+ ,X@3i .5M:5HAiMMXsH2XHXrHMr3HA;HMi5MAAHsXHsrHMs5MMi3Mr5Hh;3M253hX23iMh;5HXiHM:2HAsM3r3H2:hHXX5M3AXHssHHshHXsG2rhXsHhAhh2sM2AhHsXHXsM5iH3sM;2Msh3AMs5Hi25 rh&X,
+ .sB5i                                                                                                                                                    i5Br.
+   2              :h355522.         sAA2.   :2A55523552:     rAAX                s3h3rrX      X3A      h52552s    r322hr      2h553s  55522   ;M5A5,        2
+   Sr             s#S@##S99SA       &@&@;   3@@SSB@GS9@M     B@@@              M&BGGHG@@.  .MB9H#9G.  ,S#@SSG9S3  AG@@SX      MS@@G2  H#@@@A  rSB@Gi       rS
+   #;               2&;   .H@5     HBs HSs  X9;  9&   Bs    3@r #Gs          ,#@5     52  :BB;   ;9B;   r@   AB#    &@          &B     2@G2@H   S9         r#
+   &r               29r     B@A   2@hiiA@G       S9        3@hri3@G          B@2   rHG35: M@,      @S   h@BBB&Bh    9@         :@@     AB5 5&#  9&         r#
+   #i               h@;    s@&i  X@#MHGMH&A      &&       A@#MGGHG&3         5@H    X2@@s 2@M     5@3   2@,   5@&   @@    ;i    @&     2@3  X99s9B         s9
+   Bi              3M&3553S@G, :h@@M    5B@hs  A3&B3s   ih@@H    39@Ms        5@&hAXX5@S   2@9525#@A   3H@5553S&2 r3B@52A5@&  A3BB3s  2G&M5   #@@B         r#
+   G;             ,#SSGSSS3i   i#HG#,   SGM#3  H#GH#2   s#MHS:   SGH95          sG##SGX     .5SSG5.    #HHGSHG2   ASGGGGHSS5  HSGG#2  GSSG#    hGH         r#
+   &r   :i ,i. :;, .  ,.  .  i: .,  ;..i  :  ii  ,, .; ::  ,. :i, ,. ,i ,i. i; .:  :  ,i. :i   ,   i, ;, .,  . :,    .,  ,  i    :  i, .,  ;i, :  i, ;i.   XB
+   H:   5H;2MXihhArh2rMhi2h2iM5iMMrXMXsHXsHAiMMrAhh;5Mr2M3;h3r5M2XH5:hM;2MX;MM:2HssH5:3MXi5HXA5h5XXMXrMMr3Hr3hXhAs53sMHXrMrXMr552HsXH2;hHX:hMXXHXAH2:hMX   ;H
+   @s                                                                                                                                                      r9
+   #i                                                                       ,             ;ii;                                                             rS
+   #i                                                          :         rhS5       ,X3G9@&#M2:                                                            rS
+   9i                    5                                    MS       A9&h,     AMB@&@@SA.                                                                rS
+   &r                  r3@HX                       ,::        &H     s9@H     AGB@@S2H@5                                                                   iH
+   #i                    G;                        A3M#S3i   i@A   ,G@@r    X9@@@Gr G@A                                      2                             s9
+   S;                                                  i59#r i@s   B@&i   X#@@@Hr  G@A       isXAs;                        i3@HA                           r#
+   &r                                         :iiri       hBM &2  #@@;   5@@@#;   2@M   :5G&@@B###SSShi                      G;                            s9
+   S;                                     ;hHGHHHS999SHhr  ,99#3 3@&2   3@&@M     9@ .2#@@Bhs.       iX                                                    rG
+   9i          ,                          ,i.        :sMGH3 :B@h:&@&   s@&@M      99M&@&h,    ,iA2535Ar:                                     .             s9
+   M,          M:            :isXsr;.                :,;::A  5@#9&@9 sMS@@S  .5; hB@@&5   rh#&@@@@99#99B99r                                 s3             ;M
+   @s                      ,&@&S#B&@@@B#H2r      sh#9#9&&@9Hr #@@@@B2G@@@&Xr#BX2#B&@H. iS9@@&S3A:       :5SGX                                              r#
+   M:                       ;X3ShX:;AM9@@@@@S3i  ir      i2#@H#@@@@@@@@@@&B&@B#@@&@H iS@@@95               ,A                                              iG
+   &r                          ;G&@h   .;3#@@@@9Hs     AMHMX5@@@@@@@&&B&@@@@@@@@@@@#B@@&B3  sAAs                                                           s9
+   M,                            ,G@&3 2   .2#@@@@&H,   :sH@&@@@@95r;ir,:X#@@@@@@@@@@@@@MMB&99B&@9h:                                                       ;H
+   &r                              M@@#AXA3,  iG&@@@@H;  MMB@@@BAi39&@@@#; 5@@@@@@@@@@@@&&5:    s3#@H,                                                     rS
+   S;                               H&BB2X33X;   2B@@@@3 2@@@@@3S@@@@@@@@@5 M@@@@@@@@@@@@&&BS2:    :MBX                                                    iS
+   &r                                H@&&2AXr2HA,  5B@@@SS&@@@@@@@@@@@@@@@@ ,@@@@@@@@@@@@&MhSS9Bi    r#                                                    r#
+   G;          2                     r&&@S5XM9X      h@@@@@@@@@@@@@@@@@@@@@M #@@@@@@@@@@&@H    5Bh                                X9Gs                     ;H
+   9i        r3@MX                    r&@9GG9i  5#&S; X&@@@@@@@@@@@@@@@@@@@@: 9&@&&@@@@@9sB&    ,r                                s#Hr                     r#
+   S;          #;                      A@&B&#. M@BA;   r@@@@@SA53M#&@@@@@@@@@i;9Bs@@SAB@B :@,                                                              s#
+   &r                                   i&@@@G H@A  5&Sh@@@@@@    XisAH&@@@@@@@9 ;5;X#&@3  i     ;s5hHGGGGMM32r,                                           s9
+   #i                                    .M&@@G2BBr ;#@@@@@@@@,   s&@S2rr59@@@23&G#@@@@&    s5GB&@@@B#Mh53MHS@BGA                                          iH
+   #i                                      ;hB@@@@@#HG&&@@@@@@G G&@@@@@@BGs AAA@@@@@@@@X XM&@@&BH2i  :X53H3Xr:                                             XB
+   @s                    M;                   :h#&&&@G;B@@953G@Hr3B@@@@@@B;X  XsA3H&@@r M@@Bhi    XM#9Ms:                                                  iM
+   H:                                  r3HSSM3i       r@@&5H M@@@HAXA52ArAS# s3@@9HrrsrM93:    s5B9Gr                                                      XB
+   &r                               2S&BH32A23M#H3r    H@@@@S:S@@@@@&BB&@@@SXHHHG9M   Xr    2A39&h                                                         iH
+   H:                             A@@3:    iA53G9@@Sr   H@@@@9iX9@@@@@@@@@@@@&B#GhX:   .A2rhG#Bh             Mi                                            XB
+   @r                            M@h   XHB@@&SH3523GBG,  A&@@@@SX2G@@@@@&iS@@@@@@@@@#; XGM#SMX              BB:                               :            rS
+   S;                           r@5 rH@@@SA, ::      i&5   3@@@@B5 .i2H#93 ,S@@@@@@@@@  ;r:                9#     ir                        sG@A:          XB
+   #i                            .5S@&Gs  iGSA.AHB&@#A #h    s5s5S&&BM MHH33:iHB@@@@@H         rX2Ar      2#   ;MSMA                        :ABi           ;H
+   #i          2A               29@9A   sB&5  h@@@@9B&S Bh    5&@G55hH.SBG3s     iXr.    i5MMGSH335H#hs:     sHG5                                          s9
+   #i                         2&@M: 5XX#@M   3#2i     H r@:  S@@&9@@9i                shHM2rG9AA   M35hSHX   2;                                            iG
+   #i                       h@@h  ABHh&#     5  i3H99GS, S# .@@@@@&G#&.               H@G5  i&Gs X&Hi  sG@s    s53MHH3                                     rS
+   Br                     A&&H  s9&S#@2 hSX  G9@@@@B##9X iB.,@@@@@@###.                 sG#M H# hBs 5S#SHX     .    ;X                                     s9
+   9i                    3@Si  h@BS@B   h@@r @&HA,     X  i  &@@@@3H@H                  ..i32,: 3  G3X;                                                    s#
+   #i                   h@3  59&#S@S r3   s2 2   AH9&&B@2  r#@@@@h 5;;#H              h@@@@h XGGGGH.        XhA;                  5A                       rS
+   9i                   H9 r#&&#B@M .B@&Hi   MSB@@#M2s;A;;#@@@Bs;   S#2;5Ms          G@9sG@@iXBB&BBi         ,AHG                                          s#
+   9i                    ;H@&Bh9@h   ,59@@@S ABMX .XMG :S@@@@9    s&3 ,S@B2      ,s5S@@@ A@@ish33h3             :                                          r#
+   #i                   2&@B9A5@M iH;    sMBHs:  A@@@&#@@@@@S    r@2 s@@M i9#GS9&@@@@BHX  ;s H&&&@H                                                        rG
+   Br                 sS&##S2M&&, S@@9MA:        ,&@@@@@@@@s     hM 5&@A 2@@@@@@@&G5;rsrX  B@SMMHs s55:                                                    r#
+   G;                MB#HGG2h@@r   2G&@@@&SM5Arir, 9@@@@S2          &@5  XhSSGh2, :X33533  XH##9M, Ai2SG2:                                                 iG
+   &r               M@9GH#229@2 r     :shS&@@@@&@Ss r2s             XBA         2MGsXhhr      . :  s3s i39HA                                               XB
+   H:              h@&M3SHXS@9 s@@#Mr                 XG@;                   X#9MXsHMX    r5A2i :A5r ,X   5G#Hi                                            iH
+   &r             G@G2 hB33@&s ;3S&@@@@B#Hh555A53MG#&&BhXr                 59SMr:S92     #BhMSh3GM3H9i    Ai,G993                                          s#
+   G:            G&M  ;@#3G@#      ,s5HS9B&@@B&@B9GMs,   GS;             s9@2ArrBh      .@H ;#@@G; i@M         sB#s                                        rS
+   &r           :@A   S@M3#@3   G2         5HG:           39h           M@# hMiHA        rS##h  3#S#3            H@H                                       r#
+   G;            2   s@&rM9@s   i#BA         3BM           ;BM        :S@G:H9 :                                   M@#                                      iS
+   Br                9@2 9@2      2@G         ,#@A          s@s      :@@A MB    G:XrArXXrAs5XXsXM sA i       sh    r@S                                     rS
+   9i               :@&  3@i       i9#3         h&H        X@M      .9@h  &r    G  r93h:5HhGM#MrM    X r ; i,rH     2@5                                    r#
+   &r               A@2   i:       .GBH         A@#      :S@2       M@9, .B     s:;         .i           ;        ,: s&2                                   rS
+   H:               A@:           2@S.        i#@H      rBBs       2@#H.  5    3h sXhXHhSGHMMhMHMHXHAH3HAr,X      ,#  MSA                                  sB
+   @s                3,         2GSs         M@9;  ;rsXM@&         G&hG2       ;2  ,X:AsXAHXsssX s:XrAs;:  : : , ,:3  ;H&,                                 rS
+   G;                        ,hB&Mr        A9@3    A3MHHM3        i&S5MM       :A,s             X.r:   2   :3iAXiX     sBS                                 s#
+   &r                         2S#B@@##HH2sH@S     5253h3s,        5&G2MG:      hM .AMrBMG#3B3HrMBr. ,s 9X.:3&H9#i9     sG@i                                XB
+   G:                       ,B2   i2hSS#99BB      X533irMS9B9#5   2@S253Gr      s                      .        ;i    r23&2                                r#
+   @s                     :M#5H9G52A22AAsXs           G@@@@@@@@@5 .9#232HH                     .   ,                 :h2h@5                                r#
+   G;                    5B#:   s23h5AA3hMGh2i       :#9BB&&B#SG3  2@3X2sH#               ;h  .M   M                AMXsBS                                 sB
+   Bi            .:sXA  A@h         5S&@@@@@@@#i h9HMhAAAXA223hM#h  G@5A  S#s                                     rM3X5BS                                  XB
+   G:        :;rAAA2sr  G@3;      r@@@@@@@@@@@&h  2MHSB999999#GhA    h&Sr  ihMr                               .:A53h39&5    .rsssrs:                       ;H
+   @s       ,;rXA5AXi    5B@&S3X: :2553hh335223##                     :MB9HAisH35sii;                   .rX22MHGHS9995    ,rXXA2223552222sr                s9
+   3.   .XXAA2XiAAAA25A;   .2GSB&&B9#GGSGG#99&9SX        rAA533335Xs     ;3HHMMGGS##HhMMGSGGHGGGGSGS#####9SS#GMM5Xi      XXAAssi.srsXXssssAXsrr            ;G
+   @X             irXAX2A2       :sAA2552AXr:      ;iiAXAXXsrsssAsAA2Xs           .     ,iirXXXXssirii,,             srXAAAssXA222Asri                     A&
+   3.                                                                                                                                                      .2
+   &s  .3GXsG5sHMX2G2XH2iMMi3GAsHMi3GXrHAXHssHMr2H5rMhr3HAsGhrMMr5H5;MHi5HAiHM:2HrAH3;5G2;hHr5HHXAHHs2GsAHh:3HsrHXsHhihG2sG3shHXXHXrH3;hHAiHHs5G2sHMXXGhX  A@
+   S;                 5: 35     52;X2i;3i,5A i3 X5s.2X,r:s     h. 3A A2 :3s 5X 2hs 3i 3,rrhA       3    ,s  X2:;2r 2X X      s. :2A.X2,X5X                 ;G
+   &s                 Sh:&B2    9B2SSiASH2&5:992G9HhHsX#MH    M9#;S#XM#3 #r:S#r:# hB#X99H #:      GA    sS,XS2GSArA9BiSi     G5 G5HHG5HSH5                 X&
+   A                  rX ri     , :;r, ir si:. r; ; rr , ,    r ;.;X..r: Xi ;s  : s ,i ;i :      ;;      sr ;s .s:i  :is.    ,s; si ;s :                    A
+ .sB3i iXs rA:,Xs:;A;,X; ss.iA;,Xs ;s,:X ,s,.XX ;Xr is ;Xr ss,:X:.ri sr is: sr rX..Xi rs,.sA:;rX;,rX,;A,,sr is..s, ss is:,Xr,rs,,s,:s; rXi.Xr.rX;iX,iA.ir i3Bs.
+ .s&3i s52,A5i;22ir5r;3X:55;s3r;35:X5ii3ii3ri35;s52:25:s5A,A2;X5si22;22:X3r:35,X3:r5A,A5r:25isA2ir25;r5;i55:A3;;3ii52:25r;5X;25ri5ri3A:25s:5X:A5ir5;s3:sA i3&s.
+   ,                                                                                                                                                        ,
+
+SHA-256 (artwork above, UTF-8/LF): 9c81e286b69e370a5d7d80594b13395e53a4840c23e3feea3b769ac531e7a5a8
+```
+
+[Editable Data Goblin ASCII mascot](assets/data_goblin_wry_ascii.txt)
+
 # DataGoblin
 
 DataGoblin is an offline-first research orchestrator for synthetic data aimed at non-language-centric learners. It turns a typed learner snapshot into competing falsifiable hypotheses, a bounded data recipe, adversarial critique, narrow builder tickets, independently verified experiment records, and future research-model training examples. Its “constitution” is an executable research-integrity and control policy; it is not proof of alignment.
