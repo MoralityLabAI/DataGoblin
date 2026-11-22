@@ -14,8 +14,9 @@ import re
 import urllib.error
 import urllib.request
 from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import urlsplit
 
 SCHEMA = "metta07-keyed-finite-eval-v1"
