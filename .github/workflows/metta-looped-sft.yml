@@ -31,7 +31,7 @@ jobs:
       - name: Test oracle, lineage custody and frame adapter
         run: |
           python -m pytest -q tests/unit/test_metta_looped_sft.py tests/unit/test_metta_corpus.py
-          ruff check MeTTa/sft_oracle.py MeTTa/looped_sft.py MeTTa/export_looped_frames.py tests/unit/test_metta_looped_sft.py
+          ruff check MeTTa/sft_oracle.py MeTTa/looped_sft.py MeTTa/depth_frontier.py MeTTa/export_looped_frames.py tests/unit/test_metta_looped_sft.py
       - name: Build 3072-root curriculum from six families
         run: |
           python -m MeTTa.looped_sft build --roots-per-family 512 --out runs/metta/looped_sft
@@ -39,6 +39,7 @@ jobs:
         run: |
           python -m MeTTa.looped_sft audit --out runs/metta/looped_sft
           python -m MeTTa.export_looped_frames --bundle runs/metta/looped_sft --out runs/metta/alternate/looped_frames.jsonl
+          python -m MeTTa.depth_frontier --roots-per-family 512 --out runs/metta/looped_sft/depth_frontier.json
       - name: Confirm no reserved targets and one canonical training source
         run: |
           python - <<'PY'
@@ -72,6 +73,7 @@ jobs:
             runs/metta/looped_sft/train_candidates.jsonl
             runs/metta/looped_sft/reserved_public.jsonl
             runs/metta/looped_sft/manifest.json
+            runs/metta/looped_sft/depth_frontier.json
             runs/metta/alternate/looped_frames.jsonl
             runs/metta/alternate/looped_frames.jsonl.manifest.json
           retention-days: 14
