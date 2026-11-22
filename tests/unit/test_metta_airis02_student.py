@@ -16,6 +16,7 @@ from MeTTa.airis02_student import (
     decode_action,
     encode_public,
     evaluate,
+    legal_action_mask,
     run_students,
 )
 from MeTTa.sft_oracle import first_state, make_task
