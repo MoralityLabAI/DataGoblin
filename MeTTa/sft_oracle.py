@@ -260,6 +260,6 @@ def replay(task: dict[str, Any], selected: list[str], optimum: list[str]) -> lis
     if trace[0]["remaining_canonical_edits"] != initial_distance or trace[-1]["remaining_canonical_edits"] != 0:
         raise ValueError("incomplete trace")
     if any(a["remaining_canonical_edits"] != b["remaining_canonical_edits"] + 1
-           for a, b in zip(trace, trace[1:])):
+           for a, b in itertools.pairwise(trace)):
         raise ValueError("non-monotone canonical trace")
     return trace
