@@ -122,8 +122,7 @@ def generate_roots(*, per_split: int = 8, seed: int = SOURCE_SEED, alpha_ood: bo
             statement = _statement(family, k)
             if split == "ood_test" and alpha_ood:
                 # Alpha-equivalent statements keep the same proof scripts after "intro".
-                renamed = {"a": "u", "b": "v", "c": "w"}
-                statement = re.sub(r"\b[abc]\b", lambda m: renamed[m.group()], statement)
+                statement = re.sub(r"\b[abc]\b", lambda m: {"a": "u", "b": "v", "c": "w"}[m.group()], statement)
             task = {
                 "statement": statement,
                 "import": "Init",
