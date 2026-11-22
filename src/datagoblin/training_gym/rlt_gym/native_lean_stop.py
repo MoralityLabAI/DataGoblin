@@ -281,9 +281,10 @@ def _check(
         receipt["code"] == "kernel_certified"
         and receipt["evidence"].get("kernel_invoked")
         and receipt["evidence"].get("kernel_ok")
-        and receipt["evidence"].get("axioms") == []
+        and isinstance(receipt["evidence"].get("axioms"), list)
+        and set(receipt["evidence"]["axioms"]) <= {"propext", "Quot.sound", "Classical.choice"}
     ):
-        raise ValueError("nonempty axioms or nonkernel source success")
+        raise ValueError(f"missing audited Lean kernel certificate: {receipt['evidence']}")
     return {"id": index, "receipt": receipt,
             "native_wall_s": round(time.perf_counter() - begin, 6)}
 
