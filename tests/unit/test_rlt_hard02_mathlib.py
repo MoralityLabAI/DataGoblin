@@ -81,7 +81,7 @@ def test_source_registration_seed_disjoint_and_nontrivial_prefix():
     b = generate(per_split=8, seed=101)
     assert {x.root_id for x in a}.isdisjoint(x.root_id for x in b)
     assert all("intro " in r.prefix for r in a)
-    assert all(r.statement.count("→") >= 1 or "∣" in r.statement for r in a)
+    assert all(r.statement.count("→") >= 1 or "∣" in r.statement for r in a)  # noqa: RUF001
     with pytest.raises(ValueError, match="per_split"):
         generate(per_split=3)
 
@@ -96,7 +96,7 @@ def test_policy_fit_blocks_nontrain_sources(monkeypatch):
 
 def test_threshold_gate_blocks_noncal_and_no_native_fabrication():
     roots = generate(per_split=4)
-    assert THRESHOLDS == tuple(sorted(THRESHOLDS))
+    assert tuple(sorted(THRESHOLDS)) == THRESHOLDS
     with pytest.raises(ValueError, match="CAL"):
         calibrate([{"split": "train"}], np.zeros(6), ())
     with pytest.raises(ValueError, match="unknown"):
