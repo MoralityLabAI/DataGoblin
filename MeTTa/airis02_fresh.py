@@ -231,7 +231,7 @@ def build_bundle(out: Path, *, train_roots_per_family: int = 32,
     files["public_test_registry.json"] = sha256_bytes(
         (out / "public_test_registry.json").read_bytes()
     )
-    return {
+    manifest = {
         "schema_version": "metta-airis02-bundle-v1",
         "root_exposure_policy": "one_per_arm_max_four_per_root",
         "train_roots": len(train) // len(ARMS),
@@ -252,6 +252,10 @@ def build_bundle(out: Path, *, train_roots_per_family: int = 32,
         "files": files,
         "source_sha256": sha256_bytes(Path(__file__).read_bytes()),
     }
+    (out / "manifest.json").write_text(
+        json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    return manifest
 
 
 def main() -> int:
