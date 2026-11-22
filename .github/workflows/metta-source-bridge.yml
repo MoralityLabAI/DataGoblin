@@ -5,6 +5,7 @@ on:
     branches: [data/metta-annotated-seed-20261122]
     paths:
       - '.github/workflows/metta-source-bridge.yml'
+      - 'MeTTa/training_data/exports/expanded_source_catalog.json'
 
 permissions:
   contents: write
@@ -55,5 +56,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add MeTTa/training_data/exports/expanded_source_catalog.json MeTTa/training_data/reports/catalog_bridge.json
-          git commit -m 'data(metta): pin expanded source registry for opt-in curation gym'
-          git push origin HEAD:data/metta-annotated-seed-20261122
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(metta): pin expanded source registry for opt-in curation gym'
+            git push origin HEAD:data/metta-annotated-seed-20261122
+          fi
