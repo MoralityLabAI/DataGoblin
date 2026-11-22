@@ -19,9 +19,14 @@ from .looped_sft import query_supervision, split_for
 from .sft_oracle import FAMILIES, OOD_FAMILY, make_task
 
 
-def run_native(*, train_roots_per_family: int, queries_per_root: int) -> dict[str, Any]:
-    if not 1 <= train_roots_per_family <= 512 or not 1 <= queries_per_root <= 5:
+def run_native(
+    *, roots_per_family: int, queries_per_root: int,
+    max_train_roots_per_family: int | None = None,
+) -> dict[str, Any]:
+    if not 1 <= roots_per_family <= 512 or not 1 <= queries_per_root <= 5:
         raise ValueError("invalid bounded native replay workload")
+    if max_train_roots_per_family is not None and not 1 <= max_train_roots_per_family <= roots_per_family:
+        raise ValueError("invalid training-root sample cap")
     from hyperon import MeTTa  # optional import: native runner only
 
     version = importlib.metadata.version("hyperon")
@@ -30,7 +35,7 @@ def run_native(*, train_roots_per_family: int, queries_per_root: int) -> dict[st
         if family == OOD_FAMILY:
             continue
         checked = 0
-        for seed in range(4096):
+        for seed in range(roots_per_family):
             if split_for(family, seed) != "train_candidate":
                 continue
             task = make_task(family, seed)
@@ -57,10 +62,10 @@ def run_native(*, train_roots_per_family: int, queries_per_root: int) -> dict[st
                     "matches": True,
                 })
             checked += 1
-            if checked == train_roots_per_family:
+            if max_train_roots_per_family is not None and checked == max_train_roots_per_family:
                 break
-        if checked != train_roots_per_family:
-            raise ValueError("too few eligible training roots")
+        if checked == 0:
+            raise ValueError("no eligible training roots in sample horizon")
     return {
         "schema_version": "metta-native-query-check-v1",
         "runtime": "hyperon",
@@ -68,7 +73,9 @@ def run_native(*, train_roots_per_family: int, queries_per_root: int) -> dict[st
         "train_partition_only": True,
         "source_kind": "synthetic_symbolic_world",
         "verified_query_instances": len(results),
-        "roots_per_family": train_roots_per_family,
+        "verified_training_roots": len({row["root"] for row in results}),
+        "roots_per_family": roots_per_family,
+        "max_train_roots_per_family": max_train_roots_per_family,
         "queries_per_root": queries_per_root,
         "runtime_query_compatibility": "passed",
         "curation_subset_oracle_independently_checked": False,
@@ -83,12 +90,15 @@ def run_native(*, train_roots_per_family: int, queries_per_root: int) -> dict[st
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--train-roots-per-family", type=int, default=8)
-    parser.add_argument("--queries-per-root", type=int, default=2)
+    parser.add_argument("--roots-per-family", type=int, default=512)
+    parser.add_argument("--max-train-roots-per-family", type=int)
+    parser.add_argument("--queries-per-root", type=int, default=3)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "metta" / "native_query_receipt.json")
     args = parser.parse_args()
-    receipt = run_native(train_roots_per_family=args.train_roots_per_family,
-                         queries_per_root=args.queries_per_root)
+    receipt = run_native(
+        roots_per_family=args.roots_per_family, queries_per_root=args.queries_per_root,
+        max_train_roots_per_family=args.max_train_roots_per_family,
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({key: value for key, value in receipt.items() if key != "rows"}, indent=2, sort_keys=True))
