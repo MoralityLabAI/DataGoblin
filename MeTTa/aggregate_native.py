@@ -60,7 +60,29 @@ def join_native(directory: Path, *, shard_count: int, roots_per_family: int = 51
             seed = int(seed_text)
             if seed % shard_count != shard_index or split_for(family, seed) != "train_candidate":
                 raise ValueError(f"wrong partition or shard: {root}")
-            if row["matches"] is not True or row["native_results"] != row["static_expected_results"]:
+            task = make_task(family, seed)
+            if row["source_sha256"] != sha256_bytes(task["program"].encode()):
+                raise ValueError(f"native source hash differs from generated task: {root}")
+            expected = [
+                query_supervision(task, step)
+                for step in range(min(queries_per_root, len(task["goals"])))
+                if sha256_bytes(query_supervision(task, step)["query"].encode()) == row["query_sha256"]
+            ]
+            if len(expected) != 1:
+                raise ValueError(f"native query does not belong to generated task: {root}")
+            bindings = row.get("native_bindings")
+            if not isinstance(bindings, list) or not all(isinstance(x, str) for x in bindings):
+                raise ValueError(f"native binding list missing: {root}")
+            binding_sha = sha256_bytes(
+                json.dumps(bindings, ensure_ascii=False, separators=(",", ":")).encode()
+            )
+            if (
+                row["matches"] is not True
+                or binding_sha != row.get("native_bindings_sha256")
+                or bindings != expected[0]["expected_record_ids"]
+                or row["native_results"] != len(bindings)
+                or row["static_expected_results"] != len(bindings)
+            ):
                 raise ValueError(f"native mismatch: {root}")
             key = (root, row["query_sha256"])
             if key in observed:
