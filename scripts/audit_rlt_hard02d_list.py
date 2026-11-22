@@ -7,9 +7,41 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from zipfile import ZipFile
 
 from datagoblin.training_gym.rlt_gym.external_checked_exit import digest
-from scripts.audit_rlt_hard02 import ALLOWED_AXIOMS, Reader
+
+ALLOWED_AXIOMS = {"propext", "Quot.sound", "Classical.choice"}
+
+
+class Reader:
+    """Own the archive boundary independent of the native proof runner."""
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.archive = ZipFile(path) if path.is_file() else None
+        if self.archive:
+            members = self.archive.namelist()
+            if len(set(members)) != len(members) or any(
+                item.startswith("/") or ".." in Path(item).parts for item in members
+            ):
+                raise ValueError("unsafe or duplicate native evidence ZIP member")
+
+    def read(self, name: str) -> bytes:
+        if name.startswith("/") or ".." in Path(name).parts:
+            raise ValueError("invalid native evidence member")
+        return self.archive.read(name) if self.archive else (self.path / name).read_bytes()
+
+    def json(self, name: str):
+        return json.loads(self.read(name))
+
+    def lines(self, name: str):
+        return [json.loads(line) for line in self.read(name).splitlines() if line.strip()]
+
+    def close(self) -> None:
+        if self.archive:
+            self.archive.close()
+
 
 MATHLIB_SHA = "809c3fb3b5c8f5d7dace56e200b426187516535a"
 SCHEMA = "datagoblin.rlt_hard02d_strict_list_qa.v1"
