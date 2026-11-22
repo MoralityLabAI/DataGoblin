@@ -8,6 +8,7 @@ import pytest
 
 from datagoblin.hashing import sha256_file
 from datagoblin.training_gym.rlt_gym.external_checked_exit import digest
+from datagoblin.training_gym.rlt_gym.hard02e_list_stop import generate, rule_candidate
 from datagoblin.training_gym.rlt_gym.lean_goose import ROOTS, SCHEMA, episode, parse_tactic, probe, proposed_action
 from datagoblin.training_gym.rlt_gym.lean_goose_replay import _first_turns
 
@@ -87,3 +88,14 @@ def test_native_open_transition_and_sft_custody(tmp_path):
     assert held["status"] == "kernel_certified"
     assert held["sft_rows"] == 0
     assert len((tmp_path / "sft.jsonl").read_text(encoding="utf-8").splitlines()) == 2
+
+
+@pytest.mark.skipif(not os.environ.get("DATAGOBLIN_LEAN_412"), reason="requires native Lean 4.12.0")
+def test_registered_list_menu_uses_core_lemmas(tmp_path):
+    lean = Path(os.environ["DATAGOBLIN_LEAN_412"]).resolve()
+    root = next(root for root in generate() if root.split == "ood_test")
+    target = rule_candidate(root)
+    assert target is not None
+    for idx, candidate in enumerate(root.menu):
+        receipt = probe(lean, root.statement, [root.prefix, *candidate.splitlines()], tmp_path / f"Test{idx}.lean")
+        assert (receipt["status"] == "closed") == (idx == target)

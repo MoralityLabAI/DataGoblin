@@ -34,7 +34,7 @@ python -m datagoblin.training_gym.rlt_gym.lean_goose_replay \
   --archive runs/inky-lean-open --out runs/inky-lean-plan-replay
 ```
 
-The separate List comparison uses the four registered HARD-02F OOD roots, two checks per arm, and a five-candidate native oracle for each root. It writes evaluation receipts only. Prepare Mathlib at `809c3fb3b5c8f5d7dace56e200b426187516535a` with its Lean 4.12 cache, then run:
+The separate List comparison uses the four registered HARD-02F OOD roots, two checks per arm, and a five-candidate native oracle for each root. It writes evaluation receipts only. The statements, prefixes and candidate scripts are the registered bytes. This run imports `Init`, which supplies the exact List lemmas used in the scripts, to keep the local compilation tractable. Use Mathlib at `809c3fb3b5c8f5d7dace56e200b426187516535a` and its Lean 4.12 toolchain to check provenance and run:
 
 ```bash
 python -m datagoblin.training_gym.rlt_gym.lean_goose_list \

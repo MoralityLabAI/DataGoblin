@@ -261,10 +261,11 @@ def verify_upstream(root: Path, lake_bin: Path) -> dict[str, Any]:
 class MathlibSession(LeanNativeSession):
     def __init__(
         self, lake_bin: Path, mathlib_root: Path, directory: Path,
-        roots: list[Root],
+        roots: list[Root], *, import_module: str = "Mathlib",
     ):
         super().__init__(lake_bin, directory, {i + 1: r.statement for i, r in enumerate(roots)})
         self.lake_bin, self.mathlib_root = lake_bin, mathlib_root
+        self.import_module = import_module
         self.prefixes = {i + 1: r.prefix for i, r in enumerate(roots)}
 
     def _compile(self, source: Path) -> subprocess.CompletedProcess[str]:
@@ -284,7 +285,7 @@ class MathlibSession(LeanNativeSession):
     def _source(self, sid: int, name: str, body: str) -> Path:
         target = self.directory / f"{name}.lean"
         lines = [
-            "import Mathlib",
+            f"import {self.import_module}",
             "set_option autoImplicit false",
             f"theorem {name} : {self.statements[sid]} := by",
             *[f"  {line}" for line in self.prefixes[sid].splitlines()],
@@ -326,7 +327,7 @@ class MathlibSession(LeanNativeSession):
         }
 
 
-def export_sources(base: Path, roots: list[Root]) -> dict[str, str]:
+def export_sources(base: Path, roots: list[Root], *, import_module: str = "Mathlib") -> dict[str, str]:
     checksums = {}
     for root in roots:
         file = base / root.source_file
@@ -334,7 +335,7 @@ def export_sources(base: Path, roots: list[Root]) -> dict[str, str]:
         if file.exists():
             raise FileExistsError("source root already exists")
         code = (
-            "import Mathlib\nset_option autoImplicit false\n"
+            f"import {import_module}\nset_option autoImplicit false\n"
             f"-- Frozen source identity: {root.root_id}\n"
             f"theorem registeredGoal : {root.statement} := by\n"
             + "\n".join(f"  {line}" for line in root.prefix.splitlines())

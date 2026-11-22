@@ -20,6 +20,9 @@ from .lean_goose import GooseProcess, write_row
 
 SCHEMA = "datagoblin.lean_goose_list.v1"
 MODEL_ARM = "inky_mini_goose"
+# The registered tactics only reference Init's List.length lemmas and congrArg.
+# The frozen registration and Mathlib ancestry are still checked independently.
+LIST_MODULE = "Init"
 
 
 class GooseChoices:
@@ -53,12 +56,12 @@ def run(
     roots = [root for root in generate(per_split=8, seed=SEED) if root.split == "ood_test"][:4]
     out = out.resolve()
     out.mkdir(parents=True)
-    source_hashes = export_sources(out, roots)
+    source_hashes = export_sources(out, roots, import_module=LIST_MODULE)
     native_dir = out / "native"
     native_dir.mkdir()
     proof_dir = out / "certified_proofs"
     proof_dir.mkdir()
-    session = MathlibSession(lake, mathlib, native_dir, roots)
+    session = MathlibSession(lake, mathlib, native_dir, roots, import_module=LIST_MODULE)
     verifier_sha = digest({"upstream": upstream, "sources": source_hashes,
                            "driver_sha256": sha256_file(Path(__file__))})
     states = {digest(root.public_task()): {"root_sid": sid, "menu": dict(enumerate(root.menu))}
@@ -100,7 +103,8 @@ def run(
                 native_replays += 1
     inky = groups[MODEL_ARM]
     report = {
-        "schema": SCHEMA, "upstream": upstream, "model_identity": engine.identity, "source_seed": SEED,
+        "schema": SCHEMA, "upstream": upstream, "lean_import": LIST_MODULE,
+        "model_identity": engine.identity, "source_seed": SEED,
         "worker_sha256": sha256_file(worker), "verifier_sha256": verifier_sha,
         "evaluation_only": True, "verifier_attempt_budget": 2, "source_roots": len(roots),
         "exhaustive_oracle": {"checks": len(roots) * BUDGET, "certified": sum(oracles.values())},
