@@ -96,7 +96,7 @@ def test_fit_and_calibrate_train_only():
     assert w.shape == (30,)
     assert np.isfinite(w).all()
     p = probabilities(train[0][0], w)
-    assert p.shape == (5,) and np.all((0 < p) & (p < 1))
+    assert p.shape == (5,) and np.all((p > 0) & (p < 1))
     threshold, frontier = calibrate(cal, w)
     assert threshold in {r["threshold"] for r in frontier}
     assert all(0 <= entry["certified"] <= 8 for entry in frontier)
@@ -110,7 +110,6 @@ def test_simulated_policy_never_uses_future_outcomes_for_choice():
     roots = generate_roots(per_split=8)
     root = roots[0]
     w = np.zeros(30)
-    ids = _policy_ids(root, "learned", w)
     checked = {i: _fixture_receipt(root, i)["receipt"] for i in range(5)}
     simulation = simulate(root, checked, w, threshold=0.1)
     expected_hit = any(entry["passed"] for entry in checked.values())
