@@ -139,13 +139,13 @@ def judge(case: PrivateCase, proposed_uri: str | None) -> dict[str, Any]:
             "correct_abstention": case.gold_uri is None and proposed_uri is None}
 
 
-def build_source_roots(base: Path, *, per_split: int = 8) -> list[PrivateCase]:
+def build_source_roots(base: Path, *, per_split: int = 8, seed: int = SEED) -> list[PrivateCase]:
     if not 4 <= per_split <= 32 or per_split % 4:
         raise ValueError("per_split must be a multiple of four in 4..32")
     cases = []
     for split in SPLITS:
         for i in range(per_split):
-            cases.append(create_case(base / split / f"case_{i:03d}", split=split, index=i))
+            cases.append(create_case(base / split / f"case_{i:03d}", split=split, index=i, seed=seed))
     if len({c.source_sha256 for c in cases}) != len(cases):
         raise ValueError("source roots have overlapping snapshots")
     if len({c.root_id for c in cases}) != len(cases):
