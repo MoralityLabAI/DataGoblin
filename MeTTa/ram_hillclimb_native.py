@@ -62,10 +62,7 @@ def replay(
             raise ValueError("Proposal bytes differ from the host-owned grammar")
         arm, field = proposal["arm"], proposal["field"]
         value = str(proposal["value"]).replace(".", "_")
-        if isinstance(proposal["value"], float):
-            value = "v" + value
-        else:
-            value = "n" + value
+        value = ("v" if isinstance(proposal["value"], float) else "n") + value
         expected = f"[(Proposal {arm} {field} {value})]"
         with tempfile.TemporaryDirectory(prefix="ram-metta10-") as folder:
             program = Path(folder) / "proposal.metta"
