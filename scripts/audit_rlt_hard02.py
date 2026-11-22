@@ -51,6 +51,19 @@ class Reader:
 
 
 
+
+def expected_menu_exhaustion(source: dict) -> bool:
+    """Parse the preregistered negative-control index from generated source."""
+    import re
+
+    filename = source["public_task"]["source_file"]
+    match = re.search(r"/MathlibRoot_(\d{2})_[0-9a-f]{20}\.lean$", filename)
+    if match is None:
+        raise ValueError("unknown registered source root name")
+    return int(match.group(1)) % 4 == 3
+
+
+
 def length_first_control(source: dict, exhaustive: dict) -> dict:
     """Score a one-check length heuristic using only executed native receipts.
 
@@ -179,6 +192,24 @@ def audit(path: Path) -> dict:
         length_control = {}
         false_stops = {}
         legacy_false_stops = {}
+        negative_control_audit = {}
+        for split in SPLITS:
+            root_ids = [s["root_id"] for s in sources if s["split"] == split]
+            arm = "full_menu_fit" if split == "train" else (
+                "full_menu_cal" if split == "calibration" else "fixed_full"
+            )
+            expected = {root_id for root_id in root_ids if expected_menu_exhaustion(by_id[root_id])}
+            observed = {
+                root_id for root_id in root_ids
+                if not any(a["receipt"]["passed"] for a in by_row[(root_id, arm)]["attempts"])
+            }
+            negative_control_audit[split] = {
+                "expected_exhausted": len(expected),
+                "kernel_exhausted": len(observed),
+                "expected_but_certified": sorted(expected - observed),
+                "unexpectedly_exhausted": sorted(observed - expected),
+                "contract_passed": expected == observed,
+            }
         for split in ("ordinary_test", "ood_test"):
             root_ids = [x["root_id"] for x in sources if x["split"] == split]
             false_stop = 0
@@ -234,6 +265,10 @@ def audit(path: Path) -> dict:
             "false_stops_vs_full_search": false_stops,
             "legacy_grounded_false_stops_vs_full_search": legacy_false_stops if paired else None,
             "paired_feature_ablation": paired,
+            "negative_control_audit": negative_control_audit,
+            "registered_exhaustion_contract_passed": all(
+                item["contract_passed"] for item in negative_control_audit.values()
+            ),
             "requires_manual_hardness_review": True,
             "sealed_confirmation_opened": False,
         }
