@@ -53,7 +53,7 @@ def train(out: Path, checkpoints: Path, reference: Path, original: Path, protoco
         raise ValueError("Commit the ablation before training")
     started = time.perf_counter()
     report, reference_lock = read_reference(reference)
-    datasets, cards, selection = prepare_ablation(reference, report)
+    datasets, cards, selection = prepare_ablation(reference, report, LIMIT)
     out.mkdir(parents=True, exist_ok=False)
     checkpoints.mkdir(parents=True, exist_ok=False)
     aliases = selection["equivalent_to"]

@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from multiprocessing import get_context
 from pathlib import Path
 
 from MeTTa.ram_hillclimb import FAMILIES, digest, root_name
+from MeTTa.ram_hillclimb_trajectory import check_memory
 from MeTTa.ram_trajectory import RepairVerifier
 from MeTTa.sft_oracle import first_state, make_task
 
@@ -40,7 +42,39 @@ def reference_file(path: Path, expected: str) -> list[dict]:
     return [json.loads(line) for line in data.splitlines()]
 
 
-def prepare_ablation(reference: Path, report: dict) -> tuple[dict, list[dict], dict]:
+def audit_root(args: tuple) -> tuple[dict, dict, float]:
+    root, previous, rules, train_end, memory_limit = args
+    family, seed = root["family"], root["seed"]
+    if family not in FAMILIES or not TRAIN_START <= seed < train_end:
+        raise ValueError("Reference input is outside the registered TRAIN pool")
+    world = make_task(family, seed)
+    if (root["source_sha256"] != digest(world["program"].encode())
+            or root["root"] != root_name(family, seed)
+            or root["initial"] != first_state(world, seed)
+            or root["root"] != previous["root"] or not previous["matched_quota"]):
+        raise ValueError("Reference TRAIN root changed or lacks a common quota")
+    candidates = root["rollouts"]
+    selected, native_checks = curate_root(world, root, candidates, rules)
+    if any(selected[name] != previous["selected"][name] for name in ("good", "sloppy")):
+        raise ValueError("Original endpoint selection is not reproducible")
+    if None in selected.values():
+        raise ValueError("A single-rule ablation failed the matched quota")
+    verifier = RepairVerifier(world)
+    assessed = {}
+    for index in set(selected.values()):
+        actions = candidates[index]
+        if len(actions) != root["action_tokens_per_rollout"]:
+            raise ValueError("Ablation changed the original supervised token budget")
+        assessed[index] = audit(verifier, root["initial"], actions)
+    card = {
+        "root": root["root"], "family": family, "source_sha256": root["source_sha256"],
+        "selected": selected, "native_checks": native_checks,
+        "independent_audit": {name: assessed[index] for name, index in selected.items()},
+    }
+    return world, card, check_memory(memory_limit)
+
+
+def prepare_ablation(reference: Path, report: dict, memory_limit: int) -> tuple[dict, list[dict], dict]:
     original = report["curation"]
     pool = reference_file(reference / "candidate_rollouts.jsonl", original["candidate_pool_sha256"])
     old_cards = reference_file(reference / "curation_audit.jsonl", original["paired_curation_sha256"])
@@ -50,37 +84,17 @@ def prepare_ablation(reference: Path, report: dict) -> tuple[dict, list[dict], d
         raise ValueError("The endpoint rules differ from the previous locked run")
     simulated = {name: [] for name in rules}
     cards = []
+    worker_peak = 0.0
     train_end = TRAIN_START + report["protocol"]["train_roots_per_family"]
-    for root, previous in zip(pool, old_cards, strict=True):
-        family, seed = root["family"], root["seed"]
-        if family not in FAMILIES or not TRAIN_START <= seed < train_end:
-            raise ValueError("Reference input is outside the registered TRAIN pool")
-        world = make_task(family, seed)
-        if (root["source_sha256"] != digest(world["program"].encode())
-                or root["root"] != root_name(family, seed)
-                or root["initial"] != first_state(world, seed)
-                or root["root"] != previous["root"] or not previous["matched_quota"]):
-            raise ValueError("Reference TRAIN root changed or lacks a common quota")
-        candidates = root["rollouts"]
-        selected, native_checks = curate_root(world, root, candidates, rules)
-        if any(selected[name] != previous["selected"][name] for name in ("good", "sloppy")):
-            raise ValueError("Original endpoint selection is not reproducible")
-        if None in selected.values():
-            raise ValueError("A single-rule ablation failed the matched quota")
-        verifier = RepairVerifier(world)
-        assessed = {}
-        for name, index in selected.items():
-            actions = candidates[index]
-            if len(actions) != root["action_tokens_per_rollout"]:
-                raise ValueError("Ablation changed the original supervised token budget")
-            if index not in assessed:
-                assessed[index] = audit(verifier, root["initial"], actions)
-            simulated[name].append((world, root["initial"], actions))
-        cards.append({
-            "root": root["root"], "family": family, "source_sha256": root["source_sha256"],
-            "selected": selected, "native_checks": native_checks,
-            "independent_audit": {name: assessed[index] for name, index in selected.items()},
-        })
+    jobs = [(root, previous, rules, train_end, memory_limit) for root, previous in zip(pool, old_cards, strict=True)]
+    # Recycle native interpreters in bounded batches to release retained Hyperon memory.
+    with get_context("spawn").Pool(1, maxtasksperchild=12) as interpreter:
+        results = interpreter.imap(audit_root, jobs)
+        for root, (world, card, peak) in zip(pool, results, strict=True):
+            worker_peak = max(worker_peak, peak)
+            for name, index in card["selected"].items():
+                simulated[name].append((world, root["initial"], root["rollouts"][index]))
+            cards.append(card)
     sigs = {}
     aliases = {}
     arms = {}
@@ -103,5 +117,5 @@ def prepare_ablation(reference: Path, report: dict) -> tuple[dict, list[dict], d
     return simulated, cards, {
         "same_pool_sha256": original["candidate_pool_sha256"], "train_roots": len(cards),
         "distinct_candidate_rollouts": sum(row["candidate_count"] for row in pool),
-        "rules_sha256": hashes, "equivalent_to": aliases, "arms": arms,
+        "rules_sha256": hashes, "equivalent_to": aliases, "arms": arms, "native_worker_peak_mib": worker_peak,
     }
