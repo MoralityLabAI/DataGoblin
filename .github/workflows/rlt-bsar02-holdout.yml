@@ -1,0 +1,42 @@
+name: RLT BSAR-02 pinned Step7 holdout
+
+on:
+  pull_request:
+    paths:
+      - "training/rlt_gym/bsar02/**"
+      - "tests/unit/test_rlt_gym_bsar02_eval.py"
+      - ".github/workflows/rlt-bsar02-holdout.yml"
+  push:
+    branches: [master]
+    paths:
+      - "training/rlt_gym/bsar02/**"
+      - "tests/unit/test_rlt_gym_bsar02_eval.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-scorer-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install pytest ruff
+      - name: Verify 164 holdout IDs and independent prediction scoring
+        run: python -m pytest tests/unit/test_rlt_gym_bsar02_eval.py -q
+      - name: Lint pinned source package and evaluator
+        run: ruff check training/rlt_gym/bsar02 tests/unit/test_rlt_gym_bsar02_eval.py
+      - name: Rebuild prompt-only evaluation inputs and null baseline
+        run: |
+          python -m training.rlt_gym.bsar02.evaluation prepare --output-dir generated/bsar02
+          python -m training.rlt_gym.bsar02.evaluation majority-baseline --output-dir generated/bsar02
+          python -c 'import json; m=json.load(open("generated/bsar02/manifest.json")); assert m["task_count"] == 164'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bsar02-step7-public-eval-inputs
+          path: generated/bsar02/
+          retention-days: 14
