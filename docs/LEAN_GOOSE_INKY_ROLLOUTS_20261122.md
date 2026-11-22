@@ -10,6 +10,20 @@ The principal failure was repeating an `intro` action after Lean had already ope
 
 The live run produced two action-SFT rows for one training lineage. The replay produced two script-SFT rows for two other training lineages. Both use explicit chat messages and bind their targets to the full native proof certificate. Development and unsuccessful traces remain in evaluation receipts. The four resulting rows exercise the collection path and establish proof provenance for these examples. Learning gains and difficult theorem transfer require their own evaluations.
 
+## Paired List menus
+
+The run at commit `274771a0011caafe07a5f69c7756b42b739b2af4` compared the first four registered HARD-02F OOD roots at seed `2026112247`. The registered statements, tactic menus and two-check budgets were shared across arms. The local verifier imported `Init` under Lean 4.12.0. The registered scripts depend on its core List and equality lemmas. The run checked the pinned Mathlib checkout for provenance and recorded the narrower import.
+
+| Arm | Kernel-certified roots | Candidate checks |
+| --- | ---: | ---: |
+| Inky Mini through Goose | 1/4 | 7 |
+| Fixed order | 0/4 | 8 |
+| Seeded random | 1/4 | 7 |
+| Symbolic suffix-length rule | 3/4 | 3 |
+| Exhaustive five-candidate oracle | 3/4 | 20 |
+
+All seven model requests completed with exact prompt-token agreement. The runner replayed all seven chosen candidates and matched every receipt against the independent oracle. There were zero false STOPs, invalid choices or provider errors in the queued run. The median whole-request wall time was 223.12 seconds with queueing on the shared server. Matched llama.cpp logs recorded a median decode rate of 6.52 tokens per second. The two metrics cover different portions of the request. The paired records are evaluation-only.
+
 ## Failed attempts and secondary checks
 
 The first CPU attempt used a preflight that omitted Goose's empty system message. The provider reported three more tokens than preflight on all three returned responses. Those attempts failed closed, and the source also exposed a syntax error in the disjunction fixture. The rerun used Goose's own OpenAI request formatter and an explicit equivalent `Or` statement. Earlier receipts remain archived.
