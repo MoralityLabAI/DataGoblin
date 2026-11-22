@@ -116,3 +116,13 @@ python MeTTa/training_data/scripts/native_query_packets.py
 ```
 
 All packets remain `training_ready=false` and `split=unassigned` until overlap, lineage, semantics, and data admission are reviewed. The root identity is the original source file. Runtime agreement on author assertions is evidence of interpreter behavior; independent math/reference correctness and actual model gains require their own checks.
+
+## Public ecosystem inventory (metadata-only)
+
+`discovery_index/` retains the pinned Git tree metadata for 28 upstream MeTTa repositories, including SingularityNET DAS/DAS-PoC graph exports, CeTTa ILP and generated data, LogicMOO test corpora, iCog research, TrueAGI and MesTTo projects. Each manifest records upstream commit, Git blob SHA-1, byte length, repository-level SPDX metadata, and explicit file-level review flags. It stores file identities and sizes; bulk graphs and third-party text have not been admitted to source training.
+
+```sh
+python MeTTa/training_data/scripts/audit_discovery.py
+```
+
+The consolidated `reports/public_discovery.json` counts gross Git bytes, exact Git-blob deduplication, bulk/derived data flags, and repository-license buckets. This public index is a reproducible collection map. Measured MeTTa tokenizer counts apply only to the smaller imported-source collection, while a separate content-level rights and parsing audit is needed before building graph-derived rollouts.
