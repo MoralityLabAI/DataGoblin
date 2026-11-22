@@ -11,7 +11,7 @@ candidate checks per split. The independent audit on Actions #44989615504
 verified every retained source/proof digest and kernel receipt.
 
 A second cohort (RLT-HARD-02B) eliminated the script-length difference using
-five length-matched near-miss scripts per root, source seed \`2026112203\`.
+five length-matched near-miss scripts per root, source seed `2026112203`.
 Its source-only feature identifiability audit, Actions #44990729864, found
 **32/32 position-only roots and 0/32 roots where the old grounded features
 distinguished candidate semantics**. All candidate feature vectors are
@@ -28,13 +28,13 @@ content discrimination in this cohort.
 
 ## Fresh test and paired representation ablation
 
-**Source seed: \`2026112211\`.** The source generator remains
-\`length_matched_near_miss_v2\`. Upstream Mathlib commit and exact Lean 4
-toolchain remain \`809c3fb3b5c8f5d7dace56e200b426187516535a\`
-and \`4.12.0\`.
+**Source seed: `2026112211`.** The source generator remains
+`length_matched_near_miss_v2`. Upstream Mathlib commit and exact Lean 4
+toolchain remain `809c3fb3b5c8f5d7dace56e200b426187516535a`
+and `4.12.0`.
 
 The new candidate-feature module
-\`hard02_semantic_features.py\` creates a 208-dimensional NumPy feature
+`hard02_semantic_features.py` creates a 208-dimensional NumPy feature
 vector independently for each source-visible tactic script. It contains
 16 explicitly declared syntax features and three signed SHA-256 hash
 banks (64 bins each) for lowercased unigrams, bigrams and trigrams of
@@ -61,7 +61,7 @@ and three unchanged native controls: fixed full, random full, and
 trivial-first. The ordinary and OOD development roots and theorem
 statements are identical across arms, with actual Lean compiler
 verification. Each attempted candidate is passed through the
-\`LeanKernelChecker\`; the independently audited kernel proofs and
+`LeanKernelChecker`; the independently audited kernel proofs and
 explicit allowed axioms alone determine successful closure. Both
 learned-policy arms receive independent source replays.
 
@@ -90,24 +90,24 @@ target-blinded MCP acceptance gate. Sealed confirmation remains unopened.
 
 ## Reproduction
 
-\`\`\`bash
+```bash
 python -m pytest -q tests/unit/test_rlt_hard02_semantic_features.py \
   tests/unit/test_rlt_hard02_semantic_policy.py
 ruff check src/datagoblin/training_gym/rlt_gym/hard02_semantic_features.py
-\`\`\`
+```
 
-Use \`.github/workflows/rlt-hard02-semantic.yml\` to fetch Mathlib
+Use `.github/workflows/rlt-hard02-semantic.yml` to fetch Mathlib
 at the exact pinned commit, install Lean 4.12.0 and execute:
 
-\`\`\`bash
+```bash
 python -m datagoblin.training_gym.rlt_gym.hard02_mathlib \
   --lake "$HOME/.elan/bin/lake" \
   --mathlib /tmp/dg-rlt-mathlib \
   --per-split 8 --source-seed 2026112211 \
   --matched-menus --semantic-features \
   --out runs/rlt-hard02-semantic
-\`\`\`
+```
 
-It retains \`report.json\`, full source roots, kernel proof sources,
+It retains `report.json`, full source roots, kernel proof sources,
 training weights and native receipts, and independently runs the
 source and false-stop auditor. This is a development-only run.
