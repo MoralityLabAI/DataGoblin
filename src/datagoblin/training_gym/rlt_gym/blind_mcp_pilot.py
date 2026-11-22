@@ -153,9 +153,9 @@ def _rule_baseline(traces: list[Trace]) -> dict[str, Any]:
     return {"correct": correct, "roots": len(traces), "counterfactual_symbol_reads": reads}
 
 
-def run(per_split: int = 8) -> dict[str, Any]:
+def run(per_split: int = 8, *, source_seed: int = 20261123) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="dg-blind-mcp-") as tmp:
-        cases = build_source_roots(Path(tmp), per_split=per_split)
+        cases = build_source_roots(Path(tmp), per_split=per_split, seed=source_seed)
         traces = [collect(c) for c in cases]
         by_split = {s: [t for t in traces if t.case.split == s] for s in SPLITS}
         weights = fit_logistic(by_split["train"])
@@ -164,10 +164,12 @@ def run(per_split: int = 8) -> dict[str, Any]:
         for threshold in np.linspace(0.05, 0.95, 19):
             result = _score_policy(by_split["calibration"], weights, float(threshold))
             utility = result["correct"] - 0.015 * result["counterfactual_symbol_reads"]
-            scored.append((utility, -float(threshold), float(threshold)))
-        frozen_threshold = max(scored)[2]
+            scored.append((utility, float(threshold)))
+        frozen_threshold = max(scored)[1]
         result: dict[str, Any] = {
-            "schema": "dg_blind_mcp_learned_stop_development_v1",
+            "schema": "dg_blind_mcp_learned_stop_development_v2",
+            "source_seed": source_seed,
+            "calibration_tie_break": "prefer_larger_threshold_for_identical_calibration_utility",
             "source_custody": audit_source_roots(cases),
             "training_roots": len(by_split["train"]),
             "calibration_roots": len(by_split["calibration"]),
@@ -198,11 +200,12 @@ def run(per_split: int = 8) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--per-split", type=int, default=8)
+    parser.add_argument("--source-seed", type=int, default=20261123)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.out.exists():
         raise FileExistsError("create-only report")
-    result = run(args.per_split)
+    result = run(args.per_split, source_seed=args.source_seed)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2, sort_keys=True))
