@@ -13,7 +13,7 @@
   "task_family": "database_queries",
   "runtime_hint": "upstream-specific",
   "embedded_test_assertion_count": 0,
-  "imports_detected": false,
+  "imports_detected": true,
   "provenance_status": "pinned_upstream_snapshot",
   "verification_status": "not_run",
   "verification_receipt": null,
