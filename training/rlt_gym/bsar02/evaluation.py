@@ -2,8 +2,8 @@
 
 A measured model must supply predictions through an independently generated
 JSONL file. This script does not load a model or claim trained-model results.
-Run: python training/rlt_gym/bsar02/evaluation.py prepare --output-dir /tmp/bsar02
-     python training/rlt_gym/bsar02/evaluation.py score --predictions /tmp/model.jsonl
+Run: python -m training.rlt_gym.bsar02.evaluation prepare --output-dir /tmp/bsar02
+     python -m training.rlt_gym.bsar02.evaluation score --predictions /tmp/model.jsonl
 """
 
 from __future__ import annotations
@@ -11,11 +11,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from boundary_curriculum import CATALOG, check_dataset, generate
+from .boundary_curriculum import CATALOG, check_dataset, generate
 
 SOURCE_COMMIT = "80c62433b0eb671175bd8d6169822d3ebd922b60"
 LABELS = (
