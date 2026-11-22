@@ -1,0 +1,50 @@
+name: RLT BSAR-05 exact premise gym
+
+on:
+  pull_request:
+    paths:
+      - "training/rlt_gym/bsar05/**"
+      - "tests/unit/test_rlt_gym_bsar05_semantic.py"
+      - ".github/workflows/rlt-bsar05-semantic.yml"
+  push:
+    branches: [master]
+    paths:
+      - "training/rlt_gym/bsar05/**"
+      - "tests/unit/test_rlt_gym_bsar05_semantic.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-integer-gym:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install local DataGoblin and test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Verify exact arithmetic and split custody
+        run: python -m pytest tests/unit/test_rlt_gym_bsar05_semantic.py -q
+      - name: Check strict style and imports
+        run: ruff check training/rlt_gym/bsar05 tests/unit/test_rlt_gym_bsar05_semantic.py
+      - name: Freeze exact source-grounded outputs and majority control
+        run: |
+          python -m training.rlt_gym.bsar05.semantic_steps --out generated/bsar05
+          python - <<'PY'
+          import json
+          m = json.load(open("generated/bsar05/manifest.json", encoding="utf-8"))
+          assert m["examples"] == 1050
+          assert m["pairs"] == 525
+          assert m["constant_baseline"]["strict_accuracy"] == 0.5
+          assert m["constant_baseline"]["complete_pairs"] == 0
+          assert m["by_split"] == {"train": 600, "dev": 180, "test": 270}
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bsar05-exact-premise-jsonl
+          path: generated/bsar05/
+          retention-days: 14
