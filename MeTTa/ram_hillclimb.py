@@ -13,7 +13,6 @@ import argparse
 import hashlib
 import json
 import os
-import platform
 import sys
 
 try:
@@ -30,16 +29,14 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
-import numpy as np  # noqa: E402
-
-from .airis02_student import (  # noqa: E402
+from .airis02_student import (
     LinearStudent,
     RecurrentStudent,
     _matrix,
     _next_action,
     evaluate,
 )
-from .sft_oracle import (  # noqa: E402
+from .sft_oracle import (
     edit,
     evaluate_subset,
     exact_optimum,
@@ -288,8 +285,8 @@ def select_key(metrics: dict[str, Any]) -> tuple[int, ...]:
         metrics["exact_first_edit"],
         -metrics["premature_stops"],
         -metrics["verifier_queries"],
-        -int(round(metrics["mean_remaining_canonical_edits"] * 1000)),
-        -int(round(metrics["mean_inference_iterations"] * 1000)),
+        -round(metrics["mean_remaining_canonical_edits"] * 1000),
+        -round(metrics["mean_inference_iterations"] * 1000),
     )
 
 
@@ -566,7 +563,12 @@ def run_gym(
         "results_scope": "public development selected after repeated hillclimb observations",
         "model_comparison_warning": "TRM-style recurrent and LDT-proxy linear have unequal parameters",
         "next_teacher_prompt": {
-            "instruction": "Propose one JSON edit for the next CPU training trial. Restrict action to listed knobs; optimize verified solved-and-stopped on held-out public development while minimizing unsafe additions and verifier calls. State no model or benchmark claims not measured.",
+            "instruction": (
+                "Propose one JSON edit for the next CPU training trial. "
+                "Restrict action to listed knobs; maximize verified solved-and-stopped "
+                "on held-out public development while minimizing unsafe additions "
+                "and verifier calls. Keep claims limited to measured results."
+            ),
             "current_configs": current,
             "public_development_metrics": {
                 arm: best[arm]["dev_aggregate"] for arm in ARMS
