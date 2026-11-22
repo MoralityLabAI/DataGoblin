@@ -91,13 +91,10 @@ def run(
     tasks = public_tasks(heldout)
     expected = set(heldout)
     previous = read_predictions(output, expected) if output.exists() else {}
-    for item in tasks:
-        if item["id"] not in previous:
-            continue
-        # Stop users from silently pooling responses from different models.
-        # The simple label parser ensures each recorded response stays valid.
-        if previous[item["id"]] not in LABELS + (ABSTAIN,):
-            raise ValueError("Invalid existing prediction")
+    if output.exists():
+        for line in output.read_text(encoding="utf-8").splitlines():
+            if line.strip() and json.loads(line).get("model") != model:
+                raise ValueError("Existing predictions belong to another or unknown model")
     remaining = [item for item in tasks if item["id"] not in previous][:limit]
     output.parent.mkdir(parents=True, exist_ok=True)
     for item in remaining:
