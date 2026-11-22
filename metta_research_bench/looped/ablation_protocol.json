@@ -1,0 +1,13 @@
+{
+  "schema": "looped-curation-one-rule-ablation-v1",
+  "primary_split": "looped_ablation_frozen",
+  "primary_roots_per_family": 40,
+  "transfer_split": "looped_ablation_conflict",
+  "transfer_roots": 32,
+  "primary_contrast": "good_minus_single_rule_ablation",
+  "bootstrap_draws": 2000,
+  "sign_flip_draws": 19999,
+  "primary_error_control": "Holm over rules differing between the original curators with distinct selections",
+  "shared_guards": ["closure", "eligibility", "budget"],
+  "original_difference_rules": ["lineage", "revision", "dependency", "conflict", "coverage"]
+}

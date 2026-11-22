@@ -7,6 +7,7 @@ import json
 import subprocess
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from importlib.metadata import version
 from pathlib import Path
 
@@ -93,6 +94,7 @@ def paired_metrics(rows: list[dict]) -> dict:
 
 async def evaluate(
     out: Path, split: str, count: int, models: dict, expected: dict, forbidden: set[str],
+    *, analyze: Callable[[list[dict]], dict] = paired_metrics,
 ) -> tuple[dict, set[str]]:
     tasks = list(vf.load_taskset(BenchConfig(split=split, roots_per_family=count)))
     hashes = {task.data.source_sha256 for task in tasks}
@@ -113,7 +115,7 @@ async def evaluate(
                     "grade": trace.info["curation_grade"], "policy": policy, "reward": int(trace.reward),
                 })
     return {
-        **paired_metrics(rows), "sources": [{"root": task.data.id, "source_sha256": task.data.source_sha256}
+        **analyze(rows), "sources": [{"root": task.data.id, "source_sha256": task.data.source_sha256}
                                            for task in tasks],
         "receipts_sha256": save_receipts(out, f"{split}_receipts.jsonl", rows),
         "prime_traces_sha256": digest(path.read_bytes()),
