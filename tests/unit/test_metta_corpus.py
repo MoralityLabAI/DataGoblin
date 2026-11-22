@@ -152,5 +152,5 @@ def test_heldout_curation_has_zero_teacher_label_exposure(tmp_path: Path) -> Non
 
 
 def test_output_cannot_be_committed_as_source() -> None:
-    with pytest.raises(ValueError, match="outside MeTTa"):
+    with pytest.raises(ValueError, match="outside the committed MeTTa"):
         collect(CATALOG, {"not_an_source": ROOT}, ROOT / "MeTTa" / "bad")
