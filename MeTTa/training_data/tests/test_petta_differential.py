@@ -21,47 +21,56 @@ from petta_differential import (  # noqa: E402
     assess_petta,
     container_command,
     parse_petta_output,
+    query_program,
 )
 
 
 class PettaDifferentialTests(unittest.TestCase):
-    def test_petta_prints_a_metta_list_of_results(self) -> None:
-        self.assertEqual(parse_petta_output("()"), [])
+    def test_petta_prints_one_result_per_line(self) -> None:
+        self.assertEqual(parse_petta_output(""), [])
+        self.assertEqual(parse_petta_output("Alice\nCarla\n"), ["Alice", "Carla"])
         self.assertEqual(
-            parse_petta_output("(Alice Carla)"), ["Alice", "Carla"]
-        )
-        self.assertEqual(
-            parse_petta_output("((Found v0 u0) (Found v1 u1))"),
+            parse_petta_output("(Found v0 u0)\n(Found v1 u1)\n"),
             [("Found", "v0", "u0"), ("Found", "v1", "u1")],
         )
+        self.assertEqual(parse_petta_output("()\n"), [()])
         with self.assertRaises(UnsupportedSemantics):
             parse_petta_output("[Alice, Carla]")
         with self.assertRaises(UnsupportedSemantics):
-            parse_petta_output("Alice")
+            parse_petta_output("(Unclosed\n")
+
+    def test_query_runs_are_separate_and_have_no_hidden_prior_queries(self) -> None:
+        world = make_world(0)
+        for index, query in enumerate(world["queries"]):
+            script = query_program(world, index)
+            self.assertTrue(script.endswith(f"!{query}\n"))
+            self.assertEqual(script.count("!(match &self"), 1)
+            self.assertIn("(Role u00_000", script)
+            self.assertNotIn(f"!{world['queries'][(index + 1) % 4]}", script)
+        with self.assertRaises(ValueError):
+            query_program(world, 4)
 
     def test_reference_agreement_and_negative_control(self) -> None:
         world = make_world(0)
-        pe_lines = [
-            render(tuple(values)) for values in world["references"]
-        ]
-        run = {
-            "stdout": ("\n".join(pe_lines) + "\n").encode(),
-            "stderr": b"",
-            "exit_code": 0,
-            "timed_out": False,
-        }
-        evaluations = assess_petta(world, run)
-        self.assertEqual([x["status"] for x in evaluations], ["agree"] * 4)
-        modified = dict(run)
-        modified["stdout"] = b"(Unexpected)\n" + run["stdout"].split(b"\n", 1)[1]
-        failures = assess_petta(world, modified)
-        self.assertEqual(failures[0]["status"], "mismatch")
-        self.assertTrue(all(x["status"] == "agree" for x in failures[1:]))
+        for reference in world["references"]:
+            rows = [render(value) for value in reference]
+            run = {
+                "stdout": ("\n".join(rows) + ("\n" if rows else "")).encode(),
+                "stderr": b"",
+                "exit_code": 0,
+                "timed_out": False,
+            }
+            self.assertEqual(assess_petta(reference, run)["status"], "agree")
+            changed = dict(run)
+            changed["stdout"] = b"UnexpectedValue\n"
+            self.assertEqual(assess_petta(reference, changed)["status"], "mismatch")
 
     def test_hyperon_observation_uses_its_own_output_syntax(self) -> None:
         world = make_world(0)
-        reference = world["references"]
-        rows = [f"[{', '.join(render(x) for x in values)}]" for values in reference]
+        rows = [
+            f"[{', '.join(render(x) for x in values)}]"
+            for values in world["references"]
+        ]
         run = {
             "stdout": ("\n".join(rows) + "\n").encode(),
             "stderr": b"",
@@ -79,13 +88,15 @@ class PettaDifferentialTests(unittest.TestCase):
             "exit_code": 3,
             "timed_out": False,
         }
-        self.assertTrue(
-            all(x["status"] == "runtime_or_alignment_failure"
-                for x in assess_petta(world, run))
+        self.assertEqual(
+            assess_petta(world["references"][0], run)["status"],
+            "runtime_or_alignment_failure",
         )
         self.assertTrue(
-            all(x["status"] == "runtime_or_alignment_failure"
-                for x in assess_hyperon(world, run))
+            all(
+                x["status"] == "runtime_or_alignment_failure"
+                for x in assess_hyperon(world, run)
+            )
         )
 
     def test_immutable_image_and_networkless_resource_caps(self) -> None:
