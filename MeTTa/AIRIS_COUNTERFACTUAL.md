@@ -34,7 +34,7 @@ This internal confirmation is a split of known synthetic training roots and **no
 
 ## Outcome contract
 
-Report the target-violation flip rate for each arm, full violation-signature change rate, changed canonical oracle next edit, mutation type distribution, exact-source hashes, sham outcomes, and matched-root wins/ties. A higher flip rate means that the selector found more impactful **synthetic interventions**. It does not establish that the intervention is useful training data or that a learned recurrence policy improves.
+Report the target-violation flip rate for each arm, full violation-signature change rate, changed canonical oracle next edit, mutation type distribution, exact-source hashes, sham outcomes, and matched-root wins/ties. The budget-first control intentionally crosses the selected-cost threshold whenever possible and may attain 100% targeted flips by construction. A higher flip rate alone has little meaning in that setting. The meaningful downstream question is whether motif guidance finds varied and independently useful oracle-repair changes beyond this deterministic threshold shortcut. None of these metrics establishes model improvement.
 
 The experiment keeps independent claims for:
 - valid single-fact mutation and synthetic-world replay;
