@@ -10,15 +10,15 @@ import argparse
 import json
 import re
 import time
-import urllib.error
 import urllib.parse
 import urllib.request
 from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
+from .storyworld_native import SCHEMA as TASK_SCHEMA
 from .storyworld_native import (
-    SCHEMA as TASK_SCHEMA,
     _json,
     _sha_file,
     connect,
