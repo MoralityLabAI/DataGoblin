@@ -107,7 +107,7 @@ def test_invalid_search_bounds_and_no_reserved_labels():
     with pytest.raises(ValueError, match="reserved"):
         evolve([replace(observations[0], family="conflict"), *observations[1:]])
     with pytest.raises(ValueError, match="source-root"):
-        evolve([replace(observations[0], root="metta-sft-v1:lineage:999999"), *observations[1:]])
+        evolve([replace(observations[0], root="metta-sft-v1:nonexistent:999999"), *observations[1:]])
 
 
 def test_confusion_reports_unknown_class_accuracy_with_stable_denominator():
