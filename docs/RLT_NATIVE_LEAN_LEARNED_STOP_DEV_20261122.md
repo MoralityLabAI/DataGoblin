@@ -155,3 +155,43 @@ The second run's preregistered command is:
       --source-seed 20261125 --alpha-ood \
       --out /new/empty/parent/rlt-native-lean-alpha-ood
 
+
+## Native second cohort: variable renaming failure
+
+The preregistered seed-20261125 run passed
+[Actions #44980268127](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44980268127).
+The artifact passed all 26 SHA-256 file checks, retained 24 certified
+Lean proof sources and recorded 281 real compiler invocations. TRAIN
+and CAL each had six witnessed and two menu-exhausted roots, with a
+CAL-frozen stopping threshold of 0.95.
+
+On ordinary development roots, the learned ranker certified 6/8 in
+eight candidate attempts. On the **alpha-renamed OOD roots** it
+certified just **2/8** in eight attempts. The full fixed-menu search
+kernel-certified 6/8 on the same OOD cohort in 22 attempts, and the
+random-full baseline also certified 6/8. This is a learned-stopping
+failure: four available true witness scripts were missed after
+changing the goal's bound variable spelling. It directly tests the
+literal-formula feature shortcut identified after the first run.
+
+## Registered third development iteration: alpha-canonical inputs
+
+The third native cohort uses source seed `20261126`, with
+`--alpha-ood` and the same frozen CAL utility and candidate menus.
+The only policy-family change is a deterministic **public syntax
+normalizer**: it reads the three bound Nat variable names and maps
+them to the canonical names `a b c` before extracting the 30
+feature components. Tactic scripts, the trusted checker, split
+allocation, verifier costs, and the threshold sweep are unchanged.
+
+A new unit contract requires two alpha-equivalent goal strings to
+have exactly the same public features for every registered tactic.
+The model still trains on fresh TRAIN roots and picks its threshold
+on fresh CAL roots; ordinary/OOD labels remain development-only.
+This is a post-failure engineering repair and a separately registered
+study. Success would demonstrate an engineered invariance in the
+input representation, with no claim that the logistic model learned
+alpha-renaming on its own.
+
+Workflow argument: `--per-split 8 --source-seed 20261126 --alpha-ood`.
+The original v1 and v2 green-run artifacts are preserved.
