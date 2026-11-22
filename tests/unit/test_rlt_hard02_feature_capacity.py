@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-from datagoblin.training_gym.rlt_gym.hard02_mathlib import SPLITS
-from scripts.audit_rlt_hard02_feature_capacity import inspect
+import pytest
+
+pytest.importorskip("autograd", reason="grounded ranker feature audit requires optional rlt-pilot")
+
+from datagoblin.training_gym.rlt_gym.hard02_mathlib import SPLITS  # noqa: E402
+from scripts.audit_rlt_hard02_feature_capacity import inspect  # noqa: E402
 
 
 def test_matched_action_semantics_are_unidentifiable_without_position():
