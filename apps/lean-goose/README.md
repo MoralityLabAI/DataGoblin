@@ -44,3 +44,5 @@ python -m datagoblin.training_gym.rlt_gym.lean_goose_list \
 ```
 
 The native List baselines retain the original fixed order, root-seeded random order, and suffix-length rule. The two-check fixed score and exhaustive kernel oracle answer different questions. Treat solver results on these generated menus separately from open Lean proofs and hard Mathlib or LeanGym performance. The paired pilot uses no sealed confirmation data.
+
+On the shared single-slot server, the paired runner queues up to four independent roots while it computes the native controls. `LEAN_GOOSE_REQUEST_SECONDS` sets the GDK request deadline, including time spent waiting for a slot, from 10 to 900 seconds. The default is 90 seconds. Use a longer bounded deadline when another gym already has a long request in flight. Provider errors remain distinct from model stops and invalid moves.

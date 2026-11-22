@@ -11,5 +11,5 @@ goose-agent = "=0.1.0-alpha.14"
 goose-provider-types = "=0.1.0-alpha.14"
 goose-providers = "=0.1.0-alpha.14"
 serde_json = "1"
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }
 tokio-util = "0.7"

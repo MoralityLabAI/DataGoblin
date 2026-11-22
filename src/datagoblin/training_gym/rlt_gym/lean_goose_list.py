@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +15,7 @@ from datagoblin.hashing import sha256_file
 from .external_checked_exit import digest
 from .external_native_adapters import LeanKernelChecker
 from .hard02_mathlib import MathlibSession, export_sources, verify_upstream
-from .hard02e_list_stop import BUDGET, SEED, generate
+from .hard02e_list_stop import BUDGET, SEED, ListRoot, generate
 from .hard02f_oxibonsai import ARMS, _check, _summary, bonsai_episode, control_episode
 from .lean_bonsai import build_prompt, parse_choice
 from .lean_goose import GooseProcess, write_row
@@ -48,6 +50,19 @@ class GooseChoices:
         }
 
 
+def queued_model_episode(
+    worker: Path, port: int, model: str, root: ListRoot, shard: Path, checker: LeanKernelChecker,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    with GooseProcess(worker, port, model) as engine:
+        chooser = GooseChoices(engine, shard, root.root_id)
+        row = bonsai_episode(root, chooser, checker, max_attempts=2)
+        row["arm"] = MODEL_ARM
+        if chooser.errors:
+            row["result"] = "provider_error"
+            row["invalid_model_choices"] -= chooser.errors
+        return row, engine.identity
+
+
 def run(
     lake: Path, mathlib: Path, worker: Path, out: Path, *, port: int, model: str,
 ) -> dict[str, Any]:
@@ -69,12 +84,25 @@ def run(
     checker = LeanKernelChecker(lean=session, states=states, verifier_sha=verifier_sha)
     groups: dict[str, list[dict[str, Any]]] = {arm: [] for arm in (MODEL_ARM, *ARMS[1:])}
     oracles = {}
+    reference = {}
     native_replays = 0
-    with GooseProcess(worker, port, model) as engine:
+    identities = []
+    # The resident llama.cpp server schedules the requests. Independent workers
+    # let its single slot queue this small cohort while the host runs the controls.
+    with ThreadPoolExecutor(max_workers=len(roots)) as pool:
+        futures = []
+        for sid, root in enumerate(roots, 1):
+            shard = out / "model_shards" / f"root-{sid:02d}"
+            shard.mkdir(parents=True)
+            model_session = MathlibSession(lake, mathlib, shard, roots, import_module=LIST_MODULE)
+            model_checker = LeanKernelChecker(lean=model_session, states=states, verifier_sha=verifier_sha)
+            futures.append((root, shard, pool.submit(queued_model_episode, worker, port, model,
+                                                     root, shard, model_checker)))
         for sid, root in enumerate(roots, 1):
             state = session.probe(sid)
             oracle = [_check(checker, root, i) for i in range(BUDGET)]
             labels = {row["candidate_id"]: row["receipt"] for row in oracle}
+            reference[root.root_id] = labels
             oracles[root.root_id] = any(row["passed"] for row in labels.values())
             if sum(row["passed"] for row in labels.values()) != int(root.expected_witness):
                 raise ValueError(f"registered List witness disagreement: {root.root_id}")
@@ -84,27 +112,34 @@ def run(
                     shutil.copyfile(source, proof_dir / source.name)
             write_row(out / "kernel_oracle.jsonl", {"root_id": root.root_id, "task": root.public_task(),
                                                     "menu": root.menu, "state": state, "attempts": oracle})
-            chooser = GooseChoices(engine, out, root.root_id)
-            proposed = bonsai_episode(root, chooser, checker, max_attempts=2)
-            proposed["arm"] = MODEL_ARM
-            if chooser.errors:
-                proposed["result"] = "provider_error"
-                proposed["invalid_model_choices"] -= chooser.errors
             controls = [control_episode(root, checker, arm, max_attempts=2) for arm in ARMS[1:]]
-            for row in (proposed, *controls):
+            for row in controls:
                 for attempt in row["attempts"]:
                     if attempt["receipt"] != labels[attempt["candidate_id"]]:
                         raise ValueError("live kernel receipt differs from independent oracle")
                 groups[row["arm"]].append(row)
                 write_row(out / "paired_receipts.jsonl", row)
+        for root, shard, future in futures:
+            proposed, identity = future.result()
+            identities.append(identity)
+            groups[MODEL_ARM].append(proposed)
+            write_row(out / "paired_receipts.jsonl", proposed)
+            for raw in (shard / "model_requests.jsonl").read_text(encoding="utf-8").splitlines():
+                write_row(out / "model_requests.jsonl", json.loads(raw))
             for attempt in proposed["attempts"]:
+                if attempt["receipt"] != reference[root.root_id][attempt["candidate_id"]]:
+                    raise ValueError("model-selected proof disagrees with independent oracle")
                 if _check(checker, root, attempt["candidate_id"])["receipt"] != attempt["receipt"]:
                     raise ValueError("independent selected-candidate replay disagreed")
                 native_replays += 1
+    if any(identity != identities[0] for identity in identities):
+        raise ValueError("resident server model metadata changed during the comparison")
     inky = groups[MODEL_ARM]
     report = {
         "schema": SCHEMA, "upstream": upstream, "lean_import": LIST_MODULE,
-        "model_identity": engine.identity, "source_seed": SEED,
+        "model_identity": identities[0], "source_seed": SEED,
+        "model_request_timeout_seconds": int(os.environ.get("LEAN_GOOSE_REQUEST_SECONDS", "90")),
+        "model_request_schedule": "queued_source_roots_on_one_resident_server",
         "worker_sha256": sha256_file(worker), "verifier_sha256": verifier_sha,
         "evaluation_only": True, "verifier_attempt_budget": 2, "source_roots": len(roots),
         "exhaustive_oracle": {"checks": len(roots) * BUDGET, "certified": sum(oracles.values())},

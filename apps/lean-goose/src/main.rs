@@ -175,11 +175,15 @@ async fn infer(
     let emitter = Emitter::new(tx, cancel);
     let drain = tokio::spawn(async move { while rx.recv().await.is_some() {} });
     let started = Instant::now();
-    let result = machine.run(&runtime, "lean-rollout", &emitter).await;
+    let result = tokio::time::timeout(
+        api.timeout(),
+        machine.run(&runtime, "lean-rollout", &emitter),
+    )
+    .await;
     let request_seconds = started.elapsed().as_secs_f64();
     drop(emitter);
     drain.abort();
-    let session = result?;
+    let session = result.context("GDK inference deadline reached")??;
     let answer = session
         .0
         .last()
@@ -188,7 +192,10 @@ async fn infer(
         .as_concat_text();
     let usage = runtime.usage.lock().unwrap();
     let [reported] = usage.as_slice() else {
-        return Err(anyhow!("expected one GDK usage record"));
+        return Err(anyhow!(
+            "GDK returned {} usage records for one request",
+            usage.len()
+        ));
     };
     let parity = reported.usage.input_tokens == Some(prompt_tokens as i64);
     Ok(json!({
@@ -207,10 +214,23 @@ async fn main() -> Result<()> {
     };
     let port: u16 = port.parse().context("invalid llama.cpp port")?;
     ensure!(port > 0 && !model.is_empty(), "port and model are required");
+    let timeout_secs = std::env::var("LEAN_GOOSE_REQUEST_SECONDS")
+        .unwrap_or_else(|_| "90".into())
+        .parse::<u64>()
+        .context("invalid LEAN_GOOSE_REQUEST_SECONDS")?;
+    ensure!(
+        (10..=900).contains(&timeout_secs),
+        "request deadline must be 10..900 seconds"
+    );
     let base = format!("http://127.0.0.1:{port}/");
     let client = |url| -> Result<ApiClient> {
-        ApiClient::with_timeout_and_tls(url, AuthMethod::NoAuth, Duration::from_secs(90), None)?
-            .with_loopback_http_only()
+        ApiClient::with_timeout_and_tls(
+            url,
+            AuthMethod::NoAuth,
+            Duration::from_secs(timeout_secs),
+            None,
+        )?
+        .with_loopback_http_only()
     };
     let api = client(base.clone())?;
     let provider = Arc::new(
