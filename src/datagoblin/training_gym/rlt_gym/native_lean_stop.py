@@ -377,7 +377,7 @@ def run(lean_exe: Path, out: Path, *, per_split: int = 8, seed: int = SOURCE_SEE
         proofs = out / "certified_proofs"
         proofs.mkdir()
         source_hashes = {}
-        for sid, (source, _name) in sorted(session.proof_by_sid.items()):
+        for _sid, (source, _name) in sorted(session.proof_by_sid.items()):
             dest = proofs / source.name
             shutil.copyfile(source, dest)
             source_hashes[dest.relative_to(out).as_posix()] = _sha(dest.read_bytes())
