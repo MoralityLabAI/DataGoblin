@@ -1,0 +1,81 @@
+name: MeTTa-06 independent finite semantics and native comparison
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/metta-finite-oracle.yml'
+      - 'MeTTa/training_data/scripts/finite_semantic_oracle.py'
+      - 'MeTTa/training_data/scripts/finite_oracle_pilot.py'
+      - 'MeTTa/training_data/tests/test_finite_semantic_oracle.py'
+      - 'MeTTa/training_data/FINITE_ORACLE_PROTOCOL.md'
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/metta-finite-oracle.yml'
+      - 'MeTTa/training_data/scripts/finite_semantic_oracle.py'
+      - 'MeTTa/training_data/scripts/finite_oracle_pilot.py'
+      - 'MeTTa/training_data/tests/test_finite_semantic_oracle.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-semantic-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned Hyperon runtime and Ruff
+        run: python -m pip install 'hyperon==0.2.10' 'ruff==0.17.6'
+      - name: Enforce restricted independent semantics and mutation controls
+        run: |
+          ruff check MeTTa/training_data/scripts/finite_semantic_oracle.py \
+            MeTTa/training_data/scripts/finite_oracle_pilot.py \
+            MeTTa/training_data/tests/test_finite_semantic_oracle.py
+          python -m unittest discover -s MeTTa/training_data/tests \
+            -p 'test_finite_semantic_oracle.py' -v
+      - name: Compare 32 deterministic public roots and type-error probe
+        run: |
+          set -euo pipefail
+          mkdir -p runs/metta/finite_oracle
+          python MeTTa/training_data/scripts/finite_oracle_pilot.py \
+            --roots 32 --timeout-sec 8 \
+            --out runs/metta/finite_oracle/observations.jsonl \
+            --report runs/metta/finite_oracle/report.json \
+            > runs/metta/finite_oracle/stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("runs/metta/finite_oracle")
+          report = json.loads((p / "report.json").read_text())
+          records = [json.loads(x) for x in (p / "observations.jsonl").read_text().splitlines()]
+          assert report["ground_match_query_count"] == 128
+          assert report["typed_error_probe_count"] == 1
+          assert report["observations"] == 129
+          assert sum(report["outcome_counts"].values()) == len(records)
+          assert report["training_ready"] is False
+          assert report["sealed_eval_eligible"] is False
+          assert report["all_targets_public"] is True
+          assert report["unbounded_metta_semantics_verified"] is False
+          assert report["native_semantics_for_source_candidates_verified"] is False
+          assert all(r["training_ready"] is False for r in records)
+          assert all(r["sealed_eval_eligible"] is False for r in records)
+          assert all(r["upstream_author_targets_used"] is False for r in records)
+          assert len({r["root"] for r in records}) == 33
+          print("Public oracle agreement categories:", report["outcome_counts"])
+          PY
+      - name: Archive native observations and independent computed reference hashes
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta06-independent-finite-oracle
+          path: |
+            runs/metta/finite_oracle/observations.jsonl
+            runs/metta/finite_oracle/report.json
+            runs/metta/finite_oracle/stdout.json
+          retention-days: 14
+          if-no-files-found: error
