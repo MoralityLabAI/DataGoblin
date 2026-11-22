@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 
 from MeTTa.collect import scan_forms, sha256_bytes
-from MeTTa.looped_sft import audit_bundle, checked_training_row, make_bundle, prompt, root_id, split_for
+from MeTTa.export_looped_frames import export_frames
+from MeTTa.looped_sft import audit_bundle, checked_training_row, make_bundle, prompt, query_supervision, root_id, split_for
 from MeTTa.sft_oracle import (
     FAMILIES,
     edit,
@@ -114,6 +115,38 @@ def test_looped_bundle_is_deterministic_and_unlabeled_reserves(tmp_path: Path) -
         assert "preference" not in row
         assert "oracle" not in row
         assert "verifier_receipt" not in row
+
+
+def test_metta_query_targets_are_checked_against_structured_facts() -> None:
+    for family in FAMILIES:
+        task = make_task(family, 9)
+        for step in range(4):
+            result = query_supervision(task, step)
+            skill = task["goals"][step % len(task["goals"])]
+            expected = sorted(
+                x["id"] for x in task["items"] if x["eligible"] and skill in x["topics"]
+            )
+            assert result["expected_record_ids"] == expected
+            assert result["query"].startswith("!(match &self (,")
+            assert result["verified_native_metta"] is False
+
+
+def test_looped_frame_adapter_is_alternate_view_with_shared_roots(tmp_path: Path) -> None:
+    bundle = tmp_path / "canonical"
+    manifest = make_bundle(bundle, roots_per_family=6)
+    output = tmp_path / "alternate" / "looped_frames.jsonl"
+    view = export_frames(bundle, output)
+    assert view["rows"] == manifest["training_presentations"]
+    assert view["alternative_view_not_extra_presentations"] is True
+    assert view["max_presentations_per_root"] <= 4
+    assert view["training_ready"] is False
+    rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert rows
+    assert all(set(x) == {"instruction", "input", "output", "metadata"} for x in rows)
+    assert all(x["metadata"]["soundness_type"] == "SIMULATED_NOT_ENVIRONMENT_CERTIFIED" for x in rows)
+    assert all(x["metadata"]["stop_target"] in (True, False) for x in rows)
+    with pytest.raises(ValueError, match="distinct"):
+        export_frames(bundle, bundle / "forbidden.jsonl")
 
 
 def test_heldout_family_is_disjoint_from_train() -> None:
