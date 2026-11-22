@@ -68,6 +68,17 @@ The source-file root stays attached to every derivative. Split assignment keeps 
 
 `seed/curation_graph.metta` gives an original native MeTTa fact/query example that joins source, license, provenance, split and custody atoms. It proposes relevant candidates through `match &self`. The graph never admits records, removes data or prunes an evaluation branch. Run it with the pinned Hyperon interpreter and archive the native execution receipt before turning any query-output example into runtime-grounded supervision.
 
+## Looped-transformer SFT curation program
+
+[**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
+
+```bash
+python -m MeTTa.looped_sft build --roots-per-family 512 --out runs/metta/looped_sft
+python -m MeTTa.looped_sft audit --out runs/metta/looped_sft
+```
+
+These are synthetic candidate supervision records. Native MeTTa execution and trained-model improvements remain future validation gates.
+
 ## Next curation curriculum
 
 | Exercise | Learner task | Required check |
@@ -90,3 +101,7 @@ python -m MeTTa.curation_gym --out runs/metta/curation
 ```
 
 The GitHub workflow `metta-corpus.yml` runs the CPU tests, checks the source catalog, generates the 1,960 curation exercises, checks that evaluation labels are absent and preserves the manifest. Native interpreter replay and local model training require separate approved runs.
+
+## Goertzel Pattern-Miner curriculum and follow-on lanes
+
+[MeTTa-03](GOERTZEL_SYNERGY.md) mines root-level, observable conjunctions from the existing synthetic curation training partition, with a separate synthetic Python-oracle validity check and disjoint internal discovery/confirmation roots. It emits advisory MeTTa motif facts with lineage receipts without adding any SFT presentations. The report also maps next research integrations for MOSES, NARS/PLN, AIRIS, MetaMo/OpenPsi, ECAN and HiBaCaML. Run `python -m MeTTa.pattern_miner --out runs/metta/pattern_miner` to regenerate the proposed motifs. All outputs remain `training_ready=false`.

@@ -1,0 +1,81 @@
+name: MeTTa looped SFT curation and depth targets
+
+on:
+  pull_request:
+    paths:
+      - "MeTTa/**"
+      - "tests/unit/test_metta_looped_sft.py"
+      - "tests/unit/test_metta_native_receipts.py"
+      - ".github/workflows/metta-looped-sft.yml"
+  push:
+    branches: [master]
+    paths:
+      - "MeTTa/**"
+      - "tests/unit/test_metta_looped_sft.py"
+      - ".github/workflows/metta-looped-sft.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-curation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install DataGoblin
+        run: python -m pip install -e ".[dev]"
+      - name: Test oracle, lineage custody and frame adapter
+        run: |
+          python -m pytest -q tests/unit/test_metta_looped_sft.py tests/unit/test_metta_native_receipts.py tests/unit/test_metta_corpus.py
+          ruff check MeTTa/sft_oracle.py MeTTa/looped_sft.py MeTTa/depth_frontier.py MeTTa/export_looped_frames.py MeTTa/aggregate_native.py MeTTa/native_query_replay.py tests/unit/test_metta_looped_sft.py tests/unit/test_metta_native_receipts.py
+      - name: Build 3072-root curriculum from six families
+        run: |
+          python -m MeTTa.looped_sft build --roots-per-family 512 --out runs/metta/looped_sft
+      - name: Replay full synthetic oracle and split audit
+        run: |
+          python -m MeTTa.looped_sft audit --out runs/metta/looped_sft
+          python -m MeTTa.export_looped_frames --bundle runs/metta/looped_sft --out runs/metta/alternate/looped_frames.jsonl
+          python -m MeTTa.depth_frontier --roots-per-family 512 --out runs/metta/looped_sft/depth_frontier.json
+      - name: Confirm no reserved targets and one canonical training source
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("runs/metta/looped_sft")
+          manifest = json.loads((root / "manifest.json").read_text())
+          adapter = json.loads(Path("runs/metta/alternate/looped_frames.jsonl.manifest.json").read_text())
+          assert manifest["root_count"] == 3072, manifest
+          assert manifest["policy"]["training_ready"] is False
+          assert manifest["policy"]["eval_labels_written"] == 0
+          assert manifest["max_presentations_per_root"] <= 4
+          assert manifest["split_roots"]["ood_reserved"] == 512
+          assert manifest["training_presentations"] == adapter["rows"]
+          assert adapter["alternative_view_not_extra_presentations"]
+          with (root / "reserved_public.jsonl").open() as stream:
+              assert all(
+                  all(key not in (row := json.loads(line)) for key in (
+                      "messages", "preference", "target", "verifier_receipt", "oracle"
+                  ))
+                  for line in stream
+              )
+          print("MeTTa SFT generated curriculum:", json.dumps(manifest, sort_keys=True))
+          PY
+      - name: Save canonical corpus and alternate adapter
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-looped-sft-synthetic-v1
+          path: |
+            runs/metta/looped_sft/train_candidates.jsonl
+            runs/metta/looped_sft/reserved_public.jsonl
+            runs/metta/looped_sft/manifest.json
+            runs/metta/looped_sft/depth_frontier.json
+            runs/metta/alternate/looped_frames.jsonl
+            runs/metta/alternate/looped_frames.jsonl.manifest.json
+          retention-days: 14
+          if-no-files-found: error
