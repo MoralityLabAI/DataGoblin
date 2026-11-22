@@ -118,7 +118,7 @@ def build_row(
     if chosen["op"] not in ("add", "remove", "stop"):
         raise ValueError("invalid exact-oracle repair label")
     # Oracle labels and selected answers stay strictly inside train/dev rows.
-    return {
+    row = {
         "schema_version": SCHEMA,
         "root": root,
         "family": family,
@@ -148,6 +148,9 @@ def build_row(
         "new_model_weights": False,
         "model_label_authority": "independent_bounded_synthetic_python_oracle",
     }
+    # Serialize through a canonical JSON form before any comparison; a
+    # dependency-edge intervention otherwise leaves tuples in memory.
+    return json.loads(canonical(row))
 
 
 def make_rows(split: str, *, roots_per_family: int,
