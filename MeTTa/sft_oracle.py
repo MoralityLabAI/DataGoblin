@@ -225,18 +225,11 @@ def edit(selected: list[str] | tuple[str, ...], action: dict[str, str]) -> list[
     return sorted(set_)
 
 
-def first_state(task: dict[str, Any], optimum: list[str], seed: int) -> list[str]:
-    rng = random.Random(f"metta-initial-v1/{task['family']}/{seed}")
-    pool = [item["id"] for item in task["items"] if item["id"] not in optimum]
-    rng.shuffle(pool)
-    # The candidate begins with multiple unsupported sources. Removing
-    # them and adding missing optimum sources supplies depth supervision.
-    wrong = pool[: min(3, len(pool))]
-    omitted = sorted(optimum)
-    state = sorted(wrong + omitted[: max(0, len(omitted) - 2)])
-    if len(state) > task["max_items"]:
-        state = sorted(state[: task["max_items"]])
-    return state
+def first_state(task: dict[str, Any], seed: int) -> list[str]:
+    """Sample a public starting state independently of the hidden optimum."""
+    rng = random.Random(f"metta-initial-v2/{task['family']}/{seed}")
+    count = rng.randint(2, min(4, len(task["items"])))
+    return sorted(rng.sample([item["id"] for item in task["items"]], count))
 
 
 def replay(task: dict[str, Any], selected: list[str], optimum: list[str]) -> list[dict[str, Any]]:
