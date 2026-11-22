@@ -42,8 +42,9 @@ jobs:
           git -C "$RUNNER_TEMP/looped-transformers" checkout --quiet --detach FETCH_HEAD
       - name: Test native rule selection and validate the development taskset
         run: |
-          python -m pytest tests/unit/test_metta_looped_quality.py \
-            tests/unit/test_metta_looped_ablation.py tests/unit/test_metta_research_bench.py
+          PYTHONPATH="$PWD:$RUNNER_TEMP/looped-transformers" \
+            python -m pytest tests/unit/test_metta_looped_quality.py \
+              tests/unit/test_metta_looped_ablation.py tests/unit/test_metta_research_bench.py
           PYTHONPATH="$PWD" vf-validate metta-research-bench --taskset.split looped_dev \
             --taskset.roots-per-family 12 --runtime.type subprocess -n 60 \
             --output-dir "$RUNNER_TEMP/metta-validation"
