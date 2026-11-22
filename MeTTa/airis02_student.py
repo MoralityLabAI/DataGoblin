@@ -242,6 +242,15 @@ class RecurrentStudent:
         ))).hexdigest()
 
 
+def canonical_eval_key(row: dict) -> str:
+    # Root, selected IDs and public world are all that define an eval input.
+    # Oracle labels are deliberately excluded from the equality check.
+    return json.dumps(
+        {"root": row["root"], "world": row["public_world"], "selected": row["selected"]},
+        sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+    )
+
+
 def _matrix(rows: list[dict]) -> tuple[np.ndarray, np.ndarray]:
     if not rows:
         raise ValueError("empty student training rows")
@@ -347,6 +356,9 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         return [json.loads(line) for line in (bundle / filename).read_text(encoding="utf-8").splitlines() if line]
     train = load("train_candidate.jsonl")
     dev = load("development_labels_research.jsonl")
+    # Every fitted model is scored on the SAME public development worlds.
+    # The uniform policy's frozen worlds form a common task allocation.
+    shared_dev = [row for row in dev if row["arm"] == "uniform"]
     if {row["root"] for row in train} & {row["root"] for row in dev}:
         raise ValueError("train/development root leakage")
     if (
@@ -370,6 +382,10 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         "train_cases_per_arm": manifest["train_roots"],
         "development_cases_per_arm": manifest["development_roots"],
         "one_example_per_root_per_arm": True,
+        "development_evaluation_world_policy": "shared_uniform_intervention",
+        "development_evaluation_worlds_sha256": sha256_bytes(
+            "\n".join(canonical_eval_key(row) for row in shared_dev).encode()
+        ),
         "trained_models": {},
         "bundle_manifest_sha256": sha256_bytes((bundle / "manifest.json").read_bytes()),
         "research_fit_audit_sha256": sha256_bytes(
@@ -383,6 +399,7 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
             "Direct and recurrent models have different parameter counts; "
             "matched updates apply within each architecture.",
             "Inputs are fixed-size structured synthetic facts, not native MeTTa tokens.",
+            "All arms are evaluated on the exact same uniform-intervened development worlds.",
             "Equal source-root counts and optimizer steps do not establish equal source-token budgets.",
         ],
     }
@@ -403,13 +420,15 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
                 "parameters": linear.params,
                 "checkpoint_sha256": linear.digest(),
                 "final_training_loss": losses[-1],
-                "development": evaluate(linear, a_dev, loops=1),
+                "development": evaluate(linear, shared_dev, loops=1),
+                "within_arm_diagnostic": evaluate(linear, a_dev, loops=1),
             },
             "recurrent": {
                 "parameters": rec.params,
                 "checkpoint_sha256": rec.digest(),
                 "final_training_loss": rec_losses[-1],
-                "development": {str(k): evaluate(rec, a_dev, loops=k) for k in (2, 4, 8)},
+                "development": {str(k): evaluate(rec, shared_dev, loops=k) for k in (2, 4, 8)},
+                "within_arm_diagnostic": evaluate(rec, a_dev, loops=4),
             },
             "training_targets": dict(sorted(Counter(int(y_i) for y_i in y).items())),
         }
