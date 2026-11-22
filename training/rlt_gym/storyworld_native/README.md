@@ -61,6 +61,48 @@ Score submissions through:
 
 A native structural validator can accept a wrong but syntactically valid edge. Semantic successor restoration therefore has a separate exact score. Hypergame proxy points are kept separate from true utility, safe success and false release.
 
+## Source-native minified compiler SFT
+
+The additional micro-compiler collector runs GPTStoryworld's actual
+small-storyworld-builder script, swmd_build_qlora_examples.py, over the
+source-generated SWMD-0-MIN document. It collects the original compiler's
+four transformations: 40% compile, 25% compression, 20% repair and 15%
+targeted edit, subject to deterministic sample rounding.
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_micro \
+      --source "$GPTSTORYWORLD_SOURCE" --seed 23 \
+      --examples-per-encounter 4 --out runs/storyworld-micro-23
+    python -m datagoblin.training_gym.rlt_gym.storyworld_micro \
+      --source "$GPTSTORYWORLD_SOURCE" --replay runs/storyworld-micro-23
+
+Its micro_public.jsonl hides reference outputs, micro_sealed.jsonl keeps
+canonical compiler labels under evaluator custody, and micro_train_sft.jsonl
+exports messages for train-only supervision. The split assignment is shared
+with the repair gym at the source encounter level, preventing source
+encounters from appearing in train and test through different variants.
+Each input packet has an 8K byte-safe cap, tighter than the stated 8K-token
+Mini budget. Source script SHA and output SHA-256 are frozen in a distinct
+manifest. The original script's train/validation *row split* is reconstituted
+by encounter identity here to avoid same-encounter leakage.
+
+A learned model can return JSON to the micro grader:
+
+    {"root":"<public root>","output":"{\"schema\":\"SWMD-MICRO-0.1\",...}"}
+
+Then run:
+
+    python -m datagoblin.training_gym.rlt_gym.storyworld_micro \
+      --grade runs/storyworld-micro-23 \
+      --submissions runs/my_micro_submissions.jsonl \
+      --graded-out runs/my_micro_grades.jsonl
+
+These are deterministic compiler targets, useful for first-pass SFT and
+token-economics studies. Exact JSON equality defines the initial grader.
+Independent narrative quality and runtime correctness require additional
+validation. Existing GPTStoryworld authored worlds are public data, so
+the source-held-out encounters are development controls rather than
+unseen-world confirmation.
+
 ## Verification and next experiment
 
     GPTSTORYWORLD_SOURCE=../GPTStoryworld PYTHONPATH=src \
