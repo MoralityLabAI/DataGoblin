@@ -186,14 +186,18 @@ def source_encounter_splits(native: Native, seed: int) -> dict[str, str]:
     return {eid: SPLITS[i % len(SPLITS)] for i, eid in enumerate(source_ids)}
 
 
-def generate(native: Native, seed: int, per_mode: int = 6) -> list[tuple[dict, dict]]:
+def generate(native: Native, seed: int, per_mode: int = 6,
+             split_override: str | None = None) -> list[tuple[dict, dict]]:
     if per_mode < 1:
         raise ValueError("per-mode must be positive")
+    if split_override is not None and split_override not in SPLITS:
+        raise ValueError("unregistered whole-world split")
     rng = random.Random(seed)
     edges = _edges(native.world)
     if per_mode > len(edges):
         raise ValueError(f"per-mode exceeds {len(edges)} available distinct source reactions")
-    source_splits = source_encounter_splits(native, seed)
+    source_splits = (source_encounter_splits(native, seed) if split_override is None
+                     else {eid: split_override for eid in {e[0] for e in edges}})
     rng.shuffle(edges)
     first_by_source = {}
     for edge in edges:
@@ -225,7 +229,7 @@ def generate(native: Native, seed: int, per_mode: int = 6) -> list[tuple[dict, d
             visible = hyper.observation(scenario, hyper.initial_state(bit, 5))
             root = _hash([SCHEMA, "hypergame", lineage, bit])[:24]
             public = {"schema": SCHEMA, "root": root, "lineage": lineage,
-                      "split": SPLITS[i % len(SPLITS)], "mode": "hypergame",
+                      "split": split_override or SPLITS[i % len(SPLITS)], "mode": "hypergame",
                       "public": visible}
             private = {"root": root, "mode": "hypergame",
                        "scenario_seed": scenario_seed, "private_bit": bit,
@@ -332,11 +336,11 @@ def _seed(seed: int, private_seed_file: Path | None) -> tuple[int, str, str | No
 
 
 def collect(native: Native, out: Path, seed: int = 23, per_mode: int = 6,
-            private_seed_file: Path | None = None) -> dict:
+            private_seed_file: Path | None = None, split_override: str | None = None) -> dict:
     if out.exists():
         raise FileExistsError(f"output exists: {out}")
     resolved_seed, profile, commitment = _seed(seed, private_seed_file)
-    tasks = generate(native, resolved_seed, per_mode)
+    tasks = generate(native, resolved_seed, per_mode, split_override)
     out.mkdir(parents=True)
     publics, sealed, rollouts, targets = [], [], [], []
     for task, secret in tasks:
@@ -369,6 +373,8 @@ def collect(native: Native, out: Path, seed: int = 23, per_mode: int = 6,
         "max_train_presentations_per_lineage": 4,
         "artifacts": artifacts,
     }
+    if split_override is not None:
+        manifest["world_split"] = split_override
     (out / "manifest.json").write_text(_json(manifest) + "\n", encoding="utf-8", newline="\n")
     return manifest
 
@@ -389,7 +395,8 @@ def replay_archive(native: Native, folder: Path, private_seed_file: Path | None 
         raise ValueError("private seed commitment mismatch")
     with tempfile.TemporaryDirectory(prefix="dg-sw-replay-") as temp:
         fresh = collect(native, Path(temp) / "regenerated", seed=manifest["seed"] or 0,
-                        per_mode=manifest["per_mode"], private_seed_file=private_seed_file)
+                        per_mode=manifest["per_mode"], private_seed_file=private_seed_file,
+                        split_override=manifest.get("world_split"))
         if fresh != manifest:
             raise ValueError("regenerated manifest mismatch")
         for name in ARTIFACTS:
@@ -441,6 +448,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=23)
     parser.add_argument("--private-seed-file", type=Path)
     parser.add_argument("--per-mode", type=int, default=6)
+    parser.add_argument("--split-override", choices=sorted(set(SPLITS)), help="Whole-source-world split")
     operation = parser.add_mutually_exclusive_group(required=True)
     operation.add_argument("--out", type=Path)
     operation.add_argument("--replay", type=Path)
@@ -450,7 +458,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     native = connect(args.source, args.world, args.expect_source_commit)
     if args.out:
-        result = collect(native, args.out, args.seed, args.per_mode, args.private_seed_file)
+        result = collect(native, args.out, args.seed, args.per_mode, args.private_seed_file,
+                         args.split_override)
     elif args.replay:
         result = replay_archive(native, args.replay, args.private_seed_file)
     else:
