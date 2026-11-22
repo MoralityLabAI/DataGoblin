@@ -15,7 +15,7 @@ from .storyworld_native import SPLITS, _hash, _json, _sha_file, connect, source_
 
 SCHEMA = "datagoblin.swmd_micro.v1"
 SOURCE_COMPILER = "codex-skills/small-storyworld-builder/scripts/swmd_build_qlora_examples.py"
-OUTPUT_FILES = ("micro_public.jsonl", "micro_sealed.jsonl", "micro_train_sft.jsonl")
+OUTPUT_FILES = ("micro_public.jsonl", "micro_sealed.jsonl", "micro_train_sft.jsonl", "micro_oversize.jsonl")
 
 
 def _rows(path: Path) -> list[dict]:
@@ -66,6 +66,7 @@ def export_micro(source: Path, out: Path, *, seed: int = 23,
     public: list[dict] = []
     sealed: list[dict] = []
     train_sft: list[dict] = []
+    oversize: list[dict] = []
     task_counts: Counter[str] = Counter()
     split_counts: Counter[str] = Counter()
     seen_roots: set[str] = set()
@@ -90,8 +91,14 @@ def export_micro(source: Path, out: Path, *, seed: int = 23,
             "response_grammar": "one SWMD-MICRO-0.1 JSON object",
             "context_budget_tokens": 8192,
         }
-        if len(_json(input_public).encode("utf-8")) > 8192:
-            raise ValueError(f"source micro prompt exceeds 8K byte-safe budget: {encounter_id}")
+        prompt_bytes = len(_json(input_public).encode("utf-8"))
+        if prompt_bytes > 8192:
+            # A long-world encounter must remain a documented miss. Truncation
+            # would change the compiler's task and invalidate its gold output.
+            oversize.append({"root": root, "lineage": lineage, "split": split,
+                             "encounter_id": encounter_id, "task_type": row["task_type"],
+                             "prompt_bytes": prompt_bytes, "budget_bytes": 8192})
+            continue
         expected = json.loads(row["output"])
         if expected.get("schema") != "SWMD-MICRO-0.1":
             raise ValueError("source micro compiler generated an unexpected schema")
@@ -117,6 +124,7 @@ def export_micro(source: Path, out: Path, *, seed: int = 23,
         "micro_public.jsonl": _write(out / "micro_public.jsonl", public),
         "micro_sealed.jsonl": _write(out / "micro_sealed.jsonl", sealed),
         "micro_train_sft.jsonl": _write(out / "micro_train_sft.jsonl", train_sft),
+        "micro_oversize.jsonl": _write(out / "micro_oversize.jsonl", oversize),
     }
     manifest = {
         "schema": SCHEMA, "source": native.descriptor(),
@@ -126,6 +134,8 @@ def export_micro(source: Path, out: Path, *, seed: int = 23,
         "max_encounters": max_encounters,
         "task_types": dict(sorted(task_counts.items())),
         "split_counts": dict(sorted(split_counts.items())),
+        "excluded_oversize_rows": len(oversize),
+        "context_budget_bytes": 8192,
         "artifacts": files,
     }
     if split_override is not None:
