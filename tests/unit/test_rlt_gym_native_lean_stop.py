@@ -16,6 +16,7 @@ from datagoblin.training_gym.rlt_gym.native_lean_stop import (
     _online,
     _policy_ids,
     calibrate,
+    canonicalize_binders,
     features,
     fit_ranker,
     generate_roots,
@@ -162,3 +163,16 @@ def test_alpha_equivalent_ood_preserves_registered_candidates():
             assert "Nat" in after.statement
         else:
             assert after.statement == before.statement
+
+
+
+def test_alpha_equivalent_statements_have_identical_features():
+    base = generate_roots(per_split=8, seed=20261126)
+    renamed = generate_roots(per_split=8, seed=20261126, alpha_ood=True)
+    for before, after in zip(base, renamed, strict=True):
+        assert canonicalize_binders(before.statement) == canonicalize_binders(after.statement)
+        for tactic in before.tactics:
+            assert np.array_equal(features(before.statement, tactic),
+                                  features(after.statement, tactic))
+    with pytest.raises(ValueError, match="binder syntax"):
+        canonicalize_binders("True")
