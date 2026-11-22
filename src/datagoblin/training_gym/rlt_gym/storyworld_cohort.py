@@ -10,7 +10,6 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Any
 
 from .storyworld_micro import export_micro, replay_micro
 from .storyworld_native import SPLITS, _json, _sha_file, collect, connect, replay_archive
