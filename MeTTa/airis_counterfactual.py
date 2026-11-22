@@ -468,6 +468,7 @@ def run_experiment(*, roots_per_family: int = 512, case_limit: int = 96,
         "policy_motifs_frozen": [list(x) for x in motifs],
         "motif_policy_uses_discovery_rank_only": True,
         "control": "uniform_public_candidate_mechanism_same_root",
+        "fixed_control": "budget_first_threshold_crossing_if_available",
         "control_seed": seed,
         "paired_policy": policy_scores,
         "paired_outcomes": {
