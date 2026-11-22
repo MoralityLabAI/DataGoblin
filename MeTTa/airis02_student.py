@@ -419,6 +419,8 @@ def _rollout(
                 false_admissions += 1
             if set(current_state["violations"]) - previous_violations:
                 new_violation_additions += 1
+    if verifier_guard and new_violation_additions:
+        raise ValueError("environment veto allowed a newly violating ADD action")
     final = evaluate_subset(task, selected)
     oracle_coverage = len(oracle["verified_objective"]["covered_goals"])
     return {
