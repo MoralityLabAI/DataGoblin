@@ -72,7 +72,7 @@ The architecture-neutral training gym evaluates LoRA, HRM-Text, and bounded loop
 frozen split and metric firewall. The default command runs mock controls only and never loads weights; see
 [`docs/training_gym.md`](docs/training_gym.md).
 
-The RLT rollout gym collects checked attempts across seven task families, compares recurrence schedules on small
+The [MeTTa curation corpus](MeTTa/README.md) indexes 196 pinned language-source files and produces offline, policy-labeled curation exercises with native MeTTa fact/query scaffolds. Inputs remain discovery candidates until independent review and runtime verification.\n\nThe RLT rollout gym collects checked attempts across seven task families, compares recurrence schedules on small
 CPU controls, and stages Codex or Opus requests for verified training examples. It preserves repairs and public
 teacher work alongside local state summaries. Start with [`docs/rlt_rollout_gym.md`](docs/rlt_rollout_gym.md).
 
