@@ -22,6 +22,7 @@ from datagoblin.training_gym.sgrt_learned import (
     context_transport,
     evaluate,
     fit,
+    paired_contrasts,
     ranked_candidates,
     task_features,
 )
@@ -114,3 +115,27 @@ def test_learned_heads_share_capacity_and_are_deterministic() -> None:
     for arm, counts in summary["all"].items():
         assert counts["roots"] == 8
         assert counts["verifier_calls"] == (8 if arm == "rigid_top1_proxy" else 64)
+
+
+def test_root_paired_intervals_and_discordance_are_deterministic() -> None:
+    rows = []
+    for i, (baseline, gear) in enumerate(((0, 1), (1, 0), (1, 1), (0, 0))):
+        arms = {
+            name: {"whole_task_solved": bool(baseline)}
+            for name in TRAINED_ARMS
+        }
+        arms["holoarc_gear_lowrank"]["whole_task_solved"] = bool(gear)
+        rows.append({
+            "root_id": f"public-{i}",
+            "group": "family_ood_mixed" if i >= 2 else "new_roots_seen_families",
+            "arms": arms,
+        })
+    report = paired_contrasts(rows, replicates=128)
+    repeated = paired_contrasts(rows, replicates=128)
+    assert report == repeated
+    contrast = report["all"]["holoarc_gear_lowrank"]
+    assert contrast["roots"] == 4
+    assert contrast["wins"] == contrast["losses"] == 1
+    assert contrast["ties"] == 2
+    assert contrast["absolute_effect_pp"] == 0
+    assert contrast["root_bootstrap_95_pp"][0] <= 0 <= contrast["root_bootstrap_95_pp"][1]
