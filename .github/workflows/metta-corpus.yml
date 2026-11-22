@@ -1,0 +1,62 @@
+name: MeTTa source catalog and curation gym
+
+on:
+  pull_request:
+    paths:
+      - "MeTTa/**"
+      - "tests/unit/test_metta_corpus.py"
+      - ".github/workflows/metta-corpus.yml"
+  push:
+    branches: [master]
+    paths:
+      - "MeTTa/**"
+      - "tests/unit/test_metta_corpus.py"
+      - ".github/workflows/metta-corpus.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-curation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install DataGoblin and testing tools
+        run: python -m pip install -e ".[dev]"
+      - name: Inspect collector and curation policy contracts
+        run: |
+          python -m pytest -q tests/unit/test_metta_corpus.py
+          ruff check MeTTa tests/unit/test_metta_corpus.py
+      - name: Generate offline MeTTa curation examples
+        run: |
+          python -m MeTTa.curation_gym --out runs/metta/curation
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          base = Path("runs/metta/curation")
+          manifest = json.loads((base / "manifest.json").read_text())
+          cases = [json.loads(line) for line in (base / "cases.jsonl").read_text().splitlines()]
+          assert manifest["cases"] == 1960, manifest
+          assert len(cases) == manifest["cases"]
+          assert manifest["evaluation_labels_written"] == 0
+          assert manifest["training_ready"] is False
+          assert all(c["training_ready"] is False for c in cases)
+          assert all("policy_reference" not in c for c in cases if c["partition"] != "train_candidate")
+          assert all("policy_reference" in c for c in cases if c["partition"] == "train_candidate")
+          print(json.dumps(manifest, sort_keys=True))
+          PY
+      - name: Preserve metadata-only candidate bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-curation-static-candidates
+          path: |
+            runs/metta/curation/cases.jsonl
+            runs/metta/curation/manifest.json
+          retention-days: 14
+          if-no-files-found: error

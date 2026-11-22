@@ -1,0 +1,52 @@
+name: MeTTa-03 train-root motif mining
+
+on:
+  pull_request:
+    paths:
+      - "MeTTa/**"
+      - "tests/unit/test_metta_pattern_miner.py"
+      - ".github/workflows/metta-pattern-miner.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pattern-miner-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install developer checks
+        run: python -m pip install -e ".[dev]"
+      - name: Lint and verify split-custody contracts
+        run: |
+          ruff check MeTTa/pattern_miner.py tests/unit/test_metta_pattern_miner.py
+          python -m pytest -q tests/unit/test_metta_pattern_miner.py
+      - name: Mine all allowed training roots
+        run: |
+          python -m MeTTa.pattern_miner --roots-per-family 512 --min-support 20 --top-k 24 --out runs/metta/pattern_miner
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("runs/metta/pattern_miner/motifs.json").read_text())
+          assert p["root_count"] == 1960
+          assert p["reserved_root_labels_read"] == 0
+          assert p["new_sft_presentations_created"] == 0
+          assert p["training_ready"] is False
+          assert p["native_hyperon_miner_executed"] is False
+          assert all(x["candidate_only"] is True for x in p["candidates"])
+          assert p["root_count"] == p["discovery_roots"] + p["confirmation_roots"]
+          print("train-root-only motif custody passed")
+          PY
+      - name: Retain advisory motifs and receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metta-03-motifs
+          path: runs/metta/pattern_miner/
+          if-no-files-found: warn
+          retention-days: 14
