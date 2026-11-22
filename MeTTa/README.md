@@ -105,3 +105,13 @@ The GitHub workflow `metta-corpus.yml` runs the CPU tests, checks the source cat
 ## Goertzel Pattern-Miner curriculum and follow-on lanes
 
 [MeTTa-03](GOERTZEL_SYNERGY.md) mines root-level, observable conjunctions from the existing synthetic curation training partition, with a separate synthetic Python-oracle validity check and disjoint internal discovery/confirmation roots. It emits advisory MeTTa motif facts with lineage receipts without adding any SFT presentations. The report also maps next research integrations for MOSES, NARS/PLN, AIRIS, MetaMo/OpenPsi, ECAN and HiBaCaML. Run `python -m MeTTa.pattern_miner --out runs/metta/pattern_miner` to regenerate the proposed motifs. All outputs remain `training_ready=false`.
+
+## Additional Goertzel ecosystem intake (metadata only)
+
+[goertzel_source_discovery.json](goertzel_source_discovery.json) pins 760 additional `.metta` file identities across ten Goertzel/Hyperon-adjacent repositories, corresponding to 68,367,331 Git-reported bytes. This is a separate read-only registry from the 196-file primary source catalog. It includes MOSES, Hyperon Pattern Miner, ECAN, MetaMo, OpenPsi, NARS, Omega, concept blending and zero-MeTTa sidecars. **No code is copied or automatically admitted.** Only 107 small records from GitHub-declared MIT/Apache-2.0 repositories are discovery-only pending material-level review; the remaining 653 entries are quarantined for unknown/AGPL licensing or size. The registry validator rejects changes to source identity, rights custody, aggregate counts, and `training_ready=false`.
+
+```bash
+python -m MeTTa.goertzel_registry --out runs/metta/source_discovery_audit.json
+```
+
+The original 196-file provenance and the synthetic SFT root splits remain unchanged. Runtime compatibility with PeTTa and native Hyperon 0.2.10, individual source-license review, and verified semantic query execution remain separate admission gates.
