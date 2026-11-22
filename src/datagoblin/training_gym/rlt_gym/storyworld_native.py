@@ -185,11 +185,21 @@ def generate(native: Native, seed: int, per_mode: int = 6) -> list[tuple[dict, d
     edges = _edges(native.world)
     if per_mode > len(edges):
         raise ValueError(f"per-mode exceeds {len(edges)} available distinct source reactions")
+    # Freeze splits at the source-encounter level. Distinct reaction repairs of
+    # the same encounter cannot cross train and evaluation boundaries.
+    source_ids = sorted({eid for eid, _, _, _ in edges})
+    split_rng = random.Random(_hash(["encounter-split", seed, native.hashes["world"]]))
+    split_rng.shuffle(source_ids)
+    source_splits = {eid: SPLITS[i % len(SPLITS)] for i, eid in enumerate(source_ids)}
     rng.shuffle(edges)
-    selected = edges[:per_mode]
+    first_by_source = {}
+    for edge in edges:
+        first_by_source.setdefault(edge[0], edge)
+    prioritized = list(first_by_source.values())
+    selected = (prioritized + [edge for edge in edges if edge not in prioritized])[:per_mode]
     encounter_ids = sorted(e["id"] for e in native.world["encounters"])
     tasks: list[tuple[dict, dict]] = []
-    for i, edge in enumerate(selected):
+    for edge in selected:
         eid, oid, rid, gold = edge
         lineage = _hash(["sweepweave", native.hashes["world"], eid, oid, rid])[:20]
         alternatives = rng.sample([x for x in encounter_ids if x != gold], 2)
@@ -198,7 +208,7 @@ def generate(native: Native, seed: int, per_mode: int = 6) -> list[tuple[dict, d
         for mode in ("builder", "mini"):
             root = _hash([SCHEMA, mode, lineage])[:24]
             public = {"schema": SCHEMA, "root": root, "lineage": lineage,
-                      "split": SPLITS[i % len(SPLITS)], "mode": mode,
+                      "split": source_splits[eid], "mode": mode,
                       "public": _public_builder(native, edge, choices, mode)}
             private = {"root": root, "mode": mode, "gold_target": gold,
                        "edge": [eid, oid, rid], "lineage": lineage}
