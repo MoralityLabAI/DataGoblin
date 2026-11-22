@@ -178,6 +178,14 @@ def _public_builder(native: Native, edge: tuple[str, str, str, str],
     return public
 
 
+def source_encounter_splits(native: Native, seed: int) -> dict[str, str]:
+    """One frozen split per source encounter across the builder and micro curricula."""
+    source_ids = sorted({eid for eid, _, _, _ in _edges(native.world)})
+    split_rng = random.Random(_hash(["encounter-split", seed, native.hashes["world"]]))
+    split_rng.shuffle(source_ids)
+    return {eid: SPLITS[i % len(SPLITS)] for i, eid in enumerate(source_ids)}
+
+
 def generate(native: Native, seed: int, per_mode: int = 6) -> list[tuple[dict, dict]]:
     if per_mode < 1:
         raise ValueError("per-mode must be positive")
@@ -185,12 +193,7 @@ def generate(native: Native, seed: int, per_mode: int = 6) -> list[tuple[dict, d
     edges = _edges(native.world)
     if per_mode > len(edges):
         raise ValueError(f"per-mode exceeds {len(edges)} available distinct source reactions")
-    # Freeze splits at the source-encounter level. Distinct reaction repairs of
-    # the same encounter cannot cross train and evaluation boundaries.
-    source_ids = sorted({eid for eid, _, _, _ in edges})
-    split_rng = random.Random(_hash(["encounter-split", seed, native.hashes["world"]]))
-    split_rng.shuffle(source_ids)
-    source_splits = {eid: SPLITS[i % len(SPLITS)] for i, eid in enumerate(source_ids)}
+    source_splits = source_encounter_splits(native, seed)
     rng.shuffle(edges)
     first_by_source = {}
     for edge in edges:
