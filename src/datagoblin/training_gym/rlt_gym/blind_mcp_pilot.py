@@ -18,7 +18,7 @@ from typing import Any
 
 import numpy as np
 
-from .blind_mcp_sources import PrivateCase, SPLITS, audit_source_roots, build_source_roots, judge
+from .blind_mcp_sources import SPLITS, PrivateCase, audit_source_roots, build_source_roots, judge
 
 
 def _tool(env: Any, name: str, args: dict[str, Any]) -> dict[str, Any]:
