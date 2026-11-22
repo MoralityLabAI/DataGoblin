@@ -67,7 +67,8 @@ def test_public_rows_withhold_gold_and_train_roots(examples):
     assert all("Step7" in row["source_path"] for row in tasks)
     assert all("gold_label" not in row for row in tasks)
     assert len({row["id"] for row in tasks}) == len(tasks)
-    assert all("Signature: theorem " in row["prompt"] for row in tasks)
+    assert all("Signature: theorem " in row["prompt"] or "Signature: private theorem " in row["prompt"]
+               for row in tasks)
 
 
 def test_type_boundaries_use_exact_lean_type_bindings():
