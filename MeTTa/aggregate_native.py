@@ -73,7 +73,9 @@ def join_native(directory: Path, *, shard_count: int, roots_per_family: int = 51
             "roots": len(roots_here),
         }
     if wanted != observed:
-        raise ValueError(f"native query coverage incomplete: missing={len(wanted - observed)} extra={len(observed - wanted)}")
+        raise ValueError(
+            f"native query coverage incomplete: missing={len(wanted - observed)} extra={len(observed - wanted)}"
+        )
     roots = {root for root, _digest in observed}
     return {
         "schema_version": "metta-native-query-aggregate-v1",
