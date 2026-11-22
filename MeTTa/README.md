@@ -130,6 +130,6 @@ Run `python -m MeTTa.pln_lineage --out runs/metta/pln_lineage_shadow.json` for a
 
 ## Licensed annotated training-data intake
 
-The [`training_data/`](training_data/README.md) subtree imports **602 pinned MeTTa sources** from 12 public repositories, covering **1,273,001 source bytes** and **354,067 tokens measured using `o200k_base`**. It extracts **927 upstream author assertions (841 distinct source texts)** with query/expected fields and original source spans. Hyperon 0.2.10 process receipts cover 20 pinned source files, separately from the 5,880/5,880 native query checks already recorded for the synthetic curation gym. Author assertion correctness remains to be independently verified.
+The [`training_data/`](training_data/README.md) subtree imports **1,375 pinned MeTTa sources** from 12 public repositories, covering **2,207,624 source bytes** and **636,487 tokens measured using `o200k_base`**. It extracts **2,130 upstream author assertions (1,786 distinct source texts; 2,125 parsed pairs)** with query/expected fields and original source spans. Hyperon 0.2.10 process receipts cover 20 pinned source files, separately from the 5,880/5,880 native query checks already recorded for the synthetic curation gym. Author assertion correctness remains to be independently verified.
 
 The source corpus and the existing 1,960 synthetic curation roots are separate datasets; hash-bound duplicate lineage prevents accidental double training exposure. See `training_data/README.md` for source custody, tokenizer reports, license files and collection scripts.

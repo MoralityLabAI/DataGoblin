@@ -113,5 +113,19 @@
     "source_repositories": 12,
     "source_commit": "adb22948a55661f41b7eac1a386ad732d8c67cda",
     "note": "Pinned source-only collection; model-specific tokenizer counts and interpreter receipts are independent future stages."
+  },
+  "current_measured_snapshot": {
+    "source_files": 1375,
+    "source_bytes": 2207624,
+    "measured_o200k_tokens": 636487,
+    "tokenizer": "tiktoken 0.12.0 / o200k_base",
+    "detected_source_assertions": 2130,
+    "parsed_author_assertions": 2125,
+    "distinct_author_assertions": 1786,
+    "source_repositories": 12,
+    "source_admission": "source_only_pending_review",
+    "bridge_roots": 1513,
+    "new_quarantined_bridge_roots": 1317,
+    "batch02_workflow": "https://github.com/MoralityLabAI/DataGoblin/actions/runs/44981720269"
   }
 }

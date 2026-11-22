@@ -86,7 +86,7 @@ The sibling `source_catalog.json`, `looped_sft.py` and `native_query_replay.py` 
 
 ## Connect this corpus to the frozen MeTTa curation gym
 
-The default `MeTTa/source_catalog.json` and its existing 1,960-item synthetic curriculum are unchanged. To build an opt-in combined source catalog, first validate the 602 source snapshots and then run:
+The default `MeTTa/source_catalog.json` and its existing 1,960-item synthetic curriculum are unchanged. To build an opt-in combined source catalog, first validate the 1,375 source snapshots and then run:
 
 ```sh
 python MeTTa/training_data/scripts/catalog_bridge.py
@@ -126,3 +126,9 @@ python MeTTa/training_data/scripts/audit_discovery.py
 ```
 
 The consolidated `reports/public_discovery.json` counts gross Git bytes, exact Git-blob deduplication, bulk/derived data flags, and repository-license buckets. This public index is a reproducible collection map. Measured MeTTa tokenizer counts apply only to the smaller imported-source collection, while a separate content-level rights and parsing audit is needed before building graph-derived rollouts.
+
+## Batch-02 source expansion
+
+The pinned second-pass collection increased the source corpus from 602 to **1,375** original MeTTa files from 12 upstream repositories. The audited source-only baseline is **2,207,624 UTF-8 bytes** and **636,487 tokens** with `tiktoken 0.12.0 / o200k_base`. The source-assertion inventory contains **2,130 assertions**, of which **2,125 parsed query/expected pairs** and 1,786 distinct assertion texts. The opt-in bridge now covers **1,513** roots after removing exact catalog overlaps, with 1,317 newly quarantined. See the live reports under `reports/` for exact reproducibility.
+
+The broader `discovery_index/` covers 28 GitHub repositories, 10,369 MeTTa paths and 698,009,099 gross Git-blob bytes; SHA-deduplicated content totals 692,996,326 bytes. Bulk or generated content remains discovery-only. The second source import was verified by the [GitHub Actions batch-02 run](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44981720269).
