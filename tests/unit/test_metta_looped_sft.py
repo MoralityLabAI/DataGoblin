@@ -72,7 +72,7 @@ def test_recurrent_trajectory_follows_one_checked_edit_per_visit(family: str) ->
     assert trace[-1]["selected"] == oracle["selected"]
     assert trace[-1]["action"] == {"op": "stop", "id": "none"}
     assert all(a["remaining_canonical_edits"] == b["remaining_canonical_edits"] + 1
-               for a, b in zip(trace, trace[1:]))
+               for a, b in itertools.pairwise(trace))
     assert all(next_edit(t["selected"], oracle["selected"]) == t["action"] for t in trace)
     assert edit(oracle["selected"], {"op": "stop", "id": "none"}) == oracle["selected"]
 
