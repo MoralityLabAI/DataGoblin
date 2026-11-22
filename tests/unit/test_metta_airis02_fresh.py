@@ -7,9 +7,19 @@ import pytest
 
 from MeTTa.airis02_audit import audit_bundle
 from MeTTa.airis02_fresh import (
-    ARMS, DEV_RANGE, PUBLIC_TEST_RANGE, STEWARD_RANGE, TRAIN_RANGE,
-    FROZEN_MOSES_PROGRAM, _frozen_motifs, build_bundle, build_row,
-    canonical, partition, root_id, steward_root_manifest,
+    ARMS,
+    DEV_RANGE,
+    FROZEN_MOSES_PROGRAM,
+    PUBLIC_TEST_RANGE,
+    STEWARD_RANGE,
+    TRAIN_RANGE,
+    _frozen_motifs,
+    build_bundle,
+    build_row,
+    canonical,
+    partition,
+    root_id,
+    steward_root_manifest,
 )
 from MeTTa.collect import sha256_bytes
 from MeTTa.sft_oracle import FAMILIES, OOD_FAMILY
