@@ -146,3 +146,19 @@ def test_online_mock_native_verifier_blocks_unchecked_success():
 def test_new_generated_scripts_have_multiline_proofs_and_registered_tactics():
     assert all("constructor" in s and "\n· " in s for s in SCRIPTS)
     assert all("intro a b c" in s for s in SCRIPTS)
+
+
+
+def test_alpha_equivalent_ood_preserves_registered_candidates():
+    base = generate_roots(per_split=8, seed=20261125)
+    shifted = generate_roots(per_split=8, seed=20261125, alpha_ood=True)
+    for before, after in zip(base, shifted, strict=True):
+        assert before.root_id == after.root_id
+        assert before.tactics == after.tactics
+        if before.split == "ood_test":
+            assert after.statement.startswith("∀ u v w : Nat,")
+            assert before.statement.startswith("∀ a b c : Nat,")
+            assert after.statement != before.statement
+            assert "Nat" in after.statement
+        else:
+            assert after.statement == before.statement
