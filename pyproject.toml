@@ -39,3 +39,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 python_version = "3.10"
 strict = true
 packages = ["datagoblin"]
+
+[tool.ruff.lint.per-file-ignores]
+# Exact archived MathCan generator; preserve source bytes for provenance replay.
+"training/rlt_gym/bsar09/mathcan_exact_oracle.py" = ["RUF005"]
