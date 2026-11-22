@@ -51,9 +51,11 @@ def test_fifty_valid_causal_flips_and_three_decisions():
 
 def test_check_has_value_only_when_structural_action_possible():
     roots = construct_roots(17, make_tastes(17))
-    structural = next(root for root in roots if root["world_b"]["state"]["available"] >= root["world_b"]["state"]["required"]
-                      and root["world_b"]["state"]["safety_approved"])
-    case = dict(structural["check_case"])
+    structural = next(
+        root for root in roots
+        if root["world_b"]["state"]["available"] >= root["world_b"]["state"]["required"]
+        and root["world_b"]["state"]["safety_approved"]
+    )
     state = dict(structural["world_b"]["state"])
     root = {**structural, "check_case": {"hazard_percent": 85, "check_cost": 1, "mistake_cost": 12}}
     assert check_value(root) > 0
