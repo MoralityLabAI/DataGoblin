@@ -23,8 +23,10 @@ learning and intervention selection on synthetic curation worlds.
 - At most 24 training roots and eight public development roots per family.
   The default uses eight training and three development roots per family.
 - Trainer limits: 12–32 optimizer steps, recurrent hidden width 8–24,
-  train loops 2/4/6, inference loops 2/4/6/8. The proposal search
-  permits at most eight candidate edits per run.
+  train loops 2/4/6, inference loops 2/4/6/8. A train-calibrated binary
+  STOP head is a separate, optional learned control; its extra gradient
+  updates and parameters are recorded. The proposal search permits at
+  most eight candidate edits per run.
 - The CPU models are deliberately tiny. The runtime receipt includes peak
   process resident memory, parameter counts, actual gradient updates,
   checkpoint hashes, wall time and verifier calls.
@@ -88,7 +90,11 @@ A run independently refits from the same initialization and frozen training
 roots for every proposed configuration. Each proposal changes **one** bounded
 hyperparameter field. Acceptance requires an improved lexicographic
 public-development score, and rejects any increase in unsafe or
-new-violation additions. The ordering considers verified solved-and-stopped,
+new-violation additions. The initial uncalibrated pilot yielded zero
+solves and premature STOP in all 10 development tasks per arm. The
+next search therefore prioritizes a separate train-only STOP classifier
+with a conservative false-stop threshold. This action head is not
+adaptive inference-time depth halting. The ordering considers verified solved-and-stopped,
 constraint safety, first-edit correctness, premature stops, verification
 cost, remaining edits and inference iterations. No candidate can tune on
 the registered test root contents.
