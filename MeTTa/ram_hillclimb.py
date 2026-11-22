@@ -29,6 +29,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
+from .airis02_stop import StopHead
 from .airis02_student import (
     LinearStudent,
     RecurrentStudent,
@@ -36,7 +37,6 @@ from .airis02_student import (
     _next_action,
     evaluate,
 )
-from .airis02_stop import StopHead
 from .sft_oracle import (
     edit,
     evaluate_subset,
@@ -195,10 +195,7 @@ def check_config(arm: str, config: dict[str, Any]) -> None:
     if arm not in ARMS or set(config) != set(OPTIONS[arm]):
         raise ValueError("Unsupported architecture or training config")
     for field, value in config.items():
-        if field == "stop_policy":
-            valid_type = type(value) is str
-        else:
-            valid_type = type(value) in (float, int)
+        valid_type = type(value) is str if field == "stop_policy" else type(value) in (float, int)
         if not valid_type or value not in OPTIONS[arm][field]:
             raise ValueError(f"Configuration field {field} outside registered values")
 
