@@ -249,3 +249,34 @@ pointing to its archived report directory. Use a fresh `--out` path. The
 runner verifies the original archives and weights before opening the
 reserve. Its exclusion manifest includes the earlier revision replication.
 Keep weights and generated output outside Git.
+
+### Fresh lineage results
+
+| Training curator | Verified complete / 1,200 | Rate | Premature stops | Policy verifier calls |
+| --- | ---: | ---: | ---: | ---: |
+| Full | 336 | 28.00% | 832 | 4,638 |
+| Drop unique lineage | 293 | 24.42% | 850 | 4,950 |
+| Drop current revision | 329 | 27.42% | 842 | 4,336 |
+| Drop both | 321 | 26.75% | 793 | 5,650 |
+
+The average lineage effect was +2.13 percentage points (95% paired
+interval −0.001 to +4.21, p = 0.0551), above the original +1.67-point
+estimate and short of the preregistered significance threshold. The seed
+estimates were +1.25, +5.50, and −0.38 points.
+
+With revision present, keeping lineage yielded 43 additional completions
+out of 1,200 (+3.58 points, 95% interval +0.58 to +6.33, p = 0.015,
+secondary). With revision absent, it yielded eight additional completions
+(+0.67 points, 95% interval −2.42 to +3.33, p = 0.687, secondary). The
+interaction interval spans zero (+2.92 points, 95% interval −1.00 to
++6.75, p = 0.139), so the conditional difference remains uncertain.
+Every arm made zero unsafe additions under the shared verifier.
+
+The run at `044aa793ae6a479615b300484d4ccff86b98c727` took 234.89 seconds
+with peak RSS of 470.80 MiB. The receipt audit matched all 4,800 trials to
+their checkpoint hashes and Prime Verifiers 0.4.1 traces. It verified
+that the 400 roots were disjoint from 1,396 excluded training and
+evaluation roots and 154 archived conflict roots.
+
+- Replication lock SHA-256 `ea972e8e5a7671f7f33a7d847fe9fd113d8062f6df484448897aa666b28e53b9`
+- Frozen report SHA-256 `dcfe91b048c7a94f8257f23e4e8ce84e614be9af5a95123e0c8489994753bd3f`
