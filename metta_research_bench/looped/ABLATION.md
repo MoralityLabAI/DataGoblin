@@ -166,3 +166,31 @@ to receipts and checkpoints, and confirmed fresh source hashes against
 
 - Training lock SHA-256 `336af481a214adc26dcfcb9c2f77cbf6783843b91bbf20cc8247622cb27821cb`
 - Frozen report SHA-256 `bb37f90a381bed89419ea0e1c40bf641589a8f897e97aa0dc242d44515a4f4f0`
+
+## Revision-family replication
+
+The earlier 40 revision roots showed a descriptive interaction of
+−9.17 percentage points, with 50 joint-omission completions versus 61
+predicted by the additive model. This independent check uses 400 fresh
+revision roots and the exact same twelve archived checkpoints across
+the four arms. The architecture, initializations, 600 training updates,
+28,800 supervised action tokens per fit, inference policy, and verifier
+are carried forward. There are zero new optimizer updates.
+
+The primary contrast is the paired factorial interaction on verified
+completion. The secondary contrast is the full curator minus the joint
+omission, to distinguish overall policy loss from nonadditivity. The
+runner uses two-sided sign flips and 95% root-bootstrap intervals as in
+the original factorial study. A negative primary estimate with a
+two-sided p-value below 0.05 is the criterion for replicating the drop.
+The previous frozen roots are excluded and are never pooled into the
+new estimate.
+
+Run `python -m metta_research_bench.looped.revision_replication` with
+`--reference`, `--reference-checkpoints`, `--prior-checkpoints`,
+`--interaction`, `--checkpoints`, and `--out`. The interaction directory
+contains the original factorial lock and frozen report. `--checkpoints`
+points at the archived joint-omission weights. The runner verifies the
+original archive digests and every checkpoint hash before opening the
+reserve. Keep the generated report, receipts, traces, and checkpoints
+outside Git.

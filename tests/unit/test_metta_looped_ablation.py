@@ -59,3 +59,18 @@ def test_factorial_contrast_is_paired_and_recovers_joint_effect():
     assert interaction["paired_roots"] == 2
     with pytest.raises(ValueError, match="four arms"):
         factorial_metrics(rows[:-1], [1, 2])
+
+
+def test_revision_replication_has_a_larger_revision_only_reserve():
+    pytest.importorskip("verifiers.v1")
+    from pydantic import ValidationError
+
+    from metta_research_bench.taskset import REVISION_REPLICATION_ROOTS, REVISION_REPLICATION_SPLIT, SPLITS, BenchConfig
+
+    config = BenchConfig(split=REVISION_REPLICATION_SPLIT, roots_per_family=REVISION_REPLICATION_ROOTS)
+    assert config.roots_per_family == 400
+    assert SPLITS[config.split][0] == ("revision",)
+    with pytest.raises(ValidationError, match="at most 48"):
+        BenchConfig(split="looped_interaction_frozen", roots_per_family=49)
+    with pytest.raises(ValidationError):
+        BenchConfig(split=REVISION_REPLICATION_SPLIT, roots_per_family=401)
