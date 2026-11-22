@@ -1,0 +1,26 @@
+name: MeTTa corpus provenance
+
+on:
+  push:
+    paths:
+      - 'Metta/training_data/**'
+      - '.github/workflows/metta-corpus.yml'
+  pull_request:
+    paths:
+      - 'Metta/training_data/**'
+      - '.github/workflows/metta-corpus.yml'
+
+jobs:
+  offline-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify source digests, metadata and licenses
+        run: python Metta/training_data/scripts/corpus.py --json
+      - name: Run corpus tests
+        run: python -m unittest discover -s Metta/training_data/tests -v
+      - name: Export provenance manifest
+        run: python Metta/training_data/scripts/export.py --mode manifest --out /tmp/metta-corpus-manifest.jsonl

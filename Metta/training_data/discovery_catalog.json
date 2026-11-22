@@ -1,0 +1,95 @@
+{
+  "survey_date": "2026-11-22",
+  "method": "GitHub public repository tree inventories, manual candidate selection, pinned raw source snapshots",
+  "seeded_repositories": [
+    {
+      "repo": "trueagi-io/hyperon-experimental",
+      "license": "MIT",
+      "priority": "runtime tests and query supervision"
+    },
+    {
+      "repo": "trueagi-io/metta-examples",
+      "license": "MIT",
+      "priority": "KG conversions and declarative queries"
+    },
+    {
+      "repo": "trueagi-io/PeTTa",
+      "license": "MIT",
+      "priority": "determinism and negative compile-time tests"
+    },
+    {
+      "repo": "singnet/ai-dsl",
+      "license": "Apache-2.0",
+      "priority": "proof search and service composition"
+    },
+    {
+      "repo": "iCog-Labs-Dev/MetaMo",
+      "license": "MIT",
+      "priority": "agent state and registries"
+    },
+    {
+      "repo": "MesTTo/MeTTa-Library-Pack",
+      "license": "Apache-2.0",
+      "priority": "JSON, CSV, dictionary, database operations"
+    },
+    {
+      "repo": "F1R3FLY-io/MeTTa-Compiler",
+      "license": "Apache-2.0",
+      "priority": "knowledge-base and pattern matching tests"
+    },
+    {
+      "repo": "singnet/Omega",
+      "license": "Apache-2.0",
+      "priority": "agent memory and skills"
+    }
+  ],
+  "queued_repositories": [
+    {
+      "repo": "zariuq/CeTTa",
+      "license": "MIT",
+      "status": "candidate_for_stratified_sampling",
+      "reason": "large independent interpreter/ILP/test collection; exclude synthetic bulk until reviewed"
+    },
+    {
+      "repo": "singnet/das-poc",
+      "license": "Apache-2.0",
+      "status": "candidate_for_bounded_fact_sampling",
+      "reason": "large biology KG exports; record ontology provenance and avoid duplicate graph facts"
+    },
+    {
+      "repo": "singnet/das",
+      "license": "Apache-2.0",
+      "status": "candidate_for_bounded_fact_sampling",
+      "reason": "large synthetic sentence fixtures; sample only with lineage separation"
+    },
+    {
+      "repo": "logicmoo/metta-testsuite",
+      "license": "unknown",
+      "status": "blocked_pending_license_review",
+      "reason": "large testsuite contains duplicated examples and language-model training text"
+    },
+    {
+      "repo": "iCog-Labs-Dev/metta-moses",
+      "license": "unknown",
+      "status": "blocked_pending_license_review",
+      "reason": "substantial program-search examples"
+    },
+    {
+      "repo": "trueagi-io/pln-experimental",
+      "license": "NOASSERTION",
+      "status": "blocked_pending_license_review",
+      "reason": "probabilistic reasoning and theorem generation"
+    }
+  ],
+  "collection_policy": {
+    "train_custody": "source_only_pending_review",
+    "execution_claims": "not_run",
+    "rollouts": "none",
+    "splits": "unassigned",
+    "approved_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "metadata_unit": "per raw .metta file"
+  }
+}

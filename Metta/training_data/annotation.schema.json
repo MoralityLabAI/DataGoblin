@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MeTTa sourced-file training annotation v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id",
+    "source_repo",
+    "source_commit",
+    "source_path",
+    "source_url",
+    "upstream_blob_sha1",
+    "license_spdx",
+    "raw_path",
+    "source_kind",
+    "task_family",
+    "verification_status",
+    "training_status",
+    "split"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string"
+    },
+    "source_repo": {
+      "type": "string"
+    },
+    "source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "source_path": {
+      "type": "string",
+      "pattern": "\\.metta$"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "upstream_blob_sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "license_spdx": {
+      "enum": [
+        "MIT",
+        "Apache-2.0"
+      ]
+    },
+    "raw_path": {
+      "type": "string"
+    },
+    "source_kind": {
+      "enum": [
+        "upstream_test",
+        "negative_test",
+        "example",
+        "library",
+        "benchmark"
+      ]
+    },
+    "task_family": {
+      "type": "string"
+    },
+    "runtime_hint": {
+      "type": "string"
+    },
+    "embedded_test_assertion_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "imports_detected": {
+      "type": "boolean"
+    },
+    "utf8_bytes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "line_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "model_token_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "verification_status": {
+      "enum": [
+        "not_run",
+        "passed",
+        "failed",
+        "blocked"
+      ]
+    },
+    "verification_receipt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rollout_status": {
+      "const": "none"
+    },
+    "training_status": {
+      "enum": [
+        "source_only_pending_review",
+        "source_pretraining_approved"
+      ]
+    },
+    "split": {
+      "const": "unassigned"
+    }
+  }
+}
