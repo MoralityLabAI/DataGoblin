@@ -75,3 +75,25 @@ candidate pools, and CAL-frozen continuation decisions. Hard Lean
 problems, blinded real repository defects, live online latency,
 pretrained model comparisons, and sealed confirmation are future gates.
 This pilot does not establish them.
+
+## First native result and next development registration
+
+The initial native run [#44974767904](https://github.com/MoralityLabAI/DataGoblin/actions/runs/44974767904)
+passed tests and Ruff and made 1,408 actual MCP tool calls. Its frozen CAL
+threshold was 0.25. TRAIN/CAL each achieved 8/8, ordinary development
+7/8, OOD development 6/8. The exact-behavior rule scored 8/8 in
+both held-out development partitions. These observed development outcomes
+are retained as a **failure of the first cost-weighted classifier**.
+
+The second development run uses fresh source seed `20261123` and
+`dg_blind_mcp_learned_stop_development_v2`. The CAL-only utility remains
+`correct - 0.015 * counterfactual_symbol_reads`. When several thresholds
+have the identical utility, choose the **largest** threshold, reducing
+unverified premature selections. This change was motivated by the first
+development failure. It must be assessed on new source roots and cannot
+retroactively improve the first test result. Both generations remain
+development experiments; neither is sealed confirmation.
+
+Promotion remains blocked until a learned policy improves over the exact
+behavior rule and shows real online wall-time or tool-budget savings on
+independent, less templated repository tasks.
