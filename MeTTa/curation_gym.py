@@ -7,7 +7,6 @@ Evaluation partitions receive unlabeled packets; no sealed labels are exported.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from collections import Counter
 from pathlib import Path
@@ -16,7 +15,6 @@ from typing import Any
 from datagoblin.data_etiquette.policy import EtiquettePolicy
 from datagoblin.data_etiquette.records import DataCollectionRecord
 from datagoblin.domain.evidence import EvidenceType
-
 from MeTTa.collect import ROOT, proposed_split, sha256_bytes
 
 VARIANTS = (
@@ -135,7 +133,7 @@ def program_for(record: DataCollectionRecord) -> str:
     # Multi-atom pattern and query follow the reference interpreter's match
     # grammar. This program still needs native execution before runtime claims.
     query = f"!(match &self (, (License {key} $license) (Evidence {key} $evidence)) ($license $evidence))"
-    return "\n".join(facts + [query]) + "\n"
+    return "\n".join([*facts, query]) + "\n"
 
 
 def build_cases(
@@ -170,7 +168,10 @@ def build_cases(
                     "catalog_file": file_row["path"],
                 },
                 "model_input": {
-                    "instruction": "Inspect the MeTTa fact store and propose curation; defer authority to DataGoblin policy.",
+                    "instruction": (
+                        "Inspect the MeTTa fact store and propose curation; "
+                        "defer authority to DataGoblin policy."
+                    ),
                     "program": program_for(record),
                     "public_envelope": record.to_jsonable(),
                 },
@@ -205,7 +206,10 @@ def build_cases(
         "evaluation_labels_written": 0,
         "native_execution_verified": False,
         "training_ready": False,
-        "remarks": "Synthetic metadata fixtures. EtiquettePolicy is the label authority; MeTTa code supplies advisory structure.",
+        "remarks": (
+            "Synthetic metadata fixtures. EtiquettePolicy is the label authority; "
+            "MeTTa code supplies advisory structure."
+        ),
     }
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest
