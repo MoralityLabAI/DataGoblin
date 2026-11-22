@@ -141,7 +141,7 @@ def build_plan(
         if not isinstance(ordinal, int) or ordinal < 0:
             raise ValueError(f"{sid}: invalid evaluation ordinal")
         packet_id = sha256(
-            f"{sid}:{ordinal}:{sha256(input_text.encode('utf-8'))}".encode("utf-8")
+            f"{sid}:{ordinal}:{sha256(input_text.encode('utf-8'))}".encode()
         )
         if record.get("id") != packet_id or packet_id in seen_packet_ids:
             raise ValueError(f"{sid}: packet ID mismatch or duplicate")
