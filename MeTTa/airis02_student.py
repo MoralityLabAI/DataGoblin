@@ -330,6 +330,13 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
                  seed: int = 20261122, hidden: int = 18) -> dict[str, Any]:
     if not 1 <= steps <= 256 or not 0.001 <= lr <= 0.4:
         raise ValueError("student optimization exceeds bounded CPU budget")
+    # An independent full replay authorizes this bounded toy research fit,
+    # without marking any candidate as released training material.
+    from .airis02_audit import audit_bundle
+
+    audit = audit_bundle(bundle, full_replay=True)
+    if audit["synthetic_research_fit_eligible"] is not True or audit["general_corpus_training_ready"] is not False:
+        raise ValueError("synthetic research fit is not independently admissible")
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     if manifest.get("schema_version") != "metta-airis02-bundle-v1" or manifest.get("training_ready") is not False:
         raise ValueError("unknown or admitted training bundle")
@@ -362,12 +369,17 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         "one_example_per_root_per_arm": True,
         "trained_models": {},
         "bundle_manifest_sha256": sha256_bytes((bundle / "manifest.json").read_bytes()),
+        "research_fit_audit_sha256": sha256_bytes(
+            json.dumps(audit, sort_keys=True, separators=(",", ":")).encode()
+        ),
+        "synthetic_research_fit_eligible": True,
         "limitations": [
             "Development roots are publicly regenerable; no sealed accuracy claimed.",
             "Recurrent depths 2/4/8 share the weights fitted at depth 4.",
             "STOP is an action class, not an adaptive computation-time exit head.",
             "Direct and recurrent models have different parameter counts; matched updates apply within each architecture.",
             "Inputs are fixed-size structured synthetic facts, not native MeTTa tokens.",
+            "Equal source-root counts and optimizer steps do not establish equal source-token budgets.",
         ],
     }
     for arm in ARMS:
