@@ -56,6 +56,8 @@ jobs:
           assert report["development_cases_per_arm"] == 60
           assert report["training_ready"] is False
           assert report["holdout_steward_opened"] is False
+          assert report["development_evaluation_world_policy"] == "shared_uniform_intervention"
+          assert len(report["development_evaluation_worlds_sha256"]) == 64
           assert all(v["recurrent"]["development"]["4"]["cases"] == 60
                      for v in report["trained_models"].values())
           print("AIRIS-02 research-only verified fit: PASS")
