@@ -25,10 +25,6 @@ from datagoblin.training_gym.rlt_gym.native_lean_stop import (
 
 
 def _fixture_receipt(root, index):
-    family = SPLITS.index(root.split)
-    # Root generation schedules the theorem family independently of menu order.
-    template = (int(root.public_task["statement"].count("Nat")) + family) % 4
-    del template
     witness = next((j for j, tactic in enumerate(root.tactics) if tactic == SCRIPTS[
         _observed_family(root.statement)
     ]), None)
@@ -40,12 +36,12 @@ def _fixture_receipt(root, index):
 
 
 def _observed_family(statement: str) -> int:
+    if "(a + b) * (c +" in statement:
+        return 0
     if "(b + a)" in statement:
         return 2
     if "(a * c + b * c)" in statement:
         return 3
-    if "(a + b) * (c +" in statement:
-        return 0
     return 1
 
 
