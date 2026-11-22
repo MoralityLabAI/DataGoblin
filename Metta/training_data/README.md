@@ -45,3 +45,16 @@ python Metta/training_data/scripts/corpus.py --json
 ```
 
 Review each generated annotation and the actual program before promoting source language-modeling data; evaluate license and upstream-data-specific rights separately for graph imports. This collector intentionally makes no SFT/rollout verification claim.
+
+## Reproducible expansion and exact tokenizer count
+
+The seed expansion workflow `.github/workflows/metta-expand-seed.yml` collects up to a bounded set of pinned examples and tests from eight approved repositories and commits them with their license, source digest and custody labels. It runs one time when its workflow definition is added to the seed PR branch. Upstream sources remain unexecuted.
+
+Measure a true token count with a named tokenizer (counts are not portable across tokenizer vocabularies):
+
+```sh
+python -m pip install 'tiktoken==0.12.0'
+python Metta/training_data/scripts/count_tokens.py --encoding o200k_base
+```
+
+The report and one-token-count-per-source manifest live in `reports/o200k_base.json` and `token_counts/o200k_base.jsonl`. The count describes raw source-language-modeling tokens, separately from generated rollout tokens; use the actual Bonsai/Qwen tokenizer for their native training budgets.

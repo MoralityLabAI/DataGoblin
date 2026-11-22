@@ -1,0 +1,67 @@
+name: MeTTa bounded seed expansion
+
+on:
+  push:
+    branches: [data/metta-annotated-seed-20261122]
+    paths:
+      - '.github/workflows/metta-expand-seed.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: metta-expansion-seed
+  cancel-in-progress: false
+
+jobs:
+  bounded-source-expansion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data/metta-annotated-seed-20261122
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect pinned licensed public MeTTa code, source only
+        run: |
+          set -euo pipefail
+          COLLECT="Metta/training_data/scripts/crawl_repo.py"
+          python "$COLLECT" --repo zariuq/CeTTa --path-prefix examples/ --max-files 160 --max-file-bytes 16384 --max-total-bytes 400000 --apply
+          python "$COLLECT" --repo trueagi-io/PeTTa --path-prefix examples/ --max-files 180 --max-file-bytes 8192 --max-total-bytes 200000 --apply
+          python "$COLLECT" --repo trueagi-io/hyperon-experimental --path-prefix python/tests/scripts/ --max-files 60 --max-file-bytes 16384 --max-total-bytes 110000 --apply
+          python "$COLLECT" --repo F1R3FLY-io/MeTTa-Compiler --path-prefix docs/metta/ --max-files 60 --max-file-bytes 16384 --max-total-bytes 250000 --apply
+          python "$COLLECT" --repo MesTTo/MeTTa-Library-Pack --path-prefix lib_ --max-files 100 --max-file-bytes 16384 --max-total-bytes 200000 --apply
+          python "$COLLECT" --repo iCog-Labs-Dev/MetaMo --max-files 55 --max-file-bytes 16384 --max-total-bytes 180000 --apply
+          python "$COLLECT" --repo MesTTo/MeTTaScript --path-prefix packages/ --max-files 70 --max-file-bytes 12000 --max-total-bytes 180000 --apply
+          python "$COLLECT" --repo trueagi-io/metta-examples --path-prefix deontic_logic/sparql2metta/ --max-files 30 --max-file-bytes 12000 --max-total-bytes 100000 --apply
+          python Metta/training_data/scripts/corpus.py --json
+          python -m unittest discover -s Metta/training_data/tests -v
+      - name: Persist validated corpus source snapshots
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Metta/training_data/raw Metta/training_data/annotations
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(metta): grow pinned licensed source corpus with bounded collection'
+            git push origin HEAD:data/metta-annotated-seed-20261122
+          fi
+      - name: Measure exact source tokens with o200k_base
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'tiktoken==0.12.0'
+          python Metta/training_data/scripts/count_tokens.py \
+            --encoding o200k_base \
+            --out Metta/training_data/token_counts/o200k_base.jsonl \
+            --report Metta/training_data/reports/o200k_base.json
+      - name: Persist measured token inventory
+        run: |
+          set -euo pipefail
+          git add Metta/training_data/token_counts Metta/training_data/reports
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(metta): report tokenizer-measured source tokens'
+            git push origin HEAD:data/metta-annotated-seed-20261122
+          fi
