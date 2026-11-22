@@ -417,14 +417,21 @@ def export_repair_traces(
     arm: str,
     config: dict[str, Any],
     train: list[dict[str, Any]],
+    *,
+    seed: int,
 ) -> list[dict[str, Any]]:
     """One replayed train-root presentation, including a checked wrong action."""
     result: list[dict[str, Any]] = []
+    stop_head = None
+    if config["stop_policy"] == "train_calibrated":
+        x, y, _ = _matrix(train)
+        stop_head = StopHead(seed)
+        stop_head.fit(x, y == 20, steps=config["steps"], lr=config["lr"])
     loops = config["inference_loops"] if arm == "trm" else 1
     for row in train:
         task = row["public_world"]
         proposed, vetoed, queries = _next_action(
-            model, task, row["selected"], loops=loops, stop_head=None,
+            model, task, row["selected"], loops=loops, stop_head=stop_head,
             verifier_guard=(arm == "ldt_proxy"),
         )
         expected = row["oracle_next_edit"]
@@ -461,6 +468,8 @@ def export_repair_traces(
             "oracle": "bounded_synthetic_subset_exact_optimum",
             "model_kind": arm,
             "model_checkpoint_sha256": model.digest(),
+            "stop_head_checkpoint_sha256": stop_head.digest() if stop_head else None,
+            "learned_stop_head_calls": int(stop_head is not None),
             "data_source": "fresh_generator_owned_synthetic",
             "teacher_source": "independent_python_oracle",
             "synthetic_research_fit_eligible": True,
@@ -544,7 +553,9 @@ def run_gym(
             "training_ready": False,
         })
     champion = max(ARMS, key=lambda arm: (select_key(best[arm]["dev_aggregate"]), arm))
-    repair = export_repair_traces(models[champion], champion, current[champion], bundle["train"])
+    repair = export_repair_traces(
+        models[champion], champion, current[champion], bundle["train"], seed=seed,
+    )
     out.mkdir(parents=True, exist_ok=True)
     steps_text = "".join(canonical(row) + "\n" for row in history)
     repair_text = "".join(canonical(row) + "\n" for row in repair)
