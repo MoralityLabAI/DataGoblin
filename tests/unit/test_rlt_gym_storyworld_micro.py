@@ -28,9 +28,9 @@ class StoryworldMicroTests(unittest.TestCase):
             self.assertEqual(manifest, twin)
             self.assertEqual(manifest["artifacts"]["micro_public.jsonl"]["rows"], 28)
             self.assertEqual(replay_micro(self.source, root / "a")["status"], "verified")
-            public = [json.loads(l) for l in (root / "a/micro_public.jsonl").read_text().splitlines()]
-            secret = [json.loads(l) for l in (root / "a/micro_sealed.jsonl").read_text().splitlines()]
-            sft = [json.loads(l) for l in (root / "a/micro_train_sft.jsonl").read_text().splitlines()]
+            public = [json.loads(line) for line in (root / "a/micro_public.jsonl").read_text().splitlines()]
+            secret = [json.loads(line) for line in (root / "a/micro_sealed.jsonl").read_text().splitlines()]
+            sft = [json.loads(line) for line in (root / "a/micro_train_sft.jsonl").read_text().splitlines()]
             self.assertEqual({x["task_type"] for x in public},
                              {"compile", "compression", "repair", "targeted_edit"})
             self.assertEqual({x["root"] for x in public}, {x["root"] for x in secret})
