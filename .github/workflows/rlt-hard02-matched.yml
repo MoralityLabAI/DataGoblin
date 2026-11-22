@@ -1,0 +1,87 @@
+name: RLT-HARD-02B length-matched Mathlib tactic development
+
+on:
+  push:
+    branches: [research/rlt-hard-mathlib02-20261122]
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/hard02_mathlib.py"
+      - "tests/unit/test_rlt_hard02_matched.py"
+      - ".github/workflows/rlt-hard02-matched.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/hard02_mathlib.py"
+      - "tests/unit/test_rlt_hard02_matched.py"
+      - ".github/workflows/rlt-hard02-matched.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-mathlib-matched:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      LEAN_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin optional ranker and source tests
+        run: python -m pip install -e ".[dev,rlt-pilot]"
+      - name: Enforce fresh root / split and provenance contracts
+        run: python -m pytest -q tests/unit/test_rlt_hard02_matched.py tests/unit/test_rlt_hard02_mathlib.py
+      - name: Ruff source check
+        run: |
+          ruff check \
+            src/datagoblin/training_gym/rlt_gym/hard02_mathlib.py \
+            tests/unit/test_rlt_hard02_matched.py
+      - name: Install exact Lean 4.12.0 toolchain
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -fsSL \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.12.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lake" --version
+      - name: Obtain exact upstream Mathlib revision and binary cache
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dg-rlt-mathlib
+          git -C /tmp/dg-rlt-mathlib init -q
+          git -C /tmp/dg-rlt-mathlib remote add origin \
+            https://github.com/leanprover-community/mathlib4.git
+          git -C /tmp/dg-rlt-mathlib fetch -q --depth=1 origin \
+            809c3fb3b5c8f5d7dace56e200b426187516535a
+          git -C /tmp/dg-rlt-mathlib checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/dg-rlt-mathlib rev-parse HEAD)" = \
+            "809c3fb3b5c8f5d7dace56e200b426187516535a"
+          cd /tmp/dg-rlt-mathlib
+          timeout --signal=TERM --kill-after=15s 900s \
+            "$HOME/.elan/bin/lake" exe cache get
+      - name: Probe genuine open goals, train on TRAIN and run native eval
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=15s 1500s \
+            python -m datagoblin.training_gym.rlt_gym.hard02_mathlib \
+              --lake "$HOME/.elan/bin/lake" \
+              --mathlib /tmp/dg-rlt-mathlib \
+              --per-split 8 --source-seed 2026112203 --matched-menus \
+              --out runs/rlt-hard02-matched
+      - name: Archive candidate receipts, proof sources, and pinned mathlib hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-hard02-matched-dev
+          path: runs/rlt-hard02-matched/
+          if-no-files-found: warn
+          retention-days: 21
