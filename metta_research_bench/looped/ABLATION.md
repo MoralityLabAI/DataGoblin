@@ -100,3 +100,69 @@ conflict roots across prior studies.
 
 - Training lock SHA-256 `7cb93a0dda84678e1cae0eb2c5c6895cc0cfedb7a11608e622c729a74ee20384`
 - Frozen report SHA-256 `c087bebc2771652116474cce2148e62d1ed23f746479f63c5d8c408fc984538c`
+
+## Lineage × revision follow-up
+
+The factorial comparison holds every other clause fixed and scores the
+full curator, the two single-rule omissions, and the joint omission on
+the same fresh worlds. The existing nine control checkpoints are reused
+after their selections, weights, initialization, and budgets are checked.
+Three joint-omission fits use the same 10,662 candidates, 240 training
+roots, initialization seeds, 44,417 parameters, 600 updates, and 28,800
+supervised action tokens per fit. No conflict roots are used in training.
+
+The primary estimate on the verified completion-rate scale is joint
+omission minus the sum of the two single omissions plus the full curator.
+A positive value means the joint omission completes more repairs than
+predicted by adding the single-omission changes. The analysis pairs all
+four arms within each seed and root, averages across seeds, then uses a
+root bootstrap interval and a two-sided root-level sign-flip test. The
+primary split uses 200 fresh in-family roots and the separate transfer
+split uses 32 fresh conflict roots. Neither split overlaps the earlier
+paired benchmark or one-rule ablation reserves.
+
+Run `python -m metta_research_bench.looped.interaction train` followed by
+the same command with `frozen`. Both stages use `--reference` and
+`--reference-checkpoints` for the original paired benchmark,
+`--prior-ablation` and `--prior-checkpoints` for the one-rule run, and
+`--out` and `--checkpoints` for the new run. The fresh split is opened only
+after all twelve checkpoint hashes are locked. Keep generated receipts
+and checkpoints outside Git.
+
+### Frozen interaction results
+
+| Training curator | Changed selections / 240 | In-family complete / 600 | Premature stops | Policy verifier calls | Recurrent passes | Conflict complete / 96 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Full | 0 | 172 | 414 | 2,348 | 8,289 | 28 |
+| Drop unique lineage | 18 | 173 | 398 | 2,532 | 8,430 | 23 |
+| Drop current revision | 27 | 182 | 389 | 2,460 | 8,070 | 24 |
+| Drop both | 45 | 181 | 377 | 2,801 | 8,649 | 22 |
+
+The single omissions predicted 183 in-family completions under an
+additive model. Joint omission yielded 181. The interaction estimate
+was −0.33 percentage points (root-bootstrap 95% interval −5.00 to +4.17,
+two-sided sign-flip p = 0.941). Seed estimates were −4.50, −0.50, and
++4.00 points. The five family contrasts summed to −2 completions. On the
+revision family alone, both omissions yielded 50 completions versus an
+additive prediction of 61 out of 120. That family contrast is descriptive.
+
+On conflict, the joint omission produced 22 completions and the additive
+prediction was 19. The transfer interaction was +3.13 points (95% interval
+−7.29 to +13.54, p = 0.692). The intervals leave room for either direction
+of interaction. All arms had zero unsafe additions under the shared
+inference verifier.
+
+The joint rule chose the same 18 lineage and 27 revision replacements as
+the single omissions. The training-data audit yielded 191 independently
+verified complete trajectories, versus 236 with both guards present,
+218 after the lineage omission, and 209 after the revision omission.
+
+The run at `867372836561b9a42f4800cc096b0d957d6e2592` took 269.03 seconds
+for audit and training and 82.75 seconds for frozen scoring. Peak RSS was
+530.89 MiB per native worker, 379.32 MiB for training, and 444.87 MiB for
+frozen scoring. The final audit matched 2,784 Prime Verifiers 0.4.1 traces
+to receipts and checkpoints, and confirmed fresh source hashes against
+122 archived conflict roots.
+
+- Training lock SHA-256 `336af481a214adc26dcfcb9c2f77cbf6783843b91bbf20cc8247622cb27821cb`
+- Frozen report SHA-256 `bb37f90a381bed89419ea0e1c40bf641589a8f897e97aa0dc242d44515a4f4f0`

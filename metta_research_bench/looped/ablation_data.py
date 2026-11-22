@@ -55,7 +55,7 @@ def audit_root(args: tuple) -> tuple[dict, dict, float]:
         raise ValueError("Reference TRAIN root changed or lacks a common quota")
     candidates = root["rollouts"]
     selected, native_checks = curate_root(world, root, candidates, rules)
-    if any(selected[name] != previous["selected"][name] for name in ("good", "sloppy")):
+    if any(selected[name] != previous["selected"][name] for name in ("good", "sloppy") if name in rules):
         raise ValueError("Original endpoint selection is not reproducible")
     if None in selected.values():
         raise ValueError("A single-rule ablation failed the matched quota")
@@ -74,13 +74,16 @@ def audit_root(args: tuple) -> tuple[dict, dict, float]:
     return world, card, check_memory(memory_limit)
 
 
-def prepare_ablation(reference: Path, report: dict, memory_limit: int) -> tuple[dict, list[dict], dict]:
+def prepare_ablation(
+    reference: Path, report: dict, memory_limit: int, *, rules: dict[str, str] | None = None,
+) -> tuple[dict, list[dict], dict]:
     original = report["curation"]
     pool = reference_file(reference / "candidate_rollouts.jsonl", original["candidate_pool_sha256"])
     old_cards = reference_file(reference / "curation_audit.jsonl", original["paired_curation_sha256"])
-    rules = ablation_rules()
+    if rules is None:
+        rules = ablation_rules()
     hashes = rule_hashes(rules)
-    if any(hashes[name] != original["rules_sha256"][name] for name in ("good", "sloppy")):
+    if any(hashes[name] != original["rules_sha256"][name] for name in ("good", "sloppy") if name in rules):
         raise ValueError("The endpoint rules differ from the previous locked run")
     simulated = {name: [] for name in rules}
     cards = []
