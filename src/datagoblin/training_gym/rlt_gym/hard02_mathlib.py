@@ -89,8 +89,8 @@ def _witness(
         for _ in range(i + 1 + depth_shift):
             tree = f"dvd_add ({tree}) (dvd_add hab hac)"
         if numeric_shift:
-            statement = (  # noqa: RUF001
-                f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {n} → a ∣ ({expr} + {n})"
+            statement = (
+                f"∀ (a b c : Nat), (a ∣ b ∧ a ∣ c) → a ∣ {n} → a ∣ ({expr} + {n})"  # noqa: RUF001
             )
             prefix = "intro a b c h hn"
             proof = f"rcases h with ⟨hab, hac⟩\nexact dvd_add ({tree}) hn"
