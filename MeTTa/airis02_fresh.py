@@ -8,7 +8,6 @@ teacher labels and are never materialized by this module.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from collections import Counter
 from pathlib import Path
