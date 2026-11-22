@@ -32,7 +32,7 @@ FIELD_DIM = 15
 GLOBAL_DIM = 13
 INPUT_DIM = MAX_ITEMS * FIELD_DIM + GLOBAL_DIM
 FAMILIES = ("lineage", "coverage", "dependency", "revision", "budget")
-SCHEMA = "metta-airis02-cpu-student-v3"
+SCHEMA = "metta-airis02-cpu-student-v4"
 
 
 def encode_public(task: dict[str, Any], selected: list[str]) -> np.ndarray:
@@ -308,28 +308,92 @@ def _choose_action(
     return decode_action(int(np.argmax(np.where(mask, logits, -1e6))))
 
 
+def _guarded_action(
+    model: LinearStudent | RecurrentStudent, task: dict, selected: list[str],
+    *, loops: int, stop_head: Any | None,
+) -> tuple[dict[str, str], int, int]:
+    """Environment-owned veto: an ADD may not introduce a new violation.
+
+    The model and stop head propose scores; the independent public constraint
+    checker controls only the allowed ADD transition. It never reveals the
+    hidden exact optimal selection or canonical next action.
+    """
+    vector = encode_public(task, selected)[None, :]
+    if stop_head is not None and stop_head.should_stop(vector):
+        return {"op": "stop", "id": "none"}, 0, 0
+    logits = model.logits(vector, loops=loops)[0]
+    allowed = legal_action_mask(task, selected)
+    if stop_head is not None:
+        allowed[20] = False
+    ordering = np.argsort(-logits, kind="stable")
+    vetoes = 0
+    queries = 0
+    before: set[str] | None = None
+    for index in ordering:
+        if not allowed[index]:
+            continue
+        action = decode_action(int(index))
+        if action["op"] == "add":
+            if before is None:
+                before = set(evaluate_subset(task, selected)["violations"])
+                queries += 1
+            proposed = edit(selected, action)
+            after = set(evaluate_subset(task, proposed)["violations"])
+            queries += 1
+            if after - before:
+                vetoes += 1
+                continue
+        return action, vetoes, queries
+    return {"op": "abstain", "id": "none"}, vetoes, queries
+
+
+def _next_action(
+    model: LinearStudent | RecurrentStudent, task: dict, selected: list[str],
+    *, loops: int, stop_head: Any | None, verifier_guard: bool,
+) -> tuple[dict[str, str], int, int]:
+    if verifier_guard:
+        return _guarded_action(model, task, selected, loops=loops, stop_head=stop_head)
+    return _choose_action(model, task, selected, loops=loops, stop_head=stop_head), 0, 0
+
+
 def _rollout(
     model: LinearStudent | RecurrentStudent, row: dict,
     *, loops: int, max_edits: int = 8, stop_head: Any | None = None,
+    verifier_guard: bool = False,
 ) -> dict[str, Any]:
     """Judge an entire attempted repair with the environment-owned oracle."""
     task = row["public_world"]
     selected = list(row["selected"])
     oracle = exact_optimum(task)
-    initial = _choose_action(model, task, selected, loops=loops, stop_head=stop_head)
+    initial, initial_vetoes, initial_checks = _next_action(
+        model, task, selected, loops=loops, stop_head=stop_head, verifier_guard=verifier_guard
+    )
     exact_initial = initial == row["oracle_next_edit"]
     attempts = 0
     decisions = 0
     false_admissions = 0
     premature_stop = 0
     invalid_action = 0
+    rejected = 0
+    verifier_queries = 0
+    abstentions = 0
+    new_violation_additions = 0
     successful_stop = False
     ever_optimal = selected == oracle["selected"]
     for step in range(max_edits):
-        action = initial if step == 0 else _choose_action(
-            model, task, selected, loops=loops, stop_head=stop_head
-        )
+        if step == 0:
+            action, vetoed, checks = initial, initial_vetoes, initial_checks
+        else:
+            action, vetoed, checks = _next_action(
+                model, task, selected, loops=loops, stop_head=stop_head,
+                verifier_guard=verifier_guard,
+            )
         decisions += 1
+        rejected += vetoed
+        verifier_queries += checks
+        if action["op"] == "abstain":
+            abstentions += 1
+            break
         if action["op"] == "stop":
             successful_stop = selected == oracle["selected"]
             premature_stop = int(not successful_stop)
@@ -342,11 +406,19 @@ def _rollout(
         ):
             invalid_action = 1
             break
+        previous_violations = (
+            set(evaluate_subset(task, selected)["violations"])
+            if action["op"] == "add" else set()
+        )
         selected = edit(selected, action)
         attempts += 1
         ever_optimal |= selected == oracle["selected"]
-        if action["op"] == "add" and not evaluate_subset(task, selected)["valid"]:
-            false_admissions += 1
+        if action["op"] == "add":
+            current_state = evaluate_subset(task, selected)
+            if not current_state["valid"]:
+                false_admissions += 1
+            if set(current_state["violations"]) - previous_violations:
+                new_violation_additions += 1
     final = evaluate_subset(task, selected)
     oracle_coverage = len(oracle["verified_objective"]["covered_goals"])
     return {
@@ -356,6 +428,10 @@ def _rollout(
         "premature_stop": premature_stop,
         "inapplicable_action": invalid_action,
         "unsafe_addition": false_admissions,
+        "new_violation_addition": new_violation_additions,
+        "verifier_vetoes": rejected,
+        "verifier_queries": verifier_queries,
+        "abstentions": abstentions,
         "final_valid": int(final["valid"]),
         "goals_covered": len(final["covered_goals"]),
         "oracle_goals_covered": oracle_coverage,
@@ -368,9 +444,12 @@ def _rollout(
 
 def evaluate(
     model: LinearStudent | RecurrentStudent, rows: list[dict],
-    *, loops: int, stop_head: Any | None = None,
+    *, loops: int, stop_head: Any | None = None, verifier_guard: bool = False,
 ) -> dict[str, Any]:
-    measures = [_rollout(model, row, loops=loops, stop_head=stop_head) for row in rows]
+    measures = [
+        _rollout(model, row, loops=loops, stop_head=stop_head, verifier_guard=verifier_guard)
+        for row in rows
+    ]
     if not measures:
         raise ValueError("empty evaluation split")
     count = len(measures)
@@ -383,6 +462,10 @@ def evaluate(
         "premature_stops": sums["premature_stop"],
         "inapplicable_actions": sums["inapplicable_action"],
         "unsafe_additions": sums["unsafe_addition"],
+        "new_violation_additions": sums["new_violation_addition"],
+        "verifier_vetoes": sums["verifier_vetoes"],
+        "verifier_queries": sums["verifier_queries"],
+        "abstentions": sums["abstentions"],
         "final_valid": sums["final_valid"],
         "mean_goals_covered": round(sums["goals_covered"] / count, 5),
         "mean_remaining_canonical_edits": round(sums["remaining_canonical_edits"] / count, 5),
@@ -439,6 +522,7 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
         "optimizer_steps_per_arm": steps,
         "student_training_policy": "structural_membership_action_mask_plus_hash_fixed_point_stop",
         "learned_stop_policy": "independent_train_only_calibrated_binary_head",
+        "verifier_gate_policy": "reject_additions_introducing_new_synthetic_constraint_violations",
         "learning_rate": lr,
         "training_loops": 4,
         "inference_depths_checked": [2, 4, 8],
@@ -493,6 +577,9 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
                 "final_training_loss": losses[-1],
                 "development": evaluate(linear, shared_dev, loops=1),
                 "learned_stop_development": evaluate(linear, shared_dev, loops=1, stop_head=stop_head),
+                "verified_stop_development": evaluate(
+                    linear, shared_dev, loops=1, stop_head=stop_head, verifier_guard=True
+                ),
                 "within_arm_diagnostic": evaluate(linear, a_dev, loops=1),
             },
             "recurrent": {
@@ -504,6 +591,9 @@ def run_students(bundle: Path, *, steps: int = 48, lr: float = 0.20,
                     str(k): evaluate(rec, shared_dev, loops=k, stop_head=stop_head)
                     for k in (2, 4, 8)
                 },
+                "verified_stop_development": evaluate(
+                    rec, shared_dev, loops=4, stop_head=stop_head, verifier_guard=True
+                ),
                 "within_arm_diagnostic": evaluate(rec, a_dev, loops=4),
             },
             "training_targets": dict(sorted(Counter(int(y_i) for y_i in y).items())),
@@ -547,6 +637,9 @@ def main() -> int:
             "recurrent_4_solved": item["recurrent"]["development"]["4"]["solved_and_stopped"],
             "recurrent_4_first_edit": item["recurrent"]["development"]["4"]["exact_first_edit"],
             "recurrent_4_learned_stop_solved": item["recurrent"]["learned_stop_development"]["4"][
+                "solved_and_stopped"
+            ],
+            "recurrent_4_verified_stop_solved": item["recurrent"]["verified_stop_development"][
                 "solved_and_stopped"
             ],
         } for arm, item in report["trained_models"].items()},
