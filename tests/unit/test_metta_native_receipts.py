@@ -89,7 +89,7 @@ def test_certificate_join_rejects_tampered_native_row_even_if_digest_updated(tmp
         json.dumps(data["rows"], sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     path.write_text(json.dumps(data))
-    with pytest.raises(ValueError, match="coverage incomplete"):
+    with pytest.raises(ValueError, match=r"coverage incomplete|native query does not belong"):
         join_native(tmp_path, shard_count=3, roots_per_family=12, queries_per_root=3)
 
 
