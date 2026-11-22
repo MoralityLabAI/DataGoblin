@@ -141,9 +141,10 @@ def validate_corpus(root: Path = ROOT) -> tuple[list[dict[str, Any]], dict[str, 
             imports = imports_present(text)
             if imports != row["imports_detected"]:
                 raise ValueError("external import heuristic mismatch")
-            if row["model_token_count"] is not None:
-                if not isinstance(row["model_token_count"], int) or row["model_token_count"] < 1:
-                    raise ValueError("invalid model token count")
+            if row["model_token_count"] is not None and (
+                not isinstance(row["model_token_count"], int) or row["model_token_count"] < 1
+            ):
+                raise ValueError("invalid model token count")
             total_bytes += len(raw)
             total_assertions += count
             imported += int(imports)

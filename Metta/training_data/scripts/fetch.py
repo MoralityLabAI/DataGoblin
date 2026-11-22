@@ -26,7 +26,7 @@ def main() -> int:
             if git_blob_sha1(destination.read_bytes()) != item["upstream_blob_sha1"]:
                 raise ValueError(f"Existing source has changed: {item['id']}")
             continue
-        parts = item["source_repo"].split("/") + [item["source_commit"]] + item["source_path"].split("/")
+        parts = [*item["source_repo"].split("/"), item["source_commit"], *item["source_path"].split("/")]
         url = "https://raw.githubusercontent.com/" + "/".join(quote(p, safe="") for p in parts)
         if args.dry_run:
             print("Would fetch", item["id"])

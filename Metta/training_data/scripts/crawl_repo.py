@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-from corpus import ROOT, LICENSE_ALLOWLIST, embedded_assertions, git_blob_sha1, imports_present, safe_file
+from corpus import LICENSE_ALLOWLIST, ROOT, embedded_assertions, git_blob_sha1, imports_present, safe_file
 
 DEFAULT_EXCLUSIONS = re.compile(
     r"(^|/)(?:corpus|tmpdata|generated|snapshots|vendor|node_modules|large_data|checkpoints)(/|$)"
