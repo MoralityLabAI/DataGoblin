@@ -101,3 +101,7 @@ python -m MeTTa.curation_gym --out runs/metta/curation
 ```
 
 The GitHub workflow `metta-corpus.yml` runs the CPU tests, checks the source catalog, generates the 1,960 curation exercises, checks that evaluation labels are absent and preserves the manifest. Native interpreter replay and local model training require separate approved runs.
+
+## Goertzel Pattern-Miner curriculum and follow-on lanes
+
+[MeTTa-03](GOERTZEL_SYNERGY.md) mines root-level, observable conjunctions from the existing synthetic curation training partition, with a separate synthetic Python-oracle validity check and disjoint internal discovery/confirmation roots. It emits advisory MeTTa motif facts with lineage receipts without adding any SFT presentations. The report also maps next research integrations for MOSES, NARS/PLN, AIRIS, MetaMo/OpenPsi, ECAN and HiBaCaML. Run `python -m MeTTa.pattern_miner --out runs/metta/pattern_miner` to regenerate the proposed motifs. All outputs remain `training_ready=false`.
