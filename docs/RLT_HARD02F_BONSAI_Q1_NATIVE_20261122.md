@@ -63,3 +63,8 @@ python -m datagoblin.training_gym.rlt_gym.hard02f_oxibonsai \
 ```
 
 Native metrics are withheld until the real-checkpoint workflow completes and passes the independent artifact audit.
+
+### Exhaustive-menu versus budgeted-policy STOP accounting
+
+The pilot caps each policy at **two** native tactic attempts per source root. The historical `fixed_full` arm name therefore denotes fixed candidate order **truncated at the shared two-check budget**, not five-step exhaustive coverage. The independent five-action QA ledger exists separately. The auditor computes two different early-STOP error counts: misses relative to the budgeted fixed-order arm and misses relative to the **complete Lean-verified five-candidate menu**, the latter being authoritative for missed reachable proofs. Do not interpret the budget-limited fixed arm as an exhaustive proof search. These two definitions must stay explicit in reports and reviews.
+
