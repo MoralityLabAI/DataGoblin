@@ -34,6 +34,7 @@ jobs:
         run: |
           python -m training.rlt_gym.bsar02.evaluation prepare --output-dir generated/bsar02
           python -m training.rlt_gym.bsar02.evaluation majority-baseline --output-dir generated/bsar02
+          python -m training.rlt_gym.bsar02.evaluation template-baseline --output-dir generated/bsar02
           python -c 'import json; m=json.load(open("generated/bsar02/manifest.json")); assert m["task_count"] == 164'
       - uses: actions/upload-artifact@v4
         with:
