@@ -148,6 +148,7 @@ def test_pairing_is_deterministic_and_same_root_for_both_arms():
     assert report_a["training_ready"] is False
     assert report_a["native_airis_executed"] is False
     assert report_a["all_zero_change_shams_passed"] is True
+    assert report_a["paired_policy"]["budget_first"]["paired_roots"] == 12
     assert report_a["paired_outcomes"]["guided_only_target_flip"] + (
         report_a["paired_outcomes"]["uniform_only_target_flip"]
         + report_a["paired_outcomes"]["ties"]
