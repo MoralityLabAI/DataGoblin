@@ -121,3 +121,9 @@ The original 196-file provenance and the synthetic SFT root splits remain unchan
 [MeTTa-05](MOSES_CONTROL.md) fits original, size-capped symbolic programs to predict whether an existing **synthetic training-root** evidence selection violates the bounded curation oracle. It follows the Pattern Miner experiment and uses disjoint internal discovery and confirmation partitions, retaining independent majority and cost-pressure controls. Rule proposals are advisory, and all resulting data retains `training_ready=false`. The upstream MeTTa-MOSES library is separately implemented in PeTTa/MeTTaLog; this small Python genetic control makes no native equivalence claim.
 
 Run `python -m MeTTa.moses_control --out runs/metta/moses_rule_control` to generate the frozen CPU rule-search receipt.
+
+## Evidence-lineage confidence shadow
+
+[MeTTa-06](PLN_LINEAGE_SHADOW.md) introduces a small CPU-only evidence ledger inspired by MeTTa PLN's EvidenceID and two-component truth-value framework. It deduplicates repeated evidence IDs and claims sharing a lineage, supersedes older observed revisions for an advisory score, and flags same-version disagreement for review. The reported strength and confidence are explicitly uncalibrated, derived from declared lineages rather than native PLN inference, and preserve `authorization=none` with `training_ready=false`.
+
+Run `python -m MeTTa.pln_lineage --out runs/metta/pln_lineage_shadow.json` for a deterministic synthetic fixture.
