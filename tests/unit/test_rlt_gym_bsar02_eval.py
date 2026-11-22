@@ -7,8 +7,8 @@ import pytest
 
 from training.rlt_gym.bsar02.evaluation import (
     ABSTAIN,
-    LABELS,
     EXPECTED_COUNT,
+    LABELS,
     load_holdout,
     prepare,
     public_tasks,
