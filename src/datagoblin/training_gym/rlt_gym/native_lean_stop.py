@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import random
+import re
 import shutil
 import subprocess
 import tempfile
@@ -101,7 +102,7 @@ def _statement(family: int, k: int) -> str:
     )
 
 
-def generate_roots(*, per_split: int = 8, seed: int = SOURCE_SEED) -> list[ProofRoot]:
+def generate_roots(*, per_split: int = 8, seed: int = SOURCE_SEED, alpha_ood: bool = False) -> list[ProofRoot]:
     if type(per_split) is not int or per_split < 8 or per_split > 24 or per_split % 4:
         raise ValueError("per_split must be a multiple of four in 8..24")
     if type(seed) is not int or seed < 0:
@@ -119,6 +120,10 @@ def generate_roots(*, per_split: int = 8, seed: int = SOURCE_SEED) -> list[Proof
             source_token = _sha(f"{seed}/{split}/{i}".encode())[:18]
             random.Random(int(source_token, 16)).shuffle(scripts)
             statement = _statement(family, k)
+            if split == "ood_test" and alpha_ood:
+                # Alpha-equivalent statements keep the same proof scripts after "intro".
+                renamed = {"a": "u", "b": "v", "c": "w"}
+                statement = re.sub(r"\b[abc]\b", lambda m: renamed[m.group()], statement)
             task = {
                 "statement": statement,
                 "import": "Init",
@@ -329,7 +334,8 @@ def _arm_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def run(lean_exe: Path, out: Path, *, per_split: int = 8, seed: int = SOURCE_SEED) -> dict[str, Any]:
+def run(lean_exe: Path, out: Path, *, per_split: int = 8, seed: int = SOURCE_SEED,
+        alpha_ood: bool = False) -> dict[str, Any]:
     if out.exists():
         raise FileExistsError("create-only native evidence directory required")
     if not lean_exe.is_file():
@@ -341,7 +347,7 @@ def run(lean_exe: Path, out: Path, *, per_split: int = 8, seed: int = SOURCE_SEE
         raise ValueError(f"unexpected Lean compiler version: {version}")
     binary_sha = _sha(lean_exe.read_bytes())
     driver_sha = _sha(Path(__file__).read_bytes())
-    root_specs = generate_roots(per_split=per_split, seed=seed)
+    root_specs = generate_roots(per_split=per_split, seed=seed, alpha_ood=alpha_ood)
     source_revision = digest({
         "driver_sha": driver_sha, "seed": seed, "lean_sha": binary_sha,
         "roots": [(r.root_id, digest(r.public_task)) for r in root_specs],
@@ -422,6 +428,7 @@ def run(lean_exe: Path, out: Path, *, per_split: int = 8, seed: int = SOURCE_SEE
         "driver_sha256": driver_sha, "source_revision_sha256": source_revision,
         "verifier_sha256": verifier_sha, "source_seed": seed,
         "source_roots": len(root_specs), "per_split": per_split,
+        "ood_alpha_renamed": alpha_ood,
         "budget_per_root": PER_ROOT_BUDGET,
         "train": {"roots": len(train), "menu_exhausted": negative_train,
                   "kernel_witnessed": len(train) - negative_train},
@@ -459,8 +466,10 @@ def main() -> None:
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--per-split", type=int, default=8)
     parser.add_argument("--source-seed", type=int, default=SOURCE_SEED)
+    parser.add_argument("--alpha-ood", action="store_true")
     args = parser.parse_args()
-    report = run(args.lean.resolve(), args.out, per_split=args.per_split, seed=args.source_seed)
+    report = run(args.lean.resolve(), args.out, per_split=args.per_split,
+                 seed=args.source_seed, alpha_ood=args.alpha_ood)
     print(json.dumps({
         "split_results": report["development_splits"],
         "train": report["train"],
