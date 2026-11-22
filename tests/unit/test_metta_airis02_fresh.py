@@ -94,7 +94,11 @@ def test_tamper_protected_teacher_labels_even_if_manifest_rehashed(tmp_path):
     build_bundle(tmp_path, train_roots_per_family=2, dev_roots_per_family=1)
     file = tmp_path / "train_candidate.jsonl"
     rows = [json.loads(x) for x in file.read_text().splitlines() if x]
-    rows[0]["oracle_next_edit"] = {"op": "stop", "id": "none"}
+    rows[0]["oracle_next_edit"] = (
+        {"op": "stop", "id": "none"}
+        if rows[0]["oracle_next_edit"]["op"] != "stop"
+        else {"op": "remove", "id": "r9"}
+    )
     file.write_text("".join(canonical(r) + "\n" for r in rows))
     manifest_file = tmp_path / "manifest.json"
     manifest = json.loads(manifest_file.read_text())
