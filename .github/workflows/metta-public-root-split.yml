@@ -41,9 +41,10 @@ jobs:
       - name: Build and validate public development partition artifact
         run: |
           set -euo pipefail
+          mkdir -p runs/metta/public_root_split
           python MeTTa/training_data/scripts/public_root_splits.py \
             --out runs/metta/public_root_split/plan.json \
-            > runs/metta/public_root_split.stdout.json
+            > runs/metta/public_root_split/diagnostic.json
           python - <<'PY'
           import json
           from pathlib import Path
@@ -66,6 +67,6 @@ jobs:
           name: metta04-public-root-diagnostic
           path: |
             runs/metta/public_root_split/plan.json
-            runs/metta/public_root_split.stdout.json
+            runs/metta/public_root_split/diagnostic.json
           retention-days: 14
           if-no-files-found: error
