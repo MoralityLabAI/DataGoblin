@@ -128,3 +128,41 @@ the same command with `frozen`. Both stages use `--reference` and
 `--out` and `--checkpoints` for the new run. The fresh split is opened only
 after all twelve checkpoint hashes are locked. Keep generated receipts
 and checkpoints outside Git.
+
+### Frozen interaction results
+
+| Training curator | Changed selections / 240 | In-family complete / 600 | Premature stops | Policy verifier calls | Recurrent passes | Conflict complete / 96 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Full | 0 | 172 | 414 | 2,348 | 8,289 | 28 |
+| Drop unique lineage | 18 | 173 | 398 | 2,532 | 8,430 | 23 |
+| Drop current revision | 27 | 182 | 389 | 2,460 | 8,070 | 24 |
+| Drop both | 45 | 181 | 377 | 2,801 | 8,649 | 22 |
+
+The single omissions predicted 183 in-family completions under an
+additive model. Joint omission yielded 181. The interaction estimate
+was −0.33 percentage points (root-bootstrap 95% interval −5.00 to +4.17,
+two-sided sign-flip p = 0.941). Seed estimates were −4.50, −0.50, and
++4.00 points. The five family contrasts summed to −2 completions. On the
+revision family alone, both omissions yielded 50 completions versus an
+additive prediction of 61 out of 120. That family contrast is descriptive.
+
+On conflict, the joint omission produced 22 completions and the additive
+prediction was 19. The transfer interaction was +3.13 points (95% interval
+−7.29 to +13.54, p = 0.692). The intervals leave room for either direction
+of interaction. All arms had zero unsafe additions under the shared
+inference verifier.
+
+The joint rule chose the same 18 lineage and 27 revision replacements as
+the single omissions. The training-data audit yielded 191 independently
+verified complete trajectories, versus 236 with both guards present,
+218 after the lineage omission, and 209 after the revision omission.
+
+The run at `867372836561b9a42f4800cc096b0d957d6e2592` took 269.03 seconds
+for audit and training and 82.75 seconds for frozen scoring. Peak RSS was
+530.89 MiB per native worker, 379.32 MiB for training, and 444.87 MiB for
+frozen scoring. The final audit matched 2,784 Prime Verifiers 0.4.1 traces
+to receipts and checkpoints, and confirmed fresh source hashes against
+122 archived conflict roots.
+
+- Training lock SHA-256 `336af481a214adc26dcfcb9c2f77cbf6783843b91bbf20cc8247622cb27821cb`
+- Frozen report SHA-256 `bb37f90a381bed89419ea0e1c40bf641589a8f897e97aa0dc242d44515a4f4f0`
