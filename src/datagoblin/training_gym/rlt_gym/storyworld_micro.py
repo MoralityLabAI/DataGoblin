@@ -11,7 +11,7 @@ from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
-from .storyworld_native import _hash, _json, _sha_file, connect, source_encounter_splits
+from .storyworld_native import SPLITS, _hash, _json, _sha_file, connect, source_encounter_splits
 
 SCHEMA = "datagoblin.swmd_micro.v1"
 SOURCE_COMPILER = "codex-skills/small-storyworld-builder/scripts/swmd_build_qlora_examples.py"
@@ -32,16 +32,20 @@ def _write(path: Path, rows: list[dict]) -> dict[str, Any]:
 def export_micro(source: Path, out: Path, *, seed: int = 23,
                  examples_per_encounter: int = 4, max_encounters: int = 12,
                  world: str = "storyworlds/diplomacy/forecast_backstab.json",
-                 expect_source_commit: str | None = None) -> dict:
+                 expect_source_commit: str | None = None, split_override: str | None = None) -> dict:
     if out.exists():
         raise FileExistsError(f"output exists: {out}")
     if not 1 <= examples_per_encounter <= 32 or not 1 <= max_encounters <= 1000:
         raise ValueError("examples-per-encounter must be 1..32 and max-encounters 1..1000")
+    if split_override is not None and split_override not in SPLITS:
+        raise ValueError("unregistered whole-world split")
     native = connect(source, world, expect_source_commit)
     path = native.root / SOURCE_COMPILER
     if not path.is_file():
         raise ValueError(f"missing native micro compiler: {path}")
     split_map = source_encounter_splits(native, seed)
+    if split_override is not None:
+        split_map = dict.fromkeys(split_map, split_override)
     if not split_map:
         raise ValueError("source world has no repairable encounters")
     with tempfile.TemporaryDirectory(prefix="dg-sw-micro-") as td:
@@ -124,6 +128,8 @@ def export_micro(source: Path, out: Path, *, seed: int = 23,
         "split_counts": dict(sorted(split_counts.items())),
         "artifacts": files,
     }
+    if split_override is not None:
+        manifest["world_split"] = split_override
     (out / "manifest.json").write_text(_json(manifest) + "\n", encoding="utf-8")
     return manifest
 
@@ -141,7 +147,8 @@ def replay_micro(source: Path, folder: Path, *, world: str = "storyworlds/diplom
         fresh = export_micro(source, fresh_dir, seed=manifest["seed"],
                              examples_per_encounter=manifest["examples_per_encounter"],
                              max_encounters=manifest["max_encounters"],
-                             world=world, expect_source_commit=expect_source_commit)
+                             world=world, expect_source_commit=expect_source_commit,
+                             split_override=manifest.get("world_split"))
         if fresh != manifest:
             raise ValueError("micro source or manifest mismatch")
         for name in OUTPUT_FILES:
@@ -190,6 +197,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--seed", type=int, default=23)
     p.add_argument("--examples-per-encounter", type=int, default=4)
     p.add_argument("--max-encounters", type=int, default=12)
+    p.add_argument("--split-override", choices=sorted(set(SPLITS)))
     group = p.add_mutually_exclusive_group(required=True)
     group.add_argument("--out", type=Path)
     group.add_argument("--replay", type=Path)
@@ -201,7 +209,8 @@ def main(argv: list[str] | None = None) -> int:
         report = export_micro(args.source, args.out, seed=args.seed,
                               examples_per_encounter=args.examples_per_encounter,
                               max_encounters=args.max_encounters, world=args.world,
-                              expect_source_commit=args.expect_source_commit)
+                              expect_source_commit=args.expect_source_commit,
+                              split_override=args.split_override)
     elif args.replay:
         report = replay_micro(args.source, args.replay, world=args.world,
                               expect_source_commit=args.expect_source_commit)
