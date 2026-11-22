@@ -48,7 +48,7 @@ TRAINED_ARMS = (
     "holoarc_random_path_lowrank",
     "holoarc_step_shuffle_lowrank",
 )
-EVAL_ARMS = TRAINED_ARMS + ("rigid_top1_proxy", "semantic_heuristic", "extra_refinement_proxy")
+EVAL_ARMS = (*TRAINED_ARMS, "rigid_top1_proxy", "semantic_heuristic", "extra_refinement_proxy")
 PUBLIC_TRAIN_SEED = 31001
 PUBLIC_EVAL_SEED = 61001
 
