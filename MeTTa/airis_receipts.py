@@ -107,7 +107,7 @@ def audit_bundle(directory: Path, *, full_replay: bool = True) -> dict[str, Any]
             rebuilt = evaluate_pair(family, seed, motifs, control_seed=manifest["control_seed"])
             if rebuilt != row:
                 raise ValueError(f"independent source-root replay differs: {root}")
-    for arm in ("guided", "uniform"):
+    for arm in ("guided", "uniform", "budget_first"):
         scores = manifest["paired_policy"][arm]
         if (
             scores["paired_roots"] != n
