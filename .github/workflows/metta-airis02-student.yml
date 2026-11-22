@@ -54,6 +54,7 @@ jobs:
           assert audit["steward_labels_used"] == 0
           assert audit["public_test_labels_used"] == 0
           assert report["model_trained"] is True
+          assert report["student_training_policy"] == "structural_membership_action_mask_plus_hash_fixed_point_stop"
           assert report["train_cases_per_arm"] == 160
           assert report["development_cases_per_arm"] == 60
           assert report["training_ready"] is False
