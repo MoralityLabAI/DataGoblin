@@ -36,6 +36,7 @@ from .airis02_student import (
     _next_action,
     evaluate,
 )
+from .airis02_stop import StopHead
 from .sft_oracle import (
     edit,
     evaluate_subset,
@@ -61,21 +62,26 @@ OPTIONS: dict[str, dict[str, tuple[Any, ...]]] = {
         "hidden": (8, 12, 16, 24),
         "train_loops": (2, 4, 6),
         "inference_loops": (2, 4, 6, 8),
+        "stop_policy": ("action_class", "train_calibrated"),
     },
     "ldt_proxy": {
         "steps": (12, 16, 24, 32),
         "lr": (0.04, 0.08, 0.12, 0.20),
+        "stop_policy": ("action_class", "train_calibrated"),
     },
 }
 DEFAULTS: dict[str, dict[str, Any]] = {
-    "trm": {"steps": 16, "lr": 0.20, "hidden": 12, "train_loops": 4, "inference_loops": 4},
-    "ldt_proxy": {"steps": 16, "lr": 0.20},
+    "trm": {
+        "steps": 16, "lr": 0.20, "hidden": 12, "train_loops": 4,
+        "inference_loops": 4, "stop_policy": "action_class",
+    },
+    "ldt_proxy": {"steps": 16, "lr": 0.20, "stop_policy": "action_class"},
 }
 DEFAULT_PROPOSALS = (
+    {"arm": "trm", "field": "stop_policy", "value": "train_calibrated"},
+    {"arm": "ldt_proxy", "field": "stop_policy", "value": "train_calibrated"},
     {"arm": "trm", "field": "lr", "value": 0.08},
     {"arm": "ldt_proxy", "field": "lr", "value": 0.08},
-    {"arm": "trm", "field": "inference_loops", "value": 6},
-    {"arm": "ldt_proxy", "field": "steps", "value": 24},
 )
 
 
@@ -189,7 +195,11 @@ def check_config(arm: str, config: dict[str, Any]) -> None:
     if arm not in ARMS or set(config) != set(OPTIONS[arm]):
         raise ValueError("Unsupported architecture or training config")
     for field, value in config.items():
-        if type(value) not in (float, int) or value not in OPTIONS[arm][field]:
+        if field == "stop_policy":
+            valid_type = type(value) is str
+        else:
+            valid_type = type(value) in (float, int)
+        if not valid_type or value not in OPTIONS[arm][field]:
             raise ValueError(f"Configuration field {field} outside registered values")
 
 
@@ -203,7 +213,8 @@ def validate_proposal(proposal: dict[str, Any], current: dict[str, dict[str, Any
         raise ValueError("Unknown architecture or edit field")
     if field not in OPTIONS[arm]:
         raise ValueError("Unsupported edit")
-    if type(value) not in (int, float) or value not in OPTIONS[arm][field]:
+    allowed_type = type(value) is str if field == "stop_policy" else type(value) in (int, float)
+    if not allowed_type or value not in OPTIONS[arm][field]:
         raise ValueError("Edit value outside bounded search grammar")
     if current[arm][field] == value:
         raise ValueError("No-op edit is not a hill-climb proposal")
