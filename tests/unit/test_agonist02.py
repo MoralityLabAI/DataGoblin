@@ -68,7 +68,7 @@ def test_learned_selector_is_actual_training_and_eval_is_heldout():
     assert len(files["selections.jsonl"]) == 4
     assert len(files["student_scores.jsonl"]) == 8 * 3 * 4
     assert report["teacher_inference_calls"] == 0
-    assert report["student_seeds"] == STUDENT_SEEDS
+    assert report["student_seeds"] == list(STUDENT_SEEDS)
     assert report["training_ready"] is False
     assert report["sealed_confirmation_run"] is False
     assert report["selector_training"]["calibration_student_fits"] == 11
