@@ -17,7 +17,7 @@ import json
 import math
 from collections import Counter
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
