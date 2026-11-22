@@ -1,11 +1,15 @@
 import json
 import os
+from dataclasses import asdict
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
-from datagoblin.training_gym.rlt_gym.lean_goose import ROOTS, episode, parse_tactic, probe, proposed_action
+from datagoblin.hashing import sha256_file
+from datagoblin.training_gym.rlt_gym.external_checked_exit import digest
+from datagoblin.training_gym.rlt_gym.lean_goose import ROOTS, SCHEMA, episode, parse_tactic, probe, proposed_action
+from datagoblin.training_gym.rlt_gym.lean_goose_replay import _first_turns
 
 
 @pytest.mark.parametrize(
@@ -28,6 +32,30 @@ def test_tactics_stay_within_the_host_grammar(answer, action):
 def test_tactic_list_spends_one_action_and_cannot_hide_a_command():
     assert proposed_action("constructor; exact h.2; exact h.1") == "constructor"
     assert proposed_action("rfl;\n#eval true") is None
+
+
+def test_plan_replay_binds_complete_registry_and_model_receipts(tmp_path):
+    transitions = tmp_path / "transitions.jsonl"
+    manifest = tmp_path / "SHA256.json"
+    revision = digest([asdict(root) for root in ROOTS])
+    model = {"answer": "intro a b h; exact h.symm", "max_tokens": 64, "prompt_token_parity": True,
+             "preflight_prompt_tokens": 10, "provider": {"usage": {"input_tokens": 10}}}
+    receipt = {**model, "request_sha256": digest({"prompt": "test", "max_tokens": 64}),
+               "response_sha256": digest(model)}
+    rows = [{**asdict(root), "visit": 0, "schema": SCHEMA, "root_id": digest(asdict(root)),
+             "source_revision_sha256": revision, "goals_before": ["test goal"], "proof_before": [],
+             "prompt": "test", "model": receipt} for root in ROOTS]
+
+    def write_archive():
+        transitions.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+        manifest.write_text(json.dumps({transitions.name: sha256_file(transitions)}), encoding="utf-8")
+
+    write_archive()
+    assert len(_first_turns(tmp_path)) == len(ROOTS)
+    rows[0]["model"] = {**receipt, "answer": "exact True.intro"}
+    write_archive()
+    with pytest.raises(ValueError, match="model request or response checksum"):
+        _first_turns(tmp_path)
 
 
 @pytest.mark.skipif(not os.environ.get("DATAGOBLIN_LEAN_412"), reason="requires native Lean 4.12.0")

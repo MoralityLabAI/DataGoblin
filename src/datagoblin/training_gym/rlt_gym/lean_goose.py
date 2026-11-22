@@ -56,6 +56,13 @@ def parse_tactic(answer: str) -> str | None:
     return None
 
 
+def tactic_plan(answer: str) -> list[str]:
+    fragments = [part.strip() for part in re.split(r"[;\n]", answer.strip())]
+    if 2 <= len(fragments) <= 6 and all(parse_tactic(part) not in {None, "STOP"} for part in fragments):
+        return fragments
+    return []
+
+
 def proposed_action(answer: str) -> str | None:
     action = parse_tactic(answer)
     if action is not None:
@@ -63,10 +70,8 @@ def proposed_action(answer: str) -> str | None:
     # The model sometimes emits a plain tactic list. One visit can spend only
     # one action. Check every fragment against the same grammar before using
     # the first one and round-trip through Lean for the next goal.
-    fragments = [part.strip() for part in re.split(r"[;\n]", answer.strip())]
-    if 2 <= len(fragments) <= 6 and all(parse_tactic(part) not in {None, "STOP"} for part in fragments):
-        return fragments[0]
-    return None
+    plan = tactic_plan(answer)
+    return plan[0] if plan else None
 
 
 class GooseProcess:

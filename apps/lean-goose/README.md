@@ -26,6 +26,14 @@ The model receives the public statement, accepted prefix, current Lean goals and
 
 `sft.jsonl` contains chat `messages` for verified actions on training roots of this pilot. Every row points to its complete proof certificate and the model receipt. Take this file as a small candidate input to a chat-SFT recipe, with lineage-level deduplication before combining it with other corpora. `transitions.jsonl` includes rejections and development visits. `episodes.jsonl`, `provenance.json`, sources and `SHA256.json` allow inspection and replay. The three training and three development roots are purpose-built and modest in difficulty. Their split applies only to this fixture. Their ancestry relative to other training corpora or to the provider's pretraining is unknown.
 
+If the first turn returned a plain tactic list, the offline replay can test every prefix of that list without sending another inference request. Successful training plans produce one additional script-SFT row per root with a derived script prompt. Report this post-hoc replay independently of the single-action live score.
+
+```bash
+python -m datagoblin.training_gym.rlt_gym.lean_goose_replay \
+  --lean /path/to/lean-4.12.0/bin/lean \
+  --archive runs/inky-lean-open --out runs/inky-lean-plan-replay
+```
+
 The separate List comparison uses the four registered HARD-02F OOD roots, two checks per arm, and a five-candidate native oracle for each root. It writes evaluation receipts only. Prepare Mathlib at `809c3fb3b5c8f5d7dace56e200b426187516535a` with its Lean 4.12 cache, then run:
 
 ```bash
