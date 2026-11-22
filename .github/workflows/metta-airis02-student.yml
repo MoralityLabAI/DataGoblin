@@ -68,6 +68,10 @@ jobs:
                      for v in report["trained_models"].values())
           assert all(v["recurrent"]["learned_stop_development"]["4"]["cases"] == 60
                      for v in report["trained_models"].values())
+          assert all(v["recurrent"]["verified_stop_development"]["new_violation_additions"] == 0
+                     for v in report["trained_models"].values())
+          assert all(v["recurrent"]["verified_stop_development"]["cases"] == 60
+                     for v in report["trained_models"].values())
           print("AIRIS-02 research-only verified fit: PASS")
           PY
       - name: Publish aggregate receipts without research labels
