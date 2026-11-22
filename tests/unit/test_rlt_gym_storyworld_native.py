@@ -31,8 +31,10 @@ class StoryworldNativeTests(unittest.TestCase):
         builders = [(t, s) for t, s in tasks if t["mode"] in ("builder", "mini")]
         self.assertEqual(len(builders), 12)
         by_lineage = {}
+        by_source_encounter = {}
         for task, sealed in builders:
             by_lineage.setdefault(task["lineage"], set()).add(task["split"])
+            by_source_encounter.setdefault(task["public"]["encounter_id"], set()).add(task["split"])
             self.assertNotIn("gold_target", json.dumps(task))
             self.assertNotIn("private_bit", json.dumps(task))
             candidates = task["public"]["candidates"]
@@ -50,6 +52,8 @@ class StoryworldNativeTests(unittest.TestCase):
                 self.assertNotIn(" -> " + sealed["gold_target"] + " |", task["public"]["swmd_card"])
                 self.assertNotIn("PICK " + sealed["gold_target"], task["public"]["swmd_card"])
         self.assertEqual(len(by_lineage), 6)
+        self.assertEqual(len(by_source_encounter), 6)
+        self.assertTrue(all(len(splits) == 1 for splits in by_source_encounter.values()))
         self.assertTrue(all(len(splits) == 1 for splits in by_lineage.values()))
 
     def test_hypergame_uses_real_source_transitions_and_sealed_bit(self):
