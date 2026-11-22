@@ -1,0 +1,42 @@
+name: RLT BSAR-03 matched source claims
+
+on:
+  pull_request:
+    paths:
+      - "training/rlt_gym/bsar03/**"
+      - "tests/unit/test_rlt_gym_bsar03_matched.py"
+      - ".github/workflows/rlt-bsar03-matched.yml"
+  push:
+    branches: [master]
+    paths:
+      - "training/rlt_gym/bsar03/**"
+      - "tests/unit/test_rlt_gym_bsar03_matched.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matched-claims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e '.[dev]'
+      - name: Validate matched premise/type/name pairs
+        run: python -m pytest tests/unit/test_rlt_gym_bsar03_matched.py -q
+      - name: Check style
+        run: ruff check training/rlt_gym/bsar03 tests/unit/test_rlt_gym_bsar03_matched.py
+      - name: Export source-grounded public test and baseline
+        run: |
+          python -m training.rlt_gym.bsar03.matched_claims export --output-dir generated/bsar03
+          python -m training.rlt_gym.bsar03.matched_claims constant-baseline --output-dir generated/bsar03
+          python -c 'import json; m=json.load(open("generated/bsar03/manifest.json")); assert m["constant_baseline"]["accuracy"] == .5'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bsar03-matched-pairs
+          path: generated/bsar03/
+          retention-days: 14
