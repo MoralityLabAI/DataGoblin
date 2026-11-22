@@ -37,7 +37,7 @@ For private held-out roots, generate a private 128-bit or longer seed file outsi
 - train_targets.jsonl: source-native oracle supervision restricted to train.
 - manifest.json: source revision, per-file hashes, profile, seed commitment, splits, row counts and SHA-256.
 
-Builder and mini views of the same reaction always share a split and lineage. Both private-bit HG twins also share a scenario lineage and split. The train-only source-target export gives at most four training presentations per lineage across formats or paired hidden worlds. All baseline labels stay explicitly labeled source controls.
+All repairs originating from the same source encounter share a split, including builder and mini versions and distinct reaction targets. Paired builder/mini views also share their exact reaction lineage. Both private-bit HG twins share a scenario lineage and split. The train-only source-target export gives at most four training presentations per lineage across formats or paired hidden worlds. All baseline labels stay explicitly labeled source controls.
 
 ## Model response contract
 
