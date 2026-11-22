@@ -9,7 +9,6 @@ import pytest
 from MeTTa.looped_sft import root_id, split_for
 from MeTTa.pattern_miner import (
     REPORT_SCHEMA,
-    Observation,
     generate_observations,
     make_report,
     mine_motifs,
