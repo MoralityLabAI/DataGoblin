@@ -181,6 +181,14 @@ template and supports a descriptive comparison.
 replays the original Bayes receipts, then minimizes expected check work
 among actions tied on modeled completion probability. This diagnostic
 uses the opened development roots and keeps the original audit intact.
+The new tie-break preserved each original Bayes completion decision
+across all 96 roots and reduced verifier calls from 316 to 269 (14.9%).
+Both endpoints yielded 49 verified completions. The tie-break was
+chosen after seeing the pilot, so the observed savings need a fresh
+replication. The original audit SHA-256 is
+`e34bc5266fd1797280b3f3b73895c46b77d24b2e890e168ca3b2271197f900ce`.
+The diagnostic audit SHA-256 is
+`fd5f74f5768f15b56d4de64a1553bca555ccfbe65e50f437b6fe047e50896254`.
 
 ## Looped-transformer SFT curation program
 
