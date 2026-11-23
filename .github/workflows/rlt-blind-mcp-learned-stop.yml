@@ -1,0 +1,70 @@
+name: RLT blind MCP learned stopping development
+
+on:
+  push:
+    branches: [research/rlt-blind-learned-stopping-20261122]
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/blind_mcp_*.py"
+      - "tests/unit/test_rlt_gym_blind_mcp.py"
+      - ".github/workflows/rlt-blind-mcp-learned-stop.yml"
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/rlt_gym/blind_mcp_*.py"
+      - "tests/unit/test_rlt_gym_blind_mcp.py"
+      - ".github/workflows/rlt-blind-mcp-learned-stop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blind-mcp-dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install local package and test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Verify blind tasks, no gold leakage, and TRAIN-only fit
+        run: python -m pytest -q tests/unit/test_rlt_gym_blind_mcp.py
+      - name: Ruff check
+        run: |
+          ruff check src/datagoblin/training_gym/rlt_gym/blind_mcp_sources.py \
+            src/datagoblin/training_gym/rlt_gym/blind_mcp_pilot.py \
+            src/datagoblin/training_gym/rlt_gym/learned_stop_audit.py \
+            tests/unit/test_rlt_gym_blind_mcp.py
+      - name: Check out exact HybridTRMLDT MCP-03 source
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dg-pinned-hybrid
+          git -C /tmp/dg-pinned-hybrid init -q
+          git -C /tmp/dg-pinned-hybrid remote add origin https://github.com/MoralityLabAI/HybridTRMLDT.git
+          git -C /tmp/dg-pinned-hybrid fetch -q --depth=1 origin \
+            7e90a2d446dbb2f994a33632350e7219bdee1ba4
+          git -C /tmp/dg-pinned-hybrid checkout -q --detach FETCH_HEAD
+          test "$(git -C /tmp/dg-pinned-hybrid rev-parse HEAD)" = \
+            "7e90a2d446dbb2f994a33632350e7219bdee1ba4"
+      - name: Collect native MCP-03 source observations and fit TRAIN policy
+        if: github.event_name == 'push'
+        run: |
+          timeout --signal=TERM --kill-after=15s 600s \
+            env PYTHONPATH="/tmp/dg-pinned-hybrid:$PWD/src" \
+            python -m datagoblin.training_gym.rlt_gym.blind_mcp_pilot \
+            --per-split 8 --source-seed 20261123 --out runs/rlt-blind-mcp-development.json
+      - name: Retain development report only (no private gold keys)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dg-rlt-blind-mcp-dev
+          path: runs/rlt-blind-mcp-development.json
+          if-no-files-found: warn
+          retention-days: 14
