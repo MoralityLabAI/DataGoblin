@@ -93,6 +93,26 @@ three generator families are synthetic, and classification by the two
 matched record counts alone is capped at 50% on these pairs. The bundle
 digest is `646fadd3cbc079195b66ac5ac87577aacd2bbf0dfa621e11836a9c5ee727294a`.
 
+### Observer evidence revisions
+
+`python -m MeTTa.evidence_revision --storyworld /path/to/metta-storyworld --out runs/metta/evidence-revision`
+checks four ordered snapshots per source. Each transition binds the
+before and after public queries to native execution hashes and exact
+proof additions and removals. The native queries enumerate proofs and
+minimal source sets, then find pairs with no shared provenance root.
+A bottom-up oracle independently checks all three relations. Copies
+can add proof trees while leaving the underlying source sets unchanged.
+Proofs that require a shared source do not count as disjoint corroboration.
+
+The default pilot checked 192 snapshots and 144 transitions from 48
+synthetic sources. The source set changed in 121 transitions. In 16
+other transitions the proof trees changed while the minimal sources
+stayed the same. Counting two or more proof trees as corroboration
+would give 34 false positives. Conditions include duplicate arrivals,
+common-premise visibility changes, and superseded shortcuts. The
+changes are ordered within each source and `training_ready` remains false.
+Bundle SHA-256 `034caa91757d034f6857fcb28daecbab3b985bbec2b954305e5805ab6598b193`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
