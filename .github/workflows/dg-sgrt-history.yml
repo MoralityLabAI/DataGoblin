@@ -1,0 +1,75 @@
+name: DG-SGRT-03 sequential history development
+
+on:
+  pull_request:
+    paths:
+      - "src/datagoblin/training_gym/sgrt_history.py"
+      - "src/datagoblin/training_gym/sgrt_holoarc.py"
+      - "src/datagoblin/training_gym/sgrt_holoarc_gym.py"
+      - "tests/unit/test_sgrt_history.py"
+      - "training/sgrt_holoarc_03/**"
+      - ".github/workflows/dg-sgrt-history.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sequential-history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/unit/test_sgrt_history.py tests/unit/test_sgrt_holoarc.py tests/unit/test_sgrt_learned.py -q
+      - run: ruff check src/datagoblin/training_gym/sgrt_history.py tests/unit/test_sgrt_history.py
+      - name: Matched public synthetic world-history experiment
+        run: |
+          python -m datagoblin.training_gym.sgrt_history \
+            --seed 23 --updates 384 --train-per-family 24 \
+            --eval-per-family 12 --out runs/dg-sgrt-03-public
+      - name: Independent custody, geometry and budget receipts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("runs/dg-sgrt-03-public")
+          summary = json.loads((root / "report.json").read_text())
+          assert summary["status"] == "synthetic_cpu_development_only"
+          assert summary["train_root_count"] == 72
+          assert summary["eval_root_count"] == 48
+          assert {v["trainable_parameters"] for v in summary["training"].values()} == {937}
+          g = summary["geometry"]
+          assert g["flat_commutator_fro_max"] < 1e-9
+          assert g["curved_commutator_fro_max"] > 1e-5
+          assert g["flat_curved_trace_mismatch_max"] < 1e-8
+          scores = summary["scores"]["all"]
+          assert scores["exact_oracle"]["both_orders_correct"] == 48
+          assert scores["bag"]["both_orders_correct"] == 0
+          assert all(v["verifier_calls"] == 192 for v in scores.values())
+          public = [json.loads(x) for x in (root / "public_eval.jsonl").read_text().splitlines()]
+          scored = [json.loads(x) for x in (root / "scorer_only.jsonl").read_text().splitlines()]
+          assert len(public) == 96 and len(scored) == 48
+          assert all("truth" not in r and "target" not in r for r in public)
+          assert all(r["evaluator_only"] for r in scored)
+          hashes = {
+              a["candidate_pool_sha256"]
+              for row in scored for a in row["arms"].values()
+          }
+          assert len(hashes) == 1
+          print("DG-SGRT-03 registered checks passed")
+          for arm, result in scores.items():
+              print(arm, "both-order", result["both_orders_correct"], "/48",
+                    "final", result["last_correct"], "/96",
+                    "first", result["first_correct"], "/96")
+          print("paired effects:", summary["paired_vs_direct"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-sgrt-03-public-history-development
+          path: runs/dg-sgrt-03-public/
+          retention-days: 14
