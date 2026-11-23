@@ -234,6 +234,11 @@ the same budget per decision. An exact lower-work policy remains a
 reference. The independent acceptance runtime receives private status
 only after the policy has finished and replays every final receipt set.
 
+The native planner computes both frontiers in one query and caches
+isomorphic public layouts under a slot permutation. Each returned set
+is translated to the caller's original slots and checked against the
+reference route enumerator. The cache uses no priors or private status.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.

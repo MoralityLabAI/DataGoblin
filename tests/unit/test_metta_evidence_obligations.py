@@ -1,6 +1,6 @@
 import pytest
 
-from MeTTa.evidence_obligations import ScopedNative, host_frontier
+from MeTTa.evidence_obligations import ScopedNative, host_frontier, route_labeler
 
 
 def test_frontier_preserves_satisfied_route_and_removes_blocked_routes():
@@ -20,3 +20,15 @@ def test_native_query_scopes_do_not_leak_between_states():
     assert list(map(str, first)) == ["Original"]
     assert empty == []
     assert list(map(str, second)) == ["Revised"]
+
+
+def test_relabeling_maps_routes_and_feedback_to_one_native_cache_basis():
+    label = route_labeler()
+    original = ((0, 1), (0, 1, 2))
+    relabeled = ((0, 1, 2), (1, 2))
+    base, _, _ = label(original, 3)
+    same, order, inverse = label(relabeled, 3)
+    assert base == same
+    state = (0, -1, 1)
+    assert tuple(state[i] for i in order) == (1, -1, 0) or tuple(state[i] for i in order) == (-1, 1, 0)
+    assert tuple(inverse[i] for i in order) == (0, 1, 2)
