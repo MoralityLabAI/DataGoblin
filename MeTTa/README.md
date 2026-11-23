@@ -400,6 +400,31 @@ evaluation topologies. The deterministic public references isolate the
 same two objectives without a learned model. Actions in the evaluation
 all use the same legal mask and stopping gate.
 
+On the 128 frozen roots, both tie-trained students completed 258/768
+trials. The cost-tie student used 1,924 checks and 5,772 recurrent
+visits, compared with 1,989 checks and 5,967 visits for success ties.
+The primary completion difference was zero (descriptive 95% paired
+root interval −1.30 to +1.43 percentage points). The cost criterion saved
+0.085 checks per trial (95% interval 0.016 to 0.154), or 3.3% in total.
+It reduced checks at every seed. Completion did not reach the two-point
+gain target for this contrast.
+
+The hard-target student completed 210/768 with 2,243 checks. Crediting
+all success-optimal actions gained 6.25 completion points over that
+control (95% interval +2.86 to +9.64) and saved 254 checks. The two exact
+reference policies completed 93/256 apiece. Their check counts were 828
+for success alone and 610 with the cost tie-break. The native joint
+heuristic completed 96/256 with 542 checks. Both exact policies have the
+same expected completion under the public priors, which are distinct
+from the sampled evaluation outcomes.
+
+All nine models used 44,577 parameters, 928 shared training states,
+and 120 AdamW updates per fit. A separate audit recomputed every
+training action value and replayed all 3,072 evaluation trials. The run
+took 394.8 CPU wall seconds, peaking at 631.70 MiB under an 8 GiB cap.
+Code pins were DataGoblin `98de755`, Storyworld `6adb17f`, and
+LoopedTransformers `207d92f`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
