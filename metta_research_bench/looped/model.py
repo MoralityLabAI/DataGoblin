@@ -125,26 +125,56 @@ def fit(initial: LoopedPointer, batch: tuple, seed: int, updates: int) -> tuple[
 
 
 @torch.inference_mode()
-def solve(model: LoopedPointer, data) -> tuple[list[dict], dict]:
+def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=None,
+          audit: list | None = None) -> tuple[list[dict], dict]:
     world = make_task(data.family, data.source_seed)
     selected = first_state(world, data.source_seed)
     verifier = RepairVerifier(world)
     visited = {tuple(selected)}
     actions = []
     iterations = vetoes = 0
-    for _ in range(MAX_DECISIONS):
+    extra_calls = interventions = rank_probes = native_queries = 0
+
+    def totals():
+        metrics = {"policy_verifier_calls": verifier.checks, "passes": iterations, "vetoes": vetoes}
+        if stop_guard is not None:
+            metrics.update(witness_verifier_calls=extra_calls, witness_interventions=interventions,
+                           witness_rank_probes=rank_probes, witness_native_queries=native_queries)
+        return metrics
+
+    for step in range(MAX_DECISIONS):
         code, allowed = tokenize(world, selected)
         logits = model(code[None], allowed[None])[0]
+        if stop_offset:
+            logits[MAX_ITEMS] += stop_offset
         iterations += LOOPS
         accepted = False
         attempts = 0
+        attempted = set()
         for index in logits.argsort(descending=True):
             j = int(index)
             if not allowed[j]:
                 continue
             if j == MAX_ITEMS:
+                if stop_guard is not None and step < MAX_DECISIONS - 1:
+                    result = stop_guard(world, selected, visited, attempted, MAX_PROPOSALS - attempts,
+                                        extra_calls, verifier.refine)
+                    extra_calls += len(result["checks"])
+                    vetoes += sum(not row["receipt"]["accepted"] for row in result["checks"])
+                    rank_probes += result["rank_probes"]
+                    native_queries += int(result["native"] is not None)
+                    if audit is not None:
+                        audit.append({"step": step, "before": selected, "witness": result})
+                    if result["chosen"] is not None:
+                        choice = result["checks"][result["chosen"]]
+                        actions.append(choice["action"])
+                        selected = choice["receipt"]["selected_after"]
+                        visited.add(tuple(selected))
+                        interventions += 1
+                        accepted = True
+                        break
                 actions.append(STOP)
-                return actions, {"policy_verifier_calls": verifier.checks, "passes": iterations, "vetoes": vetoes}
+                return actions, totals()
             key = world["items"][j]["id"]
             action = {"op": "remove" if key in selected else "add", "id": key}
             if tuple(edit(selected, action)) in visited:
@@ -152,7 +182,10 @@ def solve(model: LoopedPointer, data) -> tuple[list[dict], dict]:
             if attempts == MAX_PROPOSALS:
                 break
             attempts += 1
+            attempted.add(key)
             result = verifier.refine(typed_proposal(action), selected)
+            if audit is not None:
+                audit.append({"step": step, "before": selected, "action": action, "receipt": result})
             if result["accepted"]:
                 selected = result["selected_after"]
                 visited.add(tuple(selected))
@@ -162,4 +195,4 @@ def solve(model: LoopedPointer, data) -> tuple[list[dict], dict]:
             vetoes += 1
         if not accepted:
             break
-    return actions, {"policy_verifier_calls": verifier.checks, "passes": iterations, "vetoes": vetoes}
+    return actions, totals()

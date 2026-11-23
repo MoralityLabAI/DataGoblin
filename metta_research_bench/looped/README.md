@@ -152,3 +152,22 @@ Two training states needed a detour even though the final membership
 was closer by Hamming distance. A full directed-graph audit independently
 verified those shortest sets and replayed all 4,320 Prime Verifiers
 trials. The run took 55.7 CPU wall seconds and peaked at 468.07 MiB.
+
+## Frozen STOP policies
+
+`python -m metta_research_bench.looped.stop_policy --prior /path/to/action-ties-verified --out /path/to/stop-policy-run`
+recreates the three action-set checkpoints from archived states and verifies
+their digests before scoring. A development-only selection chooses one additive
+STOP logit offset. The selection maximizes verified completion with no increase
+in unsafe additions and at most 15% more policy verifier calls. A fresh frozen
+comparison crosses this offset with a bounded native STOP witness. Prior
+conflict, training, and frozen sources are excluded from both new cohorts.
+
+The witness examines unvisited one-edit neighbors with strictly better public
+rank. It can defer STOP only when a typed check accepts a feasible successor
+and MeTTa returns the corresponding rank certificate. It shares the original
+four-proposal cap and uses at most two verifier calls per episode. The experiment
+logs rank probes, typed verifier receipts, native queries, and recurrent visits.
+The original Prime Verifiers reward still requires a safe exact repair and an
+explicit STOP. The primary contrast is the witness alone versus the unmodified
+policy. Completion on the separate fresh conflict cohort remains exploratory.
