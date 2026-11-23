@@ -460,6 +460,28 @@ took 394.8 CPU wall seconds, peaking at 631.70 MiB under an 8 GiB cap.
 Code pins were DataGoblin `98de755`, Storyworld `6adb17f`, and
 LoopedTransformers `207d92f`.
 
+### Native Storyworld courier transfer
+
+The courier pilot compares canonical best-action labels, hash-selected
+best-action labels, and supervision over the entire set of shortest legal
+actions. The three arms share the same route states, initialization seeds,
+model, and optimizer budget. Hyperon checks each reachable state's legal
+successors against a Python reference, and native replay checks each final
+route. Success requires both delivered cargo and a model STOP.
+
+Run from DataGoblin with CPU PyTorch, Hyperon 0.2.10, the pinned
+LoopedTransformers checkout on `PYTHONPATH`, and the pinned Storyworld
+checkout's inner `metta-storyworld` directory:
+
+```sh
+python -m MeTTa.storyworld_courier_pilot --storyworld /path/to/metta-storyworld/metta-storyworld --out runs/metta/courier
+```
+
+The runner locks the protocol and source allocation before training and
+records fit digests before scoring the held-out topology families. It writes
+raw trajectories and receipts under the ignored run directory.
+[Pinned native courier commit](https://github.com/MoralityLabAI/metta-storyworld/commit/4cfe1713d73b4e508833b668477921adfbe570a6)
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
