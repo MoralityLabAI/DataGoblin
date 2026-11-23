@@ -126,23 +126,30 @@ def fit(initial: LoopedPointer, batch: tuple, seed: int, updates: int) -> tuple[
 
 @torch.inference_mode()
 def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=None,
-          audit: list | None = None) -> tuple[list[dict], dict]:
+          exchange_guard=None, audit: list | None = None) -> tuple[list[dict], dict]:
+    if stop_guard is not None and exchange_guard is not None:
+        raise ValueError("Use one STOP witness per policy")
     world = make_task(data.family, data.source_seed)
     selected = first_state(world, data.source_seed)
     verifier = RepairVerifier(world)
     visited = {tuple(selected)}
     actions = []
     iterations = vetoes = 0
-    extra_calls = interventions = rank_probes = native_queries = 0
+    extra_calls = interventions = rank_probes = native_queries = screened_pairs = 0
 
     def totals():
         metrics = {"policy_verifier_calls": verifier.checks, "passes": iterations, "vetoes": vetoes}
-        if stop_guard is not None:
+        if stop_guard is not None or exchange_guard is not None:
             metrics.update(witness_verifier_calls=extra_calls, witness_interventions=interventions,
                            witness_rank_probes=rank_probes, witness_native_queries=native_queries)
+        if exchange_guard is not None:
+            metrics["witness_screened_pairs"] = screened_pairs
         return metrics
 
-    for step in range(MAX_DECISIONS):
+    slots = 0
+    while slots < MAX_DECISIONS:
+        step = slots
+        slots += 1
         code, allowed = tokenize(world, selected)
         logits = model(code[None], allowed[None])[0]
         if stop_offset:
@@ -156,20 +163,29 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
             if not allowed[j]:
                 continue
             if j == MAX_ITEMS:
-                if stop_guard is not None and step < MAX_DECISIONS - 1:
-                    result = stop_guard(world, selected, visited, attempted, MAX_PROPOSALS - attempts,
-                                        extra_calls, verifier.refine)
+                guard = None
+                if exchange_guard is not None and slots + 1 < MAX_DECISIONS:
+                    guard = exchange_guard
+                elif stop_guard is not None and slots < MAX_DECISIONS:
+                    guard = stop_guard
+                if guard is not None:
+                    result = guard(world, selected, visited, attempted, MAX_PROPOSALS - attempts,
+                                   extra_calls, verifier.refine)
                     extra_calls += len(result["checks"])
                     vetoes += sum(not row["receipt"]["accepted"] for row in result["checks"])
                     rank_probes += result["rank_probes"]
                     native_queries += int(result["native"] is not None)
+                    screened_pairs += result.get("screened_pairs", 0)
                     if audit is not None:
                         audit.append({"step": step, "before": selected, "witness": result})
                     if result["chosen"] is not None:
-                        choice = result["checks"][result["chosen"]]
-                        actions.append(choice["action"])
-                        selected = choice["receipt"]["selected_after"]
-                        visited.add(tuple(selected))
+                        chosen = result["chosen"] if guard is exchange_guard else (result["chosen"],)
+                        for index in chosen:
+                            choice = result["checks"][index]
+                            actions.append(choice["action"])
+                            selected = choice["receipt"]["selected_after"]
+                            visited.add(tuple(selected))
+                        slots += len(chosen) - 1
                         interventions += 1
                         accepted = True
                         break

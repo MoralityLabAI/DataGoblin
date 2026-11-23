@@ -200,3 +200,21 @@ Independent audit replayed every logged policy check and all 6,840
 development and frozen trials. The default inference path also reproduced
 all actions and counters in 1,440 archived trials. The run took 49.3 CPU
 wall seconds with 526.63 MiB peak memory.
+
+## Bounded exchange witness
+
+`python -m metta_research_bench.looped.stop_exchange --prior /path/to/action-ties-verified --stop-archive /path/to/stop-policy-run --out /path/to/stop-exchange-run`
+tests whether replacing one record at a proposed STOP recovers completions
+on fresh roots. The public prefilter screens budget, dependencies, lineage,
+revision, eligibility, conflict and the endpoint rank. The policy proposes
+only its best screened removal-addition pair. A typed verifier must accept
+both edits, and MeTTa must certify that the receipts form a chain to a feasible
+strictly better state. A failed exchange leaves the actor's selection intact.
+
+The exchange costs two edit slots and reserves a final STOP slot. Its checks
+share the four-proposal cap and the two-call witness budget. The intermediate
+state is recorded and checked. The model makes no additional recurrent pass
+between the two verified edits. The four arms cross the exchange guard with
+the previously frozen STOP offset. The 400 new in-family roots and 80 new
+conflict roots are separate from both earlier studies' training and scoring
+cohorts, and the three checkpoints must reproduce their archived digests.

@@ -168,7 +168,7 @@ def refit(frames: list, fits: list) -> tuple[dict, dict]:
     return models, receipts
 
 
-async def evaluate(cohort, split, models, fits, modes, out: Path) -> tuple[list, str]:
+async def evaluate(cohort, split, models, fits, modes, out: Path, *, exchange: bool = False) -> tuple[list, str]:
     task_config = BenchConfig().task
     spent = []
     prime = out / f"{split}_verifiers_traces.jsonl"
@@ -183,7 +183,8 @@ async def evaluate(cohort, split, models, fits, modes, out: Path) -> tuple[list,
             task = CurationTask(data, task_config)
             for (seed, model), (arm, (offset, witness)) in product(models.items(), modes.items()):
                 events = []
-                actions, policy = solve(model, data, stop_offset=offset, stop_guard=witness, audit=events)
+                guard = {"exchange_guard" if exchange else "stop_guard": witness}
+                actions, policy = solve(model, data, stop_offset=offset, audit=events, **guard)
                 result = await score_submission(task, actions, f"stop-policy/{arm}/{seed}")
                 result.info.update(policy=policy, checkpoint_sha256=fits[seed]["checkpoint_sha256"])
                 stream.write(result.model_dump_json() + "\n")
@@ -196,6 +197,7 @@ async def evaluate(cohort, split, models, fits, modes, out: Path) -> tuple[list,
 def metrics(rows: list[dict]) -> dict:
     witness_fields = (
         "witness_verifier_calls", "witness_interventions", "witness_rank_probes", "witness_native_queries",
+        "witness_screened_pairs",
     )
     return {**summarize(rows), **{field: sum(row["policy"].get(field, 0) for row in rows) for field in witness_fields}}
 
@@ -212,12 +214,12 @@ def select_offset(summaries: dict, offsets: dict) -> tuple[str, list[str]]:
     return selected, eligible
 
 
-def analyze(rows: list[dict]) -> dict:
+def analyze(rows: list[dict], contrasts=CONTRASTS) -> dict:
     groups = defaultdict(dict)
     for row in rows:
         groups[row["root"], row["train_seed"]][row["arm"]] = row
-    contrasts = {}
-    for baseline, candidate in CONTRASTS:
+    comparisons = {}
+    for baseline, candidate in contrasts:
         differences = defaultdict(list)
         families = {}
         for (root, _), group in groups.items():
@@ -228,10 +230,10 @@ def analyze(rows: list[dict]) -> dict:
         strata = defaultdict(list)
         for root, values in differences.items():
             strata[families[root]].append([sum(metric) / len(metric) for metric in zip(*values, strict=True)])
-        contrasts[f"{candidate}_minus_{baseline}"] = primary_intervals(strata)
+        comparisons[f"{candidate}_minus_{baseline}"] = primary_intervals(strata)
     arms = {row["arm"] for row in rows}
     return {"arms": {arm: metrics([row for row in rows if row["arm"] == arm]) for arm in arms},
-            "contrasts": contrasts}
+            "contrasts": comparisons}
 
 
 def save(path: Path, data: dict) -> str:
