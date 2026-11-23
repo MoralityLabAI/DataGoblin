@@ -117,13 +117,17 @@ def checked_snapshot(rules: str, snapshot: Snapshot) -> dict:
     return {"public_query": public, "target": expected, "native_input_sha256": digest(source.encode())}
 
 
-def build(checkout: Path, out: Path, roots_per_family: int) -> dict:
-    if version("hyperon") != PACKAGE_VERSION or not 1 <= roots_per_family <= MAX_ROOTS_PER_FAMILY:
-        raise ValueError(f"Use hyperon=={PACKAGE_VERSION} and 1 to {MAX_ROOTS_PER_FAMILY} roots per family")
+def storyworld_lineage_rules(checkout: Path) -> str:
     data = subprocess.check_output(["git", "-C", str(checkout), "show", f"{LINEAGE_COMMIT}:{LINEAGE_PATH}"])
     if digest(data) != LINEAGE_SHA256:
         raise ValueError("Storyworld lineage rules differ from the pinned bytes")
-    rules = storyworld_rules(checkout) + "\n" + data.decode("utf-8")
+    return storyworld_rules(checkout) + "\n" + data.decode("utf-8")
+
+
+def build(checkout: Path, out: Path, roots_per_family: int) -> dict:
+    if version("hyperon") != PACKAGE_VERSION or not 1 <= roots_per_family <= MAX_ROOTS_PER_FAMILY:
+        raise ValueError(f"Use hyperon=={PACKAGE_VERSION} and 1 to {MAX_ROOTS_PER_FAMILY} roots per family")
+    rules = storyworld_lineage_rules(checkout)
     rows = []
     counts: Counter = Counter()
     for family, seed in product(FAMILIES, range(roots_per_family)):

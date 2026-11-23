@@ -113,6 +113,24 @@ common-premise visibility changes, and superseded shortcuts. The
 changes are ordered within each source and `training_ready` remains false.
 Bundle SHA-256 `034caa91757d034f6857fcb28daecbab3b985bbec2b954305e5805ab6598b193`.
 
+### Incremental evidence index
+
+`python -m MeTTa.evidence_index_pilot --storyworld /path/to/metta-storyworld --out runs/metta/proof-index`
+compares a warm index with the same index started cold at each epoch.
+The unit of reuse is a claim at a fixed proof depth. A record or rule
+change invalidates dependent cells, including cells whose previous
+result was empty. The index retains every bounded proof, so a formerly
+dominated route can become minimal after a shorter route is withdrawn.
+Unchanged rule joins can be reused when another branch changes.
+
+Each epoch compares all proof trees, minimal source sets, and disjoint
+source pairs against full native and independent bottom-up evaluation.
+The pinned native replay rule checks which old trees survive a revision.
+The pilot adds wide alternatives and a bounded cycle with a rewired
+premise to the three earlier episode families. Work counters separate
+recomputed cells, rule joins, and proof products. The bundle remains
+development evidence with training admission disabled.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
