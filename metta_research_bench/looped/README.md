@@ -128,3 +128,27 @@ cohorts use the original typed inference gate and independent Prime
 Verifiers reward. The runner locks source hashes against 19 archived
 files and writes weights' digests, training frames, and frozen traces to
 the output folder for local audit.
+
+| Label target | In-family completions | Policy verifier calls | Premature stops | Conflict completions |
+| --- | ---: | ---: | ---: | ---: |
+| Canonical safe edit | 441 / 1,200 | 5,079 | 683 | 71 / 240 |
+| Hashed safe edit | 474 / 1,200 | 4,458 | 681 | 73 / 240 |
+| All shortest safe edits | 507 / 1,200 | 4,483 | 651 | 76 / 240 |
+
+In-family action-set supervision gained 5.50 percentage points over the
+canonical target (descriptive paired 95% root interval +2.75 to +8.33)
+and 2.75 points over the hashed target (+0.25 to +5.08). The primary
+contrast saved 596 policy verifier calls and 1,305 recurrent visits.
+On trials initially requiring at least two gated edits, action-set
+supervision completed 449/1,128 against 388/1,128 for the canonical
+target. The conflict contrast versus canonical was +2.08 points
+(−3.75 to +7.92). All evaluated policies applied zero unsafe additions.
+
+The corrected run used DataGoblin `2637923` and LoopedTransformers
+`950d4d5`. Each of nine fits used 44,417 parameters, 1,560 shared states,
+and 11,520 sampled action targets. The native rule replayed all 1,560
+training action sets, 620 of which had multiple equally short actions.
+Two training states needed a detour even though the final membership
+was closer by Hamming distance. A full directed-graph audit independently
+verified those shortest sets and replayed all 4,320 Prime Verifiers
+trials. The run took 55.7 CPU wall seconds and peaked at 468.07 MiB.
