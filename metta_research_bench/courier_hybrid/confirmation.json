@@ -1,0 +1,19 @@
+{
+  "study": "DG-METTA-13",
+  "family": "confirmation",
+  "namespace": "dg-metta13-confirm-20261124-v1",
+  "model_seeds": [1101, 1102, 1103],
+  "train_roots_per_topology": 16,
+  "scoring_roots_per_topology": 20,
+  "train_updates": 180,
+  "batch_size": 48,
+  "horizon": 12,
+  "verifier_ceiling": 13,
+  "macro_horizon": 4,
+  "macro_attempt_limit": 2,
+  "bootstrap_draws": 10000,
+  "bootstrap_seed": 2101,
+  "native_state_probes": true,
+  "storyworld": "4cfe1713d73b4e508833b668477921adfbe570a6",
+  "looped_transformers": "950d4d594d87a1f74c6139a928a9b6cb4ab70617"
+}

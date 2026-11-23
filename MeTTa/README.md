@@ -5,6 +5,41 @@
 
 The goal is to teach DataGoblin how MeTTa's declarative facts, pattern matching, rule chaining, types, and spaces can organize a research corpus. The first implementation puts evidence custody ahead of model-generated decisions. A learner may propose a curation plan; the existing DataGoblin etiquette policy and independent verifiers decide what is released.
 
+## MeTTa skills for Inky
+
+Pick one skill for the current task. The loader runs from the DataGoblin
+checkout and prepares a system prompt for Inky (Inkling 2 Mini).
+
+| Skill | When to use it |
+| --- | --- |
+| [Verify rules](skills/metta-verify-rules/SKILL.md) | Author or debug MeTTa code and replay native queries. |
+| [Curate sources](skills/metta-curate-sources/SKILL.md) | Review rights, pin source roots, split examples, and prepare SFT/RLT views. |
+| [Evidence dockets](skills/metta-evidence-dockets/SKILL.md) | Check observer-scoped proofs, shared evidence, and joint cost. |
+| [Repair actions](skills/metta-repair-actions/SKILL.md) | Propose typed edits, handle verifier rejections, and check STOP. |
+| [Storyworld routes](skills/metta-storyworld-routes/SKILL.md) | Plan and replay courier routes with permit and cargo constraints. |
+| [Compare policies](skills/metta-compare-policies/SKILL.md) | Run or interpret matched, source-root-paired frozen evaluations. |
+
+```sh
+python -m MeTTa.inky_skills list
+python -m MeTTa.inky_skills prompt metta-storyworld-routes
+python -m MeTTa.inky_skills request metta-storyworld-routes --model YOUR_SERVED_MODEL --task public-task.md
+```
+
+Put the public goal and the relevant facts, input format, and bounds in
+`public-task.md`. For a toolbox agent, use the output of `prompt` as the
+system message and provide that file as the user message. For an
+operator-started OpenAI-compatible Inkling server, send the JSON printed by
+`request` to its local `/v1/chat/completions` endpoint. Replace
+`YOUR_SERVED_MODEL` with the server's served model ID. The loader writes to
+standard output and works offline. The [Inkling setup guide](../docs/inkling_variable_loop_gym.md)
+describes the existing local serving and evaluation flow.
+
+The host supplies any tools and performs independent checks. With chat
+alone, use Inky's answer as a candidate and run the skill's replay against
+the relevant checkout. The native smoke checks use Hyperon 0.2.10 and can
+run in WSL on Windows. Include only public inputs in requests and use
+`runs/` for generated responses or receipts kept on disk.
+
 ## What is collated
 
 `source_catalog.json` pins **196 `.metta` files / 4,281,494 Git-reported source bytes** from three MIT-licensed repositories, using observed upstream commit hashes and Git blob SHAs:
@@ -67,6 +102,388 @@ The source-file root stays attached to every derivative. Split assignment keeps 
 ## MeTTa teaching fixture
 
 `seed/curation_graph.metta` gives an original native MeTTa fact/query example that joins source, license, provenance, split and custody atoms. It proposes relevant candidates through `match &self`. The graph never admits records, removes data or prunes an evaluation branch. Run it with the pinned Hyperon interpreter and archive the native execution receipt before turning any query-output example into runtime-grounded supervision.
+
+### Observer evidence proof pilot
+
+`python -m MeTTa.evidence_proofs --storyworld /path/to/metta-storyworld --out runs/metta/proof-pilot`
+builds paired proof and abstention exercises using the observer-scoped
+proof rules from the Storyworld commit pinned in the runner. The runner
+reads the rule bytes from Git and verifies their digest. Hyperon 0.2.10
+backchains over a bounded, projected snapshot. An independent bottom-up
+enumerator checks its exact proof set.
+
+Each root supplies two presentations with matched visible and current
+record counts. Changing visibility, swapping a current and superseded
+record, or changing rule-premise incidence flips the expected outcome.
+Native proofs retain record and source-root identities. The public query
+carries the observer's projected records and rules. The expected proof set
+is stored separately from that query. An empty result requests bounded
+abstention. The export is a candidate evaluation bundle with
+`training_ready: false` and preserves both presentations under one root
+for grouped evaluation.
+
+The default pilot checked 48 roots and 96 presentations, including 48
+abstentions and 71 proof trees across the 48 supported snapshots. The
+three generator families are synthetic, and classification by the two
+matched record counts alone is capped at 50% on these pairs. The bundle
+digest is `646fadd3cbc079195b66ac5ac87577aacd2bbf0dfa621e11836a9c5ee727294a`.
+
+### Observer evidence revisions
+
+`python -m MeTTa.evidence_revision --storyworld /path/to/metta-storyworld --out runs/metta/evidence-revision`
+checks four ordered snapshots per source. Each transition binds the
+before and after public queries to native execution hashes and exact
+proof additions and removals. The native queries enumerate proofs and
+minimal source sets, then find pairs with no shared provenance root.
+A bottom-up oracle independently checks all three relations. Copies
+can add proof trees while leaving the underlying source sets unchanged.
+Proofs that require a shared source do not count as disjoint corroboration.
+
+The default pilot checked 192 snapshots and 144 transitions from 48
+synthetic sources. The source set changed in 121 transitions. In 16
+other transitions the proof trees changed while the minimal sources
+stayed the same. Counting two or more proof trees as corroboration
+would give 34 false positives. Conditions include duplicate arrivals,
+common-premise visibility changes, and superseded shortcuts. The
+changes are ordered within each source and `training_ready` remains false.
+Bundle SHA-256 `034caa91757d034f6857fcb28daecbab3b985bbec2b954305e5805ab6598b193`.
+
+### Incremental evidence index
+
+`python -m MeTTa.evidence_index_pilot --storyworld /path/to/metta-storyworld --out runs/metta/proof-index`
+compares a warm index with the same index started cold at each epoch.
+The unit of reuse is a claim at a fixed proof depth. A record or rule
+change invalidates dependent cells, including cells whose previous
+result was empty. The index retains every bounded proof, so a formerly
+dominated route can become minimal after a shorter route is withdrawn.
+Unchanged rule joins can be reused when another branch changes.
+
+Each epoch compares all proof trees, minimal source sets, and disjoint
+source pairs against full native and independent bottom-up evaluation.
+The pinned native replay rule checks which old trees survive a revision.
+The pilot adds wide alternatives and a bounded cycle with a rewired
+premise to the three earlier episode families. Work counters separate
+recomputed cells, rule joins, and proof products. The bundle remains
+development evidence with training admission disabled.
+
+The 30-root run checked 120 snapshots, 90 transitions, and 178 native
+replays of previous proof trees. Of those trees, 115 survived. Across
+the 90 updates the warm index computed 233 cells and 131 joins versus
+495 cells and 237 joins cold. Wide alternatives accounted for most of
+the join savings. A single interleaved timing favored cold computation.
+Seven repeated, alternating-order host-only timings gave median warm
+CPU of 0.240 seconds versus 0.254 seconds cold across the five families,
+and 0.079 versus 0.096 seconds on wide alternatives. Each timing round
+repeated the same cohort 80 times. These measurements describe this
+synthetic workload with native audit cost outside the comparison.
+
+Repeat host timing with
+`python -m MeTTa.evidence_index_timing --out runs/metta/proof-index/host_timing.json`.
+Audit SHA-256 `4779fd934a5af0eb63b81901579ba5032e08b74756b2b10cd30185503a2515a3`.
+
+### Deadline-bound evidence checks
+
+`python -m MeTTa.evidence_budget_pilot --storyworld /path/to/metta-storyworld --out runs/metta/evidence-budget`
+runs a CPU development pilot with four verifier calls per episode. Public
+inputs include conjunction routes, per-record priors, previous check
+outcomes, and remaining budget. The host owns each record's hidden
+status and checks that every proposed request is currently available.
+It accepts only complete verified routes. Every final policy state is
+independently checked by the pinned native MeTTa receipt gate, which
+requires proof leaves to have matching observer, epoch, record and
+source receipts.
+
+Controls use index order, a greedy route, and exact finite-horizon
+Bayes search over public priors. Two NumPy policies imitate the Bayes
+controller with the same examples and update count per seed. One uses
+a direct scorer and the other uses three tied passes within each
+decision. Their parameter counts and compute differ and are reported.
+Training uses three graph templates. The fresh pilot adds a fourth
+template for descriptive transfer. The comparison measures verified
+completion, check counts, and model inference passes.
+
+The development pilot produced 672 receipts over 96 source roots and
+independently replayed 280 distinct final snapshots. Index order verified
+35/96 completions with 326 checks. Greedy verified 48/96 with 248, and
+public Bayes verified 49/96 with 316. The direct model finished 93/192
+trials across its two seeds with 509 checks. The tied recurrent model
+finished 91/192 with 513 checks and three inference passes per decision.
+This pilot found no improvement from tied recurrence at the chosen size
+and supervision. The overlap-only transfer slice is one held-out graph
+template and supports a descriptive comparison.
+
+`python -m MeTTa.evidence_budget_cost --storyworld /path/to/metta-storyworld --prior runs/metta/evidence-budget --out runs/metta/evidence-cost`
+replays the original Bayes receipts, then minimizes expected check work
+among actions tied on modeled completion probability. This diagnostic
+uses the opened development roots and keeps the original audit intact.
+The new tie-break preserved each original Bayes completion decision
+across all 96 roots and reduced verifier calls from 316 to 269 (14.9%).
+Both endpoints yielded 49 verified completions. The tie-break was
+chosen after seeing the pilot, so the observed savings need a fresh
+replication. The original audit SHA-256 is
+`e34bc5266fd1797280b3f3b73895c46b77d24b2e890e168ca3b2271197f900ce`.
+The diagnostic audit SHA-256 is
+`fd5f74f5768f15b56d4de64a1553bca555ccfbe65e50f437b6fe047e50896254`.
+
+`python -m MeTTa.evidence_budget_confirmation --storyworld /path/to/metta-storyworld --prior runs/metta/evidence-budget --out runs/metta/evidence-confirmation`
+locks a fresh 192-root study with eight non-isomorphic topologies absent
+from the pilot, with 24 catalogs per topology. Both Bayes policies use
+the same private world at budgets two, three and four. The primary
+criterion is a positive lower 95% interval bound for saved calls and
+a lower completion-difference bound of at least −3 percentage points.
+Resampling pairs all three budgets within each source root and keeps
+the eight topology strata fixed. An independent exhaustive check over
+all 128 private worlds per catalog and budget verifies modeled
+completion preservation and expected-work savings. A secondary,
+three-call correlated-status stress test keeps each record's marginal
+prior calibrated while introducing a shared latent docket draw.
+
+The fresh study passed its preregistered criteria. Across 576 paired
+independent-status cases, minimizing work reduced checks from 1,430 to
+1,245 (12.9%). The average saving was 0.321 calls per case (95% paired
+root interval 0.255 to 0.389). Both policies completed the same 286
+cases. Work minimization used extra calls in 36 individual cases.
+Exact enumeration over 73,728 catalog-budget-world combinations
+preserved modeled completion probability and saved 0.338 expected
+calls per case. In the correlated three-call stress condition, both
+policies completed the same 99/192 cases, with 491 versus 428 checks.
+The receipt gate independently checked 939 distinct final snapshots.
+Audit SHA-256 `7d06a045f6aab16d009dae846d9a252471c904a7f3aa5dff260c917b41ce5182`.
+
+### Public obligation representations
+
+`python -m MeTTa.evidence_obligation_pilot --storyworld /path/to/metta-storyworld --prior runs/metta/evidence-confirmation --out runs/metta/obligation-pilot`
+compares full and minimal pending-evidence frontiers using the same
+pinned CPU Looped Transformer. Native MeTTa sees only the public rule
+graph, advertised records, and prior check state. Its scoped results
+are checked against a separate route enumerator. The two representations
+share the legal action mask and feature layout, the same teacher states,
+three paired initializations, and 200 AdamW updates per fit. Both use the
+confirmed lower-work Bayes policy as teacher. All fits are locked before
+scoring fresh catalogs from the eight topologies held out from training.
+
+The primary exploratory contrast is minimal minus full verified
+completion, paired within source root across budgets and seeds. Calls
+saved are secondary. Both learned arms share three inference passes and
+the same budget per decision. An exact lower-work policy remains a
+reference. The independent acceptance runtime receives private status
+only after the policy has finished and replays every final receipt set.
+
+The native planner computes both frontiers in one query and caches
+isomorphic public layouts under a slot permutation. Each returned set
+is translated to the caller's original slots and checked against the
+reference route enumerator. The cache uses no priors or private status.
+
+On 144 fresh catalogs, the full frontier completed 500/864 learned
+trials with 2,020 checks. The minimal frontier completed 495/864 with
+2,004 checks. The paired completion difference was −0.58 percentage
+points (95% interval −1.39 to +0.12). The mean check saving was 0.019
+per trial (95% interval −0.010 to +0.049). The exact reference completed
+165/288 with 706 checks. Both learned arms used 44,417 parameters per
+fit, 762 unique supervised decisions, and 9,600 sampled action tokens
+per seed. Compression changed 289 of 1,805 projected public states.
+
+The cached and uncached implementations produced byte-identical fit
+receipts and all 2,016 trial receipts. The cached implementation reduced
+native obligation calls from 1,398 to 494. All 493 distinct acceptance
+states were independently checked. Evaluation receipt SHA-256
+`4b6cc691e67b6993a37666584e044e9942d3e65a05fa180eb97ddf84ba84a8a0`.
+
+### Matched public incidence attention
+
+`python -m MeTTa.evidence_incidence_pilot --storyworld /path/to/metta-storyworld --prior runs/metta/obligation-pilot --out runs/metta/incidence-pilot`
+compares neutral attention, a fixed incidence bias, and an equally
+dosed degree-preserving rewired bias. Each arm sees the same record and
+route nodes, true incidence bits, public priors, and legal actions.
+All use the same dense attention shape, three tied visits, and the same
+seed-paired initialization and training batches. The new routing module
+is pinned to its separate LoopedTransformers commit.
+
+The run locks 240 teacher catalogs and scores 192 fresh catalogs across
+eight topology families absent from the earlier studies. Completion is
+the primary comparison of incidence against neutral routing. Rewired
+routing is the specificity control. Root comparisons pair both budgets
+and all three seeds. The development effect floor is two percentage
+points. The pilot estimates paired effects and sham variation for
+designing a later confirmation. Native MeTTa checks each public
+frontier and independently validates final proof receipts.
+
+Each of the nine CPU fits used 44,577 parameters, 618 teacher decisions,
+and 180 AdamW updates of 48 actions. Across budgets of three and four
+checks, neutral attention completed 665/1,152 trials with 3,141 checks.
+True incidence completed 678/1,152 with 2,834 checks. The rewired arm
+completed 645/1,152 with 3,205 checks. The exact public reference
+completed 242/384 with 992 checks and had no model seed.
+
+True incidence gained 1.13 percentage points over neutral attention
+(95% paired root bootstrap interval −1.04 to +3.39 points), below the
+two-point development target. It saved 0.266 checks per trial (95%
+interval 0.215 to 0.319), a 9.8% reduction. Against rewired attention,
+the gain was 2.86 points (95% interval +0.78 to +4.95), with 0.322 fewer
+checks per trial. The rewired bias changed 507/618 teacher states and
+2,523/3,041 public states across training and evaluation. The pilot
+applied bias during fitting and scoring, so it cannot isolate their
+contributions. The exact public reference had the highest completion
+rate in this study. No training decisions used the 192 evaluation roots.
+
+The CPU run took 495.3 seconds and peaked at 453.31 MiB under an 8 GiB
+limit. The saved protocol, fit summary, and receipts were checked for
+matching digests, root exclusion, paired initialization and training
+budgets, and scoring and check-budget consistency. The run used
+DataGoblin `cc708ee`, LoopedTransformers `207d92f`, and Storyworld
+`e420454`.
+
+### Training-time and inference-time incidence bias
+
+`python -m MeTTa.evidence_incidence_stages --storyworld /path/to/metta-storyworld --prior runs/metta/incidence-pilot --out runs/metta/incidence-stages`
+crosses neutral and true-incidence bias at training and inference. A
+fifth arm applies a degree-preserving rewired bias at inference to the
+neutral-trained weights. Each training mode uses the same three seeds,
+initialization, examples and optimizer budget. Each checkpoint is reused
+across its inference conditions.
+
+The development protocol locks 240 new training roots and 192 new
+evaluation roots. The evaluation topology families are disjoint from
+the earlier studies up to slot permutation. The primary completion
+contrast is bias at both stages versus neutral at both stages, with a
+two-point development target. Prespecified stage, interaction and sham
+contrasts share the paired root bootstrap. The native receipt gate,
+exact public reference and budgets of three and four checks are reused.
+
+On 192 fresh catalogs, using the bias at both stages saved 202/3,083
+checks (6.6%) relative to neutral. Verified completions were 528/1,152
+versus 531/1,152, a −0.26 percentage-point difference (95% paired root
+bootstrap interval −2.17 to +1.82). Checks saved per trial were 0.175
+(95% interval 0.125 to 0.225). The completion endpoint missed the
+two-point target. Savings recurred for each seed, and 95 of the saved
+checks came from trials that completed under both policies.
+
+Inference-only bias completed 524/1,152 with 3,049 checks, and the
+rewired inference control completed 517/1,152 with 3,113 checks.
+Training-only bias completed 490/1,152 with 3,053 checks. The completion
+interaction was +3.91 points (descriptive 95% interval +1.48 to +6.34).
+Enabling inference bias restored 38 completions relative to removing
+it from the incidence-trained weights. Adding it to neutral-trained
+weights lost seven completions. The exact public reference completed
+197/384 with 961 checks and had the highest completion rate.
+
+Six CPU fits each used 44,577 parameters, 615 teacher decisions and
+180 AdamW updates of 48 actions. An independent replay checked all
+6,144 receipts, reconstructed the fresh allocation, and recomputed the
+seven contrasts. The run took 463.5 seconds with a 476.10 MiB peak under
+an 8 GiB cap. Code pins were DataGoblin `228619d`, LoopedTransformers
+`207d92f`, and Storyworld `e420454`.
+
+### Joint evidence dockets
+
+`python -m MeTTa.evidence_docket_pilot --storyworld /path/to/metta-storyworld --prior runs/metta/incidence-stages --out runs/metta/docket-pilot`
+tests shared receipt planning on two- and three-claim synthetic curation
+dockets. Both native teachers use the same check mask, priors and
+probability rule. The individual teacher chooses a plan for one claim,
+and the joint teacher ranks plans that cover every claim. A separate
+native receipt proof decides whether a finished docket is accepted.
+
+Both Looped Transformers use identical public inputs, shared trajectory
+states, initial weights within each seed, and matched update budgets.
+Only next-check labels change. The benchmark locks 144 training roots
+and 96 evaluation roots across disjoint topology families. Each
+evaluation family reserves ordinal zero for native smoke testing.
+Evaluation also reports both teachers and a public exact finite-horizon
+reference. The complete-docket rate is primary, with check counts and
+recurrent visits as secondary measures. Local JSONL artifacts record
+the two training trajectories per root and an alternate view of those
+same public frames and paired teacher labels.
+
+The joint-label student completed 133/576 dockets, compared with
+124/576 for the individual-label student. The +1.56 percentage-point
+gain had a descriptive 95% paired root interval of −0.17 to +3.30
+points and fell short of the two-point target. It used 1,512 checks and
+4,536 recurrent visits, versus 1,485 checks and 4,455 visits. Completions
+rose for all three seeds. On the two held-out three-claim families,
+the joint-label student completed 47/192 with 471 checks, compared
+with 45/192 and 481 checks.
+
+The native joint teacher completed 64/192 with 422 checks. The native
+individual teacher completed 62/192 with 446 checks. The exact public
+reference completed 66/192 with 480 checks. The learned students
+matched their respective teachers on 39.0% and 36.6% of held-out checks
+along their own trajectories. That descriptive agreement measures exact
+action imitation, including potentially equivalent checks.
+
+Six fits used 44,577 parameters, 405 shared decision states and 120
+optimizer updates of 48 targets each. The teachers disagreed on 56
+training states. Independent replay audited all 1,728 evaluation trials
+and both training trajectories per root. The CPU run took 322.9 seconds
+and peaked at 516.47 MiB under the 8 GiB cap. It used DataGoblin
+`75ec4e1`, Storyworld `6adb17f`, and LoopedTransformers `207d92f`.
+
+### Cost-aware action ties for joint dockets
+
+`python -m MeTTa.evidence_docket_cost_targets --storyworld /path/to/metta-storyworld --prior runs/metta/docket-pilot --out runs/metta/docket-cost-targets`
+uses exact integer action values for the public docket. The values
+maximize the chance of joint completion, then minimize expected evidence
+checks among equally successful actions. This is synthetic-oracle
+supervision. Native MeTTa still verifies the public frontiers and final
+receipt-backed proofs. It does not compute or learn the action values.
+
+The three matched training arms put target mass on one success-optimal
+action, all tied success-optimal actions, or all least-work actions
+among those success ties. All arms use the same state tensors, sampled
+batches, optimizer budgets and architecture. The primary contrast
+compares the last two arms on 128 fresh roots spanning eight non-isomorphic
+evaluation topologies. The deterministic public references isolate the
+same two objectives without a learned model. Actions in the evaluation
+all use the same legal mask and stopping gate.
+
+On the 128 frozen roots, both tie-trained students completed 258/768
+trials. The cost-tie student used 1,924 checks and 5,772 recurrent
+visits, compared with 1,989 checks and 5,967 visits for success ties.
+The primary completion difference was zero (descriptive 95% paired
+root interval −1.30 to +1.43 percentage points). The cost criterion saved
+0.085 checks per trial (95% interval 0.016 to 0.154), or 3.3% in total.
+It reduced checks at every seed. Completion did not reach the two-point
+gain target for this contrast.
+
+The hard-target student completed 210/768 with 2,243 checks. Crediting
+all success-optimal actions gained 6.25 completion points over that
+control (95% interval +2.86 to +9.64) and saved 254 checks. The two exact
+reference policies completed 93/256 apiece. Their check counts were 828
+for success alone and 610 with the cost tie-break. The native joint
+heuristic completed 96/256 with 542 checks. Both exact policies have the
+same expected completion under the public priors, which are distinct
+from the sampled evaluation outcomes.
+
+All nine models used 44,577 parameters, 928 shared training states,
+and 120 AdamW updates per fit. A separate audit recomputed every
+training action value and replayed all 3,072 evaluation trials. The run
+took 394.8 CPU wall seconds, peaking at 631.70 MiB under an 8 GiB cap.
+Code pins were DataGoblin `98de755`, Storyworld `6adb17f`, and
+LoopedTransformers `207d92f`.
+
+### Native Storyworld courier transfer
+
+The courier pilot compares canonical best-action labels, hash-selected
+best-action labels, and supervision over the entire set of shortest legal
+actions. The three arms share the same route states, initialization seeds,
+model, and optimizer budget. Hyperon checks each reachable state's legal
+successors against a Python reference, and native replay checks each final
+route. Success requires both delivered cargo and a model STOP.
+
+Run from DataGoblin with CPU PyTorch, Hyperon 0.2.10, the pinned
+LoopedTransformers checkout on `PYTHONPATH`, and the pinned Storyworld
+checkout's inner `metta-storyworld` directory:
+
+```sh
+python -m MeTTa.storyworld_courier_pilot --storyworld /path/to/metta-storyworld/metta-storyworld --out runs/metta/courier
+```
+
+The runner locks the protocol and source allocation before training and
+records fit digests before scoring the held-out topology families. It writes
+raw trajectories and receipts under the ignored run directory.
+[Pinned native courier commit](https://github.com/MoralityLabAI/metta-storyworld/commit/4cfe1713d73b4e508833b668477921adfbe570a6)
+
+See the [frozen courier results](STORYWORLD_COURIER_RESULTS.md) for the
+paired completion and route-cost estimates.
 
 ## Looped-transformer SFT curation program
 

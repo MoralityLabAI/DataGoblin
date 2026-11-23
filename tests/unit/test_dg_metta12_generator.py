@@ -6,9 +6,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2] / "metta_research_bench" / "courier_transfer"
 sys.path.insert(0, str(ROOT))
-from generator import reference_root
-from manifest_check import roots_for
-from reference import FiniteOracle
+# The standalone reference gate runs without the optional benchmark package dependencies.
+from generator import reference_root  # noqa: E402
+from manifest_check import roots_for  # noqa: E402
+from reference import FiniteOracle  # noqa: E402
 
 
 class AllReferenceRootsTests(unittest.TestCase):

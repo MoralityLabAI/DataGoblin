@@ -1,0 +1,92 @@
+name: DG-METTA-13 native courier CPU
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/dg-metta13-hybrid.yml"
+      - "metta_research_bench/courier_hybrid/**"
+      - "metta_research_bench/looped/model.py"
+      - "MeTTa/inky_skills.py"
+      - "MeTTa/skills/**"
+      - "tests/unit/test_dg_metta13_hybrid.py"
+  push:
+    branches:
+      - "research/dg-metta13-native-hybrid-20261123"
+    paths:
+      - "metta_research_bench/courier_hybrid/confirmation_split.json"
+  workflow_dispatch:
+    inputs:
+      family:
+        description: Registered experimental family
+        required: true
+        type: choice
+        default: development
+        options: [development, confirmation]
+
+permissions:
+  contents: read
+
+jobs:
+  native-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      PYTHONHASHSEED: "0"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      DG_METTA13_FAMILY: ${{ inputs.family || (github.event_name == 'push' && 'confirmation') || 'development' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install -e ".[dev]" -r metta_research_bench/requirements.txt
+          python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+      - name: Check out pinned dependencies
+        run: |
+          git init --quiet "$RUNNER_TEMP/storyworld"
+          git -C "$RUNNER_TEMP/storyworld" fetch --quiet --depth 1 \
+            https://github.com/MoralityLabAI/metta-storyworld.git 4cfe1713d73b4e508833b668477921adfbe570a6
+          git -C "$RUNNER_TEMP/storyworld" checkout --quiet --detach FETCH_HEAD
+          git init --quiet "$RUNNER_TEMP/looped-transformers"
+          git -C "$RUNNER_TEMP/looped-transformers" fetch --quiet --depth 1 \
+            https://github.com/MoralityLabAI/LoopedTransformers.git 950d4d594d87a1f74c6139a928a9b6cb4ab70617
+          git -C "$RUNNER_TEMP/looped-transformers" checkout --quiet --detach FETCH_HEAD
+          echo "PYTHONPATH=$PWD:$RUNNER_TEMP/looped-transformers" >> "$GITHUB_ENV"
+          echo "DG_METTA13_STORYWORLD=$RUNNER_TEMP/storyworld" >> "$GITHUB_ENV"
+      - name: Verify native transitions, atomicity, and paired controls
+        run: |
+          ruff check metta_research_bench/courier_hybrid tests/unit/test_dg_metta13_hybrid.py
+          python -m pytest tests/unit/test_dg_metta13_hybrid.py tests/unit/test_dg_metta12_reference.py \
+            tests/unit/test_dg_metta12_generator.py tests/unit/test_metta_inky_skills.py
+      - name: Fit on train roots and lock checkpoint identities
+        run: |
+          python -m metta_research_bench.courier_hybrid.experiment fit --family "$DG_METTA13_FAMILY" \
+            --storyworld "$DG_METTA13_STORYWORLD" --out "$RUNNER_TEMP/courier-run"
+      - name: Score the locked checkpoints on held-out roots
+        run: |
+          python -m metta_research_bench.courier_hybrid.experiment score --family "$DG_METTA13_FAMILY" \
+            --storyworld "$DG_METTA13_STORYWORLD" --out "$RUNNER_TEMP/courier-run"
+      - name: Summarize frozen outcomes
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads((Path(os.environ["RUNNER_TEMP"]) / "courier-run/report.json").read_text())
+          print(json.dumps({key: report[key] for key in (
+              "roots", "fit_lock_sha256", "receipts_sha256", "outcomes", "contrasts", "attribution"
+          )}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-metta13-${{ env.DG_METTA13_FAMILY }}-receipts
+          path: ${{ runner.temp }}/courier-run/
+          retention-days: 14

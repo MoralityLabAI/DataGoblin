@@ -1,0 +1,92 @@
+name: DG-METTA-13 Inky CPU auxiliary
+
+on:
+  push:
+    branches:
+      - "research/dg-metta13-native-hybrid-20261123"
+    paths:
+      - "metta_research_bench/courier_hybrid/inky_cpu.json"
+  workflow_dispatch:
+    inputs:
+      development_run:
+        description: CPU development run containing the locked shortest-set checkpoint
+        required: true
+        type: string
+        default: "45210927456"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONHASHSEED: "0"
+      HF_HUB_DISABLE_XET: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned CPU inference dependencies
+        run: |
+          python -m pip install -e . -r metta_research_bench/requirements.txt transformers==5.4.0
+          python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+      - name: Check out pinned Storyworld and Looped Transformer
+        run: |
+          git init --quiet "$RUNNER_TEMP/storyworld"
+          git -C "$RUNNER_TEMP/storyworld" fetch --quiet --depth 1 \
+            https://github.com/MoralityLabAI/metta-storyworld.git 4cfe1713d73b4e508833b668477921adfbe570a6
+          git -C "$RUNNER_TEMP/storyworld" checkout --quiet --detach FETCH_HEAD
+          git init --quiet "$RUNNER_TEMP/looped-transformers"
+          git -C "$RUNNER_TEMP/looped-transformers" fetch --quiet --depth 1 \
+            https://github.com/MoralityLabAI/LoopedTransformers.git 950d4d594d87a1f74c6139a928a9b6cb4ab70617
+          git -C "$RUNNER_TEMP/looped-transformers" checkout --quiet --detach FETCH_HEAD
+          echo "PYTHONPATH=$PWD:$RUNNER_TEMP/looped-transformers" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: dg-metta13-development-receipts
+          path: ${{ runner.temp }}/development
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.development_run || '45210927456' }}
+      - name: Fetch the public registered model and export native-checked public prompts
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from huggingface_hub import snapshot_download
+          plan = json.loads(Path("metta_research_bench/courier_hybrid/inky_cpu.json").read_text())
+          model, revision = plan["model"].split("@")
+          snapshot_download(repo_id=model, revision=revision, local_dir=Path(os.environ["RUNNER_TEMP"]) / "model",
+                            allow_patterns=["*.json", "*.jinja", "*.safetensors"])
+          PY
+          model_id=$(python -c 'import json; print(json.load(open("metta_research_bench/courier_hybrid/inky_cpu.json"))["model"])')
+          python -m metta_research_bench.courier_hybrid.inky_suite export --model "$model_id" --roots-per-family 1 \
+            --storyworld "$RUNNER_TEMP/storyworld" --out "$RUNNER_TEMP/requests.jsonl"
+      - name: Generate Inky replies on CPU with local weights
+        run: |
+          python -m metta_research_bench.courier_hybrid.inky_cpu --requests "$RUNNER_TEMP/requests.jsonl" \
+            --model-path "$RUNNER_TEMP/model" --out "$RUNNER_TEMP/replies.jsonl"
+      - name: Compare auxiliary repair and advice
+        run: |
+          model_id=$(python -c 'import json; print(json.load(open("metta_research_bench/courier_hybrid/inky_cpu.json"))["model"])')
+          python -m metta_research_bench.courier_hybrid.inky_suite evaluate --model "$model_id" --roots-per-family 1 \
+            --storyworld "$RUNNER_TEMP/storyworld" --fit-run "$RUNNER_TEMP/development" \
+            --replies "$RUNNER_TEMP/replies.jsonl" --out "$RUNNER_TEMP/evaluation"
+          cat "$RUNNER_TEMP/evaluation/inky_summary.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-metta13-inky-receipts
+          path: |
+            ${{ runner.temp }}/evaluation/
+            ${{ runner.temp }}/requests.jsonl
+            ${{ runner.temp }}/replies.jsonl
+            ${{ runner.temp }}/replies.lock.json
+          retention-days: 14
