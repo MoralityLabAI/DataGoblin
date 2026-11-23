@@ -297,3 +297,25 @@ at five calls. The reserved checks share the same episode and proposal
 budgets and the same two-edit accounting. The test locks 400 new in-family
 and 160 new conflict roots and recreates the three archived checkpoint
 digests before scoring.
+
+| Call ceiling and cohort | Raw | STOP-triggered | Last two calls | Agreed removal |
+| --- | ---: | ---: | ---: | ---: |
+| 3, in-family | 234 / 1,200 | 300 / 1,200 | 274 / 1,200 | 311 / 1,200 |
+| 5, in-family | 437 / 1,200 | 648 / 1,200 | 583 / 1,200 | 652 / 1,200 |
+| 3, conflict | 84 / 480 | 120 / 480 | 93 / 480 | 122 / 480 |
+| 5, conflict | 137 / 480 | 254 / 480 | 238 / 480 | 254 / 480 |
+
+General reservation reduced completion by 5.42 percentage points in the
+primary contrast (descriptive 95% paired interval −7.42 to −3.50).
+It recovered 10 in-family repairs and lost 75 at five calls. Only 20 of
+289 early exchange endpoints hit the exact final selection. Every early
+exchange had already consumed the remaining calls, so further repairs
+needed a larger budget. Requiring the model's agreement gained 0.33 points
+at five calls (+0.08 to +0.67) and 0.92 at three calls (+0.33 to +1.67)
+in-family, with no paired losses and the same aggregate typed call counts
+as the STOP trigger. The five-call conflict result tied the STOP trigger.
+
+Independent audit checked all 13,440 frozen trials and 3,874 native
+certificates. A balanced sample of 576 archived cases reproduced prior
+actions and counters with reservation disabled. DataGoblin `d1419bc`
+ran in 270.8 CPU seconds with 578.0 MiB peak memory under the 8 GiB cap.
