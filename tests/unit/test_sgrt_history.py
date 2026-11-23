@@ -5,15 +5,15 @@ import pytest
 
 from datagoblin.training_gym.sgrt_history import (
     CHOICES,
-    D,
     EVENTS,
     FAMILIES,
     TRAINED,
+    D,
     HistoryHead,
     _digest,
     _prediction,
-    event_transport,
     evaluate,
+    event_transport,
     forward,
     gradients,
     make_roots,
