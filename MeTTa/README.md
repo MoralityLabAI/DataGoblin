@@ -68,6 +68,31 @@ The source-file root stays attached to every derivative. Split assignment keeps 
 
 `seed/curation_graph.metta` gives an original native MeTTa fact/query example that joins source, license, provenance, split and custody atoms. It proposes relevant candidates through `match &self`. The graph never admits records, removes data or prunes an evaluation branch. Run it with the pinned Hyperon interpreter and archive the native execution receipt before turning any query-output example into runtime-grounded supervision.
 
+### Observer evidence proof pilot
+
+`python -m MeTTa.evidence_proofs --storyworld /path/to/metta-storyworld --out runs/metta/proof-pilot`
+builds paired proof and abstention exercises using the observer-scoped
+proof rules from the Storyworld commit pinned in the runner. The runner
+reads the rule bytes from Git and verifies their digest. Hyperon 0.2.10
+backchains over a bounded, projected snapshot. An independent bottom-up
+enumerator checks its exact proof set.
+
+Each root supplies two presentations with matched visible and current
+record counts. Changing visibility, swapping a current and superseded
+record, or changing rule-premise incidence flips the expected outcome.
+Native proofs retain record and source-root identities. The public query
+carries the observer's projected records and rules. The expected proof set
+is stored separately from that query. An empty result requests bounded
+abstention. The export is a candidate evaluation bundle with
+`training_ready: false` and preserves both presentations under one root
+for grouped evaluation.
+
+The default pilot checked 48 roots and 96 presentations, including 48
+abstentions and 71 proof trees across the 48 supported snapshots. The
+three generator families are synthetic, and classification by the two
+matched record counts alone is capped at 50% on these pairs. The bundle
+digest is `646fadd3cbc079195b66ac5ac87577aacd2bbf0dfa621e11836a9c5ee727294a`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
