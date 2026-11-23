@@ -1,0 +1,36 @@
+{
+  "experiment_id": "DG-METTA-12",
+  "schema_version": "courier-roots-v1",
+  "seed_namespace": "DG-METTA-12-20261123-v1",
+  "id_format": "DG12/{split}/{family}/{index:04d}",
+  "index_origin": 0,
+  "seed_derivation": "int.from_bytes(sha256((seed_namespace+'|'+root_id).encode()).digest()[:8], 'big')",
+  "ordered_traversal": "split order then family insertion order then ascending index",
+  "split_roots": {
+    "train": {
+      "route_ties": 48,
+      "permit_gate": 48,
+      "multi_drop": 48,
+      "evidence_ledger": 48
+    },
+    "development": {
+      "route_ties": 12,
+      "permit_gate": 12,
+      "multi_drop": 12,
+      "evidence_ledger": 12
+    },
+    "frozen": {
+      "route_ties": 40,
+      "permit_gate": 40,
+      "multi_drop": 40,
+      "evidence_ledger": 40
+    },
+    "transfer": {
+      "permit_chain": 40,
+      "evidence_collision": 40,
+      "unseen_topology": 40
+    }
+  },
+  "total_roots": 520,
+  "root_ids_sha256": "4a618bb948f677a0b25987b3bb2d83347353ace7abcd7b89dc5d2e2482faf3cc"
+}

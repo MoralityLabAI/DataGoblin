@@ -1,0 +1,73 @@
+{
+  "experiment_id": "DG-METTA-12",
+  "schema_version": "courier-transfer-preregistered-v1",
+  "registration_date": "2026-11-23",
+  "status": "wiring_only_until_native_kernel_pinned",
+  "source": {
+    "data_goblin_base": "a1646c0318df6942db6c58bc78da4084599df7d6",
+    "native_storyworld_repository": "MoralityLabAI/metta-storyworld",
+    "claimed_local_courier_commit": "4cfe171",
+    "native_storyworld_full_commit": null,
+    "looped_transformers_upstream": "950d4d594d87a1f74c6139a928a9b6cb4ab70617"
+  },
+  "architecture": {
+    "model": "upstream-LoopedDecoderLM",
+    "physical_attention_blocks": 1,
+    "recurrent_visits": 3,
+    "hidden_size": 32,
+    "attention_heads": 4,
+    "action_head": "shared_parameter_pointer_over_sorted_typed_actions",
+    "tokenizer": "courier-public-typed-state-v1"
+  },
+  "training": {
+    "seeds": [
+      1101,
+      1102,
+      1103
+    ],
+    "adamw_updates_per_arm": 600,
+    "examples_per_update": 48,
+    "learning_rate": 0.0015,
+    "weight_decay": 0.01,
+    "matched_initial_weights": true,
+    "matched_examples_by_state": true,
+    "arms": {
+      "A": "lexicographically_canonical_best_action",
+      "B": "sha256_hashed_singleton_from_full_optimal_set",
+      "C": "full_optimal_action_set_logsumexp_loss",
+      "D": "C_weights_plus_certified_stop_macro",
+      "E": "exact_bounded_oracle_reference_not_trained"
+    }
+  },
+  "evaluation": {
+    "primary_endpoint": "verified_full_delivery_and_correct_STOP",
+    "paired_contrast": "C_minus_B",
+    "secondary_contrast": "D_minus_C",
+    "secondary_metrics": [
+      "verifier_calls_per_verified_completion",
+      "mean_verifier_calls",
+      "premature_stops",
+      "invalid_proposals",
+      "accepted_action_count",
+      "macro_repair_count",
+      "paired_regressions"
+    ],
+    "five_call_cap_per_episode_for_C_and_D": 5,
+    "stop_macro_max_verifier_calls": 2,
+    "stop_macro_policy": "reserve_until_stop; certify_final_state_before_atomic_commit; unused_budget_not_reallocated",
+    "root_clustered_confidence_interval": "95% paired root bootstrap, seeds remain within root cluster",
+    "bootstrap_repetitions": 10000,
+    "decision_rule": "C-B strictly positive with bootstrap lower endpoint above zero; report raw seed effects",
+    "negative_result_handling": "report all endpoints and seed-level effects even when gate fails"
+  },
+  "release_gates": {
+    "reference_oracle_tests": "all_green",
+    "native_storyworld_kernel_pinned_full_sha": "required_for_native_results",
+    "native_three_targeted_tests": "all_green",
+    "reference_native_differential_test": "all_green_on_shared_small_states",
+    "fresh_split_disjointness": "required",
+    "dataset_and_checkpoint_hashes_locked_before_frozen": "required",
+    "frozen_evaluation_uses_only_committed_code": "required",
+    "no_applied_invalid_transition": "required"
+  }
+}
