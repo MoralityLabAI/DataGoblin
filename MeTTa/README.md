@@ -239,6 +239,21 @@ isomorphic public layouts under a slot permutation. Each returned set
 is translated to the caller's original slots and checked against the
 reference route enumerator. The cache uses no priors or private status.
 
+On 144 fresh catalogs, the full frontier completed 500/864 learned
+trials with 2,020 checks. The minimal frontier completed 495/864 with
+2,004 checks. The paired completion difference was −0.58 percentage
+points (95% interval −1.39 to +0.12). The mean check saving was 0.019
+per trial (95% interval −0.010 to +0.049). The exact reference completed
+165/288 with 706 checks. Both learned arms used 44,417 parameters per
+fit, 762 unique supervised decisions, and 9,600 sampled action tokens
+per seed. Compression changed 289 of 1,805 projected public states.
+
+The cached and uncached implementations produced byte-identical fit
+receipts and all 2,016 trial receipts. The cached implementation reduced
+native obligation calls from 1,398 to 494. All 493 distinct acceptance
+states were independently checked. Evaluation receipt SHA-256
+`4b6cc691e67b6993a37666584e044e9942d3e65a05fa180eb97ddf84ba84a8a0`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
