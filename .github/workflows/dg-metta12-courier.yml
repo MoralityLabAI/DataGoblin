@@ -1,0 +1,28 @@
+name: DG-METTA-12 courier CPU contract
+
+on:
+  pull_request:
+    paths:
+      - "metta_research_bench/courier_transfer/**"
+      - "tests/unit/test_dg_metta12_reference.py"
+      - ".github/workflows/dg-metta12-courier.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference-wiring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check exact CPU courier reference semantics
+        run: python -m unittest discover -s tests/unit -p 'test_dg_metta12_*.py' -v
+      - name: Verify pinned split ID fingerprint and result schema
+        run: |
+          python metta_research_bench/courier_transfer/manifest_check.py
+          python metta_research_bench/courier_transfer/generator.py

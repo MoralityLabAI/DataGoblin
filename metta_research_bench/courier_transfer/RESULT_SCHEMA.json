@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MoralityLabAI/DataGoblin/blob/master/metta_research_bench/courier_transfer/RESULT_SCHEMA.json",
+  "title": "DG-METTA-12 per-root, per-seed, per-arm receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mode",
+    "experiment_id",
+    "split",
+    "family",
+    "root_id",
+    "root_seed",
+    "arm",
+    "model_seed",
+    "source_sha256",
+    "protocol_sha256",
+    "native_kernel_sha",
+    "checkpoint_sha256",
+    "complete",
+    "stopped",
+    "verifier_calls",
+    "actions",
+    "proof_receipts",
+    "macro"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "dg-metta12-result-v1"
+    },
+    "mode": {
+      "enum": [
+        "reference_wiring",
+        "native"
+      ]
+    },
+    "experiment_id": {
+      "const": "DG-METTA-12"
+    },
+    "split": {
+      "enum": [
+        "train",
+        "development",
+        "frozen",
+        "transfer"
+      ]
+    },
+    "family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "arm": {
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ]
+    },
+    "model_seed": {
+      "type": "integer"
+    },
+    "source_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "protocol_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "native_kernel_sha": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "checkpoint_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "stopped": {
+      "type": "boolean"
+    },
+    "verifier_calls": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "grading_calls": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "invalid_proposals": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "premature_stop": {
+      "type": "boolean"
+    },
+    "accepted_action_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "proof_receipts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "macro": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempted",
+        "certified",
+        "committed",
+        "verifier_calls"
+      ],
+      "properties": {
+        "attempted": {
+          "type": "boolean"
+        },
+        "certified": {
+          "type": "boolean"
+        },
+        "committed": {
+          "type": "boolean"
+        },
+        "verifier_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "final_state_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
