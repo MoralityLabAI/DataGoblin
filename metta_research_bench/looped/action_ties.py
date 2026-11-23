@@ -6,7 +6,7 @@ import asyncio
 import json
 import re
 import time
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from importlib.metadata import version
 from itertools import product
 from pathlib import Path
@@ -28,7 +28,7 @@ from .model import BATCH_SIZE, LOOPS, MAX_PROPOSALS, LoopedPointer, fit, solve, 
 
 ARMS = ("canonical_hard", "sampled_hard", "uniform_ties")
 PROTOCOL = {
-    "schema": "metta-looped-verified-action-ties-v1", "train_start": 100000,
+    "schema": "metta-looped-verified-action-ties-v2", "train_start": 100000,
     "frozen_start": 110000, "conflict_start": 120000, "train_roots_per_family": 48,
     "frozen_roots_per_family": 80, "conflict_roots": 80, "train_seeds": (1101, 1102, 1103),
     "optimizer_updates": 240, "presentations_per_root": 2, "primary": "uniform_ties_minus_canonical_hard",
@@ -56,29 +56,64 @@ def edit_index(action: dict) -> int:
     return MAX_ITEMS if action == STOP else int(action["id"][1:])
 
 
-def safe_shortest(verifier: RepairVerifier, selected: list[str]) -> tuple[list[dict], list[dict]]:
-    """Take all accepted membership edits that reduce Hamming distance by one."""
-    # Removing extra records in reverse dependency order, then adding missing records in dependency order,
-    # always reaches the feasible target. A shortest path needs exactly one edit per different membership.
-    current = set(selected)
-    target = set(verifier.optimum["selected"])
-    if current == target:
-        stop = verifier.check(STOP, selected)
-        if not stop["correct_stop"]:
-            raise ValueError("The verified terminal state rejected STOP")
-        return [STOP], [{"action": STOP, "receipt": stop}]
-    moves = [{"op": op, "id": record} for op, records in (("remove", current - target), ("add", target - current))
-             for record in sorted(records)]
-    inspected = [{"action": action, "receipt": verifier.refine(typed_proposal(action), selected)} for action in moves]
-    legal = [item["action"] for item in inspected if item["receipt"]["accepted"]]
-    if not legal or any(item["receipt"]["remaining_after"] != item["receipt"]["remaining_before"] - 1
-                        for item in inspected if item["receipt"]["accepted"]):
-        raise ValueError("The verified shortest repair path is missing")
-    return legal, inspected
+class ShortestRepair:
+    """Traverse the bounded state graph backwards through actual gated edits."""
+
+    def __init__(self, verifier: RepairVerifier):
+        self.verifier = verifier
+        target = tuple(verifier.optimum["selected"])
+        self.records = tuple(item["id"] for item in verifier.world["items"])
+        self.distances = {target: 0}
+        self.pending = deque([target])
+        self.receipts = {}
+
+    def edge(self, state: tuple[str, ...], action: dict) -> dict:
+        key = state, action["op"], action["id"]
+        if key not in self.receipts:
+            self.receipts[key] = self.verifier.refine(typed_proposal(action), list(state))
+        return self.receipts[key]
+
+    def neighbors(self, state: tuple[str, ...]):
+        present = set(state)
+        # The ordering preserves the conventional remove-first canonical target for exact ties.
+        for record in (*state, *(key for key in self.records if key not in present)):
+            yield tuple(sorted(present ^ {record})), {"op": "remove" if record in present else "add", "id": record}
+
+    def distance(self, state: tuple[str, ...]) -> int:
+        while state not in self.distances and self.pending:
+            following = self.pending.popleft()
+            distance = self.distances[following] + 1
+            for previous, inverse in self.neighbors(following):
+                if previous in self.distances:
+                    continue
+                forward = {"op": "remove" if inverse["op"] == "add" else "add", "id": inverse["id"]}
+                if self.edge(previous, forward)["accepted"]:
+                    self.distances[previous] = distance
+                    self.pending.append(previous)
+        if state not in self.distances:
+            raise ValueError("No repair path through the environment gate")
+        return self.distances[state]
+
+    def offers(self, selected: list[str]) -> tuple[list[dict], list[dict]]:
+        state = tuple(selected)
+        distance = self.distance(state)
+        if not distance:
+            stop = self.verifier.check(STOP, selected)
+            if not stop["correct_stop"]:
+                raise ValueError("The verified terminal state rejected STOP")
+            return [STOP], [{"action": STOP, "receipt": stop, "distance_before": 0, "distance_after": 0}]
+        # Every closer layer has been discovered when the source is reached by the reverse breadth-first search.
+        inspected = [{"action": action, "receipt": self.edge(state, action),
+                      "distance_before": distance, "distance_after": distance - 1}
+                     for neighbor, action in self.neighbors(state) if self.distances.get(neighbor) == distance - 1]
+        allowed = [item["action"] for item in inspected if item["receipt"]["accepted"]]
+        if not allowed:
+            raise ValueError("No accepted first edit on a shortest path")
+        return allowed, inspected
 
 
 def native_certificate(native: ScopedNative, allowed: list[dict], checked: list[dict]) -> dict:
-    distance = checked[0]["receipt"]["remaining_before"]
+    distance = checked[0]["distance_before"]
     facts = [f"(RepairDistance CurrentState {distance})"]
     for index, item in enumerate(checked):
         action, receipt = item["action"], item["receipt"]
@@ -87,7 +122,7 @@ def native_certificate(native: ScopedNative, allowed: list[dict], checked: list[
         else:
             status = "Accepted" if receipt["accepted"] else "Vetoed"
             facts.append(f'(CheckedRepairEdit CurrentState {action["op"]} {action["id"]} {status} Next{index})')
-            facts.append(f'(RepairDistance Next{index} {receipt["remaining_after"]})')
+            facts.append(f'(RepairDistance Next{index} {item["distance_after"]})')
     (answers,) = native.evaluate(facts, (QUERY,))
     actual = sorted({str(row) for row in answers})
     expected = sorted(f'(RepairChoice {action["op"]} {action["id"]})' for action in allowed)
@@ -139,13 +174,14 @@ def pack_training(train: list[dict], native: ScopedNative):
         world = make_task(source["family"], source["seed"])
         start = first_state(world, source["seed"])
         verifier = RepairVerifier(world)
+        search = ShortestRepair(verifier)
         prior = {}
         for view in range(PROTOCOL["presentations_per_root"]):
             selected, transitions = start, []
             for _ in range(MAX_DECISIONS):
                 key = tuple(selected)
                 if key not in prior:
-                    allowed, checked = safe_shortest(verifier, selected)
+                    allowed, checked = search.offers(selected)
                     certificate = native_certificate(native, allowed, checked)
                     codes, mask = tokenize(world, selected)
                     tokens.append(codes)
@@ -157,7 +193,7 @@ def pack_training(train: list[dict], native: ScopedNative):
                         distribution[[edit_index(action) for action in actions]] = 1 / len(actions)
                         targets[arm].append(distribution)
                     frames.append({**source, "selected": selected, "labels": labels, "checked": checked,
-                                   "distance": checked[0]["receipt"]["remaining_before"], "native": certificate})
+                                   "distance": checked[0]["distance_before"], "native": certificate})
                     prior[key] = (allowed, {edit_index(item["action"]): item["receipt"] for item in checked})
                 allowed, indexed = prior[key]
                 action = allowed[0] if view == 0 else allowed[-1]
@@ -201,8 +237,8 @@ async def evaluate(sources: list[dict], split: str, models: dict, checkpoints: d
             world = make_task(source["family"], source["seed"])
             selected = first_state(world, source["seed"])
             verifier = RepairVerifier(world)
-            shortest, checks = safe_shortest(verifier, selected)
-            distance = checks[0]["receipt"]["remaining_before"]
+            shortest, checks = ShortestRepair(verifier).offers(selected)
+            distance = checks[0]["distance_before"]
             prompt = ("Repair the evidence selection using the public MeTTa facts. Maximize distinct goal coverage, "
                       "then quality, then minimize token cost. Break exact ties by sorted record IDs. "
                       f"Respect all constraints and end with STOP within {MAX_DECISIONS} decisions.\n"

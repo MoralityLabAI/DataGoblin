@@ -108,11 +108,13 @@ compares three same-size Looped Transformers trained on identical
 public curation states. One arm labels the canonical safe next edit,
 one uses a source-hash-selected safe edit, and one distributes target
 mass over all shortest safe edits. Every edit in a target set must pass
-the environment's typed proposal check and advance the repair by one
-membership. At the verified terminal state the only target is STOP.
+the environment's typed proposal check and reduce the shortest remaining
+gated path by one. At the verified terminal state the only target is STOP.
 The native `action_ties.metta` rule reads environment receipts and
-checks the exported target set. The exact Python verifier supplies
-the endpoint and repair distances.
+checks the exported target set. Reverse breadth-first search uses actual
+typed verifier decisions as edges. This includes repairs that must
+temporarily remove a record retained in the final optimum because an
+add cannot leave an unresolved dependency.
 
 Training uses 240 roots and two alternative shortest trajectories per
 root. Both label views come from the shared states in those trajectories.

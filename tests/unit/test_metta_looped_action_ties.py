@@ -10,13 +10,14 @@ def test_verified_action_set_matches_shortest_paths_through_the_repair_gate():
     pytest.importorskip("verifiers.v1")
     from MeTTa.ram_trajectory import STOP, RepairVerifier, typed_proposal
     from MeTTa.sft_oracle import first_state, make_task
-    from metta_research_bench.looped.action_ties import safe_shortest
+    from metta_research_bench.looped.action_ties import ShortestRepair
 
     world = make_task("dependency", 8)
     initial = first_state(world, 8)
     verifier = RepairVerifier(world)
     goal = tuple(verifier.optimum["selected"])
-    possible, _ = safe_shortest(verifier, initial)
+    search = ShortestRepair(verifier)
+    possible, _ = search.offers(initial)
     assert initial != list(goal)
     queue = deque([(tuple(initial), 0, None)])
     seen = set()
@@ -41,7 +42,24 @@ def test_verified_action_set_matches_shortest_paths_through_the_repair_gate():
                 queue.append((tuple(receipt["selected_after"]), edits + 1, first or (action["op"], key)))
     assert depth == len(set(initial) ^ set(goal))
     assert winners == {(action["op"], action["id"]) for action in possible}
-    assert safe_shortest(verifier, list(goal))[0] == [STOP]
+    assert search.offers(list(goal))[0] == [STOP]
+
+
+def test_shortest_safe_plan_can_temporarily_remove_a_record_in_the_goal():
+    pytest.importorskip("torch")
+    pytest.importorskip("research_gym.neural.looped_decoder")
+    pytest.importorskip("verifiers.v1")
+    from MeTTa.ram_trajectory import RepairVerifier
+    from MeTTa.sft_oracle import make_task
+    from metta_research_bench.looped.action_ties import ShortestRepair
+
+    verifier = RepairVerifier(make_task("dependency", 100045))
+    assert "r6" in verifier.optimum["selected"]
+    actions, checked = ShortestRepair(verifier).offers(["r6"])
+    assert actions == [{"op": "remove", "id": "r6"}]
+    assert checked[0]["receipt"]["remaining_before"] == 3
+    assert checked[0]["receipt"]["remaining_after"] == 4
+    assert checked[0]["distance_before"] == 5 and checked[0]["distance_after"] == 4
 
 
 def test_native_shortest_choice_requires_a_checked_progress_edit_or_terminal_stop():
