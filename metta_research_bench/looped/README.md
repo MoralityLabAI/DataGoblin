@@ -100,3 +100,222 @@ The recorded frozen report has SHA-256
 a1da373dd35253991671b9fad665200ab05207d1be4821f37db826463c0bf5cc.
 The CI workflow runs the development pilot in runner scratch directories.
 Recorded checkpoints and generated traces remain in local run directories.
+
+## Action-set supervision transfer
+
+`python -m metta_research_bench.looped.action_ties --archive /path/to/outputs --out /path/to/fresh-repair-ties-run`
+compares three same-size Looped Transformers trained on identical
+public curation states. One arm labels the canonical safe next edit,
+one uses a source-hash-selected safe edit, and one distributes target
+mass over all shortest safe edits. Every edit in a target set must pass
+the environment's typed proposal check and reduce the shortest remaining
+gated path by one. At the verified terminal state the only target is STOP.
+The native `action_ties.metta` rule reads environment receipts and
+checks the exported target set. Reverse breadth-first search uses actual
+typed verifier decisions as edges. This includes repairs that must
+temporarily remove a record retained in the final optimum because an
+add cannot leave an unresolved dependency.
+
+Training uses 240 roots and two alternative shortest trajectories per
+root. Both label views come from the shared states in those trajectories.
+Seed-paired weights, sampled batches, action masks, and 240 AdamW
+updates are matched. The primary contrast is action-set versus canonical
+labels on 400 fresh roots across the five in-family generators. The
+hashed singleton control distinguishes the effect of crediting multiple
+actions from the effect of using a different fixed tie-break. A separate
+80-root conflict cohort remains outside training and selection. Both
+cohorts use the original typed inference gate and independent Prime
+Verifiers reward. The runner locks source hashes against 19 archived
+files and writes weights' digests, training frames, and frozen traces to
+the output folder for local audit.
+
+| Label target | In-family completions | Policy verifier calls | Premature stops | Conflict completions |
+| --- | ---: | ---: | ---: | ---: |
+| Canonical safe edit | 441 / 1,200 | 5,079 | 683 | 71 / 240 |
+| Hashed safe edit | 474 / 1,200 | 4,458 | 681 | 73 / 240 |
+| All shortest safe edits | 507 / 1,200 | 4,483 | 651 | 76 / 240 |
+
+In-family action-set supervision gained 5.50 percentage points over the
+canonical target (descriptive paired 95% root interval +2.75 to +8.33)
+and 2.75 points over the hashed target (+0.25 to +5.08). The primary
+contrast saved 596 policy verifier calls and 1,305 recurrent visits.
+On trials initially requiring at least two gated edits, action-set
+supervision completed 449/1,128 against 388/1,128 for the canonical
+target. The conflict contrast versus canonical was +2.08 points
+(−3.75 to +7.92). All evaluated policies applied zero unsafe additions.
+
+The corrected run used DataGoblin `2637923` and LoopedTransformers
+`950d4d5`. Each of nine fits used 44,417 parameters, 1,560 shared states,
+and 11,520 sampled action targets. The native rule replayed all 1,560
+training action sets, 620 of which had multiple equally short actions.
+Two training states needed a detour even though the final membership
+was closer by Hamming distance. A full directed-graph audit independently
+verified those shortest sets and replayed all 4,320 Prime Verifiers
+trials. The run took 55.7 CPU wall seconds and peaked at 468.07 MiB.
+
+## Frozen STOP policies
+
+`python -m metta_research_bench.looped.stop_policy --prior /path/to/action-ties-verified --out /path/to/stop-policy-run`
+recreates the three action-set checkpoints from archived states and verifies
+their digests before scoring. A development-only selection chooses one additive
+STOP logit offset. The selection maximizes verified completion with no increase
+in unsafe additions and at most 15% more policy verifier calls. A fresh frozen
+comparison crosses this offset with a bounded native STOP witness. Prior
+conflict, training, and frozen sources are excluded from both new cohorts.
+
+The witness examines unvisited one-edit neighbors with strictly better public
+rank. It can defer STOP only when a typed check accepts a feasible successor
+and MeTTa returns the corresponding rank certificate. It shares the original
+four-proposal cap and uses at most two verifier calls per episode. The experiment
+logs rank probes, typed verifier receipts, native queries, and recurrent visits.
+The original Prime Verifiers reward still requires a safe exact repair and an
+explicit STOP. The primary contrast is the witness alone versus the unmodified
+policy. Completion on the separate fresh conflict cohort remains exploratory.
+
+| STOP policy | In-family completions | Premature STOP | Verifier calls | Conflict completions |
+| --- | ---: | ---: | ---: | ---: |
+| Unmodified | 485 / 1,200 | 658 | 4,720 | 92 / 240 |
+| Calibrated offset | 494 / 1,200 | 640 | 4,877 | 93 / 240 |
+| One-edit witness | 485 / 1,200 | 658 | 6,968 | 93 / 240 |
+| Offset and witness | 494 / 1,200 | 640 | 7,106 | 94 / 240 |
+
+The development cohort selected a STOP offset of −0.25. Against the
+unmodified policy it added 0.75 completion points on the primary cohort
+(descriptive paired 95% interval 0.00 to +1.50), reduced premature STOP
+by 18, and used 157 extra verifier calls. The one-edit witness changed
+no in-family trajectories and used 2,248 extra verifier calls. It found
+one actionable witness on the separate conflict cohort. None of the
+observed gains reached the registered two-point completion target.
+
+Retrospective replay found an unvisited feasible one-edit improvement
+at only 3 of 658 in-family premature stops. There was a two-edit
+improvement only at 488 stops, always a removal followed by an addition.
+The other 167 had no feasible improvement within two unvisited edits.
+These local rank improvements are possibilities, not certified complete
+repairs. All 2,248 probes from the in-family witness arm were vetoed.
+
+DataGoblin `e88bbe0` reproduced all three archived action-set checkpoint
+digests and kept the original decision, proposal, and recurrent caps.
+Independent audit replayed every logged policy check and all 6,840
+development and frozen trials. The default inference path also reproduced
+all actions and counters in 1,440 archived trials. The run took 49.3 CPU
+wall seconds with 526.63 MiB peak memory.
+
+## Bounded exchange witness
+
+`python -m metta_research_bench.looped.stop_exchange --prior /path/to/action-ties-verified --stop-archive /path/to/stop-policy-run --out /path/to/stop-exchange-run`
+tests whether replacing one record at a proposed STOP recovers completions
+on fresh roots. The public prefilter screens budget, dependencies, lineage,
+revision, eligibility, conflict and the endpoint rank. The policy proposes
+only its best screened removal-addition pair. A typed verifier must accept
+both edits, and MeTTa must certify that the receipts form a chain to a feasible
+strictly better state. A failed exchange leaves the actor's selection intact.
+
+The exchange costs two edit slots and reserves a final STOP slot. Its checks
+share the four-proposal cap and the two-call witness budget. The intermediate
+state is recorded and checked. The model makes no additional recurrent pass
+between the two verified edits. The four arms cross the exchange guard with
+the previously frozen STOP offset. The 400 new in-family roots and 80 new
+conflict roots are separate from both earlier studies' training and scoring
+cohorts, and the three checkpoints must reproduce their archived digests.
+
+| STOP policy | In-family completions | Premature STOP | Verifier calls | Conflict completions |
+| --- | ---: | ---: | ---: | ---: |
+| Unmodified | 510 / 1,200 | 642 | 4,502 | 76 / 240 |
+| Calibrated offset | 513 / 1,200 | 624 | 4,735 | 76 / 240 |
+| Verified exchange | 816 / 1,200 | 327 | 5,511 | 159 / 240 |
+| Offset and exchange | 800 / 1,200 | 323 | 5,729 | 159 / 240 |
+
+The exchange gained 25.50 completion points in-family (descriptive 95%
+paired interval +22.25 to +28.92) and 34.58 points in the conflict cohort
+(+26.25 to +42.92). It recovered 306 and 83 failed trials respectively,
+with no losses among trials the raw policy completed. Total in-family
+verifier calls rose by 1,009 and recurrent visits rose by 1,665. Calls
+per verified completion fell from 8.83 to 6.75. Both arms applied zero
+unsafe additions under the shared gate.
+
+The exchange-only arm screened 10,824 in-family pairs by public constraints
+and spent 890 typed checks on 445 applied exchanges. It had no witness
+vetoes on that cohort. The model weights and original caps were fixed.
+The gain comes from the inference controller, and the total consumed
+compute differs across arms. Independent audits replayed all 5,760
+frozen trials and 1,115 native exchange certificates. DataGoblin
+`3dcfdbd` ran in 52.6 CPU seconds with 506.26 MiB peak memory.
+
+## Equal episode-level verifier ceilings
+
+`python -m metta_research_bench.looped.capped_exchange --prior /path/to/action-ties-verified --stop-archive /path/to/stop-policy-run --exchange-archive /path/to/stop-exchange-run --out /path/to/capped-exchange-run`
+compares the unmodified and exchange policies at fixed ceilings of three,
+five, and eight typed verifier calls per episode. Both policies also run
+with the original proposal and decision caps alone. The primary contrast
+is at five calls. These ceilings cover actual calls, including vetoed and
+speculative proposals. The model can still emit its own STOP after
+exhaustion. A budget-blocked edit ends the rollout with a separate status.
+
+The exchange competes for the same verifier budget and the MeTTa query
+checks that at least two calls remain. State screening and native queries
+are recorded separately from typed checks. The frozen evaluation uses
+400 fresh in-family roots and a separate 160-root conflict cohort with
+the archived checkpoints and default STOP logits.
+
+| Call ceiling | In-family raw | In-family exchange | Conflict raw | Conflict exchange |
+| --- | ---: | ---: | ---: | ---: |
+| 3 | 222 / 1,200 | 298 / 1,200 | 74 / 480 | 103 / 480 |
+| 5 | 404 / 1,200 | 613 / 1,200 | 121 / 480 | 218 / 480 |
+| 8 | 490 / 1,200 | 773 / 1,200 | 143 / 480 | 285 / 480 |
+| Original caps | 500 / 1,200 | 790 / 1,200 | 148 / 480 | 294 / 480 |
+
+At five calls, exchange gained 17.42 completion points in-family
+(descriptive paired 95% root interval +14.50 to +20.50) and 20.21 points
+on conflict (+15.42 to +25.42). It recovered 209 and 97 completed trials
+respectively, with zero paired regressions. It consumed 4,583 in-family
+calls and 1,810 conflict calls, compared with 3,856 and 1,470 for the raw
+policy. In-family calls per verified completion fell from 9.54 to 7.48.
+All arms applied zero unsafe additions.
+
+Independent audit verified all 13,440 trials, including 2,058 native
+exchange certificates and every bounded proposal. It also verified
+that bounded raw action sequences are prefixes of the original-limit
+sequences. The new solver reproduced the actions and counters in all
+5,760 archived uncapped trials. DataGoblin `905fcfc` took 195.3 CPU wall
+seconds with 567.79 MiB peak memory under an 8 GiB ceiling.
+
+## Reserving the last two verifier calls
+
+`python -m metta_research_bench.looped.reserve_exchange --prior /path/to/action-ties-verified --stop-archive /path/to/stop-policy-run --exchange-archive /path/to/stop-exchange-run --capped-archive /path/to/capped-exchange-run --out /path/to/reservation-run`
+tests two forms of early exchange under the three- and five-call episode
+ceilings. The STOP-triggered policy is the comparison arm. When exactly
+two calls remain, the general reservation can use them for the best
+screened exchange before an ordinary model edit. The stricter arm
+requires the model's proposed edit to match the best exchange's removal.
+Both require the existing typed receipts and a native MeTTa reservation
+certificate. If no permitted exchange is available, the ordinary
+proposal can use the remaining calls.
+
+The primary contrast compares general reservation with the STOP trigger
+at five calls. The reserved checks share the same episode and proposal
+budgets and the same two-edit accounting. The test locks 400 new in-family
+and 160 new conflict roots and recreates the three archived checkpoint
+digests before scoring.
+
+| Call ceiling and cohort | Raw | STOP-triggered | Last two calls | Agreed removal |
+| --- | ---: | ---: | ---: | ---: |
+| 3, in-family | 234 / 1,200 | 300 / 1,200 | 274 / 1,200 | 311 / 1,200 |
+| 5, in-family | 437 / 1,200 | 648 / 1,200 | 583 / 1,200 | 652 / 1,200 |
+| 3, conflict | 84 / 480 | 120 / 480 | 93 / 480 | 122 / 480 |
+| 5, conflict | 137 / 480 | 254 / 480 | 238 / 480 | 254 / 480 |
+
+General reservation reduced completion by 5.42 percentage points in the
+primary contrast (descriptive 95% paired interval −7.42 to −3.50).
+It recovered 10 in-family repairs and lost 75 at five calls. Only 20 of
+289 early exchange endpoints hit the exact final selection. Every early
+exchange had already consumed the remaining calls, so further repairs
+needed a larger budget. Requiring the model's agreement gained 0.33 points
+at five calls (+0.08 to +0.67) and 0.92 at three calls (+0.33 to +1.67)
+in-family, with no paired losses and the same aggregate typed call counts
+as the STOP trigger. The five-call conflict result tied the STOP trigger.
+
+Independent audit checked all 13,440 frozen trials and 3,874 native
+certificates. A balanced sample of 576 archived cases reproduced prior
+actions and counters with reservation disabled. DataGoblin `d1419bc`
+ran in 270.8 CPU seconds with 578.0 MiB peak memory under the 8 GiB cap.
