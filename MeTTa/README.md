@@ -298,6 +298,23 @@ budgets, and scoring and check-budget consistency. The run used
 DataGoblin `cc708ee`, LoopedTransformers `207d92f`, and Storyworld
 `e420454`.
 
+### Training-time and inference-time incidence bias
+
+`python -m MeTTa.evidence_incidence_stages --storyworld /path/to/metta-storyworld --prior runs/metta/incidence-pilot --out runs/metta/incidence-stages`
+crosses neutral and true-incidence bias at training and inference. A
+fifth arm applies a degree-preserving rewired bias at inference to the
+neutral-trained weights. Each training mode uses the same three seeds,
+initialization, examples and optimizer budget. Each checkpoint is reused
+across its inference conditions.
+
+The development protocol locks 240 new training roots and 192 new
+evaluation roots. The evaluation topology families are disjoint from
+the earlier studies up to slot permutation. The primary completion
+contrast is bias at both stages versus neutral at both stages, with a
+two-point development target. Prespecified stage, interaction and sham
+contrasts share the paired root bootstrap. The native receipt gate,
+exact public reference and budgets of three and four checks are reused.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.

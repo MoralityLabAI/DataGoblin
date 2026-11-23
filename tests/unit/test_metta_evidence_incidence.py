@@ -29,3 +29,19 @@ def test_fresh_graphs_are_non_isomorphic_to_each_other_and_prior_topologies():
     previous = {topology(routes) for routes in (*TRAIN_FAMILIES.values(), *PRIOR_EVAL.values())}
     fresh = {topology(routes) for routes in EVAL.values()}
     assert len(fresh) == len(EVAL) == 8 and not fresh.intersection(previous)
+
+
+def test_stage_contrasts_pair_budgets_and_seeds():
+    pytest.importorskip("torch")
+    pytest.importorskip("research_gym.neural.obligation_pointer")
+    pytest.importorskip("verifiers.v1")
+    from MeTTa.evidence_incidence_stages import ARMS, PROTOCOL, root_contrasts
+
+    checks = {"neutral": 4, "inference_only": 2, "training_only": 3, "both": 3, "inference_sham": 4}
+    results = {(arm, budget, seed): {"checks": checks[arm] + budget - 4, "completed": arm == "both"}
+               for arm in ARMS for budget in PROTOCOL["budgets"] for seed in PROTOCOL["seeds"]}
+    results["inference_only", 4, 1101]["completed"] = True
+    actual = root_contrasts(results)
+    assert actual["both_minus_neutral"] == [1, 1]
+    assert actual["inference_without_training_bias"] == pytest.approx([2, 1 / 6])
+    assert actual["training_inference_interaction"] == pytest.approx([-2, 5 / 6])

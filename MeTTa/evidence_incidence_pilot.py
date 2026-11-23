@@ -105,35 +105,36 @@ def preflight(prior: Path) -> tuple[dict, set[str]]:
             "train_topologies": TRAIN_FAMILIES, "eval_topologies": EVAL}, known
 
 
-def fit_pairs(train: list[Episode], encode) -> list[tuple]:
-    inputs = [[] for _ in MODES]
+def fit_pairs(train: list[Episode], encode, *, modes=MODES, protocol=PROTOCOL) -> list[tuple]:
+    mode_indices = [MODES.index(mode) for mode in modes]
+    inputs = [[] for _ in modes]
     masks, targets = [], []
     for ordinal, episode in enumerate(train):
         teacher = bayes_check(episode.catalog, minimize_work=True)
 
         def collect(public: PublicObservation, teacher=teacher) -> int:
             slot = teacher(public)
-            modes, mask, _ = encode(public)
-            for bucket, packed in zip(inputs, modes, strict=True):
-                bucket.append(packed)
+            packs, mask, _ = encode(public)
+            for bucket, index in zip(inputs, mode_indices, strict=True):
+                bucket.append(packs[index])
             masks.append(mask)
             targets.append(slot)
             return slot
 
-        check_run(episode, collect, PROTOCOL["budgets"][ordinal % len(PROTOCOL["budgets"])])
+        check_run(episode, collect, protocol["budgets"][ordinal % len(protocol["budgets"])])
     mask_batch, target_batch = torch.stack(masks), torch.as_tensor(targets)
     batches = [torch.stack(bucket) for bucket in inputs]
     fitted = []
-    for seed in PROTOCOL["seeds"]:
+    for seed in protocol["seeds"]:
         torch.manual_seed(seed)
         initial = ObligationPointer(SLOTS, FIELDS, BUCKETS)
-        for mode, codes in zip(MODES, batches, strict=True):
-            model, metadata = fit(initial, (codes, mask_batch, target_batch), seed, PROTOCOL["updates"])
+        for mode, codes in zip(modes, batches, strict=True):
+            model, metadata = fit(initial, (codes, mask_batch, target_batch), seed, protocol["updates"])
             fitted.append((mode, seed, model, metadata))
         matched = ("initial_sha256", "supervised_examples", "supervised_action_tokens",
                    "optimizer_updates", "parameters")
         for key in matched:
-            if len({row[3][key] for row in fitted[-len(MODES):]}) != 1:
+            if len({row[3][key] for row in fitted[-len(modes):]}) != 1:
                 raise ValueError(f"Matched training field changed across arms: {key}")
     return fitted
 
