@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import time
 from collections import Counter, defaultdict
+from collections.abc import Callable
 from functools import cache
 from importlib.metadata import version
 from math import prod
@@ -78,18 +79,9 @@ def train_rows(episodes: list[Episode]) -> tuple[np.ndarray, np.ndarray, np.ndar
     return np.stack(inputs), np.asarray(targets), np.stack(masks)
 
 
-def verified_proofs(rules: str, episode: Episode, state: tuple[int, ...]) -> tuple[set[str], str]:
-    from hyperon import Environment, MeTTa
-
-    facts = []
-    for i, current in enumerate(episode.current):
-        if current:
-            facts.extend((f"(Witness Reviewer Claim{i} Note{i})", f"(RecordState Note{i} current)",
-                          f"(RecordRoot Note{i} Source{i})"))
-        if state[i] == CURRENT:
-            facts.append(f"(CheckedRecord Reviewer Epoch1 Note{i} Source{i})")
-    expected = set()
-    for number, route in enumerate(episode.catalog.routes):
+def route_rules(routes: tuple[tuple[int, ...], ...]) -> tuple[list[str], list[str]]:
+    facts, trees = [], []
+    for number, route in enumerate(routes):
         rule = f"Route{number}"
         left, right = (f"(Evidence Note{i} Source{i})" for i in route[:2])
         a, b = (f"Claim{i}" for i in route[:2])
@@ -99,11 +91,34 @@ def verified_proofs(rules: str, episode: Episode, state: tuple[int, ...]) -> tup
             left, right = f"(Because First{number} {left} {right})", f"(Evidence Note{c} Source{c})"
             a, b = f"Partial{number}", f"Claim{c}"
         facts.append(f"(SupportsBoth {rule} {a} {b} Review)")
-        if all(state[i] == CURRENT for i in route):
-            expected.add(f"(Because {rule} {left} {right})")
-    source = "\n".join((rules, *facts, "!(SupportWithReceipts Reviewer Epoch1 Review (Succ (Succ Zero)))"))
-    runtime = MeTTa(env_builder=Environment.custom_env(create_config=False, is_test=True))
-    (atoms,) = runtime.run(source)
+        trees.append(f"(Because {rule} {left} {right})")
+    return facts, trees
+
+
+def verified_proofs(
+    rules: str, episode: Episode, state: tuple[int, ...],
+    *, native_snapshot: Callable[[list[str], tuple[str, ...]], tuple[list, ...]] | None = None,
+) -> tuple[set[str], str]:
+    facts = []
+    for i, current in enumerate(episode.current):
+        if current:
+            facts.extend((f"(Witness Reviewer Claim{i} Note{i})", f"(RecordState Note{i} current)",
+                          f"(RecordRoot Note{i} Source{i})"))
+        if state[i] == CURRENT:
+            facts.append(f"(CheckedRecord Reviewer Epoch1 Note{i} Source{i})")
+    route_facts, trees = route_rules(episode.catalog.routes)
+    facts.extend(route_facts)
+    expected = {tree for route, tree in zip(episode.catalog.routes, trees, strict=True)
+                if all(state[i] == CURRENT for i in route)}
+    query = "(SupportWithReceipts Reviewer Epoch1 Review (Succ (Succ Zero)))"
+    source = "\n".join((rules, *facts, f"!{query}"))
+    if native_snapshot is None:
+        from hyperon import Environment, MeTTa
+
+        runtime = MeTTa(env_builder=Environment.custom_env(create_config=False, is_test=True))
+        (atoms,) = runtime.run(source)
+    else:
+        (atoms,) = native_snapshot(facts, (query,))
     actual = {str(atom) for atom in atoms}
     if expected != actual:
         raise ValueError("Native receipt gate differs from the public route verifier")

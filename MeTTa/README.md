@@ -215,6 +215,25 @@ policies completed the same 99/192 cases, with 491 versus 428 checks.
 The receipt gate independently checked 939 distinct final snapshots.
 Audit SHA-256 `7d06a045f6aab16d009dae846d9a252471c904a7f3aa5dff260c917b41ce5182`.
 
+### Public obligation representations
+
+`python -m MeTTa.evidence_obligation_pilot --storyworld /path/to/metta-storyworld --prior runs/metta/evidence-confirmation --out runs/metta/obligation-pilot`
+compares full and minimal pending-evidence frontiers using the same
+pinned CPU Looped Transformer. Native MeTTa sees only the public rule
+graph, advertised records, and prior check state. Its scoped results
+are checked against a separate route enumerator. The two representations
+share the legal action mask and feature layout, the same teacher states,
+three paired initializations, and 200 AdamW updates per fit. Both use the
+confirmed lower-work Bayes policy as teacher. All fits are locked before
+scoring fresh catalogs from the eight topologies held out from training.
+
+The primary exploratory contrast is minimal minus full verified
+completion, paired within source root across budgets and seeds. Calls
+saved are secondary. Both learned arms share three inference passes and
+the same budget per decision. An exact lower-work policy remains a
+reference. The independent acceptance runtime receives private status
+only after the policy has finished and replays every final receipt set.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
