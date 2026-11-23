@@ -1,0 +1,41 @@
+name: EvalMath AIRIS-07 candidate intake
+on:
+  push:
+    paths: ['MeTTa/evalmath_airis07_intake.py', 'MeTTa/EVALMATH_AIRIS07.md', '.github/workflows/evalmath-airis07-intake.yml']
+  pull_request:
+    paths: ['MeTTa/evalmath_airis07_intake.py', 'MeTTa/EVALMATH_AIRIS07.md', '.github/workflows/evalmath-airis07-intake.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: MoralityLabAI/EvalMath
+          ref: 3ef134f0d880a81ad56592487d951ac2287237d5
+          path: upstream-airis
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate pinned training fixture
+        run: |
+          test "$(git -C upstream-airis rev-parse HEAD)" = 3ef134f0d880a81ad56592487d951ac2287237d5
+          python upstream-airis/gyms/AIRIS/curriculum.py --out "$RUNNER_TEMP/airis-research"
+          mkdir "$RUNNER_TEMP/airis-train"
+          cp "$RUNNER_TEMP/airis-research/train_candidates.jsonl" "$RUNNER_TEMP/airis-research/train_manifest.json" "$RUNNER_TEMP/airis-train/"
+      - name: Independently verify candidate labels and custody
+        run: |
+          python -m MeTTa.evalmath_airis07_intake "$RUNNER_TEMP/airis-train" > AIRIS07-intake.json
+          cat AIRIS07-intake.json
+          python -c 'import json; r=json.load(open("AIRIS07-intake.json")); assert r["candidate_rows"]==r["independent_oracle_rows"]==856 and r["observation_groups"]==214 and r["training_ready"] is False'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AIRIS07-intake-receipt
+          path: AIRIS07-intake.json
