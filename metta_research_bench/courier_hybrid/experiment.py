@@ -165,12 +165,15 @@ def score(native, upstream, protocol, manifest, identity: dict, output: Path) ->
     from .controller import Proposal, Repair, run_episode
     from .native import STOP
     from .oracle import repair_routes
+    from .probes import probe_world, summarize_probes
 
     lock, models = _load_models(output, protocol, identity)
     # Reserve the scoring destination before opening any held-out worlds.
     with (output / "score_started.json").open("xb") as marker:
         marker.write(canonical({"fit_lock_sha256": file_sha(output / "fit_lock.json")}) + b"\n")
     rows = []
+    probes = []
+    probe_native = NativeCourier(upstream) if protocol.get("native_state_probes") else None
     horizon, ceiling = protocol["horizon"], protocol["verifier_ceiling"]
     for root, world in worlds(upstream, protocol, manifest, "score"):
         exact = repair_routes(world, world.initial, horizon, 1)[0]
@@ -199,6 +202,8 @@ def score(native, upstream, protocol, manifest, identity: dict, output: Path) ->
                 rows.append(
                     {**base, "arm": arm, "seed": seed, **run_episode(session, models[name, seed].propose, policy)}
                 )
+        if probe_native is not None:
+            probes.extend(probe_world(probe_native, world, models, root, protocol["model_seeds"], horizon, ceiling))
     if native.calls != sum(row["calls"] for row in rows):
         raise RuntimeError("Runtime queries differ from summed episode ledgers")
     metrics = analyze(rows, protocol["model_seeds"], protocol["bootstrap_draws"], protocol["bootstrap_seed"])
@@ -210,6 +215,12 @@ def score(native, upstream, protocol, manifest, identity: dict, output: Path) ->
         "scoring_native_calls": native.calls,
         **metrics,
     }
+    if probe_native is not None:
+        report.update(
+            probe_native_calls=probe_native.calls,
+            probe_receipts_sha256=jsonl_out(output / "probe_receipts.jsonl", probes),
+            probes=summarize_probes(probes),
+        )
     json_out(output / "report.json", report)
     print(f"scored {len(rows)} attempts across {metrics['roots']} roots and {native.calls} native calls", flush=True)
 

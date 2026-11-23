@@ -74,6 +74,17 @@ jobs:
         run: |
           python -m metta_research_bench.courier_hybrid.experiment score --family "$DG_METTA13_FAMILY" \
             --storyworld "$DG_METTA13_STORYWORLD" --out "$RUNNER_TEMP/courier-run"
+      - name: Summarize frozen outcomes
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads((Path(os.environ["RUNNER_TEMP"]) / "courier-run/report.json").read_text())
+          print(json.dumps({key: report[key] for key in (
+              "roots", "fit_lock_sha256", "receipts_sha256", "outcomes", "contrasts", "attribution"
+          )}))
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: dg-metta13-${{ env.DG_METTA13_FAMILY }}-receipts

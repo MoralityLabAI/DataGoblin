@@ -154,8 +154,10 @@ class Receipt:
 class NativeCourier:
     """Compose the pinned NativeCourier backend with budgeted evidence and replay queries."""
 
-    def __init__(self, upstream: ModuleType):
+    def __init__(self, upstream: ModuleType, *, auxiliary_search: bool = False):
         self.source = upstream.RULES.read_text(encoding="utf-8") + "\n" + HYBRID_RULES.read_text(encoding="utf-8")
+        if auxiliary_search:
+            self.source += "\n" + HYBRID_RULES.with_name("aux_search.metta").read_text(encoding="utf-8")
         self.runtime = upstream.NativeCourier(self.source)
         self.rules_sha256 = hashlib.sha256(self.source.encode()).hexdigest()
         self.calls = 0
