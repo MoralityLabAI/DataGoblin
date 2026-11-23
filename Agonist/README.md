@@ -124,3 +124,7 @@ multi-turn game adapters for costly information gathering, source revisions,
 social play, and research selection. Connect the verified root exports to the
 DataGoblin curator only after measuring the small-learner uplift against
 matched-budget baselines.
+
+## AGN-02 student-uplift pilot
+
+[AGN-02](AGN02.md) adds a 50-family, three-decision offline experiment with a learned utility-selection surrogate, matched random and fixed curation, trained small-student comparisons, and independently recomputed receipts. Its [selection skill](skills/agonist02/SKILL.md) describes the downstream learner objective and promotion protocol. The current AGN-02 fixture uses no live Inky inference or sealed confirmation roots.
