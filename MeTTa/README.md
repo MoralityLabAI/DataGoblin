@@ -482,6 +482,9 @@ records fit digests before scoring the held-out topology families. It writes
 raw trajectories and receipts under the ignored run directory.
 [Pinned native courier commit](https://github.com/MoralityLabAI/metta-storyworld/commit/4cfe1713d73b4e508833b668477921adfbe570a6)
 
+See the [frozen courier results](STORYWORLD_COURIER_RESULTS.md) for the
+paired completion and route-cost estimates.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
