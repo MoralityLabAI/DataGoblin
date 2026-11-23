@@ -146,6 +146,27 @@ Repeat host timing with
 `python -m MeTTa.evidence_index_timing --out runs/metta/proof-index/host_timing.json`.
 Audit SHA-256 `4779fd934a5af0eb63b81901579ba5032e08b74756b2b10cd30185503a2515a3`.
 
+### Deadline-bound evidence checks
+
+`python -m MeTTa.evidence_budget_pilot --storyworld /path/to/metta-storyworld --out runs/metta/evidence-budget`
+runs a CPU development pilot with four verifier calls per episode. Public
+inputs include conjunction routes, per-record priors, previous check
+outcomes, and remaining budget. The host owns each record's hidden
+status and checks that every proposed request is currently available.
+It accepts only complete verified routes. Every final policy state is
+independently checked by the pinned native MeTTa receipt gate, which
+requires proof leaves to have matching observer, epoch, record and
+source receipts.
+
+Controls use index order, a greedy route, and exact finite-horizon
+Bayes search over public priors. Two NumPy policies imitate the Bayes
+controller with the same examples and update count per seed. One uses
+a direct scorer and the other uses three tied passes within each
+decision. Their parameter counts and compute differ and are reported.
+Training uses three graph templates. The fresh pilot adds a fourth
+template for descriptive transfer. The comparison measures verified
+completion, check counts, and model inference passes.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
