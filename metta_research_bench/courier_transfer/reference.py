@@ -5,10 +5,9 @@ MeTTa kernel. Its outputs cannot count as native domain-transfer results.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
-from functools import cache
 import hashlib
 import json
+from dataclasses import dataclass, replace
 
 STOP = "STOP"
 
@@ -114,17 +113,21 @@ class FiniteOracle:
 
     def __init__(self, world: CourierWorld) -> None:
         self.world = world
+        self._memo: dict[tuple[CourierState, int], tuple[int, int]] = {}
 
-    @cache
     def value(self, state: CourierState, remaining: int) -> tuple[int, int]:
         if remaining < 0:
             raise ValueError("remaining must be nonnegative")
+        key = (state, remaining)
+        if key in self._memo:
+            return self._memo[key]
         best = (len(state.delivered), 0)
         if remaining:
             for action in legal_actions(self.world, state):
                 if action != STOP:
                     nxt = self.value(transition(self.world, state, action), remaining - 1)
                     best = max(best, (nxt[0], nxt[1] - 1))
+        self._memo[key] = best
         return best
 
     def action_set(self, state: CourierState, remaining: int) -> tuple[str, ...]:

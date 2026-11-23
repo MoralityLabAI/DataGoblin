@@ -8,9 +8,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] /
                        "metta_research_bench" / "courier_transfer"))
 
-from reference import (  # noqa: E402
-    CourierWorld, FiniteOracle, CourierState, initial, legal_actions,
-    transition, success, hashed_singleton, serialize_state,
+from reference import (
+    CourierState,
+    CourierWorld,
+    FiniteOracle,
+    hashed_singleton,
+    initial,
+    legal_actions,
+    serialize_state,
+    success,
+    transition,
 )
 
 

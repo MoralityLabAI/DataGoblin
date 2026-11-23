@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import random
+from pathlib import Path
 
-from reference import CourierWorld, CourierState, initial, FiniteOracle
 from manifest_check import root_seed
+from reference import CourierState, CourierWorld, FiniteOracle, initial
 
 HERE = Path(__file__).resolve().parent
 
@@ -24,11 +24,20 @@ def reference_root(root_id: str, manifest: dict) -> tuple[CourierWorld, CourierS
     seed = root_seed(manifest, root_id)
     rnd = random.Random(seed)
     suffix = f"{seed & 0xffff:04x}"
-    node = lambda x: f"{x}_{suffix}"
-    parcel = lambda x: f"parcel-{x}-{suffix}"
-    permit = lambda x: f"permit-{x}-{suffix}"
-    witness = lambda x: f"witness-{x}-{suffix}"
-    source = lambda x: f"source-{x}-{suffix}"
+    def node(x: str) -> str:
+        return f"{x}_{suffix}"
+
+    def parcel(x: str) -> str:
+        return f"parcel-{x}-{suffix}"
+
+    def permit(x: str) -> str:
+        return f"permit-{x}-{suffix}"
+
+    def witness(x: str) -> str:
+        return f"witness-{x}-{suffix}"
+
+    def source(x: str) -> str:
+        return f"source-{x}-{suffix}"
 
     edges = []
     offices = []
