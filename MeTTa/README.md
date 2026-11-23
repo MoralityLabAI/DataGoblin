@@ -190,6 +190,19 @@ replication. The original audit SHA-256 is
 The diagnostic audit SHA-256 is
 `fd5f74f5768f15b56d4de64a1553bca555ccfbe65e50f437b6fe047e50896254`.
 
+`python -m MeTTa.evidence_budget_confirmation --storyworld /path/to/metta-storyworld --prior runs/metta/evidence-budget --out runs/metta/evidence-confirmation`
+locks a fresh 192-root study with eight non-isomorphic topologies absent
+from the pilot, with 24 catalogs per topology. Both Bayes policies use
+the same private world at budgets two, three and four. The primary
+criterion is a positive lower 95% interval bound for saved calls and
+a lower completion-difference bound of at least −3 percentage points.
+Resampling pairs all three budgets within each source root and keeps
+the eight topology strata fixed. An independent exhaustive check over
+all 128 private worlds per catalog and budget verifies modeled
+completion preservation and expected-work savings. A secondary,
+three-call correlated-status stress test keeps each record's marginal
+prior calibrated while introducing a shared latent docket draw.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
