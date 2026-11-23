@@ -339,6 +339,26 @@ seven contrasts. The run took 463.5 seconds with a 476.10 MiB peak under
 an 8 GiB cap. Code pins were DataGoblin `228619d`, LoopedTransformers
 `207d92f`, and Storyworld `e420454`.
 
+### Joint evidence dockets
+
+`python -m MeTTa.evidence_docket_pilot --storyworld /path/to/metta-storyworld --prior runs/metta/incidence-stages --out runs/metta/docket-pilot`
+tests shared receipt planning on two- and three-claim synthetic curation
+dockets. Both native teachers use the same check mask, priors and
+probability rule. The individual teacher chooses a plan for one claim,
+and the joint teacher ranks plans that cover every claim. A separate
+native receipt proof decides whether a finished docket is accepted.
+
+Both Looped Transformers use identical public inputs, shared trajectory
+states, initial weights within each seed, and matched update budgets.
+Only next-check labels change. The benchmark locks 144 training roots
+and 96 evaluation roots across disjoint topology families. Each
+evaluation family reserves ordinal zero for native smoke testing.
+Evaluation also reports both teachers and a public exact finite-horizon
+reference. The complete-docket rate is primary, with check counts and
+recurrent visits as secondary measures. Local JSONL artifacts record
+the two training trajectories per root and an alternate view of those
+same public frames and paired teacher labels.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
