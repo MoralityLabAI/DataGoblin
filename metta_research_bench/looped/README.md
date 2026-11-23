@@ -218,3 +218,26 @@ between the two verified edits. The four arms cross the exchange guard with
 the previously frozen STOP offset. The 400 new in-family roots and 80 new
 conflict roots are separate from both earlier studies' training and scoring
 cohorts, and the three checkpoints must reproduce their archived digests.
+
+| STOP policy | In-family completions | Premature STOP | Verifier calls | Conflict completions |
+| --- | ---: | ---: | ---: | ---: |
+| Unmodified | 510 / 1,200 | 642 | 4,502 | 76 / 240 |
+| Calibrated offset | 513 / 1,200 | 624 | 4,735 | 76 / 240 |
+| Verified exchange | 816 / 1,200 | 327 | 5,511 | 159 / 240 |
+| Offset and exchange | 800 / 1,200 | 323 | 5,729 | 159 / 240 |
+
+The exchange gained 25.50 completion points in-family (descriptive 95%
+paired interval +22.25 to +28.92) and 34.58 points in the conflict cohort
+(+26.25 to +42.92). It recovered 306 and 83 failed trials respectively,
+with no losses among trials the raw policy completed. Total in-family
+verifier calls rose by 1,009 and recurrent visits rose by 1,665. Calls
+per verified completion fell from 8.83 to 6.75. Both arms applied zero
+unsafe additions under the shared gate.
+
+The exchange-only arm screened 10,824 in-family pairs by public constraints
+and spent 890 typed checks on 445 applied exchanges. It had no witness
+vetoes on that cohort. The model weights and original caps were fixed.
+The gain comes from the inference controller, and the total consumed
+compute differs across arms. Independent audits replayed all 5,760
+frozen trials and 1,115 native exchange certificates. DataGoblin
+`3dcfdbd` ran in 52.6 CPU seconds with 506.26 MiB peak memory.
