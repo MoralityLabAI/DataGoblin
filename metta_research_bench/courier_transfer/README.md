@@ -33,7 +33,7 @@ A root qualifies for successful-action training only when the exact bounded orac
 
 ## Gates and reproduction
 
-1. Run `python -m unittest discover -s tests/unit -p test_dg_metta12_reference.py -v` and `python -m metta_research_bench.courier_transfer.manifest_check` on CPU. This independently implemented courier model only establishes a wiring gate.
+1. Run `python -m unittest discover -s tests/unit -p test_dg_metta12_reference.py -v` and `python metta_research_bench/courier_transfer/manifest_check.py` on CPU. This independently implemented courier model only establishes a wiring gate.
 2. Push the complete native courier commit to Storyworld, pin its full SHA and runtime, run the three original targeted tests, then implement the adapter specified in `ORACLE_CONTRACT.md`. Differentially replay small shared states against the Python reference and inspect all disagreements.
 3. Train A/B/C using native verified oracle action sets; pin the upstream LoopedDecoderLM revision stated in `protocol.json`. Lock source and checkpoints before opening frozen roots.
 4. Evaluate D with a native two-check atomic macro only when C's model proposes STOP and at least two checks remain. Compare C and D with the same five-call ceiling, reporting actual calls, calls per success, vetoes, false stops and paired regressions. Abort if no native rollback/macro transition exists.
