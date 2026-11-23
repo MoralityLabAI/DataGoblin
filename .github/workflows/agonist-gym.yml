@@ -1,0 +1,40 @@
+name: AGN-01 research agonist offline gym
+
+on:
+  pull_request:
+    paths:
+      - "Agonist/**"
+      - "tests/unit/test_agonist_gym.py"
+      - ".github/workflows/agonist-gym.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONHASHSEED: "0"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      OMP_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test tooling
+        run: python -m pip install -e ".[dev]"
+      - name: Lint AGN-01 code
+        run: ruff check Agonist tests/unit/test_agonist_gym.py
+      - name: Check independent verifier and source custody
+        run: python -m pytest tests/unit/test_agonist_gym.py
+      - name: Deterministic wiring smoke and replay
+        run: |
+          python -m Agonist.gym demo \
+            --tastes Agonist/fixtures/tastes.jsonl \
+            --out "$RUNNER_TEMP/agonist01_fixture"
+          python -m Agonist.gym replay \
+            --archive "$RUNNER_TEMP/agonist01_fixture/archive"

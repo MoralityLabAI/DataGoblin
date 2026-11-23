@@ -8,3 +8,4 @@
 - Keep HRM-Text optional: never auto-download weights, persist full activations by default, or run a real checkpoint
   outside an operator-provided hard resource-cap wrapper.
 - Upstream repositories are read-only references. Do not copy unlicensed source or mutate upstream files.
+- When the human provides research taste for storyworld or videogame experimentation, use `Agonist/SKILL.md` and its offline `Agonist/gym.py` verifier before proposing a live Inkling worker.
