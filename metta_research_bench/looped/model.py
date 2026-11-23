@@ -126,9 +126,12 @@ def fit(initial: LoopedPointer, batch: tuple, seed: int, updates: int) -> tuple[
 
 @torch.inference_mode()
 def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=None,
-          exchange_guard=None, audit: list | None = None) -> tuple[list[dict], dict]:
+          exchange_guard=None, episode_call_cap: int | None = None,
+          audit: list | None = None) -> tuple[list[dict], dict]:
     if stop_guard is not None and exchange_guard is not None:
         raise ValueError("Use one STOP witness per policy")
+    if episode_call_cap is not None and (type(episode_call_cap) is not int or episode_call_cap < 0):
+        raise ValueError("The episode verifier-call cap must be a nonnegative integer")
     world = make_task(data.family, data.source_seed)
     selected = first_state(world, data.source_seed)
     verifier = RepairVerifier(world)
@@ -136,6 +139,16 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
     actions = []
     iterations = vetoes = 0
     extra_calls = interventions = rank_probes = native_queries = screened_pairs = 0
+    cap_blocked = False
+
+    def allowance(attempts: int) -> int:
+        local = MAX_PROPOSALS - attempts
+        return local if episode_call_cap is None else min(local, episode_call_cap - verifier.checks)
+
+    def refine(proposal: dict, state: list[str]) -> dict:
+        if episode_call_cap is not None and verifier.checks >= episode_call_cap:
+            raise ValueError("No verifier calls remain in this episode")
+        return verifier.refine(proposal, state)
 
     def totals():
         metrics = {"policy_verifier_calls": verifier.checks, "passes": iterations, "vetoes": vetoes}
@@ -144,6 +157,8 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
                            witness_rank_probes=rank_probes, witness_native_queries=native_queries)
         if exchange_guard is not None:
             metrics["witness_screened_pairs"] = screened_pairs
+        if episode_call_cap is not None:
+            metrics.update(episode_call_cap=episode_call_cap, blocked_by_call_cap=int(cap_blocked))
         return metrics
 
     slots = 0
@@ -169,8 +184,8 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
                 elif stop_guard is not None and slots < MAX_DECISIONS:
                     guard = stop_guard
                 if guard is not None:
-                    result = guard(world, selected, visited, attempted, MAX_PROPOSALS - attempts,
-                                   extra_calls, verifier.refine)
+                    result = guard(world, selected, visited, attempted, allowance(attempts),
+                                   extra_calls, refine)
                     extra_calls += len(result["checks"])
                     vetoes += sum(not row["receipt"]["accepted"] for row in result["checks"])
                     rank_probes += result["rank_probes"]
@@ -197,9 +212,14 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
                 continue
             if attempts == MAX_PROPOSALS:
                 break
+            if not allowance(attempts):
+                cap_blocked = True
+                if audit is not None:
+                    audit.append({"step": step, "before": selected, "budget_blocked": action})
+                break
             attempts += 1
             attempted.add(key)
-            result = verifier.refine(typed_proposal(action), selected)
+            result = refine(typed_proposal(action), selected)
             if audit is not None:
                 audit.append({"step": step, "before": selected, "action": action, "receipt": result})
             if result["accepted"]:

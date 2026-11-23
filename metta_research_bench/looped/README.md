@@ -241,3 +241,19 @@ The gain comes from the inference controller, and the total consumed
 compute differs across arms. Independent audits replayed all 5,760
 frozen trials and 1,115 native exchange certificates. DataGoblin
 `3dcfdbd` ran in 52.6 CPU seconds with 506.26 MiB peak memory.
+
+## Equal episode-level verifier ceilings
+
+`python -m metta_research_bench.looped.capped_exchange --prior /path/to/action-ties-verified --stop-archive /path/to/stop-policy-run --exchange-archive /path/to/stop-exchange-run --out /path/to/capped-exchange-run`
+compares the unmodified and exchange policies at fixed ceilings of three,
+five, and eight typed verifier calls per episode. Both policies also run
+with the original proposal and decision caps alone. The primary contrast
+is at five calls. These are ceilings on actual calls, including vetoed and
+speculative proposals. The model can still emit its own STOP after
+exhaustion. Exhaustion cannot turn a preferred edit into a STOP.
+
+The exchange competes for the same verifier budget and the MeTTa query
+checks that at least two calls remain. State screening and native queries
+are recorded separately from typed checks. The frozen evaluation uses
+400 fresh in-family roots and a separate 160-root conflict cohort, with
+no threshold calibration or model changes on this evaluation.

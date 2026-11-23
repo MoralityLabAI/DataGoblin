@@ -113,3 +113,59 @@ def test_exchange_consumes_two_action_slots_and_reserves_final_stop(monkeypatch)
     actions, costs = model.solve(AlwaysStop(), data, exchange_guard=witness)
     assert actions == [{"op": "stop", "id": "none"}]
     assert costs["policy_verifier_calls"] == 0
+
+
+def test_episode_call_cap_leaves_an_explicit_stop_available_without_an_extra_check(monkeypatch):
+    pytest.importorskip("hyperon")
+    torch = pytest.importorskip("torch")
+    module = exchange_module()
+    from metta_research_bench.looped import model
+
+    class AlwaysStop:
+        def __call__(self, codes, mask):
+            logits = torch.full_like(mask, -1.0, dtype=torch.float32)
+            logits[:, -1] = 0
+            return logits
+
+    world = trial_world()
+    monkeypatch.setattr(model, "make_task", lambda family, seed: world)
+    monkeypatch.setattr(model, "first_state", lambda task, seed: ["r0"])
+    data = SimpleNamespace(family="budget", source_seed=0)
+    witness = native_exchange(module)
+    events = []
+    actions, costs = model.solve(AlwaysStop(), data, exchange_guard=witness, episode_call_cap=2, audit=events)
+    assert actions == [{"op": "remove", "id": "r0"}, {"op": "add", "id": "r1"}, {"op": "stop", "id": "none"}]
+    assert costs["policy_verifier_calls"] == 2 and not costs["blocked_by_call_cap"]
+
+    facts = events[0]["witness"]["native"]["facts"]
+    assert "(StopExchangeAllowance CurrentState 2 0 2)" in facts
+    for allowance in ("(StopExchangeAllowance CurrentState 1 0 2)", "(StopExchangeAllowance CurrentState 2 1 2)"):
+        revised = [allowance if fact.startswith("(StopExchangeAllowance ") else fact for fact in facts]
+        (answers,) = witness.native.evaluate(revised, (module.QUERY,))
+        assert not answers
+
+    actions, costs = model.solve(AlwaysStop(), data, exchange_guard=witness, episode_call_cap=1)
+    assert actions == [{"op": "stop", "id": "none"}] and costs["policy_verifier_calls"] == 0
+
+
+def test_exhaustion_blocks_an_edit_without_inserting_a_stop(monkeypatch):
+    torch = pytest.importorskip("torch")
+    exchange_module()
+    from metta_research_bench.looped import model
+
+    class AlwaysEdit:
+        def __call__(self, codes, mask):
+            logits = torch.full_like(mask, -2.0, dtype=torch.float32)
+            logits[:, 0] = 0
+            logits[:, 1] = -1
+            return logits
+
+    world = trial_world()
+    monkeypatch.setattr(model, "make_task", lambda family, seed: world)
+    monkeypatch.setattr(model, "first_state", lambda task, seed: ["r0"])
+    data = SimpleNamespace(family="budget", source_seed=0)
+    events = []
+    actions, costs = model.solve(AlwaysEdit(), data, episode_call_cap=1, audit=events)
+    assert actions == [{"op": "remove", "id": "r0"}]
+    assert costs["policy_verifier_calls"] == 1 and costs["blocked_by_call_cap"] == 1
+    assert events[-1]["budget_blocked"] == {"op": "add", "id": "r1"}

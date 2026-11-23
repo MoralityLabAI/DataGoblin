@@ -168,7 +168,8 @@ def refit(frames: list, fits: list) -> tuple[dict, dict]:
     return models, receipts
 
 
-async def evaluate(cohort, split, models, fits, modes, out: Path, *, exchange: bool = False) -> tuple[list, str]:
+async def evaluate(cohort, split, models, fits, modes, out: Path, *, exchange: bool = False,
+                   call_caps: dict | None = None) -> tuple[list, str]:
     task_config = BenchConfig().task
     spent = []
     prime = out / f"{split}_verifiers_traces.jsonl"
@@ -184,7 +185,8 @@ async def evaluate(cohort, split, models, fits, modes, out: Path, *, exchange: b
             for (seed, model), (arm, (offset, witness)) in product(models.items(), modes.items()):
                 events = []
                 guard = {"exchange_guard" if exchange else "stop_guard": witness}
-                actions, policy = solve(model, data, stop_offset=offset, audit=events, **guard)
+                cap = call_caps[arm] if call_caps is not None else None
+                actions, policy = solve(model, data, stop_offset=offset, episode_call_cap=cap, audit=events, **guard)
                 result = await score_submission(task, actions, f"stop-policy/{arm}/{seed}")
                 result.info.update(policy=policy, checkpoint_sha256=fits[seed]["checkpoint_sha256"])
                 stream.write(result.model_dump_json() + "\n")
@@ -197,7 +199,7 @@ async def evaluate(cohort, split, models, fits, modes, out: Path, *, exchange: b
 def metrics(rows: list[dict]) -> dict:
     witness_fields = (
         "witness_verifier_calls", "witness_interventions", "witness_rank_probes", "witness_native_queries",
-        "witness_screened_pairs",
+        "witness_screened_pairs", "blocked_by_call_cap",
     )
     return {**summarize(rows), **{field: sum(row["policy"].get(field, 0) for row in rows) for field in witness_fields}}
 

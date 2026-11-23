@@ -34,7 +34,7 @@ PROTOCOL = {
 }
 CONTRASTS = (("raw", "exchange"), ("calibrated", "calibrated_exchange"),
              ("raw", "calibrated"), ("raw", "calibrated_exchange"))
-QUERY = "(VerifiedStopExchanges CurrentState)"
+QUERY = "(BudgetedStopExchanges CurrentState)"
 
 
 def exchange_candidates(world: dict, selected: list[str], visited: set, attempted: set):
@@ -106,6 +106,7 @@ class StopExchange:
         result["checks"].append({"before": selected, "action": drop_action, "receipt": drop_receipt})
         drop_status = "Accepted" if drop_receipt["accepted"] else "Vetoed"
         facts = [rank_fact("CurrentState", current_rank),
+                 f"(StopExchangeAllowance CurrentState {remaining} {already_spent} {cap})",
                  f"(CheckedExchangeEdit Attempt CurrentState remove {drop} {drop_status} Middle)"]
         expected = set()
         if drop_receipt["accepted"]:
@@ -131,14 +132,14 @@ class StopExchange:
         return result
 
 
-def source_cohorts(archive: dict, prior_stop: dict) -> dict:
+def source_cohorts(archive: dict, *prior_runs: dict, protocol=PROTOCOL) -> dict:
     excluded = set(archive["excluded_source_sha256"])
     excluded.update(row["source_sha256"] for group in archive["allocation"].values() for row in group)
-    excluded.update(row["source_sha256"] for group in prior_stop["cohorts"].values() for row in group)
+    excluded.update(row["source_sha256"] for run in prior_runs for group in run["cohorts"].values() for row in group)
     cohorts = {}
-    for split, families, count in (("frozen", FAMILIES, PROTOCOL["frozen_roots_per_family"]),
-                                   ("conflict", (OOD_FAMILY,), PROTOCOL["conflict_roots"])):
-        start = PROTOCOL[f"{split}_start"]
+    for split, families, count in (("frozen", FAMILIES, protocol["frozen_roots_per_family"]),
+                                   ("conflict", (OOD_FAMILY,), protocol["conflict_roots"])):
+        start = protocol[f"{split}_start"]
         rows = []
         for family, seed in product(families, range(start, start + count)):
             root = root_name(family, seed)
