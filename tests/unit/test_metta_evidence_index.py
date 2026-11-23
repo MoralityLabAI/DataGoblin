@@ -1,3 +1,6 @@
+import random
+from dataclasses import replace
+
 from MeTTa.evidence_index import ProofIndex
 from MeTTa.evidence_index_pilot import PILOT_FAMILIES, stress_episode
 from MeTTa.evidence_proofs import Record, Rule, Snapshot
@@ -45,3 +48,23 @@ def test_wide_rule_update_reuses_unchanged_joins():
     assert result == summary(changed)
     assert work["rule_joins"] == 1
     assert work["join_cache_hits"] == len(initial.rules) - 1
+
+
+
+def test_index_handles_reordered_and_rebound_facts_in_bounded_cycles():
+    rng = random.Random(314)
+    claims = ("A", "B", "C", "Review")
+    for _ in range(30):
+        index = ProofIndex()
+        records = [Record(f"R{i}", rng.choice(claims), f"S{rng.randrange(3)}") for i in range(5)]
+        rules = [Rule(f"R{i}", tuple(rng.choices(claims, k=rng.randrange(1, 3))), rng.choice(claims))
+                 for i in range(4)]
+        for _ in range(6):
+            snapshot = Snapshot(tuple(records), tuple(rules), rng.randrange(4))
+            assert index.evaluate(snapshot)[0] == summary(snapshot)
+            moved, changed = rng.randrange(len(records)), rng.randrange(len(rules))
+            records[moved] = replace(records[moved], claim=rng.choice(claims), root=f"S{rng.randrange(3)}",
+                                     visible=rng.choice((True, False)), current=rng.choice((True, False)))
+            rules[changed] = replace(rules[changed], premises=(rng.choice(claims),), conclusion=rng.choice(claims))
+            rng.shuffle(records)
+            rng.shuffle(rules)

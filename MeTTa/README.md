@@ -131,6 +131,21 @@ premise to the three earlier episode families. Work counters separate
 recomputed cells, rule joins, and proof products. The bundle remains
 development evidence with training admission disabled.
 
+The 30-root run checked 120 snapshots, 90 transitions, and 178 native
+replays of previous proof trees. Of those trees, 115 survived. Across
+the 90 updates the warm index computed 233 cells and 131 joins versus
+495 cells and 237 joins cold. Wide alternatives accounted for most of
+the join savings. A single interleaved timing favored cold computation.
+Seven repeated, alternating-order host-only timings gave median warm
+CPU of 0.240 seconds versus 0.254 seconds cold across the five families,
+and 0.079 versus 0.096 seconds on wide alternatives. Each timing round
+repeated the same cohort 80 times. These measurements describe this
+synthetic workload with native audit cost outside the comparison.
+
+Repeat host timing with
+`python -m MeTTa.evidence_index_timing --out runs/metta/proof-index/host_timing.json`.
+Audit SHA-256 `4779fd934a5af0eb63b81901579ba5032e08b74756b2b10cd30185503a2515a3`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
