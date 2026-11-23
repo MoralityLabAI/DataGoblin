@@ -248,12 +248,34 @@ frozen trials and 1,115 native exchange certificates. DataGoblin
 compares the unmodified and exchange policies at fixed ceilings of three,
 five, and eight typed verifier calls per episode. Both policies also run
 with the original proposal and decision caps alone. The primary contrast
-is at five calls. These are ceilings on actual calls, including vetoed and
+is at five calls. These ceilings cover actual calls, including vetoed and
 speculative proposals. The model can still emit its own STOP after
-exhaustion. Exhaustion cannot turn a preferred edit into a STOP.
+exhaustion. A budget-blocked edit ends the rollout with a separate status.
 
 The exchange competes for the same verifier budget and the MeTTa query
 checks that at least two calls remain. State screening and native queries
 are recorded separately from typed checks. The frozen evaluation uses
-400 fresh in-family roots and a separate 160-root conflict cohort, with
-no threshold calibration or model changes on this evaluation.
+400 fresh in-family roots and a separate 160-root conflict cohort with
+the archived checkpoints and default STOP logits.
+
+| Call ceiling | In-family raw | In-family exchange | Conflict raw | Conflict exchange |
+| --- | ---: | ---: | ---: | ---: |
+| 3 | 222 / 1,200 | 298 / 1,200 | 74 / 480 | 103 / 480 |
+| 5 | 404 / 1,200 | 613 / 1,200 | 121 / 480 | 218 / 480 |
+| 8 | 490 / 1,200 | 773 / 1,200 | 143 / 480 | 285 / 480 |
+| Original caps | 500 / 1,200 | 790 / 1,200 | 148 / 480 | 294 / 480 |
+
+At five calls, exchange gained 17.42 completion points in-family
+(descriptive paired 95% root interval +14.50 to +20.50) and 20.21 points
+on conflict (+15.42 to +25.42). It recovered 209 and 97 completed trials
+respectively, with zero paired regressions. It consumed 4,583 in-family
+calls and 1,810 conflict calls, compared with 3,856 and 1,470 for the raw
+policy. In-family calls per verified completion fell from 9.54 to 7.48.
+All arms applied zero unsafe additions.
+
+Independent audit verified all 13,440 trials, including 2,058 native
+exchange certificates and every bounded proposal. It also verified
+that bounded raw action sequences are prefixes of the original-limit
+sequences. The new solver reproduced the actions and counters in all
+5,760 archived uncapped trials. DataGoblin `905fcfc` took 195.3 CPU wall
+seconds with 567.79 MiB peak memory under an 8 GiB ceiling.
