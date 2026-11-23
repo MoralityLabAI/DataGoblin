@@ -254,6 +254,25 @@ native obligation calls from 1,398 to 494. All 493 distinct acceptance
 states were independently checked. Evaluation receipt SHA-256
 `4b6cc691e67b6993a37666584e044e9942d3e65a05fa180eb97ddf84ba84a8a0`.
 
+### Matched public incidence attention
+
+`python -m MeTTa.evidence_incidence_pilot --storyworld /path/to/metta-storyworld --prior runs/metta/obligation-pilot --out runs/metta/incidence-pilot`
+compares neutral attention, a fixed incidence bias, and an equally
+dosed degree-preserving rewired bias. Each arm sees the same record and
+route nodes, true incidence bits, public priors, and legal actions.
+All use the same dense attention shape, three tied visits, and the same
+seed-paired initialization and training batches. The new routing module
+is pinned to its separate LoopedTransformers commit.
+
+The run locks 240 teacher catalogs and scores 192 fresh catalogs across
+eight topology families absent from the earlier studies. Completion is
+the primary comparison of incidence against neutral routing. Rewired
+routing is the specificity control. Root comparisons pair both budgets
+and all three seeds. The development effect floor is two percentage
+points. The pilot estimates paired effects and sham variation for
+designing a later confirmation. Native MeTTa checks each public
+frontier and independently validates final proof receipts.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
