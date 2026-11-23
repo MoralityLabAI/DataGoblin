@@ -203,6 +203,18 @@ completion preservation and expected-work savings. A secondary,
 three-call correlated-status stress test keeps each record's marginal
 prior calibrated while introducing a shared latent docket draw.
 
+The fresh study passed its preregistered criteria. Across 576 paired
+independent-status cases, minimizing work reduced checks from 1,430 to
+1,245 (12.9%). The average saving was 0.321 calls per case (95% paired
+root interval 0.255 to 0.389). Both policies completed the same 286
+cases. Work minimization used extra calls in 36 individual cases.
+Exact enumeration over 73,728 catalog-budget-world combinations
+preserved modeled completion probability and saved 0.338 expected
+calls per case. In the correlated three-call stress condition, both
+policies completed the same 99/192 cases, with 491 versus 428 checks.
+The receipt gate independently checked 939 distinct final snapshots.
+Audit SHA-256 `7d06a045f6aab16d009dae846d9a252471c904a7f3aa5dff260c917b41ce5182`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
