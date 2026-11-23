@@ -279,3 +279,21 @@ that bounded raw action sequences are prefixes of the original-limit
 sequences. The new solver reproduced the actions and counters in all
 5,760 archived uncapped trials. DataGoblin `905fcfc` took 195.3 CPU wall
 seconds with 567.79 MiB peak memory under an 8 GiB ceiling.
+
+## Reserving the last two verifier calls
+
+`python -m metta_research_bench.looped.reserve_exchange --prior /path/to/action-ties-verified --stop-archive /path/to/stop-policy-run --exchange-archive /path/to/stop-exchange-run --capped-archive /path/to/capped-exchange-run --out /path/to/reservation-run`
+tests two forms of early exchange under the three- and five-call episode
+ceilings. The STOP-triggered policy is the comparison arm. When exactly
+two calls remain, the general reservation can use them for the best
+screened exchange before an ordinary model edit. The stricter arm
+requires the model's proposed edit to match the best exchange's removal.
+Both require the existing typed receipts and a native MeTTa reservation
+certificate. If no permitted exchange is available, the ordinary
+proposal can use the remaining calls.
+
+The primary contrast compares general reservation with the STOP trigger
+at five calls. The reserved checks share the same episode and proposal
+budgets and the same two-edit accounting. The test locks 400 new in-family
+and 160 new conflict roots and recreates the three archived checkpoint
+digests before scoring.

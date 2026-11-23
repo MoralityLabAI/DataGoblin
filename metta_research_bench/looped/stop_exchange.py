@@ -35,6 +35,7 @@ PROTOCOL = {
 CONTRASTS = (("raw", "exchange"), ("calibrated", "calibrated_exchange"),
              ("raw", "calibrated"), ("raw", "calibrated_exchange"))
 QUERY = "(BudgetedStopExchanges CurrentState)"
+RESERVED_QUERY = "(ReservedStopExchanges CurrentState)"
 
 
 def exchange_candidates(world: dict, selected: list[str], visited: set, attempted: set):
@@ -91,7 +92,8 @@ class StopExchange:
     def __init__(self, rules: str):
         self.native = ScopedNative(rules)
 
-    def __call__(self, world, selected, visited, attempted, remaining, already_spent, refine) -> dict:
+    def __call__(self, world, selected, visited, attempted, remaining, already_spent, refine, *,
+                 reserved: bool = False, preferred_remove: str | None = None) -> dict:
         result = {"checks": [], "rank_probes": 0, "screened_pairs": 0, "native": None, "chosen": None}
         cap = PROTOCOL["witness_verifier_cap"]
         if min(remaining, cap - already_spent) < 2:
@@ -101,6 +103,8 @@ class StopExchange:
         if not candidates:
             return result
         exchange_rank, drop, add = candidates[0]
+        if reserved and (remaining != 2 or (preferred_remove is not None and drop != preferred_remove)):
+            return result
         drop_action = {"op": "remove", "id": drop}
         drop_receipt = refine(typed_proposal(drop_action), selected)
         result["checks"].append({"before": selected, "action": drop_action, "receipt": drop_receipt})
@@ -108,6 +112,9 @@ class StopExchange:
         facts = [rank_fact("CurrentState", current_rank),
                  f"(StopExchangeAllowance CurrentState {remaining} {already_spent} {cap})",
                  f"(CheckedExchangeEdit Attempt CurrentState remove {drop} {drop_status} Middle)"]
+        if reserved:
+            permission = "AnyRemoval" if preferred_remove is None else f"(ModelRemoval {preferred_remove})"
+            facts.append(f"(ExchangeReservation CurrentState {remaining} {permission})")
         expected = set()
         if drop_receipt["accepted"]:
             middle = drop_receipt["selected_after"]
@@ -122,13 +129,14 @@ class StopExchange:
                           rank_fact("Endpoint", exchange_rank)))
             if add_receipt["accepted"] and feasible:
                 expected.add(f"(ContinueWithExchange Attempt {drop} {add})")
-        (offers,) = self.native.evaluate(facts, (QUERY,))
+        query = RESERVED_QUERY if reserved else QUERY
+        (offers,) = self.native.evaluate(facts, (query,))
         actual = {str(offer) for offer in offers}
         if actual != expected:
             raise ValueError("Native STOP exchange disagrees with the two checked transitions")
         if actual:
             result["chosen"] = (0, 1)
-        result["native"] = {"facts": facts, "query": QUERY, "offers": sorted(actual), "facts_sha256": digest(facts)}
+        result["native"] = {"facts": facts, "query": query, "offers": sorted(actual), "facts_sha256": digest(facts)}
         return result
 
 

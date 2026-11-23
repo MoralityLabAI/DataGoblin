@@ -16,3 +16,15 @@
       (let* ((True (>= $allowance 2))
              (True (<= (+ $spent 2) $witnessCap)))
            (VerifiedStopExchanges $start))))
+
+(= (ReservedRemoval $start $drop)
+   (match &self (ExchangeReservation $start 2 AnyRemoval) Granted))
+
+(= (ReservedRemoval $start $drop)
+   (match &self (ExchangeReservation $start 2 (ModelRemoval $drop)) Granted))
+
+(= (ReservedStopExchanges $start)
+   (let* (($offer (BudgetedStopExchanges $start))
+          ((ContinueWithExchange $id $drop $add) $offer)
+          (Granted (ReservedRemoval $start $drop)))
+         $offer))

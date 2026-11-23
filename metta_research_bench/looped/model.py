@@ -127,18 +127,22 @@ def fit(initial: LoopedPointer, batch: tuple, seed: int, updates: int) -> tuple[
 @torch.inference_mode()
 def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=None,
           exchange_guard=None, episode_call_cap: int | None = None,
+          exchange_reservation: str | None = None,
           audit: list | None = None) -> tuple[list[dict], dict]:
     if stop_guard is not None and exchange_guard is not None:
         raise ValueError("Use one STOP witness per policy")
     if episode_call_cap is not None and (type(episode_call_cap) is not int or episode_call_cap < 0):
         raise ValueError("The episode verifier-call cap must be a nonnegative integer")
+    if exchange_reservation is not None and (exchange_guard is None or episode_call_cap is None
+                                             or exchange_reservation not in ("last_two", "agreed_removal")):
+        raise ValueError("Exchange reservation requires a capped exchange policy and a known mode")
     world = make_task(data.family, data.source_seed)
     selected = first_state(world, data.source_seed)
     verifier = RepairVerifier(world)
     visited = {tuple(selected)}
     actions = []
     iterations = vetoes = 0
-    extra_calls = interventions = rank_probes = native_queries = screened_pairs = 0
+    extra_calls = interventions = rank_probes = native_queries = screened_pairs = reserved_exchanges = 0
     cap_blocked = False
 
     def allowance(attempts: int) -> int:
@@ -159,6 +163,8 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
             metrics["witness_screened_pairs"] = screened_pairs
         if episode_call_cap is not None:
             metrics.update(episode_call_cap=episode_call_cap, blocked_by_call_cap=int(cap_blocked))
+        if exchange_reservation is not None:
+            metrics["reserved_exchanges"] = reserved_exchanges
         return metrics
 
     slots = 0
@@ -177,48 +183,72 @@ def solve(model: LoopedPointer, data, *, stop_offset: float = 0.0, stop_guard=No
             j = int(index)
             if not allowed[j]:
                 continue
-            if j == MAX_ITEMS:
-                guard = None
-                if exchange_guard is not None and slots + 1 < MAX_DECISIONS:
+            action = STOP
+            if j != MAX_ITEMS:
+                key = world["items"][j]["id"]
+                action = {"op": "remove" if key in selected else "add", "id": key}
+                if key in attempted or tuple(edit(selected, action)) in visited:
+                    continue
+                if attempts == MAX_PROPOSALS:
+                    break
+
+            guard = None
+            hint = {}
+            exchange_slots = exchange_guard is not None and slots + 1 < MAX_DECISIONS
+            if action == STOP:
+                if exchange_slots:
                     guard = exchange_guard
                 elif stop_guard is not None and slots < MAX_DECISIONS:
                     guard = stop_guard
-                if guard is not None:
-                    result = guard(world, selected, visited, attempted, allowance(attempts),
-                                   extra_calls, refine)
-                    extra_calls += len(result["checks"])
-                    vetoes += sum(not row["receipt"]["accepted"] for row in result["checks"])
-                    rank_probes += result["rank_probes"]
-                    native_queries += int(result["native"] is not None)
-                    screened_pairs += result.get("screened_pairs", 0)
-                    if audit is not None:
-                        audit.append({"step": step, "before": selected, "witness": result})
-                    if result["chosen"] is not None:
-                        chosen = result["chosen"] if guard is exchange_guard else (result["chosen"],)
-                        for index in chosen:
-                            choice = result["checks"][index]
-                            actions.append(choice["action"])
-                            selected = choice["receipt"]["selected_after"]
-                            visited.add(tuple(selected))
-                        slots += len(chosen) - 1
-                        interventions += 1
-                        accepted = True
-                        break
+            elif (exchange_slots and exchange_reservation is not None and episode_call_cap - verifier.checks == 2
+                  and allowance(attempts) >= 2 and extra_calls == 0
+                  and (exchange_reservation == "last_two" or action["op"] == "remove")):
+                guard = exchange_guard
+                hint = {"reserved": True, "preferred_remove": action["id"] if exchange_reservation == "agreed_removal"
+                        else None}
+
+            if guard is not None:
+                result = guard(world, selected, visited, attempted, allowance(attempts), extra_calls, refine, **hint)
+                spent = len(result["checks"])
+                attempts += spent
+                extra_calls += spent
+                vetoes += sum(not row["receipt"]["accepted"] for row in result["checks"])
+                rank_probes += result["rank_probes"]
+                native_queries += int(result["native"] is not None)
+                screened_pairs += result.get("screened_pairs", 0)
+                if audit is not None:
+                    event = {"step": step, "before": selected, "witness": result}
+                    if hint:
+                        event.update(reservation=exchange_reservation, preferred_action=action)
+                    audit.append(event)
+                if result["chosen"] is not None:
+                    chosen = result["chosen"] if guard is exchange_guard else (result["chosen"],)
+                    for choice_index in chosen:
+                        choice = result["checks"][choice_index]
+                        actions.append(choice["action"])
+                        selected = choice["receipt"]["selected_after"]
+                        visited.add(tuple(selected))
+                    slots += len(chosen) - 1
+                    interventions += 1
+                    reserved_exchanges += int(bool(hint))
+                    accepted = True
+                    break
+                if hint and spent:
+                    checked_key = result["checks"][0]["action"]["id"]
+                    attempted.add(checked_key)
+                    if action["id"] == checked_key:
+                        continue
+
+            if action == STOP:
                 actions.append(STOP)
                 return actions, totals()
-            key = world["items"][j]["id"]
-            action = {"op": "remove" if key in selected else "add", "id": key}
-            if tuple(edit(selected, action)) in visited:
-                continue
-            if attempts == MAX_PROPOSALS:
-                break
             if not allowance(attempts):
-                cap_blocked = True
-                if audit is not None:
+                cap_blocked = episode_call_cap is not None and verifier.checks >= episode_call_cap
+                if cap_blocked and audit is not None:
                     audit.append({"step": step, "before": selected, "budget_blocked": action})
                 break
             attempts += 1
-            attempted.add(key)
+            attempted.add(action["id"])
             result = refine(typed_proposal(action), selected)
             if audit is not None:
                 audit.append({"step": step, "before": selected, "action": action, "receipt": result})

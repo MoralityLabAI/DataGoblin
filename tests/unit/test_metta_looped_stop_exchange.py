@@ -169,3 +169,45 @@ def test_exhaustion_blocks_an_edit_without_inserting_a_stop(monkeypatch):
     assert actions == [{"op": "remove", "id": "r0"}]
     assert costs["policy_verifier_calls"] == 1 and costs["blocked_by_call_cap"] == 1
     assert events[-1]["budget_blocked"] == {"op": "add", "id": "r1"}
+
+
+def test_last_two_reservation_can_preserve_the_models_preferred_removal(monkeypatch):
+    pytest.importorskip("hyperon")
+    torch = pytest.importorskip("torch")
+    module = exchange_module()
+    from metta_research_bench.looped import model
+
+    class RemoveThenStop:
+        seen = 0
+
+        def __call__(self, codes, mask):
+            logits = torch.full_like(mask, -1.0, dtype=torch.float32)
+            logits[:, 0 if self.seen == 0 else -1] = 0
+            self.seen += 1
+            return logits
+
+    world = trial_world()
+    monkeypatch.setattr(model, "make_task", lambda family, seed: world)
+    monkeypatch.setattr(model, "first_state", lambda task, seed: ["r0"])
+    witness = native_exchange(module)
+    data = SimpleNamespace(family="budget", source_seed=0)
+    expected = [{"op": "remove", "id": "r0"}, {"op": "add", "id": "r1"}, {"op": "stop", "id": "none"}]
+
+    baseline, _ = model.solve(RemoveThenStop(), data, exchange_guard=witness, episode_call_cap=2)
+    assert baseline == [expected[0], expected[-1]]
+    for reservation in ("last_two", "agreed_removal"):
+        events = []
+        actions, costs = model.solve(RemoveThenStop(), data, exchange_guard=witness, episode_call_cap=2,
+                                     exchange_reservation=reservation, audit=events)
+        assert actions == expected and costs["policy_verifier_calls"] == 2 and costs["reserved_exchanges"] == 1
+        assert events[0]["preferred_action"] == expected[0]
+        assert events[0]["witness"]["native"]["query"] == module.RESERVED_QUERY
+        facts = events[0]["witness"]["native"]["facts"]
+        conflicting = ["(ExchangeReservation CurrentState 2 (ModelRemoval r1))"
+                       if fact.startswith("(ExchangeReservation ") else fact for fact in facts]
+        (answers,) = witness.native.evaluate(conflicting, (module.RESERVED_QUERY,))
+        assert not answers
+
+    actions, costs = model.solve(RemoveThenStop(), data, exchange_guard=witness, episode_call_cap=3,
+                                 exchange_reservation="last_two")
+    assert actions == baseline and costs["reserved_exchanges"] == 0
