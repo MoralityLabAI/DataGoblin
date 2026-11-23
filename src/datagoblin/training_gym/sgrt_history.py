@@ -15,7 +15,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from typing import Any, Literal
 
@@ -152,7 +152,7 @@ def _rotation(angles: list[float]) -> np.ndarray:
     return out
 
 
-@lru_cache(maxsize=None)
+@cache
 def event_transport(mode: str, op: str) -> np.ndarray:
     """Spectrally matched flat, curved and random orthogonal connections."""
     if mode not in TRAINED or op not in EVENTS:
