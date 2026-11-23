@@ -52,13 +52,14 @@
       "macro_repair_count",
       "paired_regressions"
     ],
-    "five_call_cap_per_episode_for_C_and_D": 5,
     "stop_macro_max_verifier_calls": 2,
     "stop_macro_policy": "reserve_until_stop; certify_final_state_before_atomic_commit; unused_budget_not_reallocated",
     "root_clustered_confidence_interval": "95% paired root bootstrap, seeds remain within root cluster",
     "bootstrap_repetitions": 10000,
     "decision_rule": "C-B strictly positive with bootstrap lower endpoint above zero; report raw seed effects",
-    "negative_result_handling": "report all endpoints and seed-level effects even when gate fails"
+    "negative_result_handling": "report all endpoints and seed-level effects even when gate fails",
+    "five_call_cap_per_episode_for_A_B_C_D": 5,
+    "requires_native_root_solvable_under_five_policy_calls": true
   },
   "release_gates": {
     "reference_oracle_tests": "all_green",

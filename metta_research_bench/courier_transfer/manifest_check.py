@@ -30,7 +30,7 @@ def validate() -> dict:
     assert len(roots) == len(set(roots)) == manifest["total_roots"]
     assert len({root_seed(manifest, r) for r in roots}) == len(roots)
     assert protocol["experiment_id"] == schema["properties"]["experiment_id"]["const"]
-    assert protocol["evaluation"]["five_call_cap_per_episode_for_C_and_D"] == 5
+    assert protocol["evaluation"]["five_call_cap_per_episode_for_A_B_C_D"] == 5
     if protocol["status"] == "wiring_only_until_native_kernel_pinned":
         assert protocol["source"]["native_storyworld_full_commit"] is None
     else:
