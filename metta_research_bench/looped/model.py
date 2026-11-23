@@ -96,12 +96,22 @@ def fit(initial: LoopedPointer, batch: tuple, seed: int, updates: int) -> tuple[
     generator = torch.Generator().manual_seed(seed)
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=0.01)
     tokens, masks, targets = batch
+    distributions = targets.ndim == 2
+    if distributions and (targets.shape != masks.shape or not torch.isfinite(targets).all()
+                          or (targets < 0).any() or (targets[~masks] != 0).any()
+                          or not torch.allclose(targets.sum(dim=-1), torch.ones_like(targets[:, 0]))):
+        raise ValueError("Expected one probability distribution over legal actions per training row")
     losses = []
     for _ in range(updates):
         index = torch.randint(len(tokens), size=(BATCH_SIZE,), generator=generator)
         optimizer.zero_grad(set_to_none=True)
         prediction = model(tokens[index], masks[index])
-        loss = nn.functional.cross_entropy(prediction, targets[index])
+        if distributions:
+            # Keep illegal logits out of the normalizer without multiplying zero mass by negative infinity.
+            log_probs = prediction.log_softmax(dim=-1).masked_fill(~masks[index], 0)
+            loss = -(targets[index] * log_probs).sum(dim=-1).mean()
+        else:
+            loss = nn.functional.cross_entropy(prediction, targets[index])
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()

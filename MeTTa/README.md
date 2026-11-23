@@ -382,6 +382,24 @@ and both training trajectories per root. The CPU run took 322.9 seconds
 and peaked at 516.47 MiB under the 8 GiB cap. It used DataGoblin
 `75ec4e1`, Storyworld `6adb17f`, and LoopedTransformers `207d92f`.
 
+### Cost-aware action ties for joint dockets
+
+`python -m MeTTa.evidence_docket_cost_targets --storyworld /path/to/metta-storyworld --prior runs/metta/docket-pilot --out runs/metta/docket-cost-targets`
+uses exact integer action values for the public docket. The values
+maximize the chance of joint completion, then minimize expected evidence
+checks among equally successful actions. This is synthetic-oracle
+supervision. Native MeTTa still verifies the public frontiers and final
+receipt-backed proofs. It does not compute or learn the action values.
+
+The three matched training arms put target mass on one success-optimal
+action, all tied success-optimal actions, or all least-work actions
+among those success ties. All arms use the same state tensors, sampled
+batches, optimizer budgets and architecture. The primary contrast
+compares the last two arms on 128 fresh roots spanning eight non-isomorphic
+evaluation topologies. The deterministic public references isolate the
+same two objectives without a learned model. Actions in the evaluation
+all use the same legal mask and stopping gate.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.

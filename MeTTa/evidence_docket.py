@@ -93,8 +93,8 @@ def rollout(docket: Docket, current: tuple[bool, ...], budget: int, choose) -> d
             "checks": len(checks), "completed": completed(docket.claims, state)}
 
 
-def exact_policy(docket: Docket):
-    """Maximize joint success, then minimize expected checks using exact integer weights."""
+def action_values(docket: Docket):
+    """Score legal actions by integer success mass and negated check mass at one horizon."""
     @cache
     def value(state: State, remaining: int) -> tuple[int, int]:
         if completed(docket.claims, state):
@@ -111,8 +111,18 @@ def exact_policy(docket: Docket):
             work += weight * saved
         return success, work - 100**public.remaining
 
+    def scores(public: Observation) -> dict[int, tuple[int, int]]:
+        return {slot: score(public, slot) for slot in public.legal}
+
+    return scores
+
+
+def exact_policy(docket: Docket):
+    """Maximize joint success, then minimize expected checks using exact integer weights."""
+    scores = action_values(docket)
+
     def choose(public: Observation) -> int:
-        return max(public.legal, key=lambda slot: (*score(public, slot), -slot))
+        return max(scores(public).items(), key=lambda item: (*item[1], -item[0]))[0]
 
     return choose
 

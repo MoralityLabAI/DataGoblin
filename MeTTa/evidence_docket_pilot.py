@@ -65,8 +65,9 @@ PROTOCOL = {
 }
 
 
-def sample(family: str, claims: Claims, ordinal: int, *, train: bool) -> tuple[Docket, tuple[int, ...], random.Random]:
-    rng = random.Random(f"{PROTOCOL['schema']}/{train}/{family}/{ordinal}")
+def sample(family: str, claims: Claims, ordinal: int, *, train: bool,
+           schema: str = PROTOCOL["schema"]) -> tuple[Docket, tuple[int, ...], random.Random]:
+    rng = random.Random(f"{schema}/{train}/{family}/{ordinal}")
     order = tuple(rng.sample(range(WIDTH), WIDTH))
     priors = tuple(rng.randrange(22, 94) for _ in order)
     return Docket(tuple(relabel(group, order) for group in claims), priors), order, rng
@@ -149,23 +150,26 @@ def preflight(prior: Path) -> tuple[dict, set[str]]:
     fingerprints = {topology(claims) for claims in (*TRAIN.values(), *EVAL.values())}
     if len(fingerprints) != len(TRAIN) + len(EVAL):
         raise ValueError("The registered docket families must be non-isomorphic")
+    return {"commit": committed_checkout(PROTOCOL["upstream_commit"]), "protocol": PROTOCOL,
+            "train_families": TRAIN, "eval_families": EVAL, "excluded_source_hashes": sorted(excluded)}, excluded
+
+
+def committed_checkout(upstream_commit: str) -> str:
     upstream = Path(inspect.getfile(ObligationPointer)).resolve().parents[2]
     if (subprocess.check_output(["git", "-C", str(upstream), "rev-parse", "HEAD"], text=True).strip()
-            != PROTOCOL["upstream_commit"] or subprocess.check_output(
+            != upstream_commit or subprocess.check_output(
                 ["git", "-C", str(upstream), "diff", "HEAD", "--", "research_gym", "lsa"]
             )):
         raise ValueError("Use the pinned LoopedTransformers checkout")
     if subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"]):
         raise ValueError("Commit the protocol and experiment before opening the cohort")
-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-    return {"commit": head, "protocol": PROTOCOL, "train_families": TRAIN, "eval_families": EVAL,
-            "excluded_source_hashes": sorted(excluded)}, excluded
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
 
 
-def allocate(families: dict, train: bool) -> list:
-    count = PROTOCOL["train_roots_per_family" if train else "eval_roots_per_family"]
-    start = 0 if train else PROTOCOL["eval_start_ordinal"]
-    return [(family, *sample(family, routes, index, train=train))
+def allocate(families: dict, train: bool, protocol=PROTOCOL) -> list:
+    count = protocol["train_roots_per_family" if train else "eval_roots_per_family"]
+    start = 0 if train else protocol["eval_start_ordinal"]
+    return [(family, *sample(family, routes, index, train=train, schema=protocol["schema"]))
             for family, routes in families.items() for index in range(start, start + count)]
 
 
