@@ -25,7 +25,7 @@ def validate() -> dict:
     protocol = json.loads((BASE / "protocol.json").read_text())
     schema = json.loads((BASE / "RESULT_SCHEMA.json").read_text())
     roots = roots_for(manifest)
-    digest = hashlib.sha256(("\\n".join(roots) + "\\n").encode()).hexdigest()
+    digest = hashlib.sha256(("\n".join(roots) + "\n").encode()).hexdigest()
     assert digest == manifest["root_ids_sha256"], "root-ID manifest changed"
     assert len(roots) == len(set(roots)) == manifest["total_roots"]
     assert len({root_seed(manifest, r) for r in roots}) == len(roots)
