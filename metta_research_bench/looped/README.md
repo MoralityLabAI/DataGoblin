@@ -100,3 +100,29 @@ The recorded frozen report has SHA-256
 a1da373dd35253991671b9fad665200ab05207d1be4821f37db826463c0bf5cc.
 The CI workflow runs the development pilot in runner scratch directories.
 Recorded checkpoints and generated traces remain in local run directories.
+
+## Action-set supervision transfer
+
+`python -m metta_research_bench.looped.action_ties --archive /path/to/outputs --out /path/to/fresh-repair-ties-run`
+compares three same-size Looped Transformers trained on identical
+public curation states. One arm labels the canonical safe next edit,
+one uses a source-hash-selected safe edit, and one distributes target
+mass over all shortest safe edits. Every edit in a target set must pass
+the environment's typed proposal check and advance the repair by one
+membership. At the verified terminal state the only target is STOP.
+The native `action_ties.metta` rule reads environment receipts and
+checks the exported target set. The exact Python verifier supplies
+the endpoint and repair distances.
+
+Training uses 240 roots and two alternative shortest trajectories per
+root. Both label views come from the shared states in those trajectories.
+Seed-paired weights, sampled batches, action masks, and 240 AdamW
+updates are matched. The primary contrast is action-set versus canonical
+labels on 400 fresh roots across the five in-family generators. The
+hashed singleton control distinguishes the effect of crediting multiple
+actions from the effect of using a different fixed tie-break. A separate
+80-root conflict cohort remains outside training and selection. Both
+cohorts use the original typed inference gate and independent Prime
+Verifiers reward. The runner locks source hashes against 19 archived
+files and writes weights' digests, training frames, and frozen traces to
+the output folder for local audit.
