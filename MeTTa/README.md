@@ -5,6 +5,41 @@
 
 The goal is to teach DataGoblin how MeTTa's declarative facts, pattern matching, rule chaining, types, and spaces can organize a research corpus. The first implementation puts evidence custody ahead of model-generated decisions. A learner may propose a curation plan; the existing DataGoblin etiquette policy and independent verifiers decide what is released.
 
+## MeTTa skills for Inky
+
+Pick one skill for the current task. The loader runs from the DataGoblin
+checkout and prepares a system prompt for Inky (Inkling 2 Mini).
+
+| Skill | When to use it |
+| --- | --- |
+| [Verify rules](skills/metta-verify-rules/SKILL.md) | Author or debug MeTTa code and replay native queries. |
+| [Curate sources](skills/metta-curate-sources/SKILL.md) | Review rights, pin source roots, split examples, and prepare SFT/RLT views. |
+| [Evidence dockets](skills/metta-evidence-dockets/SKILL.md) | Check observer-scoped proofs, shared evidence, and joint cost. |
+| [Repair actions](skills/metta-repair-actions/SKILL.md) | Propose typed edits, handle verifier rejections, and check STOP. |
+| [Storyworld routes](skills/metta-storyworld-routes/SKILL.md) | Plan and replay courier routes with permit and cargo constraints. |
+| [Compare policies](skills/metta-compare-policies/SKILL.md) | Run or interpret matched, source-root-paired frozen evaluations. |
+
+```sh
+python -m MeTTa.inky_skills list
+python -m MeTTa.inky_skills prompt metta-storyworld-routes
+python -m MeTTa.inky_skills request metta-storyworld-routes --model YOUR_SERVED_MODEL --task public-task.md
+```
+
+Put the public goal and the relevant facts, input format, and bounds in
+`public-task.md`. For a toolbox agent, use the output of `prompt` as the
+system message and provide that file as the user message. For an
+operator-started OpenAI-compatible Inkling server, send the JSON printed by
+`request` to its local `/v1/chat/completions` endpoint. Replace
+`YOUR_SERVED_MODEL` with the server's served model ID. The loader writes to
+standard output and works offline. The [Inkling setup guide](../docs/inkling_variable_loop_gym.md)
+describes the existing local serving and evaluation flow.
+
+The host supplies any tools and performs independent checks. With chat
+alone, use Inky's answer as a candidate and run the skill's replay against
+the relevant checkout. The native smoke checks use Hyperon 0.2.10 and can
+run in WSL on Windows. Include only public inputs in requests and use
+`runs/` for generated responses or receipts kept on disk.
+
 ## What is collated
 
 `source_catalog.json` pins **196 `.metta` files / 4,281,494 Git-reported source bytes** from three MIT-licensed repositories, using observed upstream commit hashes and Git blob SHAs:
