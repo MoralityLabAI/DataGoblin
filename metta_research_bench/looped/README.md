@@ -171,3 +171,32 @@ logs rank probes, typed verifier receipts, native queries, and recurrent visits.
 The original Prime Verifiers reward still requires a safe exact repair and an
 explicit STOP. The primary contrast is the witness alone versus the unmodified
 policy. Completion on the separate fresh conflict cohort remains exploratory.
+
+| STOP policy | In-family completions | Premature STOP | Verifier calls | Conflict completions |
+| --- | ---: | ---: | ---: | ---: |
+| Unmodified | 485 / 1,200 | 658 | 4,720 | 92 / 240 |
+| Calibrated offset | 494 / 1,200 | 640 | 4,877 | 93 / 240 |
+| One-edit witness | 485 / 1,200 | 658 | 6,968 | 93 / 240 |
+| Offset and witness | 494 / 1,200 | 640 | 7,106 | 94 / 240 |
+
+The development cohort selected a STOP offset of −0.25. Against the
+unmodified policy it added 0.75 completion points on the primary cohort
+(descriptive paired 95% interval 0.00 to +1.50), reduced premature STOP
+by 18, and used 157 extra verifier calls. The one-edit witness changed
+no in-family trajectories and used 2,248 extra verifier calls. It found
+one actionable witness on the separate conflict cohort. None of the
+observed gains reached the registered two-point completion target.
+
+Retrospective replay found an unvisited feasible one-edit improvement
+at only 3 of 658 in-family premature stops. There was a two-edit
+improvement only at 488 stops, always a removal followed by an addition.
+The other 167 had no feasible improvement within two unvisited edits.
+These local rank improvements are possibilities, not certified complete
+repairs. All 2,248 probes from the in-family witness arm were vetoed.
+
+DataGoblin `e88bbe0` reproduced all three archived action-set checkpoint
+digests and kept the original decision, proposal, and recurrent caps.
+Independent audit replayed every logged policy check and all 6,840
+development and frozen trials. The default inference path also reproduced
+all actions and counters in 1,440 archived trials. The run took 49.3 CPU
+wall seconds with 526.63 MiB peak memory.
