@@ -273,6 +273,31 @@ points. The pilot estimates paired effects and sham variation for
 designing a later confirmation. Native MeTTa checks each public
 frontier and independently validates final proof receipts.
 
+Each of the nine CPU fits used 44,577 parameters, 618 teacher decisions,
+and 180 AdamW updates of 48 actions. Across budgets of three and four
+checks, neutral attention completed 665/1,152 trials with 3,141 checks.
+True incidence completed 678/1,152 with 2,834 checks. The rewired arm
+completed 645/1,152 with 3,205 checks. The exact public reference
+completed 242/384 with 992 checks and had no model seed.
+
+True incidence gained 1.13 percentage points over neutral attention
+(95% paired root bootstrap interval −1.04 to +3.39 points), below the
+two-point development target. It saved 0.266 checks per trial (95%
+interval 0.215 to 0.319), a 9.8% reduction. Against rewired attention,
+the gain was 2.86 points (95% interval +0.78 to +4.95), with 0.322 fewer
+checks per trial. The rewired bias changed 507/618 teacher states and
+2,523/3,041 public states across training and evaluation. The pilot
+applied bias during fitting and scoring, so it cannot isolate their
+contributions. The exact public reference had the highest completion
+rate in this study. No training decisions used the 192 evaluation roots.
+
+The CPU run took 495.3 seconds and peaked at 453.31 MiB under an 8 GiB
+limit. The saved protocol, fit summary, and receipts were checked for
+matching digests, root exclusion, paired initialization and training
+budgets, and scoring and check-budget consistency. The run used
+DataGoblin `cc708ee`, LoopedTransformers `207d92f`, and Storyworld
+`e420454`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
