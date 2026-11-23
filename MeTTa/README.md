@@ -359,6 +359,29 @@ recurrent visits as secondary measures. Local JSONL artifacts record
 the two training trajectories per root and an alternate view of those
 same public frames and paired teacher labels.
 
+The joint-label student completed 133/576 dockets, compared with
+124/576 for the individual-label student. The +1.56 percentage-point
+gain had a descriptive 95% paired root interval of −0.17 to +3.30
+points and fell short of the two-point target. It used 1,512 checks and
+4,536 recurrent visits, versus 1,485 checks and 4,455 visits. Completions
+rose for all three seeds. On the two held-out three-claim families,
+the joint-label student completed 47/192 with 471 checks, compared
+with 45/192 and 481 checks.
+
+The native joint teacher completed 64/192 with 422 checks. The native
+individual teacher completed 62/192 with 446 checks. The exact public
+reference completed 66/192 with 480 checks. The learned students
+matched their respective teachers on 39.0% and 36.6% of held-out checks
+along their own trajectories. That descriptive agreement measures exact
+action imitation, including potentially equivalent checks.
+
+Six fits used 44,577 parameters, 405 shared decision states and 120
+optimizer updates of 48 targets each. The teachers disagreed on 56
+training states. Independent replay audited all 1,728 evaluation trials
+and both training trajectories per root. The CPU run took 322.9 seconds
+and peaked at 516.47 MiB under the 8 GiB cap. It used DataGoblin
+`75ec4e1`, Storyworld `6adb17f`, and LoopedTransformers `207d92f`.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.
