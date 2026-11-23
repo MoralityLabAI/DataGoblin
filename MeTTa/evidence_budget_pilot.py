@@ -110,15 +110,19 @@ def verified_proofs(rules: str, episode: Episode, state: tuple[int, ...]) -> tup
     return actual, digest(source.encode())
 
 
-def run(checkout: Path, out: Path) -> dict:
+def gate_rules(checkout: Path) -> str:
     if version("hyperon") != PACKAGE_VERSION:
         raise ValueError(f"Use hyperon=={PACKAGE_VERSION}")
-    limits = install_memory_ceiling(8192)
-    started = time.perf_counter()
     gate = subprocess.check_output(["git", "-C", str(checkout), "show", f"{GATE_COMMIT}:{GATE_PATH}"])
     if digest(gate) != GATE_SHA256:
         raise ValueError("The native receipt rule must match its source pin")
-    rules = storyworld_rules(checkout) + "\n" + gate.decode("utf-8")
+    return storyworld_rules(checkout) + "\n" + gate.decode("utf-8")
+
+
+def run(checkout: Path, out: Path) -> dict:
+    limits = install_memory_ceiling(8192)
+    started = time.perf_counter()
+    rules = gate_rules(checkout)
 
     train = [make_episode(family, "teacher", seed) for family in TRAIN_FAMILIES
              for seed in range(TRAIN_ROOTS_PER_FAMILY)]

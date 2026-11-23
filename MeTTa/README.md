@@ -167,6 +167,21 @@ Training uses three graph templates. The fresh pilot adds a fourth
 template for descriptive transfer. The comparison measures verified
 completion, check counts, and model inference passes.
 
+The development pilot produced 672 receipts over 96 source roots and
+independently replayed 280 distinct final snapshots. Index order verified
+35/96 completions with 326 checks. Greedy verified 48/96 with 248, and
+public Bayes verified 49/96 with 316. The direct model finished 93/192
+trials across its two seeds with 509 checks. The tied recurrent model
+finished 91/192 with 513 checks and three inference passes per decision.
+This pilot found no improvement from tied recurrence at the chosen size
+and supervision. The overlap-only transfer slice is one held-out graph
+template and supports a descriptive comparison.
+
+`python -m MeTTa.evidence_budget_cost --storyworld /path/to/metta-storyworld --prior runs/metta/evidence-budget --out runs/metta/evidence-cost`
+replays the original Bayes receipts, then minimizes expected check work
+among actions tied on modeled completion probability. This diagnostic
+uses the opened development roots and keeps the original audit intact.
+
 ## Looped-transformer SFT curation program
 
 [**MeTTa-SFT-02**](LOOPED_SFT.md) adds six synthetic research-data curation families with explicit next-edit, evidence-preference, native-shaped MeTTa query and stop targets. Its independent bounded Python oracle produces a reproducible 3,072-root default curriculum while preserving a maximum of four presentations per root and keeping development/test/novel conflict worlds unlabeled. The generated rows can be exported into LoopedTransformers' `instruction/input/output/metadata` schema as an alternate view of the same examples.

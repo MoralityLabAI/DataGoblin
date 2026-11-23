@@ -100,23 +100,32 @@ def greedy_check(public: PublicObservation) -> int:
     return min((i for i in route if public.state[i] == UNCHECKED), key=lambda i: (public.catalog.priors[i], i))
 
 
-def bayes_check(catalog: Catalog) -> Callable[[PublicObservation], int]:
+def bayes_check(catalog: Catalog, *, minimize_work: bool = False) -> Callable[[PublicObservation], int]:
     """Exact finite-horizon controller using public independent priors only."""
-    @cache
-    def value(state: State, remaining: int) -> float:
-        if witness(catalog, state) is not None:
-            return 1.0
-        if not remaining:
-            return 0.0
-        choices = observe(catalog, state, remaining).legal
-        return max((expected(state, remaining, slot) for slot in choices), default=0.0)
+    def score(expectation: tuple[float, float]) -> tuple[float, float]:
+        success, calls = expectation
+        return (round(success, 12), -round(calls, 12)) if minimize_work else (success, 0.0)
 
-    def expected(state: State, remaining: int, slot: int) -> float:
+    @cache
+    def value(state: State, remaining: int) -> tuple[float, float]:
+        if witness(catalog, state) is not None:
+            return 1.0, 0.0
+        if not remaining:
+            return 0.0, 0.0
+        choices = observe(catalog, state, remaining).legal
+        return max((expected(state, remaining, slot) for slot in choices), key=score, default=(0.0, 0.0))
+
+    def expected(state: State, remaining: int, slot: int) -> tuple[float, float]:
         p = catalog.priors[slot] / 100
-        return (p * value(written(state, slot, CURRENT), remaining - 1)
-                + (1 - p) * value(written(state, slot, REJECTED), remaining - 1))
+        yes, yes_calls = value(written(state, slot, CURRENT), remaining - 1)
+        no, no_calls = value(written(state, slot, REJECTED), remaining - 1)
+        return p * yes + (1 - p) * no, 1 + p * yes_calls + (1 - p) * no_calls
 
     def choose(public: PublicObservation) -> int:
-        return max(public.legal, key=lambda slot: (round(expected(public.state, public.remaining, slot), 12), -slot))
+        def priority(slot: int) -> tuple[float, float, int]:
+            success, calls = score(expected(public.state, public.remaining, slot))
+            return round(success, 12), calls, -slot
+
+        return max(public.legal, key=priority)
 
     return choose

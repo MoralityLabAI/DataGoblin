@@ -33,3 +33,13 @@ def test_bayes_and_features_use_priors_to_seek_the_best_feasible_route():
     inputs, targets, masks = train_rows([episode])
     assert len(inputs) == len(targets) <= 4
     assert all(mask[target] for mask, target in zip(masks, targets, strict=True))
+
+
+def test_bayes_work_tie_break_checks_the_riskiest_conjunct_first():
+    catalog = Catalog(((0, 1),), (90, 30, 80, 80, 80, 80, 80))
+    episode = Episode(catalog, (True, False, True, True, True, True, True))
+    early = check_run(episode, bayes_check(catalog, minimize_work=True), budget=2)
+    original = check_run(episode, bayes_check(catalog), budget=2)
+    assert early["checks"] == 1
+    assert original["checks"] == 2
+    assert not early["completed"] and not original["completed"]
