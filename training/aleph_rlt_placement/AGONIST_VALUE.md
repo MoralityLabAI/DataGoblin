@@ -39,6 +39,8 @@ The supervised ranker learned that most candidates fail. Better probabilities fo
 
 Reproduce with `python training/aleph_rlt_placement/lean_acquisition.py --pack runs/placement/mixed --out runs/placement/lean-acquisition.json`. The receipt records every purchased training goal and proposal index. The actor uses training labels only after selection.
 
+The [follow-up decision certificate experiment](SLATE_CERTIFICATES.md) compared two actual four-tactic slates per public goal. Checking the candidates on which the two slates differ first certified the same 84 comparisons in 328 calls versus 492 exhaustive union calls. It tied a learned-prior optimal decision tree on each seed. This measures a concrete contribution available to a small collector with access to shared verifier receipts.
+
 ## Interface for a network of small agents
 
 A public prompt gives a claim, the current ledger, an intervention menu, a target family and remaining cost. The actor names a test, two predicted outcomes under competing mechanisms, what would falsify its preference, and a cost. The hub freezes that receipt, then a separate checker reveals an outcome. Link all reused records to their origins. Give every participating policy identical access to shared parent receipts. For a nonlinear recurrent core, the clock-order game in [CLOCK_ORDER_GYM.md](CLOCK_ORDER_GYM.md) supplies verifiable local edges. A centralized policy with access to all clock endpoints can evaluate the potentials directly in linear work. Include it as a baseline. A decentralized contributor earns scientific credit for a blind, reproducible forecast on a new root or a cheaper useful acquisition. Algebraic consequences keep their parents' provenance.
