@@ -159,6 +159,7 @@ scale evidence and report checkpoint-specific full-scale results.
 * [Strict 1B recipe](../../docs/one_billion_pretraining_recipe.md)
 * [RLT research track](../../docs/rlt_research_track.md)
 * [Synthetic data value, rival theories and the held Lean acquisition experiment](AGONIST_VALUE.md)
+* [Matched placement results and the promotion decision](FINDINGS.md)
 * [RLT feedback coefficients](../../src/datagoblin/training_gym/rlt_feedback.py)
 * [Pretrain cell](../../src/datagoblin/training_gym/rlt_pretrain_cell.py)
 * [November 23 execution plan](../reports/2026-11-23_aleph_pretrain_execution_plan.md)
