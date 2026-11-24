@@ -156,6 +156,14 @@ def digest(obj):
     return hashlib.sha256(json.dumps(obj,sort_keys=True).encode()).hexdigest()
 
 
+def file_sha(path):
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024*1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def atomic_json(path, obj):
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(obj,indent=2,sort_keys=True)+"\n")
@@ -242,14 +250,14 @@ def fit(args, seed, arm, deadline):
                   executed_block_token_visits=step*args.batch*20*len(schedule(args.r,args.s)),
                   session_fit_s=fit_s,last_loss=last_loss,
                   peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(device) if device.type=="cuda" else None,
-                  checkpoint_sha256=hashlib.file_digest(ckpt.open("rb"),"sha256").hexdigest())
+                  checkpoint_sha256=file_sha(ckpt))
     if result["complete"] and time.monotonic()<deadline:
         result["dev_native"] = evaluate(model,arm,args.r,args.s,device,args.eval_n)
         if args.swaps:
             result["dev_runtime_swap"] = {a:evaluate(model,a,args.r,args.s,device,args.eval_n)
-                                          for a in ("direct","first_penultimate_last","pass_rlt")}
+                                          for a in ("direct","first_penultimate_last","pass_rlt") if time.monotonic()<deadline}
             result["dev_depth"] = {str(k):evaluate(model,arm,k,args.s,device,args.eval_n)
-                                   for k in (1,3,4)}
+                                   for k in (1,3,4) if time.monotonic()<deadline}
     atomic_json(folder/"result.json",result)
     print(json.dumps(result),flush=True)
     return result
@@ -294,7 +302,7 @@ def main():
     p.add_argument("--lr",type=float,default=0.001)
     p.add_argument("--seeds",type=int,nargs="+",default=[137,163])
     p.add_argument("--arms",nargs="+",choices=ARMS,default=["direct","first_last","penultimate","first_penultimate_last","first_penultimate_damp","pass_rlt"])
-    p.add_argument("--seconds",type=int,default=600)
+    p.add_argument("--seconds",type=int,default=600,help="soft inter-step deadline; checkpoint/eval may overrun")
     p.add_argument("--threads",type=int,default=2)
     p.add_argument("--eval-n",type=int,default=32)
     p.add_argument("--checkpoint-every",type=int,default=16)
