@@ -157,6 +157,10 @@ training episode. The check peaked at 93.4 MiB within a 128 MiB job. This
 preflight exercised the data and verification interfaces before the
 matched fits.
 
+### Frontier teacher-trace candidates
+
+See the [frontier teacher-trace curriculum catalog](../training/data/README.md#frontier-teacher-trace-curriculum-candidates-2026-11-24) for Fable/Opus, GPT/Codex, open reasoning and software-repair source leads, with an Astra discovery slot. The proposed 500M-token comparison lane evaluates raw response, compressed subgoal and independently checked state-transition supervision at matched budgets. Source admission and token accounting must precede any change to the existing curriculum. This catalog is planning metadata, with `training_ready=false`.
+
 ## Mixed-pilot evidence
 
 All 14 fits used 8,760 parameters, 192 optimizer updates, and 156 planned
