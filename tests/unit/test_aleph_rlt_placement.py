@@ -80,6 +80,22 @@ def test_frozen_rule_twin_inputs_and_independent_endpoints(corpus):
         list(corpus.rule_rows([(task, target)]))
 
 
+def test_constructive_controls_match_enumerated_mask_and_repair_oracles(corpus):
+    controls = importlib.import_module("control_audit")
+    rng = random.Random(23)
+    for _ in range(128):
+        repair = corpus.generate_repair(rng)
+        assert controls.repair_prediction(repair.public()) in repair.good
+        counter = corpus.generate_counter(rng)
+        cue, exact = controls.counter_predictions(counter.public())
+        assert 0 <= cue <= corpus.NONE and exact in counter.good
+    # Both canonical positive masks pass both rules. Adding a forbidden bit
+    # separates the rules even though neither unmodified mask can witness it.
+    prompt = (corpus.COUNTER, 1, 2, corpus.SEP, 1, 4, corpus.SEP)
+    assert controls.counter_predictions(prompt) == (1, 3)
+
+
+
 def test_lean_keeps_unknown_in_rank_budget_and_joins_epoch(corpus, study):
     candidates = [{"id": str(i), "tactic": f"apply t{i}"} for i in range(5)]
     order = [item["id"] for item in candidates]

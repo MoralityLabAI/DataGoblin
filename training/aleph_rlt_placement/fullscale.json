@@ -1,0 +1,81 @@
+{
+  "schema": "aleph.dense-placement.planning.v1",
+  "status": "development proposal pending placement confirmation and measured TPU intake",
+  "architecture": {
+    "vocab": 49152,
+    "width": 2048,
+    "query_heads": 16,
+    "kv_heads": 4,
+    "core_ff": 8960,
+    "shell_and_answer_ff": 8192,
+    "physical_core_blocks": 10,
+    "physical_answer_blocks": 2,
+    "outer_blocks": 2,
+    "max_context": 2048,
+    "normalization": "pre-RMSNorm; final RMSNorm",
+    "position": "RoPE",
+    "embedding_head": "tied",
+    "bias": false,
+    "dropout": 0,
+    "answer_passes": 1,
+    "fixture_expected_params": 999352320
+  },
+  "tournament": {
+    "arm_a": "direct",
+    "provisional_arm_b": "pass_rlt",
+    "reasoning_passes": 3,
+    "engineering_reference_passes": 2,
+    "stage_tokens": [
+      10000000,
+      500000000,
+      10000000000
+    ],
+    "extension_tokens": 10000000000,
+    "initialization_seed": 137,
+    "model_compute_dtype": "bfloat16",
+    "reduction_dtype": "float32",
+    "activation_checkpointing": "block rematerialization if required; freeze in both arms after profiling",
+    "training_gradient": "full through all visits",
+    "default_global_nonpadding_positions": 262144
+  },
+  "optimizer": {
+    "name": "AdamW",
+    "beta1": 0.9,
+    "beta2": 0.95,
+    "eps": 1e-8,
+    "weight_decay_matrices": 0.1,
+    "weight_decay_norms": 0,
+    "clip_global_norm": 1,
+    "peak_lr": 0.00025,
+    "ending_lr": 0.000025,
+    "warmup_tokens": 200000000,
+    "stable_until_tokens": 16000000000,
+    "cosine_decay_ends_tokens": 20000000000,
+    "schedule_clock": "processed non-padding positions; equal in both arms"
+  },
+  "corpus": {
+    "tokenizer_revision": null,
+    "training_manifest_sha256": null,
+    "confirmation_manifest_sha256": null,
+    "adjudication_manifest_sha256": null,
+    "final_manifest_sha256": null,
+    "encoding": "frozen 49152-token tokenizer; registered text and typed proposal objectives",
+    "static_root_view_cap": 4,
+    "processed_per_first_leg": 10000000000,
+    "repeat_prefix_for_arm_b": true
+  },
+  "user_cost_case": {
+    "tokens_per_leg": 10000000000,
+    "hours_per_leg": 55,
+    "credits_per_leg": 350,
+    "credits_available": 1000,
+    "calibrated_depth": null
+  },
+  "selection": {
+    "primary": "held-out language NLL on a common frozen denominator",
+    "text_regression_relative_max": 0.01,
+    "checked_task_regression_absolute_max": 0.02,
+    "throughput_regression_relative_max": 0.1,
+    "independent_fullscale_seeds": 1
+  }
+}

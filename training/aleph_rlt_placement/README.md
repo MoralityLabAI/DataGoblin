@@ -1,5 +1,7 @@
 # DG-RLT-ARCH-01 — Aleph RLT placement tournament
 
+[Resume the development matrix](RESUME.md) · [Frozen promotion protocol](PROTOCOL.md) · [Dense architecture and TPU costs](ARCHITECTURE.md) · [A distributed clock-order research gym](CLOCK_ORDER_GYM.md)
+
 Status: development gym and prospective promotion protocol, 2026-11-24.
 No full pretrain, accelerator allocation, efficacy result or sealed evaluation
 is claimed. The sole internal architecture intervention is RLT; RLP, SGRT/HoloArc,
@@ -156,6 +158,7 @@ scale evidence and report checkpoint-specific full-scale results.
 
 * [Strict 1B recipe](../../docs/one_billion_pretraining_recipe.md)
 * [RLT research track](../../docs/rlt_research_track.md)
+* [Synthetic data value, rival theories and the held Lean acquisition experiment](AGONIST_VALUE.md)
 * [RLT feedback coefficients](../../src/datagoblin/training_gym/rlt_feedback.py)
 * [Pretrain cell](../../src/datagoblin/training_gym/rlt_pretrain_cell.py)
 * [November 23 execution plan](../reports/2026-11-23_aleph_pretrain_execution_plan.md)
