@@ -62,7 +62,16 @@ def main():
     p.add_argument("--wall", type=int, default=3600)
     p.add_argument("--memory-mib", type=int, default=3072)
     p.add_argument(
-        "worker", choices=("gym.py", "audit.py", "study.py", "pass_diagnostic.py", "review.py", "fullscale.py")
+        "worker",
+        choices=(
+            "gym.py",
+            "audit.py",
+            "study.py",
+            "pass_diagnostic.py",
+            "review.py",
+            "fullscale.py",
+            "repair_generation.py",
+        ),
     )
     args, rest = p.parse_known_args()
     if not (1 <= args.wall <= 21600 and 256 <= args.memory_mib <= 4096):
