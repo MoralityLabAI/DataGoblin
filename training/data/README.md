@@ -26,6 +26,41 @@ Research predictions and model critiques remain attributed proposals. A proof ch
 
 The RLT Campsite module pilot has 511 distinct, verifier-checked repair examples from 256 train puzzles. It compares direct feedback, answer-state RLT and matched damping on shared targets. Count the repair examples under the existing procedural-games lane once admitted. The local train pack has a content-hashed manifest. Full-scale admission needs a source-rights review and accepted-token counts with the frozen Aleph tokenizer. [Build and replay the training pack](../../docs/rlt_hermes_repair.md#training-pack)
 
+## Frontier teacher-trace curriculum candidates (2026-11-24)
+
+Status: discovery queue only; `training_ready=false`. These links are candidate sources for continued pretraining and post-training of Aleph. Community dataset names are uploader claims, not authenticated teacher identities. Availability, revisions, sizes, origin, licenses and upstream provider permissions need independent review before admission.
+
+| Candidate source | Proposed use |
+| --- | --- |
+| [MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x](https://huggingface.co/datasets/MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x) | Long reasoning trajectories; extract bounded decisions and subgoals. |
+| [greghavens/fable-5-coding-and-debugging-traces](https://huggingface.co/datasets/greghavens/fable-5-coding-and-debugging-traces) | Debugging, failed attempts, tool feedback and repair. |
+| [Crownelius/Complete-FABLE.5-traces-2M](https://huggingface.co/datasets/Crownelius/Complete-FABLE.5-traces-2M) | Broad Fable/Opus-attributed candidate pool; check overlap. |
+| [clzoro/Claude-Distills](https://huggingface.co/datasets/clzoro/Claude-Distills) | Opus/Sonnet-attributed reasoning candidates. |
+| [RESMP-DEV/Fable-GPT-5.5-Distillation-Traces](https://huggingface.co/datasets/RESMP-DEV/Fable-GPT-5.5-Distillation-Traces) | Mixed-teacher candidate pool; audit lineage before sampling. |
+| [predictive-singularity/Accretion](https://huggingface.co/datasets/predictive-singularity/Accretion) | Coding and agent-behavior candidates. |
+| [AletheiaResearch/GPT-5.5-Codex](https://huggingface.co/datasets/AletheiaResearch/GPT-5.5-Codex) | Agent-session segmentation and repair. |
+| [TeichAI datasets](https://huggingface.co/TeichAI/datasets) | Frontier-model-attributed reasoning collections. |
+| [Manusagents mixed frontier distillation](https://huggingface.co/datasets/Manusagents/GPT-5.5-Gemini-3.1-Pro-Grok-4-Claude-Fable-5-Mythos-5-Qwen-3.7-Max-and-more-Distillation-Dataset) | Large mixed-source discovery lead; high-priority rights and provenance audit. |
+
+Astra Pro / GPT-6.2: no authenticated public corpus identified in the initial discovery pass. Keep a separate discovery slot; do not infer Astra authorship from GPT or Codex labels. The owned Spiral Codex campaign is a separate candidate subject to authorization, provider terms, confidentiality screening and source rights.
+
+### Open tooling and comparison sources
+
+| Resource | Role |
+| --- | --- |
+| [Teich](https://github.com/TeichAI/teich) | Investigate session import, normalization and response masking. |
+| [OpenThoughts](https://github.com/open-thoughts/open-thoughts) | Reproducible reasoning-data recipe and comparison corpus. |
+| [NVIDIA Open-SWE-Traces](https://huggingface.co/datasets/nvidia/Open-SWE-Traces) | Software-repair trajectories; replay tests independently. |
+| [LeanDojo](https://github.com/lean-dojo/LeanDojo) | Formal proof states and tactic extraction; evaluate newer tooling before pinning. |
+
+### Proposed 500M-token frontier lane
+
+Illustrative post-filter, post-tokenization targets in millions of loss-bearing tokens: Fable 150, Opus 75, GPT/Codex 50, verified software repair 75, open mathematical reasoning 75, native Lean/research traces 75. This is a separate proposed comparison lane, with no change to the existing 20B/30B quotas or strict-1B architecture. If incorporated into continued pretraining, debit exposures against the approved total and avoid double counting. Rights failures or insufficient unique capacity require a documented shortfall or separately approved substitution.
+
+Compare raw response SFT, compressed subgoal supervision, and state-transition supervision at matched loss-bearing token and planned recurrent-cell budgets. The last view carries state, proposal, independently checked outcome (or unknown), and revised action. Keep tool/environment output as context, mask non-target spans, and preserve failed actions as attributed proposals. Teacher self-grades do not supply independent truth labels.
+
+Admission requires pinned dataset/file revisions, origin and teacher-attribution evidence, rights review (including applicable provider terms), secret/PII screening, deduplication across aggregates, root-level split custody and the existing four-presentation cap. Retain unknown outcomes as masked labels; verify Lean with the kernel and software repair with isolated tests. Record accepted unique and loss-bearing Aleph tokens with the frozen tokenizer, actual replay costs and source-specific exclusions. CPU/RAM inventory and sampling should precede any separately authorized GPU or Silico run. No dataset downloads or training are authorized by this catalog.
+
 ## Generation measurement
 
 The proposed first yield measurement is 10,000 examples across 12–20 task families. Record accepted unique Aleph tokens, loss-bearing tokens, canonical roots, replay pass rate, duplication and resource cost. This measurement has not run.
