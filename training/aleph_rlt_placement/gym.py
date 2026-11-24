@@ -176,10 +176,12 @@ def evaluate(model, arm, r, s, device, n):
     out = []
     for family in (0,1):
         for ood in (False,True):
-            x,y = batch(9000000+100*family+int(ood),n,device,ood,family)
+            x,y = batch(f"dev:{family}:{int(ood)}",n,device,ood,family)
             logits = model(x,arm,r,s)[:,-1,:]
+            rows = [{"root":digest(row),"prediction":pred,"target":target}
+                    for row,pred,target in zip(x.cpu().tolist(),logits.argmax(-1).cpu().tolist(),y.cpu().tolist(),strict=True)]
             out.append({"family":family,"ood":ood,"correct":int((logits.argmax(-1)==y).sum()),
-                        "n":n,"nll":float(F.cross_entropy(logits,y)),
+                        "n":n,"nll":float(F.cross_entropy(logits,y)),"rows":rows,
                         "prompt_tokens":int(x.numel()),"input_sha":digest(x.cpu().tolist())})
     model.train()
     return out
@@ -220,7 +222,7 @@ def fit(args, seed, arm, deadline):
         torch.cuda.reset_peak_memory_stats(device)
     while step < args.steps and time.monotonic() < deadline:
         # Per-update data RNG is independent of model RNG and placement.
-        x,y = batch(seed*100000+step,args.batch,device)
+        x,y = batch(f"train:{seed}:{step}",args.batch,device)
         opt.zero_grad(set_to_none=True)
         loss = F.cross_entropy(model(x,arm,args.r,args.s)[:,-1,:],y)
         if not torch.isfinite(loss):
@@ -256,6 +258,9 @@ def fit(args, seed, arm, deadline):
 def self_test():
     assert len(schedule(2,1))==24 and len(set(schedule(2,1)))==14
     assert schedule(2,1)[22]==12
+    assert math.isclose(coefficients("first_penultimate_damp",2,1)[0][0],13/48)
+    assert coefficients("core_edges",2,1)==coefficients("core_edges_damp",2,1)
+    assert coefficients("core_edges",3,1)!=coefficients("core_edges_damp",3,1)
     assert coefficients("first_last",2,1)=={0:(1/24,"local"),23:(1.0,"local")}
     assert coefficients("penultimate",2,1)=={22:(0.5,"local")}
     assert coefficients("core_edges",2,1)[1]==(0.5,"local")
