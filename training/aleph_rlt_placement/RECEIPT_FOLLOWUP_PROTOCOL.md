@@ -1,0 +1,20 @@
+# Coordinated receipt supervision and LDT relation transfer
+
+Frozen against baseline a247c29. Local fresh-seed SHA-256 is 6149617542414bf52b66c927d0e86b651a6283a416baa90b221b5a5cfdb8d4cc. Train before opening the held-out fixtures. Keep the v1 artifacts and outcomes. All workers are offline on one low-priority CPU core with GPUs hidden and a 3 GiB cap.
+
+**Parity.** Compare from-scratch whole-code supervision with the frozen outcome-trained C, D and MLP checkpoints, matching seeds (137, 163, 191), model initialization, original eight training priors and 1,200 optimizer steps. External enumeration uses training-game Brier risk to identify two coordinated code alternatives. Train a sender using their signed risk difference and train its fresh receiver on only a hard bit, side query and public context. Independently interpolate code risks between the two endpoints as a finite external solver. No optimum labels at held priors enter training. Record the code and realized Brier on the original 0.07/0.08 bracket and the new 0.072/0.079 replication bracket, as well as remote priors and the exact tie. A seed passes parity only with optimal codes on all four bracket points and better realized Brier than side-only at all four. These are transfer labels for a supervised mechanism; the plain-outcome controls estimate what the original training signal achieved.
+
+**LDT.** Both slots carry material rival evidence in training. Hold out strict containment between their masks for both point SELECTED and interval UNRESOLVED predicates, in both containment orientations. Include training examples with the same ordered mask sizes as each held case. Four independently generated frames per held family. Query features, side observations, thresholds and native grading conventions are common across the split. A distinct fresh draw of the training relationships measures familiar-family performance. Both fresh panels are generated after all weights freeze. Each goal receives one external calibration result and one hard message. All Brier and decision scores integrate over all eight worlds and the public query distribution.
+
+For each arm and seed train three branches for 600 updates, using the same ordered training games and fresh Adam state. (1) Adapt the coordinated parity checkpoint with the original joint Brier objective. This is the primary branch. (2) Adapt the original outcome-trained parity checkpoint with the same objective. (3) From the coordinated checkpoint supervise the sender on the known three-metric majority bit and train the receiver using that bit. Report its actual learned-sender score and the learned receiver with the exact majority bit forced. The latter is a diagnostic positive control. Score side-only, per-frame best GF(2) parity, fixed majority and unrestricted one-bit Bayes risk. Report the refitted ideal receiver for the learned bits. Recheck parity after adaptation as a forgetting diagnostic.
+
+**Promotion.** Require three parity passes, lower primary held LDT Brier than both the paired MLP and the rival recurrent model on every seed, lower than the best-linear Bayes control on every seed, and no held family with seed-mean Brier above side-only. Equal family weight, equal frame weight within each family. If neither qualifies, keep the 10B slots open. Report if the controls make any criterion structurally unattainable. These runs compare dense two-slot proxies. The checker's risk table and majority targets are external training signals.
+
+**Replay.** From the repository root with DataGoblin and PyTorch installed, supply the v1 directory with training.json and its archived parity checkpoints. Use a new local directory and a private integer seed file. The training phase does not read the seed file.
+
+```powershell
+$d = 'training/aleph_rlt_placement'
+python "$d/cpu_worker.py" --wall 1800 receipt_followup.py train --base ../receipt-cd --out ../receipt-v2
+python "$d/cpu_worker.py" --wall 300 receipt_followup.py score --base ../receipt-cd --out ../receipt-v2 --seed-file ../receipt-v2.seed
+python "$d/receipt_followup_summary.py" ../receipt-v2/results.json --out ../receipt-v2/summary.json
+```
