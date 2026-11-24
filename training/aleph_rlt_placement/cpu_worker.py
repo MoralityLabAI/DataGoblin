@@ -71,6 +71,7 @@ def main():
             "review.py",
             "fullscale.py",
             "repair_generation.py",
+            "receipt_gym.py",
         ),
     )
     args, rest = p.parse_known_args()

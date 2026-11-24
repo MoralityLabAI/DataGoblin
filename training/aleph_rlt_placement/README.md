@@ -168,3 +168,17 @@ scale evidence and report checkpoint-specific full-scale results.
 
 No paid runs, teacher fallback, weights download, full corpus ingestion or
 new full-scale architecture is authorized by this development gym alone.
+
+## One-bit receipt gym
+
+The [experiment protocol](RECEIPT_PROTOCOL.md) tests whether a sender can learn which single bit to retain before the next lab chooses its question. It compares option comparison (C), evidence revision (D), an MLP and exhaustive finite-channel controls. The [results](RECEIPT_RESULTS.md) give the paired seeds, transfer scores and 10B decision.
+
+From the repository root, install the project and its optional neural dependencies. Choose an empty local directory for checkpoints. Keep the fresh evaluation seed file outside version control and use the same file for exact replay. The training command does not read it. Example PowerShell commands follow.
+
+```powershell
+[System.Security.Cryptography.RandomNumberGenerator]::GetInt32(1,2147483647).ToString() | Set-Content -NoNewline -Encoding ascii ../receipt-holdout.seed
+$d = 'training/aleph_rlt_placement'
+python "$d/cpu_worker.py" --wall 1200 receipt_gym.py --phase train --run-dir ../receipt-cd --eval-seed-file ../receipt-holdout.seed
+python "$d/cpu_worker.py" --wall 300 receipt_gym.py --phase score --run-dir ../receipt-cd --eval-seed-file ../receipt-holdout.seed
+python "$d/receipt_summary.py" ../receipt-cd/results.json --out ../receipt-cd/summary.json
+```
