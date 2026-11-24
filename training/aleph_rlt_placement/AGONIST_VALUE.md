@@ -43,6 +43,8 @@ The [follow-up decision certificate experiment](SLATE_CERTIFICATES.md) compared 
 
 ## Interface for a network of small agents
 
+The [mergeable receipt theorem](FEDERATED_RECEIPTS.md) characterizes what labs must communicate across a declared separator. Projecting each lab to the final target too soon loses decisive evidence in 32 of 144 finite cases. Retaining the shared coordinates preserves the exact result on all 2,704 tested two-lab systems with disjoint private variables.
+
 A [second transfer test with the 1.41M Aleph builder](REPAIR_TRANSFER.md) used a verified finite student. Six targeted generated challenges found four builder errors and completed the student's transition coverage. Six random challenges found four to six errors and left coverage incomplete. It tests the data-value claim on an actual neural proposer and a finite student with an explicit inductive bias.
 
 A public prompt gives a claim, the current ledger, an intervention menu, a target family and remaining cost. The actor names a test, two predicted outcomes under competing mechanisms, what would falsify its preference, and a cost. The hub freezes that receipt, then a separate checker reveals an outcome. Link all reused records to their origins. Give every participating policy identical access to shared parent receipts. For a nonlinear recurrent core, the clock-order game in [CLOCK_ORDER_GYM.md](CLOCK_ORDER_GYM.md) supplies verifiable local edges. A centralized policy with access to all clock endpoints can evaluate the potentials directly in linear work. Include it as a baseline. A decentralized contributor earns scientific credit for a blind, reproducible forecast on a new root or a cheaper useful acquisition. Algebraic consequences keep their parents' provenance.
