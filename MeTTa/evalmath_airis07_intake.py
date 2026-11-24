@@ -5,18 +5,18 @@ No training admission, network access, evaluator/development input, or model exe
 from __future__ import annotations
 
 import argparse
+import json
 from collections import defaultdict
 from fractions import Fraction as F
 from functools import lru_cache
 from hashlib import sha256
 from itertools import product
-import json
 from pathlib import Path
 
 UPSTREAM = "3ef134f0d880a81ad56592487d951ac2287237d5"
 SCHEMA = "evalmath-airis07-candidate-v1"
 EXPECTED_SHA = "988fa25090d00918705f1affae0916dd7faf51a06d58588c3b98e591a845723d"
-SCHEDULES = ((0,1,0),) + tuple(a for a in product(range(2), repeat=3) if a != (0,1,0))
+SCHEDULES = ((0, 1, 0), *(a for a in product(range(2), repeat=3) if a != (0, 1, 0)))
 OBS = tuple(product(range(2),repeat=2))
 RAW = tuple(product(range(2),repeat=3))
 ROW_KEYS = {"schema","root_id","group_id","presentation","split","training_ready",
@@ -49,7 +49,7 @@ def emission(a, raw, theta):
         driver=(u,u^f,u^f^g)
         prev=(0,a[0],a[1])
         y=tuple((x*(theta&1))^(p*((theta>>1)&1))^b
-                for x,p,b in zip(a,prev,driver))
+                for x,p,b in zip(a,prev,driver, strict=True))
         if y==raw:
             total+=F(1,2)*F(1 if f else 3,4)*F(1 if g else 3,4)
     return total
@@ -140,7 +140,7 @@ def validate_bundle(directory, expected_sha=EXPECTED_SHA):
         groups[group][k,v]=(best,codes)
         n+=1
     need(n==m["rows"] and len(groups)==m["groups"],"manifest count mismatch")
-    for g,rows in groups.items():
+    for rows in groups.values():
         need(set(rows)==set(product((0,1),repeat=2)),"missing paired control")
         for v in (0,1):
             need(rows[0,v][1]==rows[1,v][1],"stationary control mismatch")
