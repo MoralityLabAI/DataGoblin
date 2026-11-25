@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/dcf16_decision_trace.schema.json",
+  "title": "DCF-16 verifier-grounded decision trace",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "split",
+    "family",
+    "n",
+    "seed",
+    "conditions",
+    "problem",
+    "observation_history",
+    "decision_rule",
+    "budget_log2_ops",
+    "candidate_representations",
+    "operators",
+    "selected",
+    "receipts",
+    "final",
+    "verification",
+    "regret",
+    "targets",
+    "hard_negative"
+  ],
+  "properties": {
+    "schema": {"const": "dcf16.decision_trace.v1"},
+    "id": {"type": "string", "pattern": "^[0-9a-f]{20}$"},
+    "split": {"enum": ["train", "val", "heldout"]},
+    "family": {
+      "enum": ["chain", "tree", "grid", "sparse", "star", "dense", "hyper", "ktree", "xor_noiseless", "weak_dense"]
+    },
+    "n": {"type": "integer", "minimum": 1},
+    "seed": {"type": "integer"},
+    "conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["noise", "query_size", "model_misspecified"],
+      "properties": {
+        "noise": {"enum": ["low", "high"]},
+        "query_size": {"type": "integer", "minimum": 1},
+        "model_misspecified": {"type": "boolean"}
+      }
+    },
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["n_vars", "prior", "query", "query_type", "factors"],
+      "properties": {
+        "n_vars": {"type": "integer", "minimum": 1},
+        "prior": {"const": "independent uniform bits"},
+        "query": {"$ref": "#/$defs/variable_list"},
+        "query_type": {"const": "parity"},
+        "factors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope", "kind", "y", "noise"],
+            "properties": {
+              "scope": {"$ref": "#/$defs/variable_list"},
+              "kind": {"enum": ["id", "agree", "and", "xor", "maj"]},
+              "y": {"enum": [0, 1]},
+              "noise": {"type": "number", "minimum": 0, "maximum": 1}
+            }
+          }
+        }
+      }
+    },
+    "observation_history": {"type": "array", "items": {"type": "integer", "minimum": 0}},
+    "decision_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reward", "act_threshold"],
+      "properties": {
+        "reward": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["correct", "wrong", "abstain"],
+          "properties": {
+            "correct": {"type": "number"},
+            "wrong": {"type": "number", "maximum": 0},
+            "abstain": {"type": "number"}
+          }
+        },
+        "act_threshold": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "budget_log2_ops": {"type": "integer", "minimum": 0},
+    "candidate_representations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "sufficient"],
+        "properties": {
+          "name": {
+            "enum": [
+              "unary_evidence_only",
+              "one_hop_neighbourhood",
+              "query_component",
+              "min_fill_elimination_order",
+              "loop_cutset"
+            ]
+          },
+          "sufficient": {"type": "boolean"},
+          "variables": {"$ref": "#/$defs/variable_list"},
+          "order": {"$ref": "#/$defs/variable_list"},
+          "p": {"type": "number", "minimum": 0, "maximum": 1},
+          "reason": {"type": "string"},
+          "induced_width": {"type": "integer", "minimum": 0},
+          "max_table_entries": {"type": "integer", "minimum": 1},
+          "enumerations": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "operators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "exact", "ops", "within_budget", "p", "action", "regret"],
+        "properties": {
+          "name": {
+            "enum": ["ve_min_fill", "ve_min_degree", "ve_weighted_min_fill", "enumeration", "cutset", "gf2", "bp", "particle", "mbe"]
+          },
+          "exact": {"type": "boolean"},
+          "ops": {"type": "integer", "minimum": 0},
+          "within_budget": {"type": "boolean"},
+          "p": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "action": {"enum": [-1, 0, 1]},
+          "regret": {"type": "number"}
+        }
+      }
+    },
+    "selected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["option", "operator", "ops", "recurrent_depth"],
+      "properties": {
+        "option": {"enum": ["exact", "bp", "mbe", "particle", "cutset", "gf2", "abstain"]},
+        "operator": {"type": "string", "minLength": 1},
+        "ops": {"type": "integer", "minimum": 0},
+        "recurrent_depth": {"type": "integer", "minimum": 0}
+      }
+    },
+    "receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["elimination_trace", "bp"],
+      "properties": {
+        "elimination_trace": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["var", "union", "factors", "ops"],
+            "properties": {
+              "var": {"type": "integer", "minimum": 0},
+              "union": {"type": "integer", "minimum": 1},
+              "factors": {"type": "integer", "minimum": 1},
+              "ops": {"type": "integer", "minimum": 1}
+            }
+          }
+        },
+        "bp": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["iters", "converged", "p"],
+              "properties": {
+                "iters": {"type": "integer", "minimum": 0},
+                "converged": {"type": "boolean"},
+                "p": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "final": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "p_model"],
+      "properties": {
+        "action": {"enum": [-1, 0, 1]},
+        "p_model": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference_p", "verified_by", "max_disagreement", "exact_action", "truth_parity", "reference_model"],
+      "properties": {
+        "reference_p": {"type": "number", "minimum": 0, "maximum": 1},
+        "verified_by": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "max_disagreement": {"type": "number", "minimum": 0},
+        "exact_action": {"enum": [-1, 0, 1]},
+        "truth_parity": {"enum": [0, 1]},
+        "reference_model": {"enum": ["solver model", "generating model"]}
+      }
+    },
+    "regret": {"type": "number"},
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relevant_variables",
+        "dependency_edges",
+        "log2_exact_cost",
+        "algorithm",
+        "recurrent_depth",
+        "p_reference",
+        "abstain"
+      ],
+      "properties": {
+        "relevant_variables": {"$ref": "#/$defs/variable_list"},
+        "dependency_edges": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [{"type": "integer", "minimum": 0}, {"type": "integer", "minimum": 0}],
+            "items": false,
+            "minItems": 2
+          }
+        },
+        "log2_exact_cost": {"type": "number", "minimum": 0},
+        "algorithm": {"type": "string", "minLength": 1},
+        "recurrent_depth": {"type": "integer", "minimum": 0},
+        "p_reference": {"type": "number", "minimum": 0, "maximum": 1},
+        "abstain": {"type": "boolean"}
+      }
+    },
+    "hard_negative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unary_shortcut_wrong", "one_hop_wrong", "bp_wrong"],
+      "properties": {
+        "unary_shortcut_wrong": {"type": "boolean"},
+        "one_hop_wrong": {"type": "boolean"},
+        "bp_wrong": {"type": "boolean"}
+      }
+    }
+  },
+  "$defs": {
+    "variable_list": {"type": "array", "items": {"type": "integer", "minimum": 0}}
+  }
+}

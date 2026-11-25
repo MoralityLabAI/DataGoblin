@@ -1,0 +1,16 @@
+dataset_id: dcf16.decision_trace.v1
+schema: schemas/dcf16_decision_trace.schema.json
+source:
+  repository: https://github.com/MoralityLabAI/Compactification-Theory
+  url: https://github.com/MoralityLabAI/Compactification-Theory/tree/research/dcf01-dense-compute-frontier-20261125/research/dcf16_decision_curriculum
+  files:
+    - data/train.jsonl.gz
+    - data/val.jsonl.gz
+    - data/heldout.jsonl.gz
+    - PROTOCOL.json
+    - MANIFEST.json
+  vendored: false
+heldout_only_families: [star, dense, hyper, ktree, xor_noiseless, weak_dense]
+training_splits: [train, val]
+targets: [dependency_edges, relevant_variables, complexity, algorithm, recurrent_depth, calibration, abstention]
+loader: datagoblin.datasets.dcf16
