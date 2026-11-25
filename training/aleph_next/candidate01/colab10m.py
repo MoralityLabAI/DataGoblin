@@ -19,14 +19,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch.nn import functional as F
-from torch.utils.checkpoint import checkpoint
-
+from milestone_mix import audit_pack
+from packing import reference_logits, sdpa_mask, token_loss_sum
 from production import HERE, digest, read
 from restart import Aleph, adam, lr, restore_rng, rng_state, schedule
-from packing import reference_logits, sdpa_mask, token_loss_sum
-from milestone_mix import audit_pack
 from snapshot import MixedStream
+from torch.nn import functional as F
+from torch.utils.checkpoint import checkpoint
 
 PIN = "be25522ded491e0c0c3f81d87d786034b46733e1ccbe2b9cea2dafc47b48abf4"
 RECIPE_SHA = "58fd8c2805f04ed918b4547d5a177624f839648c6be98dc749426ba39cd32e87"
@@ -116,7 +115,8 @@ def self_test(device):
         numerator,count = token_loss_sum(z.float(),p["labels_at_query"])
         (numerator/total).backward()
         ref_loss += float(numerator.detach())
-        if not int(count):continue
+        if not int(count):
+            continue
         zz,yy = query_logits(other,p,True)
         torch.testing.assert_close(zz,z[0,labels!=-100].float(),atol=atol,rtol=rtol)
         num = F.cross_entropy(zz,yy,reduction="sum")
@@ -156,12 +156,16 @@ def atomic_json(path,obj):
 
 
 def collect_group(stream,expected):
-    sha=hashlib.sha256(); packs=[]; labels=positions=padding=0
+    sha=hashlib.sha256()
+    packs=[]
+    labels=positions=padding=0
     while (item:=stream.next_pack(expected["stop"])) is not None:
         lane,p=item
         n,k=audit_pack(p,lane,sha)
         packs.append((lane,p,k))
-        labels+=k;positions+=n;padding+=len(p["input_ids"])-n
+        labels+=k
+        positions+=n
+        padding+=len(p["input_ids"])-n
     got=dict(sha256=sha.hexdigest(),positions=positions,labels=labels,
              packs=len(packs),padding=padding,stop=expected["stop"])
     if got!=expected or labels==0:
@@ -179,7 +183,8 @@ def save(out,identity,net,opt,stream,group,records):
         raise RuntimeError("insufficient free space for a complete checkpoint")
     path=out/f"group_{group:03d}.pt"
     tmp=path.with_suffix(".partial")
-    if path.exists():raise FileExistsError(path)
+    if path.exists():
+        raise FileExistsError(path)
     with tmp.open("wb") as f:
         torch.save(state,f)
         f.flush()
@@ -198,79 +203,117 @@ def main_run(args):
     prop=torch.cuda.get_device_properties(device)
     free,total=torch.cuda.mem_get_info(device)
     if total<35*2**30 or free<30*2**30:
-        raise RuntimeError(f"need a mostly empty >=40 GB class accelerator; free={free}")
+        raise RuntimeError(f"need a mostly empty >=40 GB class accelerator
+        free={free}")
     if digest(RECIPE)!=RECIPE_SHA or digest(args.base/"index.json")!=PIN:
         raise ValueError("frozen recipe/index differs")
-    cfg=read(RECIPE); gold=read(RECEIPT); groups=gold["bounded_replay"]["steps"]
+    cfg=read(RECIPE)
+    gold=read(RECEIPT)
+    groups=gold["bounded_replay"]["steps"]
     if len(groups)!=39 or not 1<=args.max_groups<=len(groups):
         raise ValueError("invalid group limit")
     if args.resume:
-        if not (args.out/"LATEST.json").is_file():raise ValueError("no published checkpoint")
+        if not (args.out/"LATEST.json").is_file():
+            raise ValueError("no published checkpoint")
     else:
         args.out.mkdir(parents=True,exist_ok=False)
-    needed_groups = sum(1 for g in set((1,19,39,args.max_groups)) if g<=args.max_groups and not (args.out/f"group_{g:03d}.pt").exists())
+    needed_groups = sum(
+        1 for g in set((1,19,39,args.max_groups))
+        if g<=args.max_groups and not (args.out/f"group_{g:03d}.pt").exists()
+    )
     if shutil.disk_usage(args.out).free<13_000_000_000*max(needed_groups,1):
         raise RuntimeError("insufficient storage for all planned checkpoint generations")
-    torch.set_num_threads(1);torch.manual_seed(137);random.seed(137);np.random.seed(137)
+    torch.set_num_threads(1)
+    torch.manual_seed(137)
+    random.seed(137)
+    np.random.seed(137)
     torch.backends.cuda.matmul.allow_tf32=False
     self_test(device)
-    torch.manual_seed(137);random.seed(137);np.random.seed(137)
+    torch.manual_seed(137)
+    random.seed(137)
+    np.random.seed(137)
     a=cfg["construction"]
     net=Aleph(a["width"],a["vocab"],heads=a["query_heads"],kv=a["kv_heads"],core_ff=a["core_ff"])
     assert sum(p.numel() for p in net.parameters())==a["parameters"]==999352320
     assert list(schedule(2,1))==[0,*range(1,11),*range(1,11),11,12,13]
-    net=net.to(device);opt=adam(net,cfg)
+    net=net.to(device)
+    opt=adam(net,cfg)
     identity=dict(recipe=RECIPE_SHA,index=PIN,code=digest(Path(__file__)),
                   model=digest(HERE.parents[1]/"aleph_rlt_placement/gym.py"),
                   packer=digest(HERE.parents[1]/"aleph_rlt_placement/packing.py"),
                   torch=str(torch.__version__),cuda=torch.version.cuda,device=prop.name,
                   capacity=total,world_size=1)
-    records=[];cursor=None;first=0
+    records=[]
+    cursor=None
+    first=0
     if args.resume:
-        pointer=read(args.out/"LATEST.json");path=args.out/pointer["file"]
-        if digest(path)!=pointer["sha256"]:raise ValueError("checkpoint hash mismatch")
+        pointer=read(args.out/"LATEST.json")
+        path=args.out/pointer["file"]
+        if digest(path)!=pointer["sha256"]:
+            raise ValueError("checkpoint hash mismatch")
         ck=torch.load(path,map_location="cpu",weights_only=True)
-        if ck["identity"]!=identity or ck["group"]!=pointer["group"]:raise ValueError("resume identity mismatch")
-        first=ck["group"];records=ck["records"];cursor=ck["cursor"]
+        if ck["identity"]!=identity or ck["group"]!=pointer["group"]:
+            raise ValueError("resume identity mismatch")
+        first=ck["group"]
+        records=ck["records"]
+        cursor=ck["cursor"]
         assert first==len(records) and records[-1]["stop"]==groups[first-1]["stop"]
-        net.load_state_dict(ck["model"],strict=True);opt.load_state_dict(ck["optimizer"])
-        restore_rng(ck["rng"]);torch.cuda.set_rng_state(ck["cuda_rng"]);del ck
+        net.load_state_dict(ck["model"],strict=True)
+        opt.load_state_dict(ck["optimizer"])
+        restore_rng(ck["rng"])
+        torch.cuda.set_rng_state(ck["cuda_rng"])
+        del ck
     atomic_json(args.out/"IDENTITY.json",identity)
     with ExitStack() as stack:
         stream=MixedStream(args.base,args.base/"index.json",PIN,stack,cursor)
         assert sum(stream.totals.values())==(groups[first-1]["stop"] if first else 0)
         for i in range(first,args.max_groups):
-            if time.monotonic()-started>=args.wall_seconds:break
-            t=time.monotonic();group=i+1;expected=groups[i]
+            if time.monotonic()-started>=args.wall_seconds:
+                break
+            t=time.monotonic()
+            group=i+1
+            expected=groups[i]
             packs,denom=collect_group(stream,expected)
             opt.zero_grad(set_to_none=True)
-            numer=defaultdict(float);counts=defaultdict(int)
+            numer=defaultdict(float)
+            counts=defaultdict(int)
             torch.cuda.reset_peak_memory_stats(device)
             complete=True
             for lane,pack,k in packs:
                 if time.monotonic()-started>=args.wall_seconds:
-                    complete=False;break
-                if not k:continue
+                    complete=False
+                    break
+                if not k:
+                    continue
                 z,y=query_logits(net,pack,True)
                 loss=F.cross_entropy(z,y,reduction="sum")
-                if not bool(torch.isfinite(loss)):raise FloatingPointError("nonfinite loss")
+                if not bool(torch.isfinite(loss)):
+                    raise FloatingPointError("nonfinite loss")
                 (loss/denom).backward()
-                numer[lane]+=float(loss.detach());counts[lane]+=k
+                numer[lane]+=float(loss.detach())
+                counts[lane]+=k
                 del z,y,loss
             if not complete:
                 opt.zero_grad(set_to_none=True)
-                print("wall cap hit during accumulation; discard partial group and restore last published checkpoint",flush=True)
+                print(
+                    "wall cap hit during accumulation; discard partial group and restore last published checkpoint",
+                    flush=True,
+                )
                 break
-            if sum(counts.values())!=denom:raise ValueError("label accounting differs")
+            if sum(counts.values())!=denom:
+                raise ValueError("label accounting differs")
             norm=float(torch.nn.utils.clip_grad_norm_(net.parameters(),1.,error_if_nonfinite=True,foreach=False))
-            for g in opt.param_groups:g["lr"]=lr(cfg,expected["stop"])
-            opt.step();torch.cuda.synchronize(device)
+            for g in opt.param_groups:
+                g["lr"]=lr(cfg,expected["stop"])
+            opt.step()
+            torch.cuda.synchronize(device)
             row=dict(group=group,**expected,loss=sum(numer.values())/denom,grad_norm=norm,
                      lr=opt.param_groups[0]["lr"],lane_loss_sums=dict(numer),
                      lane_label_counts=dict(counts),update_wall_seconds=time.monotonic()-t,
                      peak_allocated_bytes=torch.cuda.max_memory_allocated(device),
                      peak_reserved_bytes=torch.cuda.max_memory_reserved(device))
-            records.append(row);print(json.dumps(row),flush=True)
+            records.append(row)
+            print(json.dumps(row),flush=True)
             # Avoid losing first real update; keep periodic and final checkpoints.
             if group in (1,19,39,args.max_groups):
                 save(args.out,identity,net,opt,stream,group,records)
@@ -291,7 +334,8 @@ def main():
     p.add_argument("--resume",action="store_true")
     args=p.parse_args()
     if args.self_test:
-        self_test(torch.device(args.device));return
+        self_test(torch.device(args.device))
+        return
     if not (args.execute and args.base and args.out and args.wall_seconds and 0<args.wall_seconds<=5400):
         p.error("explicit --execute, --base, --out and 1..5400 --wall-seconds required")
     main_run(args)
