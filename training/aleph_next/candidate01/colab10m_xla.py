@@ -45,21 +45,25 @@ class Backend:
         if any(os.environ.get(k, "").lower() not in ("", "0", "false") for k in
                ("XLA_USE_BF16", "XLA_DOWNCAST_BF16", "XLA_USE_SPMD")):
             raise RuntimeError("global BF16 conversion and SPMD are forbidden")
-        os.environ.setdefault("PJRT_DEVICE", "TPU")
+        expected = "CPU" if kind == "xla-cpu" else "TPU"
+        os.environ.setdefault("PJRT_DEVICE", expected)
+        if os.environ["PJRT_DEVICE"] != expected:
+            raise RuntimeError("PJRT_DEVICE differs from requested backend")
         import torch_xla
         import torch_xla.core.xla_model as xm
         import torch_xla.debug.metrics as met
         import torch_xla.runtime as xr
 
-        if xr.device_type() != "TPU" or xr.world_size() != 1 or torch_xla.device_count() != 1:
-            raise RuntimeError("require exactly one addressable TPU and one process")
+        if xr.device_type() != expected or xr.world_size() != 1 or torch_xla.device_count() != 1:
+            raise RuntimeError("require exactly one addressable device and one process")
         self.xla, self.xm, self.metrics = torch_xla, xm, met
         self.device = torch_xla.device()
         hw = xm.xla_device_hw(self.device)
         self.identity = {
-            "backend": "xla", "hardware": hw, "world_size": 1,
+            "backend": kind, "hardware": hw, "world_size": 1,
             "torch_xla": str(torch_xla.__version__),
-            "memory_limit": int(xm.get_memory_info(self.device)["bytes_limit"]),
+            "memory_limit": (int(xm.get_memory_info(self.device)["bytes_limit"])
+                             if kind == "xla" else None),
         }
 
     def sync(self):
@@ -67,7 +71,7 @@ class Backend:
             self.xla.sync(wait=True)
 
     def memory(self):
-        return {} if self.xm is None else {
+        return {} if self.kind != "xla" else {
             k: int(v) for k, v in self.xm.get_memory_info(self.device).items()
         }
 
@@ -445,8 +449,8 @@ def run(args,backend):
             raise ValueError("no completed checkpoint")
     else:
         args.out.mkdir(parents=True,exist_ok=False)
-    if shutil.disk_usage(args.out).free<26_000_000_000:
-        raise RuntimeError("need capacity for two full checkpoint generations")
+    if shutil.disk_usage(args.out).free<13_000_000_000:
+        raise RuntimeError("need capacity for at least one full checkpoint generation")
     parity=self_test(backend,torch.bfloat16)
     atomic_json(args.out/"TPU_FIXTURE.json",parity)
     backend.seed(137)
@@ -470,12 +474,19 @@ def run(args,backend):
         assert opt.step==len(records) and records[-1]["stop"]==groups[opt.step-1]["stop"]
         if args.max_groups<=opt.step:
             raise ValueError("resume target must exceed completed step")
+    planned = {g for g in (1,19,39,args.max_groups) if opt.step<g<=args.max_groups}
+    required = 13_000_000_000 * max(len(planned), 2 if not args.resume else 1)
+    if shutil.disk_usage(args.out).free<required:
+        raise RuntimeError(f"need {required} free bytes for planned checkpoint generations")
     atomic_json(args.out/"IDENTITY.json",identity)
+    durable_step = opt.step
+    last_cursor = cursor
+    train_deadline = started+args.wall_seconds-args.checkpoint_reserve_seconds
     with ExitStack() as stack:
         stream=MixedStream(args.base,args.base/"index.json",PIN,stack,cursor)
         assert sum(stream.totals.values())==(groups[opt.step-1]["stop"] if opt.step else 0)
         for i in range(opt.step,args.max_groups):
-            if time.monotonic()-started>=args.wall_seconds:
+            if time.monotonic()>=train_deadline:
                 break
             t=time.monotonic()
             expected=groups[i]
@@ -487,7 +498,7 @@ def run(args,backend):
             complete=True
             micro_times=[]
             for lane,p,k in packs:
-                if time.monotonic()-started>=args.wall_seconds:
+                if time.monotonic()>=train_deadline:
                     complete=False
                     break
                 ts=time.monotonic()
@@ -519,41 +530,57 @@ def run(args,backend):
                  "useful_positions_per_second":expected["positions"]/elapsed,
                  "hbm":backend.memory()}
             records.append(row)
+            last_cursor=stream.checkpoint()
             print(json.dumps(row),flush=True)
             if i+1 in (1,19,39,args.max_groups):
                 ts=time.monotonic()
-                tag=save_checkpoint(args.out,identity,net,opt,backend,stream.checkpoint(),records)
+                tag=save_checkpoint(args.out,identity,net,opt,backend,last_cursor,records)
+                durable_step=opt.step
                 atomic_json(args.out/f"CHECKPOINT_{i+1:03d}.json",{
                     "directory":tag,"wall_seconds":time.monotonic()-ts,"group":i+1})
             atomic_json(args.out/"PROGRESS.json",{
                 "records":records,"session_wall_seconds":time.monotonic()-started,
-                "complete_10m":i+1==39,"distributed_qualified":False,
+                "complete_10m":i+1==39,"durable_group":durable_step,"distributed_qualified":False,
                 "production_launch_authorized":False,
             })
             if backend.metrics is not None:
                 (args.out/"XLA_METRICS.txt").write_text(backend.metrics.metrics_report())
+    if opt.step>durable_step:
+        # An interrupted accumulation advanced the live stream; last_cursor is
+        # the state immediately after the last successful optimizer update.
+        ts=time.monotonic()
+        tag=save_checkpoint(args.out,identity,net,opt,backend,last_cursor,records)
+        durable_step=opt.step
+        atomic_json(args.out/f"CHECKPOINT_{opt.step:03d}.json",{
+            "directory":tag,"wall_seconds":time.monotonic()-ts,"group":opt.step})
+    atomic_json(args.out/"PROGRESS.json",{
+        "records":records,"session_wall_seconds":time.monotonic()-started,
+        "complete_10m":durable_step==39,"durable_group":durable_step,
+        "distributed_qualified":False,"production_launch_authorized":False})
     print("Stop/delete the Colab runtime externally to stop billing.",flush=True)
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--self-test",action="store_true")
-    p.add_argument("--device",choices=("cpu","xla"),default="cpu")
+    p.add_argument("--device",choices=("cpu","xla","xla-cpu"),default="cpu")
     p.add_argument("--bf16",action="store_true",help="also exercise BF16 on CPU fixture")
     p.add_argument("--execute",action="store_true")
     p.add_argument("--base",type=Path)
     p.add_argument("--out",type=Path)
     p.add_argument("--max-groups",type=int,default=1)
     p.add_argument("--wall-seconds",type=int)
+    p.add_argument("--checkpoint-reserve-seconds",type=int,default=120)
     p.add_argument("--resume",action="store_true")
     args=p.parse_args()
     torch.set_num_threads(1)
     if args.self_test:
         b=Backend(args.device)
-        self_test(b,torch.bfloat16 if args.device=="xla" or args.bf16 else torch.float32)
+        self_test(b,torch.bfloat16 if args.device!="cpu" or args.bf16 else torch.float32)
         return
     if not (args.execute and args.device=="xla" and args.base and args.out and
-            args.wall_seconds and 0<args.wall_seconds<=5400 and 1<=args.max_groups<=39):
+            args.wall_seconds and 0<=args.checkpoint_reserve_seconds<args.wall_seconds<=5400 and
+            1<=args.max_groups<=39):
         p.error("explicit --execute --device xla --base --out --wall-seconds (1..5400) required")
     run(args,Backend("xla"))
 
