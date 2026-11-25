@@ -277,6 +277,18 @@
       "notes": "Most evaluated with MathVerify; 12% Llama judge. At least one correct answer per problem does not mean every trace is correct. Match the correctness field by trace index. Authors report default outperformed extended SFT. Long 16K generation limit affects 4K packing.",
       "aleph_unique_tokens_measured": null,
       "training_ready": false
+    },
+    {
+      "id": "Louiealbp/DLMST",
+      "role": "research reasoning trajectory reference (mathematical algorithm improvement)",
+      "advertised_size": "18 PDF manuscripts, one public mathematical discovery family; no token count measured",
+      "license": "No explicit repository license observed; reference metadata only pending permission",
+      "priority": "reference_only_quarantine_for_training",
+      "source": "https://github.com/Louiealbp/DLMST/tree/0072335716b145032b418760883daed2a89809db",
+      "notes": "MIC-01 manifest: training/data/research_curricula/dlmst_mic01.json. Ten intermediate manuscripts, seven optimal variants, one consolidated final paper. Group all variants and derivatives under one lineage. Do not copy source bytes, allocate tokens, or include in train/eval corpora until rights and evidence gates clear. Original trajectory is public and contaminated for discovery evaluation.",
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false,
+      "checked_at": "2026-11-25"
     }
   ],
   "source_revision_note": "Dataset cards checked on the audit date; data-file revisions must be pinned at intake."
