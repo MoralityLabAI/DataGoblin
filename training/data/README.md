@@ -1,5 +1,10 @@
 # Aleph data planning
 
+[COL-DG-01](collatz_curriculum.md) supplies an offline arithmetic curriculum
+with independent trace replay, parameter-disjoint public splits and scaled-copy
+checks. Its generator admits finite cycle witnesses after verification and
+records no token quota credit until tokenizer and mixture admission run.
+
 The [19 November 2026 landscape report](../reports/2026-11-19_data_landscape.md) evaluates the owned corpus receipts and public sources for a proposed 20B-token run with a conditional 30B continuation.
 
 | File | Contents |

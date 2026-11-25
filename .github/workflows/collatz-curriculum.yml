@@ -1,0 +1,23 @@
+name: collatz-curriculum
+on:
+  pull_request:
+    paths:
+      - src/datagoblin/training_gym/collatz_*.py
+      - tests/unit/test_collatz_corpus.py
+      - .github/workflows/collatz-curriculum.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m pytest tests/unit/test_collatz_corpus.py
+      - run: python -m datagoblin.training_gym.collatz_corpus generate --out runs/col-ci
+      - run: python -m datagoblin.training_gym.collatz_corpus audit --out runs/col-ci
