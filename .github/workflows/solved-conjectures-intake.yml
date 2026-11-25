@@ -7,6 +7,10 @@ on:
       - "scripts/stage_solved_conjectures.py"
       - "tests/unit/test_solved_conjectures_intake.py"
       - ".github/workflows/solved-conjectures-intake.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - ".github/workflows/solved-conjectures-intake.yml"
   workflow_dispatch:
 
 permissions:
@@ -25,7 +29,7 @@ jobs:
           python-version: "3.12"
       - name: Test read-only staging on a synthetic Git repository
         run: |
-          python -m pip install pytest ruff
+          python -m pip install . pytest ruff
           python -m pytest -q tests/unit/test_solved_conjectures_intake.py
           ruff check scripts/stage_solved_conjectures.py tests/unit/test_solved_conjectures_intake.py
       - name: Fetch exact upstream commit without checking out or executing its code
