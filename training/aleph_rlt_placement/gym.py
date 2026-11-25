@@ -30,6 +30,8 @@ ARMS = (
     "pass_rlt",
     "pass_damp",
     "global_full_damp",
+    "prelude_reread",
+    "site_damp",
 )
 
 
@@ -54,7 +56,7 @@ def coefficients(arm, r, s):
     n = len(word)
     if arm not in ARMS:
         raise ValueError(arm)
-    if arm == "direct":
+    if arm in ("direct", "prelude_reread", "site_damp"):
         return {}
     if arm in ("core_edges", "core_edges_damp", "pass_rlt", "pass_damp"):
         weights = [1 / (r - j) for j in range(r)]
@@ -133,9 +135,25 @@ class Aleph(nn.Module):
         x = self.embed(tokens)
         word, coeff = schedule(r, s), coefficients(arm, r, s)
         pass_input = x
+        prelude = x
         for i, physical in enumerate(word):
             if physical == 1:
                 pass_input = x
+            # Exactly one token-aligned reread before physical core block 6
+            # on pass 2. At r=1 the site is absent; at r>2 it is not repeated.
+            reread = None
+            if i == 16 and physical == 6 and arm in ("prelude_reread", "site_damp"):
+                source_read = prelude if arm == "prelude_reread" else pass_input
+                before_read = x
+                x = torch.lerp(x, source_read, 0.25)
+                if trace is not None:
+                    with torch.no_grad():
+                        reread = {
+                            "source": "prelude" if arm == "prelude_reread" else "pass_input",
+                            "beta": 0.25,
+                            "source_rms": source_read.float().square().mean().sqrt().item(),
+                            "displacement_rms": (x - before_read).float().square().mean().sqrt().item(),
+                        }
             y = self.blocks[physical](x)
             a, anchor = coeff.get(i, (1.0, "local"))
             source = pass_input if anchor == "pass" else x
@@ -152,6 +170,7 @@ class Aleph(nn.Module):
                             "physical": physical,
                             "alpha": a,
                             "anchor": anchor,
+                            "reread": reread,
                             **dict(
                                 zip(
                                     (
@@ -169,6 +188,8 @@ class Aleph(nn.Module):
                             ),
                         }
                     )
+            if physical == 0:
+                prelude = x
         return F.linear(self.norm(x), self.embed.weight)
 
 
@@ -400,6 +421,17 @@ def self_test():
     assert torch.equal(direct, m(x, "terminal"))
     assert torch.equal(m(x, "direct", 1, 1), m(x, "pass_rlt", 1, 1))
     assert torch.equal(m(x, "direct", 1, 1), m(x, "core_edges", 1, 1))
+    for arm in ("prelude_reread", "site_damp"):
+        assert torch.equal(m(x, "direct", 1, 1), m(x, arm, 1, 1))
+        tr = []
+        m(x, arm, 2, 1, trace=tr)
+        assert [v["visit"] for v in tr if v["reread"] is not None] == [16]
+        tr = []
+        m(x, arm, 3, 1, trace=tr)
+        assert [v["visit"] for v in tr if v["reread"] is not None] == [16]
+        x_future = x.clone()
+        x_future[:, -1] = 62
+        assert torch.allclose(m(x, arm)[:, :-1], m(x_future, arm)[:, :-1], atol=1e-6, rtol=1e-6)
     x2 = x.clone()
     x2[:, -1] = 62
     assert torch.allclose(direct[:, :-1], m(x2)[:, :-1], atol=1e-6, rtol=1e-6)
