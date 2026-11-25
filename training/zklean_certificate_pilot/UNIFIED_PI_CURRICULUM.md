@@ -1,0 +1,9 @@
+# ZKL-19: unified typed certificates, native curriculum preflight
+
+Source and evidence: https://github.com/patrickdugan/zk-rusto-no-bitcoino/blob/7097e1a07588edc03085aacd13f32a86dd9d69ca/docs/ZKL18_19_RESULTS.md.
+
+The public-syntax circuit candidate uses a single append-only log of Lift, Sub, Eq, WF, Lookup and Ty judgments. Every inference is governed by one of 32 fixed local rule cases. Dependent application requires an explicit substitution premise. The host validates syntax structure and independently specifies the closed goal, without supplying a prevalidated semantic inference table. Native reference and static equation table pass all 185 rows in six fixtures, all 32 local cases and 5,371 different-signature predecessor substitutions. Actual Nova synthesis and folding remain pending at this handoff.
+
+On 192 fresh diagnostic goals (64 per family), all native replay and equation checks pass. Weakening / dependent application / conversion require 4,260 / 14,829 / 6,217 unified rows, compared with 2,296 / 4,053 / 3,304 hybrid rows. At the current 64-slot cap, coverage is 62/192; at a hypothetical 512 slots all fit. The maximum is 442 rows. These counts do not establish an optimal certificate or a cryptographic runtime. No learned candidate, training release or sealed roots.
+
+Next curriculum: explicitly generate missing Lift/Sub and Lookup judgments for typed goals with a source-family split and independent checker. Prioritize dependent application and context lookup. Compare against deterministic memoized generation; assess a bulk-lifting or authenticated lookup representation as a separate prospective change. The current native generator is a structural ceiling, not evidence of a model advantage. Never mix costs of the ZKL-18 hybrid with ZKL-19's explicit semantics. Public syntax still exposes proof terms; meaningful private theoremhood requires a separately audited private arena and statement binding.
