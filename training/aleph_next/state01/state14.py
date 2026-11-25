@@ -94,8 +94,7 @@ def progress(r):
     p=r['attempts']['search_probe'];return 1-p['gap']/max(1,p['initial_gap'])
 
 def features(r):
-    a=r['attempts'];p=a['search_probe'];n=a['norm_probe']
-    return q.features(r['domain'],r['x'],r['y'])+[progress(r),p['edges']/128,p['work']/2048,n['done']/2,n['growth'],n['gap']/64,n['work']/2048]
+    a=r['attempts'];p=a['search_probe'];n=a['norm_probe'];return q.features(r['domain'],r['x'],r['y'])+[progress(r),p['edges']/128,p['work']/2048,n['done']/2,n['growth'],n['gap']/64,n['work']/2048]
 
 def main(out):
     torch.set_num_threads(1);torch.use_deterministic_algorithms(True);start=time.process_time();rows=panel();paths={};out.mkdir(parents=True,exist_ok=True)
