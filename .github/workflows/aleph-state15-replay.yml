@@ -2,7 +2,8 @@ name: Aleph STATE15 kernel replay
 on:
   pull_request:
     paths:
-      - 'training/aleph_next/state01/state15_replay.py'
+      - 'training/aleph_next/state01/state1*.py'
+      - 'training/aleph_next/state01/STATE15_REWRITE_WITNESSES.json'
       - '.github/workflows/aleph-state15-replay.yml'
   workflow_dispatch:
 permissions:
@@ -33,6 +34,7 @@ jobs:
         run: |
           lean --version
           python training/aleph_next/state01/state15_replay.py --regenerate --archive-root "$RUNNER_TEMP/state15-archives" --out "$RUNNER_TEMP/state15" --batch-size 8
+          python training/aleph_next/state01/state15_audit.py --archive-root "$RUNNER_TEMP/state15-archives" --out "$RUNNER_TEMP/state15" --summary "$RUNNER_TEMP/state15/AUDIT.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -40,6 +42,7 @@ jobs:
           path: |
             ${{ runner.temp }}/state15/PREPARED.json
             ${{ runner.temp }}/state15/KERNEL_RECEIPTS.json
+            ${{ runner.temp }}/state15/AUDIT.json
             ${{ runner.temp }}/state15/batches/*.log
           if-no-files-found: warn
           retention-days: 14
