@@ -1,0 +1,31 @@
+name: Aleph recovered training source packet
+on:
+  pull_request:
+    paths:
+      - 'training/aleph_next/recovery/**'
+      - '.github/workflows/aleph-recover-sources.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PYTHONPATH: src
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - run: python training/aleph_next/recovery/recover_sources.py --out "${{ runner.temp }}/aleph-recovery-sources"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aleph-recovery-train-source-candidates
+          path: ${{ runner.temp }}/aleph-recovery-sources
+          if-no-files-found: error
+          retention-days: 30
