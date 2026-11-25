@@ -2,7 +2,7 @@
 
 2026-11-25. Research export for Data Goblin, following DCF-15 (HybridTRMLDT PR #29, https://github.com/MoralityLabAI/HybridTRMLDT/pull/29). This is a standalone curriculum adapter, not an import into the main training collator or a trained model.
 
-The upstream dispatcher compiles reusable structural elimination plans. Its 864 original frame labels are independently replayed here in a log-space factor-elimination implementation with explicit assignment indexing and a different elimination tie order. All 864 posterior and decision labels agree (max posterior discrepancy 2.6645352591003757e-15). Original 288 n=8 frames also had brute-force checks upstream. Independent algorithm comparison is numerical FP64 evidence, not a formal interval certificate. Fresh held-out frames use the independent oracle; these 144 labels have not been cross-checked by a second implementation in DCF-16.
+The upstream dispatcher compiles reusable structural elimination plans. Its 864 original frame labels are independently replayed here in a log-space factor-elimination implementation with explicit assignment indexing and a different elimination tie order. All 864 posterior and decision labels agree (max posterior discrepancy 2.6645352591003757e-15). Original 288 n=8 frames also had brute-force checks upstream. Independent algorithm comparison is numerical FP64 evidence, not a formal interval certificate. All 144 new family holdout labels also agree with the upstream dispatcher (max discrepancy 3.6637359812630166e-15); 48 width-8 cases agree with brute force (max 1.0547118733938987e-15). Maximum dispatcher scope 6.
 
 ## Data contract and split
 
@@ -34,6 +34,7 @@ Run DCF-15 benchmark.py from HybridTRMLDT research_gym/benchmarks/dcf15_structur
 
     OPENBLAS_NUM_THREADS=1 python export.py --source /path/to/frames.jsonl --out data
     python score.py data
+    PYTHONPATH=/path/to/dcf15_structural_dispatcher python family_audit.py data
     sha256sum -c SHA256SUMS
 
 Manifest covers actual local generated data and scripts. Raw JSONL splits, audit and baseline receipts are provided in the conversation archive; the branch stores the exporter, scorer, manifest and this report. Training dataset registration, EvalMath integration, hidden split infrastructure, plan-level routing traces, learned model experiments, and larger independent graph families remain outstanding.
