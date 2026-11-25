@@ -1,0 +1,10 @@
+seed,arm,local_initial,local_8,local_16,local_32,local_64,train_cpu_s,cal_cpu_s,48_survival_direct_orbits,48_survival_feedback_orbits,48_partial_direct_orbits,48_partial_feedback_orbits,48_reset_direct_orbits,48_reset_feedback_orbits,48_double_direct_orbits,48_double_feedback_orbits
+229,shuffled,14,30,36,36,36,18.9239,2.9487,0,0,0,0,8,8,3,3
+229,state,34,36,36,36,36,19.4123,3.1633,0,32,0,10,8,32,3,13
+229,terminal,15,25,29,36,36,19.2032,3.0901,0,0,0,0,7,8,3,3
+233,shuffled,16,30,31,36,36,19.811,2.6508,0,0,0,0,4,6,2,2
+233,state,35,36,36,36,36,19.6459,2.8323,0,32,0,10,5,32,0,19
+233,terminal,13,20,30,34,36,20.3605,2.735,0,0,0,0,6,5,1,4
+239,shuffled,11,22,27,36,36,20.2127,3.0778,0,0,0,0,8,9,1,1
+239,state,32,36,36,36,36,20.2615,3.0659,0,32,0,0,4,24,4,6
+239,terminal,9,15,20,33,36,20.1889,3.0757,0,0,0,0,9,10,1,2
