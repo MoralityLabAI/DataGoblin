@@ -191,8 +191,10 @@ def _summary(value: Any, depth: int = 0) -> Any:
             if not isinstance(key, str) or not NAME.fullmatch(key):
                 continue
             low = key.lower()
-            if (low.startswith("_") or low.startswith(("train_", "calibration_", "ordinary_", "ood_"))
-                    and re.search(r"_[0-9]{3}_", low)):
+            if low.startswith("_") or (
+                low.startswith(("train_", "calibration_", "ordinary_", "ood_"))
+                and re.search(r"_[0-9]{3}_", low)
+            ):
                 continue
             if any(x in low for x in ("witness", "secret", "token", "label", "generator_seed", "sealed",
                                       "root_ids", "lineage_ids", "checkpoint", "sha256", "path")):
@@ -201,9 +203,12 @@ def _summary(value: Any, depth: int = 0) -> Any:
             if v is not None:
                 out[key] = v
         return out
-    if isinstance(value, list) and 1 <= len(value) <= 2 and all(type(x) in (int, float) for x in value):
-        if all(math.isfinite(x) for x in value):
-            return value
+    if (
+        isinstance(value, list)
+        and 1 <= len(value) <= 2
+        and all(type(x) in (int, float) and math.isfinite(x) for x in value)
+    ):
+        return value
     return None
 
 
