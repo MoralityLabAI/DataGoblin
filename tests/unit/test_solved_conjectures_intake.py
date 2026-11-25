@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from stage_solved_conjectures import stage, triage  # noqa: E402
+from stage_solved_conjectures import stage, triage
 
 
 def test_pinned_intake(tmp_path):

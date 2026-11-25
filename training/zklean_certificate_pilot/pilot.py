@@ -62,7 +62,7 @@ def verify(x, rows):
         h, pre = x.rules[r]
         if len(refs) != len(pre):
             return False
-        for a, j in zip(pre, refs):
+        for a, j in zip(pre, refs, strict=True):
             if not 0 <= j < i or heads[j] != a:
                 return False
             used[j] += 1
@@ -117,7 +117,7 @@ def batch(xs):
     arity = (p != n).sum(-1)
     labels = []
     for x in xs:
-        cs, rs = optimal(x)
+        _cs, rs = optimal(x)
         labels.append([math.log1p(min(v, 128)) for v in rs])
     return h, p, arity, torch.tensor(labels, dtype=torch.float32), n
 
@@ -146,7 +146,7 @@ class RecurrentRanker(nn.Module):
 
 def measure(xs, score_fn):
     out = {'solved': 0, 'optimal': 0, 'attempts': 0, 'extra_rows': 0, 'n': len(xs)}
-    for x, scores in zip(xs, score_fn(xs)):
+    for x, scores in zip(xs, score_fn(xs), strict=True):
         rows, attempts = search(x, scores)
         out['attempts'] += attempts
         if rows is not None:
@@ -191,8 +191,11 @@ def main():
         h, p, ar, _, n = batch(xs)
         with torch.no_grad():
             return model(h, p, ar, n, steps).tolist()
-    results = {'parameters': sum(p.numel() for p in model.parameters()), 'train_roots': len(train), 'epochs': args.epochs,
-               'search_attempt_budget': 128, 'splits': {}}
+    results = {
+        'parameters': sum(p.numel() for p in model.parameters()),
+        'train_roots': len(train), 'epochs': args.epochs,
+        'search_attempt_budget': 128, 'splits': {},
+    }
     for name, xs in [('same_size', test), ('size_shift', shift)]:
         results['splits'][name] = {k: measure(xs, f) for k, f in [
             ('arity', scores_heur), ('dp_2', lambda x: scores_dp(x, 2)), ('dp_5', lambda x: scores_dp(x, 5)),
