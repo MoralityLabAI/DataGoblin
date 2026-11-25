@@ -28,6 +28,7 @@ def splits(cl,ood):
         if k:
             a=r.permutation(np.flatnonzero((cl==k)&ood));assert len(a)>=PANEL_N;outer.append(a[:PANEL_N])
     assert not set(np.concatenate(train))&set(np.concatenate(iid+outer));return train,iid,outer
+
 def observations(r,n,b):return np.argsort(r.random((n,N)),axis=1)[:,:b]
 def encode(f,idx):
     a=np.zeros((len(f),N),dtype=np.int64);a[np.arange(len(f))[:,None],idx]=f[np.arange(len(f))[:,None],idx]+1;return F.one_hot(torch.from_numpy(a),Q+1).float().flatten(1)
