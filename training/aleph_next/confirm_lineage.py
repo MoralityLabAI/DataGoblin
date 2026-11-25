@@ -11,8 +11,11 @@ SEEDS = (137, 163, 191)
 
 
 def digest(path):
+    hasher = hashlib.sha256()
     with path.open("rb") as fp:
-        return hashlib.file_digest(fp, "sha256").hexdigest()
+        for block in iter(lambda: fp.read(1024 * 1024), b""):
+            hasher.update(block)
+    return hasher.hexdigest()
 
 
 def read(path):
