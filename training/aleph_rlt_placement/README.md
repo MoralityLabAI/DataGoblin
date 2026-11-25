@@ -182,3 +182,5 @@ python "$d/cpu_worker.py" --wall 1200 receipt_gym.py --phase train --run-dir ../
 python "$d/cpu_worker.py" --wall 300 receipt_gym.py --phase score --run-dir ../receipt-cd --eval-seed-file ../receipt-holdout.seed
 python "$d/receipt_summary.py" ../receipt-cd/results.json --out ../receipt-cd/summary.json
 ```
+
+The [coordinated-supervision follow-up](RECEIPT_FOLLOWUP_PROTOCOL.md) reuses these frozen parity checkpoints, compares whole-code teaching with a matched-exposure outcome control, and transfers to two-rival LDT arrays with a held containment relation. Its [results](RECEIPT_FOLLOWUP_RESULTS.md) include the parity transition grid and the 10B decision.
