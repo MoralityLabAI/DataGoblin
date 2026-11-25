@@ -1,0 +1,98 @@
+{
+  "schema": "datagoblin.aleph-next.planning.v1",
+  "decision": "HOLD",
+  "launch": false,
+  "base_recipe": "../aleph_rlt_placement/fullscale.json",
+  "base_recipe_commit": "c9d88e390dd7b3435573e87a573f03b77525b931",
+  "purpose": "Prospective priceable comparison pending independent confirmation of a second arm.",
+  "unique_trainable_parameters_each": 999352320,
+  "precision": "bfloat16 weights",
+  "context": 2048,
+  "architecture": {
+    "width": 2048,
+    "vocab": 49152,
+    "query_heads": 16,
+    "kv_heads": 4,
+    "physical_shell_and_answer_blocks": 4,
+    "physical_shared_core_blocks": 10,
+    "core_ff": 8960,
+    "shell_and_answer_ff": 8192,
+    "core_passes": 2,
+    "answer_passes": 1,
+    "executed_blocks": 24,
+    "head": "tied",
+    "norm": "pre-RMSNorm with final RMSNorm",
+    "position": "RoPE",
+    "dropout": 0,
+    "bias": false
+  },
+  "pair": [
+    {
+      "arm": "A",
+      "policy": "direct",
+      "role": "reference",
+      "site": "direct actual endpoint after each block"
+    },
+    {
+      "arm": "B",
+      "policy": "global_full_damp",
+      "role": "provisional strongest simple text control for confirmation",
+      "site": "each nonterminal physical visit blends its endpoint against its immediate input",
+      "nonterminal_alpha": "990874363/8209817616",
+      "terminal_alpha": 1
+    }
+  ],
+  "training": {
+    "optimizer_source": "../aleph_rlt_placement/fullscale.json#optimizer",
+    "shared_initial_weights": true,
+    "identical_ordered_corpus": true,
+    "identical_processed_nonpadding_positions": true,
+    "preserve_optimizer_and_data_cursor_for_extension": true,
+    "first_leg_target": 10000000000,
+    "checkpoint_positions": [
+      10000000,
+      100000000,
+      500000000,
+      1000000000,
+      10000000000
+    ],
+    "fullscale_seeds_per_arm": 1,
+    "adjudication_unit": "paired independent documents, proof families, revision lineages and verification generators"
+  },
+  "stop_rules": {
+    "quality_source": "../aleph_rlt_placement/PROTOCOL.md",
+    "max_relative_text_loss_increase": 0.01,
+    "max_absolute_checked_regression": 0.02,
+    "max_throughput_loss": 0.1,
+    "required": "Positive paired gain against the strongest preregistered alternative, resolved critical tasks, independent corpus, restart and measured inclusive credit rate. Use adjudication only at the scheduled stop; preserve untouched final evaluation."
+  },
+  "credit_case": {
+    "starting_balance": 1000,
+    "chosen_reserve": 100,
+    "price_source": "operator estimate for two-pass execution",
+    "assumed_hours_per_10B": 55,
+    "assumed_credits_per_10B": 350,
+    "normal_plan_tokens_across_arms": 25700000000,
+    "winner_increment_tokens": 5700000000,
+    "normal_plan_total_credits": 899.5,
+    "early_exit_at_1B_alternative": {
+      "winner_total_tokens": 20000000000,
+      "loser_total_tokens": 1000000000,
+      "total_credits": 735
+    },
+    "full_30B_requires_credits_at_quote": 1050
+  },
+  "missing_before_launch": [
+    "production tokenizer identity",
+    "rights-reviewed, disjoint train/confirmation/adjudication/final manifests",
+    "author-independent multi-family confirmation",
+    "TPU topology, restart parity, throughput and measured price"
+  ],
+  "external_systems": [
+    "RLP",
+    "SGRT/HoloArc",
+    "LDT",
+    "research compiler and curation",
+    "verifiers"
+  ]
+}

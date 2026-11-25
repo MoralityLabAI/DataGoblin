@@ -22,13 +22,16 @@ def main():
         choices=(
             "architecture_lab.py",
             "arch_spectral.py",
+            "arch_scoring.py",
             "decoder_lab.py",
             "decoder_pooled.py",
             "nonlinear_lab.py",
             "continual_lab.py",
             "scale_lab.py",
+            "scale_shard.py",
             "study.py",
             "research_stream.py",
+            "packed_probe.py",
         ),
     )
     args, rest = p.parse_known_args()

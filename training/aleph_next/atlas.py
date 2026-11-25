@@ -56,14 +56,16 @@ def build(runs, output, commit):
             if local not in checked_files:
                 checked(row["checkpoint"], runs / directory, h)
                 checked_files.add(local)
-            parent = row.get("parent") or row["mechanism"].get("sender_sha256")
-            roles.append(dict(study=study, key=key, sha256=h, parent=parent))
+            parent = row.get("parent")
+            sender = row["mechanism"].get("sender_sha256")
+            roles.append(dict(study=study, key=key, sha256=h, weight_parent=parent, frozen_sender=sender))
             refs = references.setdefault(h, dict(sha256=h, training_seed=row["seed"], steps=row["steps"]))
             if refs.get("training_seed") != row["seed"]:
                 refs.pop("training_seed", None)
             obs = dict(
                 study_id=study,
                 scope="receipt_observation",
+                frozen_sender=sender,
                 split="public-development" if directory in ("scale", "mixed192") else "registered-held",
                 source_uri=uri,
                 pointer=key,
@@ -99,7 +101,7 @@ def build(runs, output, commit):
                 mechanistic_profile=row["mechanism"],
                 causal_evidence={"design": scope, "limitations": row["failures"]},
                 formal_properties={"oracle_or_verifier": uri},
-                lineage={"parent_or_sender": parent},
+                lineage={"weight_parent": parent},
                 checkpoint=dict(
                     reported_sha256=h,
                     verified_bytes=False,
@@ -156,6 +158,28 @@ def build(runs, output, commit):
             metrics=stream_inventory,
             checkpoints=[dict(sha256=h) for h in sorted(participants)],
             limits="Generated from public training grammar. Byte tokenizer is pilot-only.",
+        )
+    )
+    joint_source = "training/aleph_next/JOINT_QUERY.md"
+    modules.append(
+        dict(
+            id="ALEPH-joint-query",
+            family="aleph-next",
+            kind="synthetic_gym",
+            scope="Exact exploratory three-worker pair selection and finite counterexample",
+            sources=[
+                dict(
+                    repository="MoralityLabAI/DataGoblin",
+                    commit=rev,
+                    path=joint_source,
+                    git_blob_sha1=git("rev-parse", rev + ":" + joint_source),
+                )
+            ],
+            architecture="Three decentralized one-bit workers",
+            recipe="Enumerate eight uniform worlds",
+            metrics="Conditional Bayes Brier risk and greedy regret per slate",
+            checkpoints=[],
+            limits="Analytical game, no training; selection fixed before observations.",
         )
     )
     records = [models[h] for h in sorted(models)]

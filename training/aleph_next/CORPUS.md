@@ -15,3 +15,5 @@ python training/aleph_next/bounded.py --core 0 --wall 600 research_stream.py --v
 ```
 
 Each export requires a fresh destination. The verified packed-stream manifest SHA-256 of this release is `0b50ab12a77341e03323ec02259e05adac5377aef55e34f1564e95a230c5ecfc`. Its detached verifier-receipt file hashes to `003139542c6df7645e1b9de2aa7f3958864b3fb20ad615a74d93afca9baf620c`. Independent training reruns may produce different serialized checkpoint hashes across environments. Verify the new run's manifests before using its records.
+
+A second implementation solved every one of the 1,364 prompts using only its printed premises and checked the answer bytes, target mask and detached receipt. A 2,048-position pack then passed through the native two-pass Aleph reference with causal segment isolation. It had ten supervised next-token pairs, mean loss 5.98692 and finite gradient norm 16.33318 at initialization. Restoring the corpus cursor reproduced the following pack exactly. This smoke check performed zero optimizer updates. [Independent verifier](verify_research_stream.py) · [Native gradient and restart check](packed_probe.py)

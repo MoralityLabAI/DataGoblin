@@ -10,3 +10,16 @@ python training/aleph_next/mixed_release.py --new ../aleph-next/mixed192 --contr
 ```
 
 The frozen corpus comes from the DataGoblin evidence branch described in the earlier placement report. Run its intake and verification procedure before starting a new independent campaign. The scored tasks are byte-level text, verified Lean candidate choice, rule revision, reasoning repair and counterexample selection. The corpus-specific lexical and cue baselines are available in every cell receipt.
+
+## Finalizing independent seed workers
+
+The reducer checks the pinned dataset manifest and member bytes. It reconstructs each ordered 192-update sampling plan from the admitted corpus, including nonpadding positions, supervised positions, padded positions and lane counts. It recomputes the native and crossover metrics from scored rows and matches the row order to independently reconstructed 48-root and six-root panels. Old and new forwards must have bitwise-equal logits and gradients for every named parameter on two fixtures per archived control. The second fixture uses a real trained width-80 checkpoint, one native text row and one verified repair row.
+
+Run the preflight while cells are still training. Add each independent worker output using a separate shard argument. A final checkpoint and complete receipt must match before a shard can contribute. An existing partial cell keeps its own directory. A fully verified external cell is copied atomically into the dedicated completed-shards subdirectory. The reducer selects the earliest completed receipt for each seed and arm. The atlas uses relative checkpoint paths inside the output tree.
+
+```sh
+python training/aleph_next/mixed_release.py --mode audit --new ../aleph-next/mixed192 --controls runs/placement/study --pack runs/placement/mixed
+python training/aleph_next/mixed_release.py --mode release --new ../aleph-next/mixed192 --controls runs/placement/study --pack runs/placement/mixed --shard ../aleph-next/mixed163-shard --shard ../aleph-next/mixed191-shard
+```
+
+The final summary reports prelude minus local-site damping as its same-site source comparison, with direct and global constant damping as additional references. Its percentile intervals reuse the native public clusters and fix the three paired training seeds. Text clusters are windows, Lean clusters are seven goal families, and the remaining lanes share generator semantics across seeds.
