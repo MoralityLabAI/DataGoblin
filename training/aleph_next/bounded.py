@@ -33,6 +33,9 @@ def main():
             "study.py",
             "research_stream.py",
             "packed_probe.py",
+            "anchor14_train.py",
+            "confirm_eval.py",
+            "confirm_speed.py",
         ),
     )
     args, rest = p.parse_known_args()
