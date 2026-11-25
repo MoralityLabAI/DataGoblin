@@ -203,8 +203,7 @@ def main_run(args):
     prop=torch.cuda.get_device_properties(device)
     free,total=torch.cuda.mem_get_info(device)
     if total<35*2**30 or free<30*2**30:
-        raise RuntimeError(f"need a mostly empty >=40 GB class accelerator
-        free={free}")
+        raise RuntimeError(f"need a mostly empty >=40 GB class accelerator; free={free}")
     if digest(RECIPE)!=RECIPE_SHA or digest(args.base/"index.json")!=PIN:
         raise ValueError("frozen recipe/index differs")
     cfg=read(RECIPE)
