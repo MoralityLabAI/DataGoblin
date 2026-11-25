@@ -30,6 +30,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
   build-replacement:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
@@ -61,7 +62,10 @@ jobs:
           retention-days: 30
           compression-level: 0
   verify-replacement:
-    needs: build-replacement
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      actions: read
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -81,10 +85,13 @@ jobs:
         with:
           name: Aleph-10M-replacement-v2
           path: ${{ runner.temp }}/delivery
+          run-id: 45722542334
+          github-token: ${{ github.token }}
       - name: Verify the independently packaged payload
         run: |
           receipt="$RUNNER_TEMP/delivery/RELEASE.json"
-          sha="$(sha256sum "$receipt" | cut -d' ' -f1)"
+          sha="ce2d0d5c637b39945fed7d92f022da3d92ab575d4b0e79fb35b8553a8dfaf509"
+          cmp "$receipt" training/aleph_next/recovery/RELEASE.v2.json
           python -u training/aleph_next/recovery/verify_bundle.py --archive "$RUNNER_TEMP/delivery/Aleph-10M-replacement-v2.zip" --release "$receipt" --release-sha256 "$sha" --out "$RUNNER_TEMP/fresh-corpus"
   publish-replacement:
     needs: verify-replacement
@@ -93,6 +100,7 @@ jobs:
     timeout-minutes: 8
     permissions:
       contents: write
+      actions: read
     concurrency:
       group: aleph-replacement-evidence-v2
       cancel-in-progress: false
@@ -104,6 +112,8 @@ jobs:
         with:
           name: Aleph-10M-replacement-v2
           path: ${{ runner.temp }}/delivery
+          run-id: 45722542334
+          github-token: ${{ github.token }}
       - name: Publish verified release without replacing existing data
         env:
           DELIVERY: ${{ runner.temp }}/delivery
@@ -111,6 +121,7 @@ jobs:
           python - <<'PY'
           import hashlib, json, os, pathlib, shutil, zipfile
           d = pathlib.Path(os.environ["DELIVERY"])
+          assert hashlib.sha256((d/"RELEASE.json").read_bytes()).hexdigest() == "ce2d0d5c637b39945fed7d92f022da3d92ab575d4b0e79fb35b8553a8dfaf509"
           r = json.loads((d/"RELEASE.json").read_bytes())
           z = d/"Aleph-10M-replacement-v2.zip"
           dest = pathlib.Path("assets/evidence")
@@ -129,8 +140,8 @@ jobs:
                   assert hashlib.sha256(f.read("REPLAY.json")).hexdigest() == stamp["replay_sha256"]
               return stamp
           verify(z, d/"RELEASE.json")
-          archive = dest/z.name
-          receipt = dest/"Aleph-10M-replacement-v2.RELEASE.json"
+          archive = dest/"Aleph-10M-replacement-v2-a0579b31.zip"
+          receipt = dest/"Aleph-10M-replacement-v2-a0579b31.RELEASE.json"
           if archive.exists() or receipt.exists():
               published = verify(archive, receipt)
               print("Existing immutable release retained", json.dumps(published, sort_keys=True))
@@ -142,7 +153,7 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -f assets/evidence/Aleph-10M-replacement-v2.zip assets/evidence/Aleph-10M-replacement-v2.RELEASE.json
+          git add -f assets/evidence/Aleph-10M-replacement-v2-a0579b31.zip assets/evidence/Aleph-10M-replacement-v2-a0579b31.RELEASE.json
           if ! git diff --cached --quiet; then
             git commit -m 'Publish verified Aleph replacement 10M train-only archive'
             git push origin HEAD:refs/heads/evidence/aleph-10m-replacement-v2-20261126
