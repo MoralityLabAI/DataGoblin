@@ -1,0 +1,2065 @@
+{
+  "schema_version": "1.0",
+  "repositories": [
+    {
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "priority": 1,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/LoopedTransformers.748770454ba9.branch-only.json",
+          "commit": "748770454ba994e1f6be100e84a5a86e6223ce78",
+          "sha256": "0b9081a9dc886455599ae50c98996c06cc9b62b7d2837d42b321b121b883fa3b",
+          "prefixes": [
+            "docs/recurrence_studies_synthesis_2026-10.md",
+            "experiments/compute_retain_reuse_v1/",
+            "experiments/recurrent_recovery_laco_v1/",
+            "experiments/recurrent_sae_study/"
+          ]
+        },
+        {
+          "file": "extracts/LoopedTransformers.f2ffca191359.json",
+          "commit": "f2ffca191359fa2b3790e784a9827d18240d87c6",
+          "sha256": "47c87bd385db868319e1f3217fe4ef12836f7599beedf5437236bda294a5a027",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Pinned origin/main plus origin/add-recurrent-recovery-laco for the three branch-only studies (compute_retain_reuse_v1, recurrent_recovery_laco_v1, recurrent_sae_study)."
+      ],
+      "unresolved_provenance": [
+        "Local commit e02f522 (recurrent-recovery re-run with the laco-lab 0.6B recipe and a second seed) is unpushed, so it has no public immutable reference and is not collected.",
+        "experiments/recurrent_sae_study ships 24 SAE .pt files with no digest receipts; they are identified by Git blob only."
+      ],
+      "missing_artifacts": [
+        "Raw tensors (raw_boundary_tensors.pt.gz, raw_fresco_tensors.pt.gz) remain at their upstream paths and are linked, not read."
+      ]
+    },
+    {
+      "repository": "MoralityLabAI/Compactification-Theory",
+      "priority": 2,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/Compactification-Theory.add2dc77cb6b.json",
+          "commit": "add2dc77cb6bf3ca4caa1f58c3cbe3d90c9000ae",
+          "sha256": "43c5a02281f69382871a933083bdab5bd434acc70dfcf3d74f90ee75cd0f0efa",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "priority": 3,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/DataGoblin.659c89195d23.json",
+          "commit": "659c89195d23a42e1c8f3ce8a87d9ba9da387498",
+          "sha256": "13d012b8339b89c1a3426171598dd5670d4b2652613f0ea00835db4484a60610",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/BPD",
+      "priority": 4,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/BPD.6d3ca23a8170.json",
+          "commit": "6d3ca23a817095f38789751004594777f54cf7d8",
+          "sha256": "fcc9d1f839566c7b28a649344e187d3e310c72f77da2bad44b0e7ffe0f3ae6d9",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/EvalMath",
+      "priority": 5,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/EvalMath.8e5c4e1e8bad.json",
+          "commit": "8e5c4e1e8bad782929469e7b2d8df2cab4e3db18",
+          "sha256": "cd84844693ed500e67faf0fe09f3565d2b72b50687816edc0f52fdac98630b22",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/Control-Harness",
+      "priority": 6,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/Control-Harness.b16a5c7dc20d.json",
+          "commit": "b16a5c7dc20d3bbd932ca2716816ece74e229f6f",
+          "sha256": "ce7cce636662c83bec0467c720d45142244c6a1871641818cade7f9117c88c20",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/HybridTRMLDT",
+      "priority": 7,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/HybridTRMLDT.0d331ce28a56.json",
+          "commit": "0d331ce28a561f3eb8b27b8423aafe4640fb9506",
+          "sha256": "bdb07ca57e8fef41694bacf38ff9fe05ef0f3a1e62090a399ae91a8a6806dc03",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/param-decomp",
+      "priority": 8,
+      "status": "extracted",
+      "extracts": [
+        {
+          "file": "extracts/param-decomp.2df0092d5be4.json",
+          "commit": "2df0092d5be4d8e4748b3c66ef8325dedef17549",
+          "sha256": "2a36ffdee00951dc6208f8e306dd48e6f052f9fdc5fc310f51939686d1b932d4",
+          "prefixes": []
+        }
+      ],
+      "notes": [],
+      "unresolved_provenance": [],
+      "missing_artifacts": [
+        "Tracked weight-like files are listed by tree entry only; no receipts name their digests."
+      ]
+    },
+    {
+      "repository": "MoralityLabAI/ConstitutionalAlignment",
+      "priority": 9,
+      "status": "partial",
+      "extracts": [
+        {
+          "file": "extracts/ConstitutionalAlignment.f7b6f78971bf.json",
+          "commit": "f7b6f78971bf5dbb54bde2a86433b95d28d4896d",
+          "sha256": "19540f14338d3d92e13e90f6ccab6230c2b7b6240658b6089e7e78d9e06e8451",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Extracted from the default branch only; the role and training provenance of each digest need review before use."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/FurlingExperiments",
+      "priority": 9,
+      "status": "partial",
+      "extracts": [
+        {
+          "file": "extracts/FurlingExperiments.5af062c0d226.json",
+          "commit": "5af062c0d22682036b8d50b845d5c2f7291a962f",
+          "sha256": "3211ab5c556eca8ec6ad5bae9eb1be96bdd619ab4cce0ee1a125af40f7982454",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Extracted from the default branch only; the role and training provenance of each digest need review before use."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/Pixieology",
+      "priority": 9,
+      "status": "partial",
+      "extracts": [
+        {
+          "file": "extracts/Pixieology.5d9b7fdaf557.json",
+          "commit": "5d9b7fdaf55795c9fe99e721c8b46a21ee279179",
+          "sha256": "68bba99aad04b9fd325783381ab31d4a0ddf9c4c1c27293718deb98a363d47f4",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Extracted from the default branch only; the role and training provenance of each digest need review before use."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/percolation-interp",
+      "priority": 9,
+      "status": "partial",
+      "extracts": [
+        {
+          "file": "extracts/percolation-interp.282184519f7b.json",
+          "commit": "282184519f7bbd05a81ae76c3faa5d655945ee04",
+          "sha256": "5939a0503bf3468c2fb7e4396c9541b6dd815944a2fe7d4dd2c0d065d3e59100",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Extracted from the default branch only; the role and training provenance of each digest need review before use."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Persona-Holonmy-Bench",
+      "priority": 9,
+      "status": "partial",
+      "extracts": [
+        {
+          "file": "extracts/Persona-Holonmy-Bench.5819cf99237a.json",
+          "commit": "5819cf99237ab54f8a9fbebbbde0d3a4f060f62b",
+          "sha256": "0339d705768dfa46830b2dde442a526da9f499e15f119000a5e14cc6c3a72017",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Extracted from the default branch only; the role and training provenance of each digest need review before use."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SystemicRiskBench",
+      "priority": 9,
+      "status": "partial",
+      "extracts": [
+        {
+          "file": "extracts/SystemicRiskBench.8df4276265c3.json",
+          "commit": "8df4276265c348e24e98f9968848074d1d82fdfe",
+          "sha256": "88fce983cbf8ff6e22bbdae16f64dbd2b00c907a84262a5e8bcaf8414a4858c9",
+          "prefixes": []
+        }
+      ],
+      "notes": [
+        "Extracted from the default branch only; the role and training provenance of each digest need review before use."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/AICourt",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/AI_Diplomacy",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/ALife",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/Adict",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/BlueBeam",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/CoupBench",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/GPTStoryworld",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/Hermes-Skills",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/RSITopology",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/SelfModels",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/TRMStoryworld",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/TheySing",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/ThoughtLeader",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/VPD",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/jev-qwen",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/loop-capacity",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/metta-storyworld",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/morality-lab-site",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/sweepweave-ts",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "MoralityLabAI/trm_observability_harness",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ANE",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ANE-LM",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/AllSketchs",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Bergverse",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Bisq-Agent-Network",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/BitAgent",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/BitAgent-web",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/BitVMArena",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/BitcornWisdom",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Blighted-Galaxy",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/BlockPo-to-Tradelayer",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Blockpo",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/BoP6GW",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Chitraverse",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Claude-Code-Game-Studios",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/CryptoSwarmArena",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Dillonverse",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ExoselfBench",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/FreeTradingAlgos",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Gameatria",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Goodfireverse",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/HRM",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/HRM-Text",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/HRM-re",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Hermes-Skills",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/JRPG",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/LMRL-Gym",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Math-Accel",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/MathCan",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/MuslimTrader",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/OmniTradeJS",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/OntologicalProofs",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/OpenWeights",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/P2P-Settlement-Arena",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/PuppetMaster",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/QuantumBitcoinArena",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/QuantumBlot",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/QuranQA",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Safe-Server-MM",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SatsHedgeZero",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SilicoBuddy",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SlaveBench",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Soul-Torch",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Spiral",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/StableRateStudy",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/Storyforge",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SukukCoin",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SweepWeave",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/SynergismOfficial",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TL-Web",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TLDocs",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TLNPM",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TensorCraft",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TheySing",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ThoughtLeader",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TradeLayer-Rust",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/TweetScraping",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/UTXO-Ref",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/XenobotBench",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ZKstream",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/activitypub-fuzzer",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/airsign",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/arkadiko",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/arke",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/autoresearch",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/autoresearch-mlx",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bark",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bark-shinigami-zk-bitvm-demos",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/beyond-bayes",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bips",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bisq2",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bitcoin-defi-bench",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bitcoin-liquidity-formal",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/bitcoin-rs",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/blossom-storage-bonds",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/btc-verified",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/chrono-echo",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/clearwing",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/consciousness_cluster",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/cookieclicker",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/create-react-app-lambda",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/crucible",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/cryptanalytic-discovery-lab",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/deribit-api-clients",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/deribit-v2-ws",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/dlc-verify",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/dlc-verify-tvc",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/electrum",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/fbamtrain",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/frakt-web",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/garbled-snark-verifier",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/goose",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/hermes-agent",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/hermes-lite",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/infomorphs",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ironclaw",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/jurassic-bitcoin",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/khepri-starknet",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/kidsgames",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/kucoin-futures-node-api",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/layerexplorer",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/leanp2p",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/levinverse",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/linuxarena",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/litecoin",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/lm_understand-logs",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/lookatmyquant",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/make-it-grow-renewed",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/makeitgrow-game.gmx",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/makeitgrow-website",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/metaliquid",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/modified-MWDF",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/my-near-rust-contract",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/neoplatonic-lean",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ntn-boilerplate",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/omnilite.js",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/oss-contributions",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/p2poolv2",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/param-decomp",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/prime-environments",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/q1-adapters",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/raito",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/rust-bitcoin",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/rust-sdk",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/sapio",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/securekeys",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/shinigami",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/sparrow",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/spec",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/starknet-btc-lightclient",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/starknet-contracts",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/stego-bench",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/stwo-cairo",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/tensor-lab",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/tradelayer-wallet",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/tradelayer.js",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/tradelayer_wallet_mono_repo_v1",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/ts-sdk",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/unsloth",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/vramorama",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/vtxo-exit-proof",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/zeus",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Fork of an upstream project; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/zk-rusto-no-bitcoino",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    },
+    {
+      "repository": "patrickdugan/zkTL",
+      "priority": 11,
+      "status": "excluded",
+      "extracts": [],
+      "notes": [
+        "Empty repository; not scanned."
+      ],
+      "unresolved_provenance": [],
+      "missing_artifacts": []
+    }
+  ]
+}

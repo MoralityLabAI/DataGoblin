@@ -66,3 +66,7 @@ Admission requires pinned dataset/file revisions, origin and teacher-attribution
 The proposed first yield measurement is 10,000 examples across 12–20 task families. Record accepted unique Aleph tokens, loss-bearing tokens, canonical roots, replay pass rate, duplication and resource cost. This measurement has not run.
 
 Store raw training content, generated runs and evaluation labels outside this directory. The repository retains catalogs, plans and aggregate analytical estimates.
+
+## Model Atlas: small-model research specimens
+
+[Model Atlas collator](../model_atlas/README.md) stages pinned fit receipts, recipes, development benchmarks, causal and mechanistic summaries for Aleph's research-learning corpus. The first catalog targets 55 distinct archived LBF fits. Generated candidate documents are discovery-only until rights, evidence, lineage and token-admission review; no additional training quota is assumed.
