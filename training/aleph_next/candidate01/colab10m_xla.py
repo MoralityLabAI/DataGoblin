@@ -21,14 +21,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch.nn import functional as F
-from torch.utils.checkpoint import checkpoint
-
 from colab10m import PIN, RECEIPT, RECIPE, RECIPE_SHA, collect_group, fixture, rotary
 from packing import reference_logits, sdpa_mask, token_loss_sum
 from production import HERE, digest, read
 from restart import Aleph, adam, lr, restore_rng, rng_state, schedule
 from snapshot import MixedStream
+from torch.nn import functional as F
+from torch.utils.checkpoint import checkpoint
 
 FIELDS = ("input_ids", "position_ids", "segment_ids", "labels_at_query")
 CHECKPOINT_SCHEMA = "aleph.direct-a.xla.single.v1"
