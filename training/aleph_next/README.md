@@ -1,5 +1,7 @@
 # Aleph architecture and distributed researcher tournament
 
+The final candidate tournament, verified corpus supply and first-round launch decision are in [ALEPH-CANDIDATE-01](candidate01/REPORT.md).
+
 The [consolidated report](REPORT.md) gives the strict-1B recommendation, measured effects against the strongest controls and the credit decision. The [machine-readable gates](catalog/gates.json), [Model Atlas release](catalog/README.md) and [replay commands](REPLAY.md) accompany the study.
 
 | Study | Registered comparison | Evidence |
