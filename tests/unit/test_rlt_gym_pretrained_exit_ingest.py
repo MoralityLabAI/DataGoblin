@@ -126,7 +126,7 @@ def test_cross_split_leakage_rejected(tmp_path: Path) -> None:
     rows = [json.loads(x) for x in path.read_text().splitlines()]
     rows[0]["split"] = "development"
     text = "".join(canonical_json(x) + "\n" for x in rows)
-    path.write_text(text)
+    path.write_bytes(text.encode("utf-8"))
     manifest_path = source / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
     manifest["files_sha256"][path.name] = hashlib.sha256(text.encode()).hexdigest()
