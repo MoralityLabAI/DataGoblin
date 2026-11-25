@@ -126,6 +126,10 @@ def freeze(fit_manifest, text_dir, pack, out, extra_roots=()):
         meta = file.with_suffix(".json")
         if meta.is_file():
             receipt = read(meta)
+            if "receipt_sha256" in row and sha(meta) != row["receipt_sha256"]:
+                raise ValueError("endpoint receipt differs from the canonical fit roster")
+            if "parent_sha256" in row and receipt.get("prefix_sha") != row["parent_sha256"]:
+                raise ValueError("endpoint descends from a different prefix")
             if (
                 receipt["arm"],
                 receipt["seed"],
@@ -194,6 +198,12 @@ def verify_freeze(out):
     check_native_pack(pack)
     if any(sha(Path(v["checkpoint"])) != v["sha256"] for v in lock["fits"].values()):
         raise ValueError("frozen checkpoint changed")
+    for v in lock["fits"].values():
+        if (
+            "endpoint_receipt_sha256" in v
+            and sha(Path(v["checkpoint"]).with_suffix(".json")) != v["endpoint_receipt_sha256"]
+        ):
+            raise ValueError("frozen endpoint receipt changed")
     return lock
 
 

@@ -46,6 +46,80 @@ def test_failed_development_leaves_panel_unopened(tmp_path):
     assert not (out / "freeze.json").exists()
 
 
+def test_frozen_public_fixture_roster_checks_endpoint_lineage_and_receipt(tmp_path, monkeypatch):
+    import confirm_eval as ev
+
+    monkeypatch.setattr(ev, "sources", lambda: {"fixture": "public"})
+    panel, pack, out = (tmp_path / n for n in ("text", "pack", "gate"))
+    panel.mkdir()
+    pack.mkdir()
+    (panel / "manifest.json").write_text("{}")
+    (pack / "dataset.json").write_text(json.dumps({"schema": "datagoblin.mixed-pretrain-pilot.v1", "files": {}}))
+    records = []
+    for arm in ARMS:
+        for seed in SEEDS:
+            base = tmp_path / f"{arm}-{seed}"
+            base.mkdir()
+            weights = base / "h0064.pt"
+            weights.write_bytes(f"public fixture {arm} {seed}".encode())
+            roots = base / "h0064-roots.json"
+            roots.write_text(json.dumps({"repair": ["c" * 64]}))
+            meta = weights.with_suffix(".json")
+            meta.write_text(
+                json.dumps(
+                    dict(
+                        arm=arm,
+                        seed=seed,
+                        step=64,
+                        checkpoint_sha256=ev.sha(weights),
+                        params=14179584,
+                        visits=24,
+                        roots=roots.name,
+                        roots_sha256=ev.sha(roots),
+                        stream=str(seed),
+                        tokens=9,
+                        padded=10,
+                        labels=7,
+                        prefix_sha="test-parent",
+                        prefix_stream="toy",
+                        prefix_tokens=2,
+                        prefix_padded=2,
+                        recipe="toy",
+                        corpus="toy",
+                    )
+                )
+            )
+            records.append(
+                dict(
+                    arm=arm,
+                    seed=seed,
+                    step=64,
+                    checkpoint=str(weights),
+                    sha256=ev.sha(weights),
+                    receipt_sha256=ev.sha(meta),
+                    parent_sha256="test-parent",
+                )
+            )
+    manifest = tmp_path / "fits.json"
+    manifest.write_text(
+        json.dumps(
+            dict(
+                reference_competent=True,
+                candidate_competent=False,
+                development_competence={"fixture": True},
+                fits=records,
+            )
+        )
+    )
+    ev.freeze(manifest, panel, pack, out)
+    assert not (out / "private.seed").exists() and not ev.verify_freeze(out)["candidate_development_competent"]
+    meta.write_text("{}")
+    with pytest.raises(ValueError, match="frozen endpoint receipt changed"):
+        ev.verify_freeze(out)
+    with pytest.raises(ValueError, match="differs from the canonical fit roster"):
+        ev.freeze(manifest, panel, pack, tmp_path / "second")
+
+
 def synthetic_scores(gain):
     docs = {f"d{i}": str(i % 3) for i in range(12)}
     scores = {}

@@ -81,6 +81,15 @@ def test_atomic_optimizer_continuation(inputs, tmp_path):
     assert all(torch.equal(x, y) for x, y in zip(net.parameters(), other.parameters(), strict=True))
 
 
+def test_native_lookup_control_on_balanced_transition_table(inputs):
+    from anchor14_controls import lookup
+
+    train, _ = inputs
+    rows = train["repair"]
+    assert lookup(rows, rows, (-4, -3, -2)) == {"training_keys": 32, "held_keys_seen": 32, "hits": 32, "total": 32}
+    assert lookup(rows, rows, (-3, -2))["hits"] == 20
+
+
 def test_selection_requires_three_paired_sources_and_rejects_b_development(tmp_path, monkeypatch):
     monkeypatch.setattr(anchor, "recipe", lambda: "pin")
     for h in (64, 128):
