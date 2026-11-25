@@ -1,5 +1,7 @@
 # Aleph candidate tournament decision
 
+The [first 10M checkpoint follow-up](MILESTONE10M.md) fills the starter gaps reported below and records the current launch blockers.
+
 **Close the reasoning-allocation tournament. Keep direct A frozen. Hold the first paid run.** A fixed symbolic portfolio reached the retrospective first-action oracle's coverage in this bounded gym. Neither learned allocator earned promotion. The production stream now contains verified examples from the winning and losing methods, but it supplies only 4,214,754 of 10 billion positions. The first bottleneck is the custom-research lane.
 
 ## What the kernel established

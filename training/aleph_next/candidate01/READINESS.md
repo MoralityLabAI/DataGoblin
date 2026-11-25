@@ -1,5 +1,7 @@
 # First 10B direct-A pretraining round
 
+The [first 10M checkpoint follow-up](MILESTONE10M.md) fills the starter gaps reported below and records the current launch blockers.
+
 **Hold launch.** The architecture and optimizer have a frozen recipe. The admitted corpus supplies 4,214,754 positions (0.04215% of budget). The five-lane mix exhausts its custom-research lane during the seventh optimizer update. A full numerical TPU runner and restart on the intended topology still need qualification. The candidate tournament closes independently of these production gates.
 
 ## What the freeze buys

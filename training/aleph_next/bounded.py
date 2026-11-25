@@ -36,6 +36,10 @@ def main():
             "anchor14_train.py",
             "confirm_eval.py",
             "confirm_speed.py",
+            "candidate01/milestone_mix.py",
+            "candidate01/milestone_checked.py",
+            "candidate01/milestone_research.py",
+            "candidate01/milestone_text.py",
         ),
     )
     args, rest = p.parse_known_args()
@@ -74,6 +78,8 @@ def main():
     timer = threading.Timer(args.wall, lambda: os._exit(124))
     timer.daemon = True
     timer.start()
+    if script.parent == HERE / "candidate01":
+        sys.path.insert(0, str(script.parent))
     sys.argv = [str(script), *rest]
     runpy.run_path(str(script), run_name="__main__")
 

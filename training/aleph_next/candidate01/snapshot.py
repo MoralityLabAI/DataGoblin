@@ -8,7 +8,7 @@ import sqlite3
 import sys
 import tempfile
 from collections import Counter, defaultdict
-from contextlib import ExitStack
+from contextlib import ExitStack, closing
 from pathlib import Path
 
 from production import HERE, TOKENIZER_SHA256, digest, read
@@ -41,7 +41,7 @@ def membership(path, split):
     if {s["split"] for s in manifest["shards"]} != {split}:
         raise ValueError("held and training payloads must live in separate stores")
     uri = (path.parent / manifest["registry"]["path"]).resolve().as_uri() + "?mode=ro&immutable=1"
-    with sqlite3.connect(uri, uri=True) as db:
+    with closing(sqlite3.connect(uri, uri=True)) as db:
         members = db.execute(
             "SELECT roots.root,families.family,families.split FROM roots JOIN families ON roots.family=families.family"
         ).fetchall()
