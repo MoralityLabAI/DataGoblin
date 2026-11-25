@@ -86,9 +86,8 @@ def check_role(path):
     """Check an explicit row-level split if present; file role is pinned separately."""
     for row in rows(path):
         for field in ("split", "partition"):
-            if field in row and isinstance(row[field], str):
-                if row[field].lower() not in ("train", "training"):
-                    raise ValueError(f"unexpected {field}={row[field]} in {path.name}")
+            if field in row and isinstance(row[field], str) and row[field].lower() not in ("train", "training"):
+                raise ValueError(f"unexpected {field}={row[field]} in {path.name}")
 
 
 def recover_native(work, out):

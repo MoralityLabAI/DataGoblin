@@ -28,17 +28,20 @@ HERE = Path(__file__).resolve().parent
 CANDIDATE = HERE.parent / "candidate01"
 sys.path.insert(0, str(CANDIDATE))
 
-import curation as c
-import milestone_research as mr
-import milestone_text as mt
-import text_intake as ti
-from confirm_text import body_bytes, fetch as fetch_books, native_bytes, pins
-from curation_check import ALLOWED_AXIOMS, AX
-from milestone_mix import replay, require_train
-from milestone_text_overlap import Overlap, symbols
-from production import TOKENIZER_SHA256, digest, load_tokenizer, read
-from recover_sources import LBF, LRM, LT, LT_PIN, recover_looped, recover_native
-from snapshot import RECIPE, next_allocation
+# Load the archived sibling scripts only after establishing their module search path.
+# isort: off
+import curation as c  # noqa: E402
+import milestone_research as mr  # noqa: E402
+import milestone_text as mt  # noqa: E402
+import text_intake as ti  # noqa: E402
+from confirm_text import body_bytes, fetch as fetch_books, native_bytes, pins  # noqa: E402
+from curation_check import ALLOWED_AXIOMS, AX  # noqa: E402
+from milestone_mix import replay, require_train  # noqa: E402
+from milestone_text_overlap import Overlap, symbols  # noqa: E402
+from production import TOKENIZER_SHA256, digest, load_tokenizer, read  # noqa: E402
+from recover_sources import LBF, LRM, LT, LT_PIN, recover_looped, recover_native  # noqa: E402
+from snapshot import RECIPE, next_allocation  # noqa: E402
+# isort: on
 
 VERSION = "aleph-direct-A-10m-replacement-v2"
 SEED = 202611260915
