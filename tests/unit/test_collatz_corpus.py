@@ -93,7 +93,7 @@ def test_resource_bounds_and_out_of_core_seed():
             parameter_split(d)
 
 
-@pytest.mark.parametrize("mutation", ["target", "input", "receipt", "split", "id", "bool_input"])
+@pytest.mark.parametrize("mutation", ["target", "input", "receipt", "split", "id", "bool_input", "scope"])
 def test_dataset_admission_is_replayed(mutation):
     row = admitted_record(1, 1)
     if mutation == "target":
@@ -108,6 +108,8 @@ def test_dataset_admission_is_replayed(mutation):
         row["id"] = "forged"
     elif mutation == "bool_input":
         row["input"]["n"] = True
+    elif mutation == "scope":
+        row["supervision_scope"] = "all seeds and all parameters"
     with pytest.raises(ValueError):
         audit_records([row])
 

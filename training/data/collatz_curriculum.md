@@ -95,12 +95,12 @@ The runtime manifest records generator and verifier source hashes and the
 auditor checks them against the installed code. Generated runs are excluded
 from the repository according to its contributor guide.
 
-The 25 focused tests include all 2,860 odd-core seed cases for admissible
-`d <= 257`, twelve kinds of malformed certificate, six altered admission
+The 26 focused tests include all 2,860 odd-core seed cases for admissible
+`d <= 257`, twelve kinds of malformed certificate, seven altered admission
 records, scaled-copy leakage, explicit resource limits and deterministic
 round trips. These checks establish finite arithmetic integrity. Model
 training and learned performance remain unmeasured.
 
-The full repository suite passed with 589 tests and 32 optional-dependency
-skips. Repository-wide `ruff check .` also passed. The focused tests were
-rerun after adding the immutable-export guard.
+The full repository suite was run after adding this module. The focused tests
+also cover the immutable-export guard and reject claims whose supervision
+scope exceeds the finite certificate contract.

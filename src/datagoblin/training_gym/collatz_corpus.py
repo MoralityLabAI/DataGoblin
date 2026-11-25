@@ -71,6 +71,8 @@ def audit_records(records: list[dict]) -> dict:
     for row in records:
         if type(row) is not dict:
             raise ValueError("dataset record must be an object")
+        if row.get("supervision_scope") != "finite arithmetic trajectory and cycle closure":
+            raise ValueError("supervision scope exceeds the certificate contract")
         admission = verify_certificate(row.get("certificate"))
         if canonical_hash(row.get("admission")) != canonical_hash(admission):
             raise ValueError("admission was not produced by current independent replay")
