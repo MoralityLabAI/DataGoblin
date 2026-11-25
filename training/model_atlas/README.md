@@ -78,9 +78,52 @@ SHA-256; optionally `seed_rates`, `seed_penalized_work`, aggregate
 Different manifest layouts require a narrow adapter plus tests, not a recursive
 scrape of all JSON files in a repo.
 
-Next intake targets: LoopedTransformers TRM/PPT/SAE experiments, DataGoblin RLT
-and LDT gyms, Compactification-Theory, EvalMath and BPD. No counts are claimed
-for those until actual checkpoint receipts have been reviewed.
+## Repository queue, extracts and the coverage ledger
+
+`repositories.json` is the ordered intake queue. Each entry carries a status (`extracted`, `partial`, `queued`,
+`no_artifacts`, `inaccessible`, `excluded`), the pinned extract files (commit SHA-1 and file SHA-256), and the open
+items a reader needs: unresolved provenance, missing artifacts and notes. `extracts/` holds one deterministic JSON per
+pinned commit. Collation is offline: it verifies each extract digest, merges them with the curated LBF sources and
+writes the corpus, the population inventory and the ledger.
+
+```sh
+# 1. Extract metadata from a pinned commit (reads Git objects only; no checkout, no weights, no upstream code).
+git clone --bare --filter=blob:none https://github.com/OWNER/NAME NAME.git
+python -m datagoblin.model_atlas_extract --git-dir NAME.git --ref <branch-or-sha>   --repository OWNER/NAME --out training/model_atlas/extracts/NAME.<sha12>.json
+# 2. Pin it in repositories.json, then collate (add --sources/--cache to include the curated LBF fit manifests).
+python -m datagoblin.model_atlas_corpus --queue training/model_atlas/repositories.json   --sources training/model_atlas/sources.json --cache runs/model-atlas/source-cache --out runs/model-atlas/corpus
+```
+
+What the extractor keeps: tree entries (path, size, Git blob SHA-1), the names of weight files, Git blob SHA-1 of
+every JSON receipt, and for dicts holding a checkpoint digest: numeric and Boolean fields, short identifier labels
+(architecture, arm, optimizer), public base-model ids, pass/fail verdict flags, and the run's recipe container
+(`args`, `config`, `hparams`). It never keeps free text, weight bytes, per-root arrays or any field whose key names a
+witness, label, token, hidden or sealed quantity. Paths with a custody token (`sealed`, `holdout`, `hidden`,
+`private`, `ordinary`, `ood`, `witness`, `labels`, ...) are not parsed at all and are counted in the ledger.
+A `results_file` named by a run manifest contributes its per-loop summary metrics and multiple-choice denominators.
+JSONL files (episode rows and traces) are counted but not collected.
+
+Identity and deduplication:
+
+- A model is identified by the digest the source reports (`sha256:<hex>`); a tracked weight file that no receipt
+  names is identified by its Git blob (`gitblob:<sha1>`), taken from the tree entry without reading the bytes.
+- One digest reported by several receipts or studies is one model with several phenotype rows, never several models.
+- `checkpoint.artifact_kind` separates `final_or_primary` checkpoints from `intermediate_snapshot`, `sae_dictionary`
+  and `transcoder` artifacts. Design cells and primary-model counts ignore seeds and exclude the other kinds.
+- A digest that is only ever referenced (a teacher or base checkpoint) has no model record; it is listed under
+  referenced-only identities in the inventory and the ledger. A parent edge is set only when exactly one co-located
+  parent-role digest exists; otherwise `weight_parent` stays null and the candidates are listed.
+- `population_group` is a heuristic that drops version, recovery and ordinal suffixes from the study directory name.
+  Hold out whole groups when evaluating prediction, and treat the heuristic as a starting point for review.
+
+Fields the generic scan cannot supply stay null or `unknown`: implementation URI, recurrence topology, metric
+definitions, causal effect sizes and formal-verification status. `mechanistic_profile`, `causal_evidence` and
+`formal_properties` carry receipt-level tags (name-derived, not verified) and links to those receipts. Every
+phenotype row is `source_reported` with `independent_verification: false`; negative-result and correction documents
+are linked from their study records and never filtered out.
+
+`COVERAGE_LEDGER.md` and `corpus_report.json` are the committed outputs of the latest collation. The JSONL corpus
+stays untracked under `runs/`; `corpus_report.json` records its SHA-256 digests so a regeneration can be compared.
 
 ## Corpus admission
 

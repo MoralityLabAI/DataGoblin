@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "DataGoblin Model Atlas discovery record v1",
+  "title": "DataGoblin Model Atlas discovery record v1 (additive extension for receipt-extracted populations)",
   "type": "object",
   "required": [
     "schema_version",
@@ -33,7 +33,7 @@
     },
     "model_id": {
       "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
+      "pattern": "^(sha256:[0-9a-f]{64}|gitblob:[0-9a-f]{40})$"
     },
     "notation": {
       "type": "string"
@@ -60,7 +60,10 @@
           "type": "string"
         },
         "parameter_count": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 1
         },
         "passes": {
@@ -71,7 +74,23 @@
           "minimum": 1
         },
         "implementation_uri": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trainable_parameter_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "base_model_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -81,7 +100,36 @@
         "declared",
         "training_seed",
         "reported_fit_receipt"
-      ]
+      ],
+      "properties": {
+        "declared": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "training_seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "reported_fit_receipt": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "training_seed_candidates": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "extraction": {
+          "type": "string"
+        }
+      }
     },
     "phenotype": {
       "type": "array",
@@ -89,23 +137,18 @@
         "type": "object",
         "required": [
           "study_id",
-          "policy",
           "scope",
-          "split",
-          "independent_roots",
-          "budget",
-          "closure_rate"
+          "split"
         ],
         "properties": {
           "scope": {
-            "const": "per_training_seed"
+            "enum": [
+              "per_training_seed",
+              "receipt_observation"
+            ]
           },
           "split": {
-            "const": "calibration"
-          },
-          "independent_roots": {
-            "type": "integer",
-            "minimum": 1
+            "type": "string"
           },
           "budget": {
             "type": "integer",
@@ -119,8 +162,79 @@
           "mean_penalized_work": {
             "type": "number",
             "minimum": 0
+          },
+          "metrics": {
+            "type": "object"
+          },
+          "denominators": {
+            "type": "object"
+          },
+          "metric_definitions": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "independent_verification": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "independent_roots": {
+            "type": "integer",
+            "minimum": 1
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "scope": {
+                  "const": "per_training_seed"
+                }
+              },
+              "required": [
+                "scope"
+              ]
+            },
+            "then": {
+              "required": [
+                "policy",
+                "independent_roots",
+                "budget",
+                "closure_rate"
+              ],
+              "properties": {
+                "split": {
+                  "const": "calibration"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "scope": {
+                  "const": "receipt_observation"
+                }
+              },
+              "required": [
+                "scope"
+              ]
+            },
+            "then": {
+              "required": [
+                "source_uri",
+                "pointer",
+                "metrics",
+                "denominators",
+                "evidence",
+                "independent_verification"
+              ]
+            }
+          }
+        ]
       }
     },
     "mechanistic_profile": {
@@ -144,14 +258,33 @@
       ],
       "properties": {
         "reported_sha256": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^[0-9a-f]{64}$"
         },
         "verified_bytes": {
           "const": false
         },
         "archive_directory_uri": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "git_blob_sha1": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_kind": {
+          "enum": [
+            "final_or_primary",
+            "intermediate_snapshot",
+            "sae_dictionary",
+            "transcoder",
+            "unclassified_tracked_file"
+          ]
         }
       }
     },
@@ -170,5 +303,51 @@
     "data_split": {
       "const": "unassigned"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "model_id": {
+            "pattern": "^gitblob:"
+          }
+        },
+        "required": [
+          "model_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint": {
+            "required": [
+              "git_blob_sha1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_id": {
+            "pattern": "^sha256:"
+          }
+        },
+        "required": [
+          "model_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint": {
+            "properties": {
+              "reported_sha256": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
