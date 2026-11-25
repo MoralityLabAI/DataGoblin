@@ -65,6 +65,20 @@ Admission requires pinned dataset/file revisions, origin and teacher-attribution
 
 [solved-conjectures](https://github.com/1337isnot1337/solved-conjectures/tree/e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e) is registered in the formal-game catalog under the existing `formal_lean` lane. The pinned tree has 5,882 Lean paths (272,157,737 bytes), of which 5,215 are under `lean/` (262,579,836 bytes). These are raw source counts; result directories, archived snapshots and generated certificates do not count as independent theorem tasks. The two large filename-prefix groups Loneliness and Frankl alone contribute 246,395,879 bytes under `lean/`. Stage the primary sources before considering archives, preserve upstream credits and per-file license notices, and sample generated certificates separately. The pinned Lean 4.35.0 and mathlib lock, result-level scope reviews, strict axiom audit and independent replay are prerequisites for checked supervision. Keep public conjecture families separate from reserved evaluation roots. No source payload was downloaded, no proof was independently replayed, and no Aleph token volume or quota credit is claimed. Existing owned-corpus totals and mixture allocations are unchanged.
 
+### Read-only source intake
+
+Run `scripts/stage_solved_conjectures.py` against a local Git object store containing the exact pinned commit:
+
+```sh
+git init /tmp/solved-conjectures
+git -C /tmp/solved-conjectures fetch --depth=1 --no-tags https://github.com/1337isnot1337/solved-conjectures.git e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e
+python scripts/stage_solved_conjectures.py --source /tmp/solved-conjectures --out runs/solved-conjectures-intake
+```
+
+The dedicated GitHub Actions job performs this fetch in a disposable runner. It verifies the expected tree, primary path/byte census and Git blob identities, then hashes every primary file with SHA-256. It emits a deterministic metadata-only candidate inventory, review queue and aggregate receipt. Supply repeatable `--reference path/to/manifest.jsonl` arguments with existing SHA-256 file manifests for exact cross-source duplicate detection. A zero reference count means no cross-source comparison took place. The review queue caps high-volume filename groups and is solely for manual review. Filename groups are not theorem roots; all splits remain unset and all rows remain quarantined. No external Lean code or verification scripts run during this stage. The upstream Git object store holds the source content; raw payloads are not committed or uploaded as Actions artifacts.
+
+Next, map candidates to original conjecture roots and endpoint declarations using scope reports, review imported rights, deduplicate at declaration level, check evaluation custody, and replay a small independently audited endpoint cohort under pinned Lean 4.35.0 in an isolated resource-capped environment. Only after those gates and frozen-tokenizer accounting can accepted records enter training.
+
 ## Generation measurement
 
 The proposed first yield measurement is 10,000 examples across 12–20 task families. Record accepted unique Aleph tokens, loss-bearing tokens, canonical roots, replay pass rate, duplication and resource cost. This measurement has not run.
