@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "src/datagoblin/model_atlas.py"
+      - "src/datagoblin/gym_metadata.py"
       - "training/model_atlas/**"
       - "tests/unit/test_model_atlas.py"
       - ".github/workflows/model-atlas.yml"
@@ -20,7 +21,7 @@ jobs:
           python-version: "3.10"
       - run: python -m pip install -e ".[dev]"
       - run: python -m pytest tests/unit/test_model_atlas.py
-      - run: ruff check src/datagoblin/model_atlas.py tests/unit/test_model_atlas.py
+      - run: ruff check src/datagoblin/model_atlas.py src/datagoblin/gym_metadata.py tests/unit/test_model_atlas.py
       - name: Collect pinned public metadata only
         run: |
           python -m datagoblin.model_atlas --sources training/model_atlas/sources.json \
@@ -30,4 +31,15 @@ jobs:
         with:
           name: model-atlas-lbf-first-import
           path: runs/model-atlas/collated/
+          retention-days: 14
+
+      - name: Collate recently indexed gym metadata offline
+        run: |
+          python -m datagoblin.gym_metadata \
+            --sources training/model_atlas/gym_metadata/sources.json \
+            --out runs/model-atlas/gym-metadata
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-atlas-recent-gym-metadata
+          path: runs/model-atlas/gym-metadata/
           retention-days: 14
