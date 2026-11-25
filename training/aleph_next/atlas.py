@@ -58,7 +58,18 @@ def build(runs, output, commit):
                 checked_files.add(local)
             parent = row.get("parent")
             sender = row["mechanism"].get("sender_sha256")
-            roles.append(dict(study=study, key=key, sha256=h, weight_parent=parent, frozen_sender=sender))
+            roles.append(
+                dict(
+                    study=study,
+                    key=key,
+                    sha256=h,
+                    weight_parent=parent,
+                    frozen_sender=sender,
+                    training_seed=row["seed"],
+                    steps=row["steps"],
+                    local_relative_path=directory + "/" + row["checkpoint"],
+                )
+            )
             refs = references.setdefault(h, dict(sha256=h, training_seed=row["seed"], steps=row["steps"]))
             if refs.get("training_seed") != row["seed"]:
                 refs.pop("training_seed", None)

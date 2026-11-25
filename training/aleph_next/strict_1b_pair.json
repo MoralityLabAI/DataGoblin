@@ -69,7 +69,7 @@
   "credit_case": {
     "starting_balance": 1000,
     "chosen_reserve": 100,
-    "price_source": "operator estimate for two-pass execution",
+    "price_source": "operator estimate, depth unspecified; scenario assumes it applies to two passes",
     "assumed_hours_per_10B": 55,
     "assumed_credits_per_10B": 350,
     "normal_plan_tokens_across_arms": 25700000000,

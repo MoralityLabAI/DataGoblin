@@ -221,9 +221,14 @@ def admit(out, chosen):
     if chosen.is_relative_to(out):
         return chosen
     receipt_sha = gym.file_sha(chosen / "receipt.json")
+    source_receipt = json.loads((chosen / "receipt.json").read_bytes())
     with tempfile.TemporaryDirectory(prefix=".incoming-", dir=out) as temp:
         staged = Path(temp) / chosen.name
-        shutil.copytree(chosen, staged)
+        staged.mkdir()
+        # A finished fit comprises precisely the verified checkpoint, receipt
+        # and its named probes. Never copy temporary or unrelated job files.
+        for name in ("checkpoint.pt", "receipt.json", *(f"sweep-{k}.json" for k in source_receipt.get("sweep", {}))):
+            shutil.copy2(chosen / name, staged / name)
         rec = json.loads((staged / "receipt.json").read_bytes())
         if (
             gym.file_sha(staged / "receipt.json") != receipt_sha
@@ -336,6 +341,15 @@ def summarize(out, base, pack, shards=(), mode="release"):
         verified_existing_control_gradients=True,
         audit=audit,
         paths=locations,
+        admitted_new_files={
+            locations[f"w80-r2-s{s}-{arm}"]: [
+                "checkpoint.pt",
+                "receipt.json",
+                *(f"sweep-{key}.json" for key in r["sweep"]),
+            ]
+            for arm in ARMS[2:]
+            for s, r in cells[arm].items()
+        },
         by_arm=aggregate,
         means={k: {m: mean(row[m] for row in rows) for m in rows[0] if m != "seed"} for k, rows in aggregate.items()},
         prelude_minus_control=pairs,

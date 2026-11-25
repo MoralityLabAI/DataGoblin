@@ -4,7 +4,7 @@ The 999,352,320-parameter dense model uses 14 physical blocks. Ten middle blocks
 
 ## Full-context cost
 
-For a 2,048-position causal context, two passes require approximately 10.532 GFLOP per nonpadding position and three passes require 14.716 GFLOP. The count includes dense forward and backward projection products, the tied vocabulary head and ideal triangular attention. Padding, rematerialization, compiler/kernel behavior, I/O and evaluation change sustained throughput. The operator's 55-hour, 350-credit estimate for 10B positions implies 50,505 positions/s and about 6.36 credits/hour. The calibrated pass count is unknown. [Geometry and FLOP calculation](../aleph_rlt_placement/fullscale.py)
+For a 2,048-position causal context, two passes require approximately 10.532 GFLOP per nonpadding position and three passes require 14.716 GFLOP. The count includes dense forward and backward projection products, the tied vocabulary head and ideal triangular attention. Padding, rematerialization, compiler/kernel behavior, I/O and evaluation change sustained throughput. The operator's 55-hour, 350-credit estimate for 10B positions implies 50,505 positions/s and about 6.36 credits/hour. That rate would require 532 aggregate useful TFLOP/s at two passes or 743 at three. The calibrated pass count is unknown. [Geometry and FLOP calculation](../aleph_rlt_placement/fullscale.py)
 
 | Processed positions on one arm | Two-pass FLOPs | Three-pass FLOPs | Hours / credits at operator rate | Three-pass hours / credits if rate was measured at two passes |
 |---:|---:|---:|---:|---:|

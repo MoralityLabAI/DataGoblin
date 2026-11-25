@@ -1,0 +1,100 @@
+{
+  "schema": "datagoblin.aleph-next.continuation.v1",
+  "paid_training_authorized": false,
+  "local_cohorts": {
+    "ALEPH01_02": "33 preregistered small fits, sealed scoring and local operator diagnostics; see gate ledger",
+    "ALEPH03": "216 learned/calibration fits across nine frozen senders",
+    "ALEPH04": "nine fits following exact local certification",
+    "ALEPH05": "42 stage endpoints; 21 final students",
+    "ALEPH06": "admission and counts per width in catalog/gates.json",
+    "mixed192": "six new source/site cells and six archived, byte-checked controls"
+  },
+  "conditional_cells": [
+    {
+      "id": "scale-50M-100M",
+      "parameters": [
+        49622880,
+        99437080
+      ],
+      "status": "CLOSED: 14,179,584-parameter competence gate failed for both anchor controls",
+      "action": "Read ALEPH-06 rungs in the gate ledger. A closed failed gate ends this registered tournament; any replacement requires a separately frozen study.",
+      "controls": [
+        "direct",
+        "global_full_damp"
+      ]
+    },
+    {
+      "id": "independent-scale-confirmation",
+      "status": "unrun",
+      "requirements": [
+        "freeze task and checker before drawing a new design cohort",
+        "independent documents, Lean goal families, rule lineages and repair/counterexample generators",
+        "train a competent direct/control pair across three matched seeds at a budget where control beats unigram text and checked cue baselines",
+        "retain two-pass global damping as comparator and same-site damping for any prelude claim",
+        "retain three-pass matched 5/12,5/12,1 damping if testing RLT-specific benefit"
+      ],
+      "endpoints": [
+        "paired held text NLL",
+        "paired family-level verified research yield",
+        "safety bounds in ../aleph_rlt_placement/PROTOCOL.md"
+      ],
+      "power": "Use the paired family-difference variance on a separate development sample for a prespecified effect and simultaneous interval. Keep final family set untouched."
+    },
+    {
+      "id": "new-program-communication",
+      "status": "unrun",
+      "hypothesis": "A reader trained on semantic features or a verified code-family description can recover useful bits on new predicate programs.",
+      "controls": [
+        "same trained side-only, constant, shuffled, valid",
+        "pooled public-input oracle",
+        "fully algorithmic solver",
+        "separately budgeted metadata bits and readout compute"
+      ],
+      "unit": "entire unseen program grammar or intervention family"
+    },
+    {
+      "id": "joint-receipts",
+      "status": "exact three-worker verifier implemented; learned selection on unseen grammars unrun",
+      "hypothesis": "Some useful two-worker uploads have no individual utility. Price the choice of partners and rank coalitions against exhaustive optimum."
+    },
+    {
+      "id": "continual-transfer",
+      "status": "unrun",
+      "hypothesis": "Freeze the retained three-bit route, learn a calibrated side/bit reader for LDT, and add new deployment families before fitting a four-bit sender.",
+      "controls": [
+        "equal-update replay",
+        "frozen trunk with explicit task ID",
+        "matched no-message readout"
+      ],
+      "gates": [
+        "retained 4/53 and 16/667 brackets",
+        "actual downstream gain on held new families",
+        "count all added trainable parameters and updates"
+      ]
+    },
+    {
+      "id": "strict-production-admission",
+      "status": "HOLD",
+      "requirements": [
+        "tokenizer file, revision and hash",
+        "rights-reviewed, deduplicated training shards with immutable document/problem family assignments",
+        "separate confirmation, adjudication and final manifests",
+        "full optimizer/RNG/packer restart and compilation check",
+        "observed billing and sustained throughput under the target topology",
+        "decision authorizing spending after independent gate"
+      ]
+    },
+    {
+      "id": "strict-three-leg-budget",
+      "status": "HOLD",
+      "assumption": "1000 credits, 100 reserved; 350 per 10B two-pass",
+      "full_30B_max_inclusive_credits_per_B": 30,
+      "normal_winner_stop": 15700000000,
+      "early_exit_winner_stop": 20000000000,
+      "ledger": "STRICT_1B_BUDGET.md"
+    }
+  ],
+  "replay": "REPLAY.md",
+  "fullscale_config": "strict_1b_pair.json",
+  "quality_gates": "catalog/gates.json"
+}

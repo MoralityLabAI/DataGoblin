@@ -23,3 +23,22 @@ python training/aleph_next/mixed_release.py --mode release --new ../aleph-next/m
 ```
 
 The final summary reports prelude minus local-site damping as its same-site source comparison, with direct and global constant damping as additional references. Its percentile intervals reuse the native public clusters and fix the three paired training seeds. Text clusters are windows, Lean clusters are seven goal families, and the remaining lanes share generator semantics across seeds.
+
+## Results on the frozen public panel
+
+All four arms had 1,414,480 physical parameters, two passes and 192 updates at each of seeds 137, 163 and 191. The six new fits used 3,116.5 summed wall seconds on shared CPUs. Native scores are seed means. Lower text loss and higher checked scores are better.
+
+| Arm | Text nats/byte | Checked macro | Lean@4 | Joint revision | Repair | Counterexample |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Direct | 3.06862 | 20.25% | 28.57% | 1.04% | 25.00% | 26.39% |
+| Global constant damping | 2.96774 | 21.56% | 35.71% | 0.52% | 25.69% | 24.31% |
+| Prelude reread | 3.05490 | 22.23% | 39.29% | 1.04% | 26.39% | 22.22% |
+| Same-site pass-input damping | 3.06141 | 23.65% | 42.86% | 1.04% | 25.00% | 25.69% |
+
+Prelude minus same-site damping was −0.00651 nats/byte, with a descriptive 95% public-cluster interval of [−0.01119, −0.00221]. The three seed differences were −0.03174, −0.00191 and +0.01411. The checked macro difference was −1.414 percentage points [−4.415, +1.017], with seed differences of −6.771, +2.083 and +0.446 points. The intervals condition on the fitted seeds.
+
+Global damping achieved lower text loss than prelude reread at all three seeds. The mean prelude-minus-global difference was +0.08716 nats/byte [+0.07721, +0.09769] and +0.676 checked points [−5.906, +6.011]. Against direct, prelude reread gained 0.01372 nats/byte [0.00869, 0.01876] and 1.984 checked points [−1.736, +7.491]. These results support retaining global constant damping as a tournament control. They give no evidence for advancing prelude reread to paid training.
+
+Both same-site arms used a coefficient of 0.25. Across 15 lane-by-seed traces, the imposed displacement RMS averaged 1.882 for prelude reads and 0.552 for pass-input reads. Source RMS averaged 0.547 and 5.830, respectively. On the six-root-per-group probe, switching frozen prelude-trained weights from the native read to a pass-input read moved text loss from 3.19363 to 3.19368. Switching pass-input-trained weights to prelude reads moved it from 3.19744 to 3.20146. At six inference passes, the two native-schedule losses rose to 3.27654 and 3.27547.
+
+Release verification matched historical initialization for all three seeds, logits and all 128 named parameter gradients for both archived controls on both fixtures, final optimizer clocks, token ledgers and checkpoint hashes. All sixteen corpus-member byte hashes matched the pinned manifest.
