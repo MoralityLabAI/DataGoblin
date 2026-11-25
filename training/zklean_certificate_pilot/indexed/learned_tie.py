@@ -12,8 +12,20 @@ from itertools import pairwise
 
 import numpy as np
 from weighted import (
-    FAMILIES, V, Z, Instance, Rule, enumerate_edges, generate, instantiate_rule,
-    key, numeral, offset, one_step, trace, value,
+    FAMILIES,
+    Instance,
+    Rule,
+    V,
+    Z,
+    enumerate_edges,
+    generate,
+    instantiate_rule,
+    key,
+    numeral,
+    offset,
+    one_step,
+    trace,
+    value,
 )
 
 CAP = 100_000
