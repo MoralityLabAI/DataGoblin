@@ -3,7 +3,6 @@ from dataclasses import replace
 from itertools import pairwise, product
 
 import pytest
-
 from lean_export import export
 from weighted import Z, dp, generate, numeral, offset, one_step, search, trace, verify, weighted
 
