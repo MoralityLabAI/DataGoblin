@@ -105,7 +105,11 @@ def build_guard(manifest: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("donor relationship mismatch")
         if c["all_same_basin"] is not (len(set(basins)) == 1):
             raise ValueError("basin stratum mismatch")
-    if roots != set(manifest["root_ids"]) or len(roots) != manifest["n_roots"] or len(ids) != manifest["n_cases"]:
+    if (
+        roots != set(manifest["root_ids"])
+        or len(roots) != manifest["n_roots"]
+        or len(ids) != manifest["n_cases"]
+    ):
         raise ValueError("manifest denominators")
     if not 1 <= len(roots) <= 32 or not 1 <= len(ids) <= 64:
         raise ValueError("manifest resource bounds")

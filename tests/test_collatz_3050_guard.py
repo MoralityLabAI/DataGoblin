@@ -8,7 +8,7 @@ from datagoblin.training_gym.collatz_verifier import parameter_split
 
 
 def manifest():
-    return json.loads((Path(__file__).parent/"fixtures"/"col3050_development.json").read_text())
+    return json.loads((Path(__file__).parent / "fixtures" / "col3050_development.json").read_text())
 
 
 class GuardTests(unittest.TestCase):
