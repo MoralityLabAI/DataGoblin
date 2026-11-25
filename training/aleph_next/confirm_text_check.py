@@ -140,7 +140,13 @@ def run(directory, expected_panel=PANEL_HASH):
     # Require a released joint decision before accessing any held losses or native-count baselines.
     decision = json.loads((directory / "decision.json").read_bytes())
     frozen = json.loads(checked_bytes(directory / "freeze.json", decision["frozen"]["freeze_sha256"]))
-    if frozen["reference_development_competent"] is not True or frozen["text_manifest_sha256"] != expected_panel:
+    roster = json.loads(checked_bytes(Path(frozen["fit_manifest"]), frozen["fit_manifest_sha256"]))
+    if (
+        frozen["reference_development_competent"] is not True
+        or roster["reference_competent"] is not True
+        or frozen["text_manifest_sha256"] != expected_panel
+        or decision["frozen"]["held_text_sha256"] != expected_panel
+    ):
         raise ValueError("Missing competent reference or wrong original panel commitment")
     p = Path(frozen["text_dir"])
     meta = json.loads(checked_bytes(p / "manifest.json", expected_panel))
@@ -200,6 +206,7 @@ def run(directory, expected_panel=PANEL_HASH):
     return dict(
         schema="datagoblin.confirm14.independent_text.v1",
         panel_sha256=expected_panel,
+        fit_manifest_sha256=frozen["fit_manifest_sha256"],
         capsule_sha256=capsule_hashes,
         per_seed=by_seed,
         mean_arm_nats_per_byte=means,
