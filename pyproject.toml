@@ -44,3 +44,5 @@ packages = ["datagoblin"]
 [tool.ruff.lint.per-file-ignores]
 # Exact archived MathCan generator; preserve source bytes for provenance replay.
 "training/rlt_gym/bsar09/mathcan_exact_oracle.py" = ["RUF005"]
+# Byte-identical MIC-18 source; preserve its pinned upstream digest.
+"Agonist/mic18_core.py" = ["I001", "RUF059", "B905", "UP031"]

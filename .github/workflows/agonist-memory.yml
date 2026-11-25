@@ -1,0 +1,24 @@
+name: Agonist finite memory
+on:
+  pull_request:
+    paths:
+      - 'Agonist/memory_curriculum.py'
+      - 'Agonist/mic18_core.py'
+      - 'Agonist/schemas/memory_ticket.schema.json'
+      - 'Agonist/MEMORY_PROVENANCE.json'
+      - 'tests/unit/test_agonist_memory.py'
+      - '.github/workflows/agonist-memory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  finite-cpu-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests/unit -p 'test_agonist_memory.py' -v
+      - run: python -m Agonist.memory_curriculum --check

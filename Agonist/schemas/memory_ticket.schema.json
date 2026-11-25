@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MoralityLabAI/DataGoblin/Agonist/schemas/memory_ticket.schema.json",
+  "title": "AGN-MEM-01 finite-memory author ticket",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "AGN-MEM-01/ticket/v1"
+    },
+    "source_family": {
+      "const": {
+        "id": "agn-memory-permit/v1",
+        "split": "dev",
+        "rights": "project_original"
+      }
+    },
+    "mechanism": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task",
+        "width"
+      ],
+      "properties": {
+        "task": {
+          "enum": [
+            "query",
+            "parity"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        }
+      }
+    },
+    "memory_bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "states",
+        "bits_ceiling"
+      ],
+      "properties": {
+        "states": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "bits_ceiling": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        }
+      }
+    },
+    "query_timing": {
+      "const": "after_all_observations_and_memory_commit"
+    },
+    "allowed_side_information": {
+      "const": [
+        "public phase",
+        "public rule",
+        "fixed controller tables",
+        "late query index"
+      ]
+    },
+    "retrieval_cost": {
+      "const": {
+        "enabled": false,
+        "per_bit": 1,
+        "budget": 0
+      }
+    },
+    "actor_view": {
+      "const": "current observation during update; retained code and late query during action"
+    },
+    "teacher_budget": {
+      "const": {
+        "calls": 0,
+        "tokens": 0
+      }
+    },
+    "training_ready": {
+      "const": false
+    },
+    "max_presentations_per_root": {
+      "const": 4
+    }
+  },
+  "required": [
+    "schema",
+    "source_family",
+    "mechanism",
+    "memory_bounds",
+    "query_timing",
+    "allowed_side_information",
+    "retrieval_cost",
+    "actor_view",
+    "teacher_budget",
+    "training_ready",
+    "max_presentations_per_root"
+  ]
+}
