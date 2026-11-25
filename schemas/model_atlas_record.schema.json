@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DataGoblin Model Atlas discovery record v1 (additive extension for receipt-extracted populations)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "model_id",
+    "notation",
+    "family",
+    "population_group",
+    "study_id",
+    "genotype",
+    "training_recipe",
+    "phenotype",
+    "mechanistic_profile",
+    "causal_evidence",
+    "formal_properties",
+    "lineage",
+    "checkpoint",
+    "provenance",
+    "training_ready",
+    "custody_lane",
+    "data_rights_review",
+    "data_split"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_type": {
+      "const": "model"
+    },
+    "model_id": {
+      "type": "string",
+      "pattern": "^(sha256:[0-9a-f]{64}|gitblob:[0-9a-f]{40})$"
+    },
+    "notation": {
+      "type": "string"
+    },
+    "family": {
+      "type": "string"
+    },
+    "population_group": {
+      "type": "string"
+    },
+    "study_id": {
+      "type": "string"
+    },
+    "genotype": {
+      "type": "object",
+      "required": [
+        "architecture",
+        "parameter_count",
+        "passes",
+        "implementation_uri"
+      ],
+      "properties": {
+        "architecture": {
+          "type": "string"
+        },
+        "parameter_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "passes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "implementation_uri": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trainable_parameter_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "base_model_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "training_recipe": {
+      "type": "object",
+      "required": [
+        "declared",
+        "training_seed",
+        "reported_fit_receipt"
+      ],
+      "properties": {
+        "declared": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "training_seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "reported_fit_receipt": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "training_seed_candidates": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "extraction": {
+          "type": "string"
+        }
+      }
+    },
+    "phenotype": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "study_id",
+          "scope",
+          "split"
+        ],
+        "properties": {
+          "scope": {
+            "enum": [
+              "per_training_seed",
+              "receipt_observation"
+            ]
+          },
+          "split": {
+            "type": "string"
+          },
+          "budget": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "closure_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "mean_penalized_work": {
+            "type": "number",
+            "minimum": 0
+          },
+          "metrics": {
+            "type": "object"
+          },
+          "denominators": {
+            "type": "object"
+          },
+          "metric_definitions": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "independent_verification": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "independent_roots": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "scope": {
+                  "const": "per_training_seed"
+                }
+              },
+              "required": [
+                "scope"
+              ]
+            },
+            "then": {
+              "required": [
+                "policy",
+                "independent_roots",
+                "budget",
+                "closure_rate"
+              ],
+              "properties": {
+                "split": {
+                  "const": "calibration"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "scope": {
+                  "const": "receipt_observation"
+                }
+              },
+              "required": [
+                "scope"
+              ]
+            },
+            "then": {
+              "required": [
+                "source_uri",
+                "pointer",
+                "metrics",
+                "denominators",
+                "evidence",
+                "independent_verification"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "mechanistic_profile": {
+      "type": "object"
+    },
+    "causal_evidence": {
+      "type": "object"
+    },
+    "formal_properties": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "reported_sha256",
+        "verified_bytes",
+        "archive_directory_uri"
+      ],
+      "properties": {
+        "reported_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verified_bytes": {
+          "const": false
+        },
+        "archive_directory_uri": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "git_blob_sha1": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_kind": {
+          "enum": [
+            "final_or_primary",
+            "intermediate_snapshot",
+            "sae_dictionary",
+            "transcoder",
+            "unclassified_tracked_file"
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "training_ready": {
+      "const": false
+    },
+    "custody_lane": {
+      "const": "discovery"
+    },
+    "data_rights_review": {
+      "const": "pending"
+    },
+    "data_split": {
+      "const": "unassigned"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "model_id": {
+            "pattern": "^gitblob:"
+          }
+        },
+        "required": [
+          "model_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint": {
+            "required": [
+              "git_blob_sha1"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_id": {
+            "pattern": "^sha256:"
+          }
+        },
+        "required": [
+          "model_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint": {
+            "properties": {
+              "reported_sha256": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

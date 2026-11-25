@@ -1,6 +1,6 @@
 {
   "schema": "aleph.dense-placement.planning.v1",
-  "status": "development proposal pending placement confirmation and measured TPU intake",
+  "status": "HOLD: no confirmed challenger; historical three-pass placement proposal retained pending DG-ARCH-02 mixed and independent confirmation",
   "architecture": {
     "vocab": 49152,
     "width": 2048,
@@ -77,5 +77,28 @@
     "checked_task_regression_absolute_max": 0.02,
     "throughput_regression_relative_max": 0.1,
     "independent_fullscale_seeds": 1
+  },
+  "candidate_decision": {
+    "status": "HOLD",
+    "primary_reference": "direct",
+    "priority_development_depth": 2,
+    "priority_development_arms": [
+      "direct",
+      "global_full_damp",
+      "prelude_reread",
+      "site_damp"
+    ],
+    "registered_replication": {
+      "reasoning_passes": 3,
+      "arms": [
+        "direct",
+        "pass_rlt",
+        "pass_damp"
+      ],
+      "width": 256
+    },
+    "production_challenger": null,
+    "report": "SOURCE_REREAD_RESULTS.md",
+    "reason": "Weak synthetic proxy; mixed-corpus confirmation and TPU resource gate not complete"
   }
 }

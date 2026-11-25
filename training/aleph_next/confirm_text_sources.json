@@ -1,0 +1,218 @@
+[
+  {
+    "id": "pg1342",
+    "stratum": "fiction",
+    "repository": "GITenberg/Pride-and-Prejudice_1342",
+    "commit": "81db45c9c48c592f0b77f01fc59e677ad0a5634e",
+    "text": {
+      "path": "1342-0.txt",
+      "sha256": "48e0522844402a86a3ea98f0947ba85ea54838db3c59022299298ed968a5a163"
+    },
+    "catalogue": {
+      "path": "pg1342.rdf",
+      "sha256": "ba6c6182e8da11975b74cf62bf55e8d1302cbcb80014d543051721b4e5cab22c"
+    },
+    "edition_rights": "CC BY-NC",
+    "text_rights": "Public domain in the USA.",
+    "author": "Austen, Jane",
+    "title": "Pride and Prejudice"
+  },
+  {
+    "id": "pg84",
+    "stratum": "fiction",
+    "repository": "GITenberg/Frankenstein_84",
+    "commit": "c98a483bd1f34e7366126b81bcedd1a6faee636e",
+    "text": {
+      "path": "84-0.txt",
+      "sha256": "c29a4f56dd91aa894a3f17d5f96b356ccb499e3e2c5a27964de911845e39efab"
+    },
+    "catalogue": {
+      "path": "pg84.rdf",
+      "sha256": "442ff27c539b03f16753aea2a2f09256f5afb6208dc6dbbfabe505e70e7ccade"
+    },
+    "edition_rights": "CC BY-NC",
+    "text_rights": "Public domain in the USA.",
+    "author": "Shelley, Mary Wollstonecraft",
+    "title": "Frankenstein; Or, The Modern Prometheus"
+  },
+  {
+    "id": "pg244",
+    "stratum": "fiction",
+    "repository": "GITenberg/A-Study-in-Scarlet_244",
+    "commit": "28ff9b2f49dad721efd60c4d5ba9645fad84f936",
+    "text": {
+      "path": "244-0.txt",
+      "sha256": "af0f6c590ca3901b3f61d5b90acac1ac16abc83e50b8541c9f17aff079829d96"
+    },
+    "catalogue": {
+      "path": "pg244.rdf",
+      "sha256": "3bc1e13fe802350f969a1a25029407e4ff92163c34238ce0c8724f5022649e80"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Doyle, Arthur Conan",
+    "title": "A Study in Scarlet"
+  },
+  {
+    "id": "pg43",
+    "stratum": "fiction",
+    "repository": "GITenberg/The-Strange-Case-of-Dr.-Jekyll-and-Mr.-Hyde_43",
+    "commit": "534f1e1d3193ffaf351570cf808e0ee6db70efe9",
+    "text": {
+      "path": "43-0.txt",
+      "sha256": "31df0a9af1bce24ccbb5ab3ccb659603353accde5b7e40f7c5b887fb88173d48"
+    },
+    "catalogue": {
+      "path": "pg43.rdf",
+      "sha256": "a0a5d36d172eaf8b590c379a8d627ba9e74839301ebd69fe1f78aaf9ea009837"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Stevenson, Robert Louis",
+    "title": "The Strange Case of Dr. Jekyll and Mr. Hyde"
+  },
+  {
+    "id": "pg1228",
+    "stratum": "observation",
+    "repository": "GITenberg/On-the-Origin-of-Species-By-Means-of-Natural-Selection--13-Or-the-Preservation-of-Favoured-Rac__1228",
+    "commit": "6c66c461969417cb73d63645085f0c534ea4b972",
+    "text": {
+      "path": "1228.txt",
+      "sha256": "82ee88e28d5f4662d03d2bfd09330d79cf860c090930d1774e23aa1609bf3730"
+    },
+    "catalogue": {
+      "path": "pg1228.rdf",
+      "sha256": "d0b0795ec1f6bc8ee1cfea98700a694fc226c9682a02cd648ffc5d627042e77c"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Darwin, Charles",
+    "title": "On the Origin of Species By Means of Natural Selection Or, the Preservation of Favoured Races in the Struggle for Life"
+  },
+  {
+    "id": "pg205",
+    "stratum": "observation",
+    "repository": "GITenberg/Walden-and-On-The-Duty-Of-Civil-Disobedience_205",
+    "commit": "0efbef2325160440b0a7ca7e5130ef566a969985",
+    "text": {
+      "path": "205-0.txt",
+      "sha256": "40862fac5a6a485ccc0e057e716a570223a549c90a0e6f527ce858a8c3b58776"
+    },
+    "catalogue": {
+      "path": "pg205.rdf",
+      "sha256": "4b12eb84db1c9deec1c926d38170390651babc04aa08ca8321de37b40207effe"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Thoreau, Henry David",
+    "title": "Walden, and On The Duty Of Civil Disobedience"
+  },
+  {
+    "id": "pg10012",
+    "stratum": "observation",
+    "repository": "GITenberg/The-Mountains-of-California_10012",
+    "commit": "1561834dafd82ea12339971f1a23cb20fff86c41",
+    "text": {
+      "path": "10012.txt",
+      "sha256": "17b5f1330ff23285bceea76577a48a806d8a5633a240316443c83073d9a97482"
+    },
+    "catalogue": {
+      "path": "pg10012.rdf",
+      "sha256": "a3bd61dff1b40f87d12040bca0527af00ab072195c1cfff8947f7ff64bf9dd8d"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Muir, John",
+    "title": "The Mountains of California"
+  },
+  {
+    "id": "pg14474",
+    "stratum": "observation",
+    "repository": "GITenberg/The-Chemical-History-of-a-Candle_14474",
+    "commit": "8e778424cd5462a2d553cc0c5c141846994039f2",
+    "text": {
+      "path": "14474.txt",
+      "sha256": "dc2f26bd91e4ce39700722fb1f3f6f91cf585d8e5ffebb23572f889da790d200"
+    },
+    "catalogue": {
+      "path": "pg14474.rdf",
+      "sha256": "db29168f26f19efe3ef7fa552393dedcf8e705052ea7c079f28411e4baf36aa5"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Faraday, Michael",
+    "title": "The Chemical History of a Candle"
+  },
+  {
+    "id": "pg23",
+    "stratum": "nonfiction",
+    "repository": "GITenberg/Narrative-of-the-Life-of-Frederick-Douglass-an-American-Slave_23",
+    "commit": "2a7853fe25d271a1e10bc0e4e55982a313be9adc",
+    "text": {
+      "path": "23.txt",
+      "sha256": "948d491964b6ac66df3966476b2a9305b5d7ea56b8ec0b78c3c56815c5d9605f"
+    },
+    "catalogue": {
+      "path": "pg23.rdf",
+      "sha256": "2e0fedd7f682644615abf0184def65b49b06b3b3719ebae43f98c79fc175e58d"
+    },
+    "edition_rights": "CC BY-NC",
+    "text_rights": "Public domain in the USA.",
+    "author": "Douglass, Frederick",
+    "title": "Narrative of the Life of Frederick Douglass, an American Slave"
+  },
+  {
+    "id": "pg148",
+    "stratum": "nonfiction",
+    "repository": "GITenberg/The-Autobiography-of-Benjamin-Franklin_148",
+    "commit": "6a006405564a4927409f7a04ccae741e51e9ef70",
+    "text": {
+      "path": "148.txt",
+      "sha256": "683973e0555f19cb9cf41da3dedbb675f09320bc484c1a28836495b2e785cca9"
+    },
+    "catalogue": {
+      "path": "pg148.rdf",
+      "sha256": "0795a6fda64e4e0920c125f41d24f8159d1f549aa63713acbad39256352fdce3"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Franklin, Benjamin",
+    "title": "The Autobiography of Benjamin Franklin"
+  },
+  {
+    "id": "pg3420",
+    "stratum": "nonfiction",
+    "repository": "GITenberg/A-Vindication-of-the-Rights-of-Woman-With-Strictures-on-Political-and-Moral-Subjects_3420",
+    "commit": "f1e4e97298f132f77136332c10e7d44b811c21ae",
+    "text": {
+      "path": "3420.txt",
+      "sha256": "9dbbb58e03824ba10a3e0d47196155a4b7a22156b202c848131691d62413c3ae"
+    },
+    "catalogue": {
+      "path": "pg3420.rdf",
+      "sha256": "e3cdcb27194a5d947abb667820c60376b7f2ebe2edc147f1ba3da4cbc0377eb2"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Wollstonecraft, Mary",
+    "title": "A Vindication of the Rights of Woman With Strictures on Political and Moral Subjects"
+  },
+  {
+    "id": "pg408",
+    "stratum": "nonfiction",
+    "repository": "GITenberg/The-Souls-of-Black-Folk_408",
+    "commit": "3cea9665d80cf2b395bb7ed79e76d06459628aa0",
+    "text": {
+      "path": "408.txt",
+      "sha256": "4995fcdaae56025b9243fcd787ad9864ffe3380705198d26954973452d5c38a2"
+    },
+    "catalogue": {
+      "path": "pg408.rdf",
+      "sha256": "a8f461e4abbaa62cc5be3b829ea82d01bbb66a91bf33942f79191e82be79960f"
+    },
+    "edition_rights": "Public domain in the USA.",
+    "text_rights": "Public domain in the USA.",
+    "author": "Du Bois, W. E. B. (William Edward Burghardt)",
+    "title": "The Souls of Black Folk"
+  }
+]

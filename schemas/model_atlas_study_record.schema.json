@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DataGoblin Model Atlas study record v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "study_id",
+    "family",
+    "population_group",
+    "provenance",
+    "training_ready",
+    "custody_lane",
+    "data_rights_review",
+    "data_split"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_type": {
+      "const": "study"
+    },
+    "study_id": {
+      "type": "string"
+    },
+    "family": {
+      "type": "string"
+    },
+    "population_group": {
+      "type": "string"
+    },
+    "independent_roots": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "reference_budget": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "evidence_tags": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "mechanistic",
+          "causal",
+          "formal"
+        ]
+      }
+    },
+    "negative_or_correction_docs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "receipts": {
+      "type": "array"
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "training_ready": {
+      "const": false
+    },
+    "custody_lane": {
+      "const": "discovery"
+    },
+    "data_rights_review": {
+      "const": "pending"
+    },
+    "data_split": {
+      "const": "unassigned"
+    }
+  }
+}
