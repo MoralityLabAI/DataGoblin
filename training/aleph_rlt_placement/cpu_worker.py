@@ -74,6 +74,7 @@ def main():
             "receipt_gym.py",
             "receipt_followup.py",
             "receipt_followup_summary.py",
+            "receipt_readout.py",
         ),
     )
     args, rest = p.parse_known_args()
