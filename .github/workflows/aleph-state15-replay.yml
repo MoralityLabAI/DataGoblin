@@ -1,0 +1,43 @@
+name: Aleph STATE15 kernel replay
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aleph-state15-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Install pinned CPU dependencies
+        run: |
+          python -m pip install numpy==2.3.5
+          python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+      - name: Install pinned Lean core toolchain
+        run: |
+          set -eu
+          curl -fL --retry 2 https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/lean-4.19.0-linux/bin" >> "$GITHUB_PATH"
+      - name: Replay archived certificates and audit axioms
+        run: |
+          lean --version
+          python training/aleph_next/state01/state15_replay.py --regenerate --archive-root "$RUNNER_TEMP/state15-archives" --out "$RUNNER_TEMP/state15" --batch-size 8
+          python training/aleph_next/state01/state15_audit.py --archive-root "$RUNNER_TEMP/state15-archives" --out "$RUNNER_TEMP/state15" --summary "$RUNNER_TEMP/state15/AUDIT.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aleph-state15-kernel-receipts
+          path: |
+            ${{ runner.temp }}/state15/PREPARED.json
+            ${{ runner.temp }}/state15/KERNEL_RECEIPTS.json
+            ${{ runner.temp }}/state15/AUDIT.json
+            ${{ runner.temp }}/state15/batches/*.log
+          if-no-files-found: warn
+          retention-days: 14

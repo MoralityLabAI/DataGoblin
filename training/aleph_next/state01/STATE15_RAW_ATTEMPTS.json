@@ -1,0 +1,183 @@
+{
+  "schema": "datagoblin.state15.censored-raw-trials.v1",
+  "windows_local": {
+    "kernel_receipt_sha256": "d23828fed0f3e28eee7915d4018dc556939a8f0e63b5f3aec4d14fa7ace8fbfd",
+    "stage_counts": {
+      "10": {
+        "batches": 21,
+        "declarations": 168,
+        "credited": 168
+      },
+      "11": {
+        "batches": 45,
+        "declarations": 353,
+        "credited": 353
+      },
+      "12": {
+        "batches": 24,
+        "declarations": 192,
+        "credited": 192
+      },
+      "13": {
+        "batches": 40,
+        "declarations": 319,
+        "credited": 303
+      },
+      "14": {
+        "batches": 6,
+        "declarations": 48,
+        "credited": 32
+      }
+    },
+    "complete_query_receipts": 136,
+    "attempted_declarations": 1080,
+    "credited_declarations": 1048,
+    "negative_pairs_reached": 0,
+    "complete_query_wall_seconds": 2310.54316859995,
+    "complete_query_cpu_seconds": 1731.09375,
+    "failed_batches": [
+      {
+        "stage": 13,
+        "start": 32,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": 1,
+        "wall_seconds": 180.12796179999714,
+        "cpu_seconds": 131.671875,
+        "source_sha256": "a0d46bfb69efee7c27aa288c23de76abfb9c161c0e0ac2aae71e51fcbd5e4179",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": 13,
+        "start": 80,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": 1,
+        "wall_seconds": 180.07420560000173,
+        "cpu_seconds": 131.25,
+        "source_sha256": "9d09514c6697d7220885a21e00e2bb0f4950330969a8748982dfc10357261a02",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": 14,
+        "start": 8,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": 1,
+        "wall_seconds": 180.25173429999268,
+        "cpu_seconds": 126.734375,
+        "source_sha256": "ce9bae586974b807325b93c79f1f8f2218c3e4c9a7661a480991140fbee8ae44",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": 14,
+        "start": 24,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": 1,
+        "wall_seconds": 180.29673080000794,
+        "cpu_seconds": 154.046875,
+        "source_sha256": "a643928a511aafa260c88ae4ed775068f96da12f874a846c4ef4df8709ac160b",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "log_files_without_query_receipt": [],
+    "closure": "Intentional stop at a complete query boundary after the exhaustive certified suite. The next input was unstarted.",
+    "first_query_source_created_utc": "2026-11-25T11:11:33.351461+00:00",
+    "final_receipt_utc": "2026-11-25T11:50:11.246850+00:00",
+    "observation_elapsed_seconds": 2317.8953890800476,
+    "per_query_timeout_seconds": 180,
+    "overall_time_cap_seconds": null
+  },
+  "linux_public": {
+    "kernel_receipt_sha256": "505175e047b08a33e2206e0f122739038f04ae9ced7505b39789375e3894ff14",
+    "stage_counts": {
+      "10": {
+        "batches": 21,
+        "declarations": 168,
+        "credited": 168
+      },
+      "11": {
+        "batches": 45,
+        "declarations": 353,
+        "credited": 353
+      },
+      "12": {
+        "batches": 24,
+        "declarations": 192,
+        "credited": 192
+      },
+      "13": {
+        "batches": 40,
+        "declarations": 319,
+        "credited": 311
+      },
+      "14": {
+        "batches": 7,
+        "declarations": 56,
+        "credited": 32
+      }
+    },
+    "complete_query_receipts": 137,
+    "attempted_declarations": 1088,
+    "credited_declarations": 1056,
+    "negative_pairs_reached": 0,
+    "complete_query_wall_seconds": 1444.3620559970004,
+    "complete_query_cpu_seconds": 1446.170771,
+    "failed_batches": [
+      {
+        "stage": 13,
+        "start": 32,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": -9,
+        "wall_seconds": 180.11431416,
+        "cpu_seconds": 180.0815,
+        "source_sha256": "a0d46bfb69efee7c27aa288c23de76abfb9c161c0e0ac2aae71e51fcbd5e4179",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": 14,
+        "start": 8,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": -9,
+        "wall_seconds": 180.11563725700012,
+        "cpu_seconds": 180.078758,
+        "source_sha256": "ce9bae586974b807325b93c79f1f8f2218c3e4c9a7661a480991140fbee8ae44",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": 14,
+        "start": 24,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": -9,
+        "wall_seconds": 180.09362280100004,
+        "cpu_seconds": 180.063398,
+        "source_sha256": "a643928a511aafa260c88ae4ed775068f96da12f874a846c4ef4df8709ac160b",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": 14,
+        "start": 48,
+        "declarations": 8,
+        "timed_out": true,
+        "exit_code": -9,
+        "wall_seconds": 180.11562453300007,
+        "cpu_seconds": 180.091181,
+        "source_sha256": "2d6a5dcd5cbabb8dea844406731f43015c3fa8f1e897fc7d60e8f81c80429275",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "log_files_without_query_receipt": [],
+    "closure": "Original public serial workflow reached its 25-minute job cap during replay. Per-query subtotals cover completed receipts only.",
+    "job_started_utc": "2026-11-25T11:22:29Z",
+    "job_completed_utc": "2026-11-25T11:47:46Z",
+    "job_elapsed_seconds": 1517,
+    "overall_time_cap_seconds": 1500,
+    "per_query_timeout_seconds": 180,
+    "artifact_digest": "a721c6985deda321f8947cf286abc4ee71e0fc70edeee43cdb88c34500e25a5e",
+    "run_url": "https://github.com/MoralityLabAI/DataGoblin/actions/runs/45603824863"
+  }
+}

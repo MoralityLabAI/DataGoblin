@@ -1,5 +1,9 @@
 # Aleph architecture and distributed researcher tournament
 
+[First 10M direct-A corpus and readiness](candidate01/MILESTONE10M.md) records the five-lane training supply and full checkpoint-boundary replay.
+
+The final candidate tournament, verified corpus supply and first-round launch decision are in [ALEPH-CANDIDATE-01](candidate01/REPORT.md).
+
 The [consolidated report](REPORT.md) gives the strict-1B recommendation, measured effects against the strongest controls and the credit decision. The [machine-readable gates](catalog/gates.json), [Model Atlas release](catalog/README.md) and [replay commands](REPLAY.md) accompany the study.
 
 | Study | Registered comparison | Evidence |

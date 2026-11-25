@@ -1,0 +1,122 @@
+{
+  "schema": "datagoblin.state15.disjoint-kernel-replay.v1",
+  "prepared_manifest_sha256": "74c8de419b21ad0e3d7e84607175a2e73ad903aadb52d42ad9316f1a9edda6b7",
+  "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "lean_executable_sha256_by_shard": {
+    "0": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "1": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "2": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "3": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "4": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "5": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "6": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "7": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023"
+  },
+  "shards": 8,
+  "positive_declarations_verified": 1364,
+  "valid_contexts": 136,
+  "invalid_transports_rejected": 136,
+  "kernel_verified": true,
+  "stage_counts": {
+    "10": {
+      "raw_positive": 168,
+      "balanced_positive": 0,
+      "valid_context": 72,
+      "invalid_transport": 72
+    },
+    "11": {
+      "raw_positive": 353,
+      "balanced_positive": 0,
+      "valid_context": 64,
+      "invalid_transport": 64
+    },
+    "12": {
+      "raw_positive": 192,
+      "balanced_positive": 0,
+      "valid_context": 0,
+      "invalid_transport": 0
+    },
+    "13": {
+      "raw_positive": 278,
+      "balanced_positive": 41,
+      "valid_context": 0,
+      "invalid_transport": 0
+    },
+    "14": {
+      "raw_positive": 284,
+      "balanced_positive": 48,
+      "valid_context": 0,
+      "invalid_transport": 0
+    }
+  },
+  "auxiliary_declarations_audited": 15989,
+  "positive_root_axiom_sets": {
+    "propext": 1196,
+    "none": 168
+  },
+  "failures": [],
+  "costs": {
+    "balanced_positive": {
+      "queries": 89,
+      "wall_seconds": {
+        "sum": 637.3725476899998,
+        "median": 4.1844523640000375,
+        "min": 0.5746173180000085,
+        "max": 104.70929453600002
+      },
+      "cpu_seconds": {
+        "sum": 687.479307,
+        "median": 4.440099000000004,
+        "min": 0.6160920000000019,
+        "max": 112.20512899999999
+      }
+    },
+    "invalid_transport": {
+      "queries": 136,
+      "wall_seconds": {
+        "sum": 29.927686697000226,
+        "median": 0.21115931199997817,
+        "min": 0.11091079599999887,
+        "max": 0.5840796400000272
+      },
+      "cpu_seconds": {
+        "sum": 29.973893000000004,
+        "median": 0.21095399999999387,
+        "min": 0.11088099999999201,
+        "max": 0.5828190000000006
+      }
+    },
+    "raw_positive": {
+      "queries": 206,
+      "wall_seconds": {
+        "sum": 195.45976367799983,
+        "median": 0.6761472059999818,
+        "min": 0.11893724999998767,
+        "max": 22.034345069999972
+      },
+      "cpu_seconds": {
+        "sum": 197.53107799999998,
+        "median": 0.6882090000000005,
+        "min": 0.11916899999999941,
+        "max": 22.059224
+      }
+    },
+    "valid_context": {
+      "queries": 136,
+      "wall_seconds": {
+        "sum": 26.543886932000092,
+        "median": 0.18307388300002003,
+        "min": 0.10426681100000224,
+        "max": 0.4119858290000593
+      },
+      "cpu_seconds": {
+        "sum": 26.438642999999992,
+        "median": 0.1823425000000043,
+        "min": 0.10344300000000572,
+        "max": 0.4112570000000062
+      }
+    }
+  },
+  "all_charged_queries": 567,
+  "training_admission": false
+}

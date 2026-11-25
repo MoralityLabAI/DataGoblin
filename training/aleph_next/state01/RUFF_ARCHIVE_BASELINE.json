@@ -1,0 +1,253 @@
+{
+  "schema": "datagoblin.ruff-archived-source-baseline.v1",
+  "archive_commit": "500a57285f253a200abe85082e363ef1bde05496",
+  "ruff_version": "0.17.6",
+  "historical_findings": 1355,
+  "files": {
+    "training/aleph_next/state01/affine_control.py": {
+      "blob": "535bcc015c70153cbd41cd77930885ba78ba5cdb",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 23,
+        "E501": 4,
+        "B905": 1,
+        "E701": 1
+      }
+    },
+    "training/aleph_next/state01/direct_excerpt.py": {
+      "blob": "4cd27fbd4c6ec304d56f9c09f0b375720f2c8764",
+      "diagnostics": {
+        "I001": 1
+      }
+    },
+    "training/aleph_next/state01/native_bridge.py": {
+      "blob": "e2ed0c14ae8aeaf8915c05ab99a8cb7ee0f520fa",
+      "diagnostics": {
+        "I001": 1
+      }
+    },
+    "training/aleph_next/state01/native_continue.py": {
+      "blob": "25c1541cdca1f8adff182179b47affbe818ac90b",
+      "diagnostics": {
+        "E402": 2,
+        "I001": 1,
+        "E701": 4,
+        "E702": 12,
+        "RUF059": 1
+      }
+    },
+    "training/aleph_next/state01/native_interchange.py": {
+      "blob": "cdc95497fad76b67c5858d73ffce992be548affe",
+      "diagnostics": {
+        "I001": 1,
+        "E702": 14,
+        "E701": 7,
+        "E501": 1
+      }
+    },
+    "training/aleph_next/state01/query_diagnostic.py": {
+      "blob": "3ff2cb18218181750f4647dc0e657ea295f825c0",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "F401": 1,
+        "E702": 23,
+        "E501": 4,
+        "RUF059": 1,
+        "B905": 1,
+        "E701": 7
+      }
+    },
+    "training/aleph_next/state01/state02.py": {
+      "blob": "6a5dc99a6117e5a516082824f366a03c2d4d7828",
+      "diagnostics": {
+        "I001": 1,
+        "F841": 1,
+        "E741": 2,
+        "B905": 1
+      }
+    },
+    "training/aleph_next/state01/state03.py": {
+      "blob": "ff3f13444e9b978d54b3124e11d865fa2fdf17ba",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E701": 4,
+        "E702": 23,
+        "E501": 2,
+        "E741": 1
+      }
+    },
+    "training/aleph_next/state01/state04.py": {
+      "blob": "2c05b43a722615134fe646a3e3caeff0b5ad70c1",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E701": 2,
+        "E741": 2,
+        "E702": 39,
+        "B023": 1,
+        "E501": 2
+      }
+    },
+    "training/aleph_next/state01/state04_calibrate.py": {
+      "blob": "e70acdcaff74c409a8265a1ec3a83f62677c166f",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 18,
+        "E701": 1
+      }
+    },
+    "training/aleph_next/state01/state04_diagnostics.py": {
+      "blob": "1843095cd177e4d56b4b498b53cc013dccfc53e0",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 15,
+        "E501": 1
+      }
+    },
+    "training/aleph_next/state01/state05.py": {
+      "blob": "13b6f24186f50d7d132a24dd448dc63b5a276ead",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 93,
+        "E701": 23,
+        "E501": 11,
+        "E741": 3,
+        "B905": 2
+      }
+    },
+    "training/aleph_next/state01/state06.py": {
+      "blob": "1bba9c11af5623208f08caf2b693589504c1f22d",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 73,
+        "E701": 8,
+        "E501": 12,
+        "B905": 1
+      }
+    },
+    "training/aleph_next/state01/state07.py": {
+      "blob": "09bdd35c45b53c08e31ae2765804b357bb476f2b",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "F401": 1,
+        "E702": 103,
+        "E701": 15,
+        "E501": 11,
+        "B905": 1
+      }
+    },
+    "training/aleph_next/state01/state08.py": {
+      "blob": "f50217b43adfa52130d1ac266f83327c39c6d8db",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 53,
+        "E701": 18,
+        "E501": 5
+      }
+    },
+    "training/aleph_next/state01/state09.py": {
+      "blob": "b2528cead26389b41eb23c6aa8e47b32fc26da20",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 76,
+        "E741": 3,
+        "E701": 32,
+        "E501": 10,
+        "E703": 1,
+        "B905": 4
+      }
+    },
+    "training/aleph_next/state01/state10.py": {
+      "blob": "c90c2fc4e20a88e90ab0968402b3cfffa60a656c",
+      "diagnostics": {
+        "E501": 6,
+        "B007": 1,
+        "RUF059": 1,
+        "E702": 2
+      }
+    },
+    "training/aleph_next/state01/state11.py": {
+      "blob": "358d4e79dcd270aa2c6561353daaa80c9f018ab0",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 85,
+        "E501": 19,
+        "E701": 23,
+        "RUF005": 2,
+        "B905": 4,
+        "B007": 2
+      }
+    },
+    "training/aleph_next/state01/state11_normal_forms.py": {
+      "blob": "41484998b1f48897f1684e5001f6e36fec730187",
+      "diagnostics": {
+        "I001": 1,
+        "E741": 1,
+        "B905": 1,
+        "RUF005": 1,
+        "E501": 1
+      }
+    },
+    "training/aleph_next/state01/state12.py": {
+      "blob": "80189a42d5621dda3c842a708c7933f814f1ac48",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "RUF005": 5,
+        "E701": 35,
+        "E702": 64,
+        "E741": 1,
+        "E501": 11
+      }
+    },
+    "training/aleph_next/state01/state12_portfolio.py": {
+      "blob": "61a735d31f634964eb783b97c0ae223a044bc90c",
+      "diagnostics": {
+        "F401": 1,
+        "F841": 1,
+        "E501": 1
+      }
+    },
+    "training/aleph_next/state01/state13.py": {
+      "blob": "807f8844b5e9ff1328e8da66b6d1a16cbb9dfe04",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 85,
+        "E701": 34,
+        "E501": 13,
+        "B905": 5,
+        "RUF005": 1
+      }
+    },
+    "training/aleph_next/state01/state14.py": {
+      "blob": "cf74bbae5b39b3125ced858fe687d8d3fad46550",
+      "diagnostics": {
+        "E401": 1,
+        "I001": 1,
+        "E702": 88,
+        "E701": 21,
+        "E501": 19,
+        "RUF005": 1,
+        "B905": 2
+      }
+    },
+    "training/aleph_next/state01/state_proxy.py": {
+      "blob": "7183a457234cbc4e8aa8cc8572f0981f6e78031b",
+      "diagnostics": {
+        "I001": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+policy,positive,forward_solved,reverse_solved,solved,false_accept,negative,expansions,normal_steps,proof_steps,median_proof_steps,max_proof_steps
+original,192,93,0,93,0,96,7498,0,357,4,6
+enhanced,192,93,0,93,0,96,9013,0,357,4,6
+two_frontier,192,94,94,188,0,96,7254,0,768,4,7
+normal,192,96,96,192,0,96,0,31373,20302,15,2244
+hybrid,192,95,95,190,0,96,2999,3908,1708,7,26
+portfolio,192,96,96,192,0,96,2251,160,928,4,61
