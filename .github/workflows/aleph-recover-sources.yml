@@ -60,3 +60,91 @@ jobs:
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
+  verify-replacement:
+    needs: build-replacement
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: src
+      CUDA_VISIBLE_DEVICES: '-1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      RAYON_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . tokenizers==0.22.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: Aleph-10M-replacement-v2
+          path: ${{ runner.temp }}/delivery
+      - name: Verify the independently packaged payload
+        run: |
+          receipt="$RUNNER_TEMP/delivery/RELEASE.json"
+          sha="$(sha256sum "$receipt" | cut -d' ' -f1)"
+          python -u training/aleph_next/recovery/verify_bundle.py --archive "$RUNNER_TEMP/delivery/Aleph-10M-replacement-v2.zip" --release "$receipt" --release-sha256 "$sha" --out "$RUNNER_TEMP/fresh-corpus"
+  publish-replacement:
+    needs: verify-replacement
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/aleph-recovery-sources-20261125'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    concurrency:
+      group: aleph-replacement-evidence-v2
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evidence/aleph-10m-replacement-v2-20261126
+      - uses: actions/download-artifact@v4
+        with:
+          name: Aleph-10M-replacement-v2
+          path: ${{ runner.temp }}/delivery
+      - name: Publish verified release without replacing existing data
+        env:
+          DELIVERY: ${{ runner.temp }}/delivery
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, shutil, zipfile
+          d = pathlib.Path(os.environ["DELIVERY"])
+          r = json.loads((d/"RELEASE.json").read_bytes())
+          z = d/"Aleph-10M-replacement-v2.zip"
+          dest = pathlib.Path("assets/evidence")
+          dest.mkdir(parents=True, exist_ok=True)
+          def verify(archive, receipt):
+              stamp = json.loads(receipt.read_bytes())
+              assert stamp["schema"] == "aleph-direct-A-10m-replacement-v2"
+              assert stamp["train_only"] and stamp["fresh_replay_pass"]
+              assert stamp["full_positions"] == 10000000 and stamp["update_groups"] == 39
+              assert not stamp["production_launch_authorized"]
+              assert hashlib.sha256(archive.read_bytes()).hexdigest() == stamp["archive_sha256"]
+              assert archive.stat().st_size == stamp["archive_bytes"] < 95000000
+              with zipfile.ZipFile(archive) as f:
+                  assert f.testzip() is None
+                  assert hashlib.sha256(f.read("index.json")).hexdigest() == stamp["index_sha256"]
+                  assert hashlib.sha256(f.read("REPLAY.json")).hexdigest() == stamp["replay_sha256"]
+              return stamp
+          verify(z, d/"RELEASE.json")
+          archive = dest/z.name
+          receipt = dest/"Aleph-10M-replacement-v2.RELEASE.json"
+          if archive.exists() or receipt.exists():
+              published = verify(archive, receipt)
+              print("Existing immutable release retained", json.dumps(published, sort_keys=True))
+          else:
+              shutil.copyfile(z, archive)
+              shutil.copyfile(d/"RELEASE.json", receipt)
+              print("Publishing verified release", json.dumps(r, sort_keys=True))
+          print("RELEASE.json SHA-256", hashlib.sha256(receipt.read_bytes()).hexdigest())
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f assets/evidence/Aleph-10M-replacement-v2.zip assets/evidence/Aleph-10M-replacement-v2.RELEASE.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish verified Aleph replacement 10M train-only archive'
+            git push origin HEAD:refs/heads/evidence/aleph-10m-replacement-v2-20261126
+          fi
+          git log -1 --format='Evidence commit: %H'
