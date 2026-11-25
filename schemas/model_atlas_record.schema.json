@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DataGoblin Model Atlas discovery record v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "model_id",
+    "notation",
+    "family",
+    "population_group",
+    "study_id",
+    "genotype",
+    "training_recipe",
+    "phenotype",
+    "mechanistic_profile",
+    "causal_evidence",
+    "formal_properties",
+    "lineage",
+    "checkpoint",
+    "provenance",
+    "training_ready",
+    "custody_lane",
+    "data_rights_review",
+    "data_split"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_type": {
+      "const": "model"
+    },
+    "model_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "notation": {
+      "type": "string"
+    },
+    "family": {
+      "type": "string"
+    },
+    "population_group": {
+      "type": "string"
+    },
+    "study_id": {
+      "type": "string"
+    },
+    "genotype": {
+      "type": "object",
+      "required": [
+        "architecture",
+        "parameter_count",
+        "passes",
+        "implementation_uri"
+      ],
+      "properties": {
+        "architecture": {
+          "type": "string"
+        },
+        "parameter_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "passes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "implementation_uri": {
+          "type": "string"
+        }
+      }
+    },
+    "training_recipe": {
+      "type": "object",
+      "required": [
+        "declared",
+        "training_seed",
+        "reported_fit_receipt"
+      ]
+    },
+    "phenotype": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "study_id",
+          "policy",
+          "scope",
+          "split",
+          "independent_roots",
+          "budget",
+          "closure_rate"
+        ],
+        "properties": {
+          "scope": {
+            "const": "per_training_seed"
+          },
+          "split": {
+            "const": "calibration"
+          },
+          "independent_roots": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "budget": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "closure_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "mean_penalized_work": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "mechanistic_profile": {
+      "type": "object"
+    },
+    "causal_evidence": {
+      "type": "object"
+    },
+    "formal_properties": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "reported_sha256",
+        "verified_bytes",
+        "archive_directory_uri"
+      ],
+      "properties": {
+        "reported_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verified_bytes": {
+          "const": false
+        },
+        "archive_directory_uri": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "training_ready": {
+      "const": false
+    },
+    "custody_lane": {
+      "const": "discovery"
+    },
+    "data_rights_review": {
+      "const": "pending"
+    },
+    "data_split": {
+      "const": "unassigned"
+    }
+  }
+}
