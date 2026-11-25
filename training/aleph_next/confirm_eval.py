@@ -6,8 +6,10 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import random
 import secrets
+import tempfile
 from collections import Counter, defaultdict
 from dataclasses import asdict
 from pathlib import Path
@@ -36,9 +38,19 @@ def save(path, data):
         if json.dumps(read(path), sort_keys=True, separators=(",", ":"), allow_nan=False) != serialized:
             raise ValueError(f"refusing to alter existing {path.name}")
         return
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(serialized, encoding="utf-8")
-    tmp.replace(path)
+    with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".pending-", delete=False) as stream:
+        tmp = Path(stream.name)
+    try:
+        tmp.write_text(serialized, encoding="utf-8")
+        if os.name == "nt":
+            os.rename(tmp, path)
+        else:
+            os.link(tmp, path)
+    except FileExistsError:
+        if json.dumps(read(path), sort_keys=True, separators=(",", ":"), allow_nan=False) != serialized:
+            raise ValueError(f"conflicting concurrent record {path.name}") from None
+    finally:
+        tmp.unlink(missing_ok=True)
 
 
 def sources():
@@ -336,19 +348,19 @@ def root_values(value):
 
 def prior_repair_programs():
     """Exclude all relevant computations appearing in old public train and development traces."""
-    used=set()
-    for batch in agonist_rows(generate_repair,512,96):
+    used = set()
+    for batch in agonist_rows(generate_repair, 512, 96):
         for row in batch:
-            p=row.prompt
-            cut=p.index(SEP,2)
-            ops=[(16+(v-16)%2,x) for v,x in zip(p[2:cut:3],p[3:cut:3],strict=True)]
-            initial=p[1]
-            for left,(op,arg) in enumerate(ops):
-                for length in (4,5,6):
-                    sub=ops[left:left+length]
-                    if len(sub)==length:
-                        used.add(identity([initial,sub]))
-                initial=arg if op==SET else (initial+arg)%4
+            p = row.prompt
+            cut = p.index(SEP, 2)
+            ops = [(16 + (v - 16) % 2, x) for v, x in zip(p[2:cut:3], p[3:cut:3], strict=True)]
+            initial = p[1]
+            for left, (op, arg) in enumerate(ops):
+                for length in (4, 5, 6):
+                    sub = ops[left : left + length]
+                    if len(sub) == length:
+                        used.add(identity([initial, sub]))
+                initial = arg if op == SET else (initial + arg) % 4
     return used
 
 
@@ -379,23 +391,24 @@ def prepare(out):
     rows = []
     unique = set(prior)
     programs = prior_repair_programs()
-    prior_programs=len(programs)
+    prior_programs = len(programs)
     for family, words in HELD_WORDS.items():
         for word in words:
             rng = random.Random(_seed(salt, family, word))
             collected = 0
             attempts = 0
             while collected < ORBIT_COUNT:
-                attempts+=1
-                if attempts>50000:
+                attempts += 1
+                if attempts > 50000:
                     raise ValueError("cannot fill a distinct held program template")
                 group = _orbit(word, rng, family)
                 root = group[0].root
-                orbit_programs={identity([r.prompt[3],list(zip(r.prompt[4:-1:2],r.prompt[5:-1:2],strict=True))])
-                               for r in group}
-                if len(orbit_programs)!=4:
+                orbit_programs = {
+                    identity([r.prompt[3], list(zip(r.prompt[4:-1:2], r.prompt[5:-1:2], strict=True))]) for r in group
+                }
+                if len(orbit_programs) != 4:
                     raise ValueError("counterfactuals duplicated a program")
-                if root in unique or orbit_programs&programs:
+                if root in unique or orbit_programs & programs:
                     continue
                 programs.update(orbit_programs)
                 unique.add(root)

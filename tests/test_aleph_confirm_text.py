@@ -42,6 +42,11 @@ def test_native_compatibility_and_completeness(fake_panel):
     result = text.document_scores(reversed(scores), panel, checksum)
     assert (result["documents"], result["windows"], result["supervised_bytes"]) == (12, 384, 12288)
     assert set(result["per_document"].values()) == {2.0}
+    fixed = {(r.root, r.group, r.order) for r in rows}
+    mean, by_doc = independent.raw_model_nll(scores, fixed)
+    assert mean == 2 and by_doc == result["per_document"]
+    with pytest.raises(ValueError):
+        independent.raw_model_nll([*scores[1:], scores[-1]], fixed)
     with pytest.raises(ValueError):
         text.document_scores(scores[1:], panel)
     with pytest.raises(ValueError):
@@ -95,6 +100,10 @@ def test_normalized_overlap_and_train_only_baselines(fake_panel, monkeypatch):
     )
     assert uni == pytest.approx(expected)
     assert scores["interpolated_trigram"]["nats_per_byte"] < uni
+    _, held = text.panel_data(panel, checksum)
+    alternate = independent.raw_ngram_nll(training, held)
+    for name in scores:
+        assert scores[name]["per_document"] == pytest.approx(alternate[name])
 
 
 def test_exact_author_bootstrap_reduces_to_binomial_when_one_author_changes():

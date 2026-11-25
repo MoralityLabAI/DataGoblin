@@ -112,6 +112,11 @@ def summarize_task(grid, cues, families):
         values = grid[:, i].mean(axis=(1, 2))
         family[f] = {a: float(x) for a, x in zip(ARMS, values[:6].reshape(2, 3).mean(1), strict=True)}
         family[f]["strongest_cue"] = float(values[6:].max())
+        family[f]["strongest_cue_names"] = [c for c, v in zip(cues, values[6:], strict=True) if v == values[6:].max()]
+        family[f]["simple_cue_hits_ceiling"] = bool(values[6:].max() == 1)
+        family[f]["paired_seed_gains"] = {
+            str(s): float(g) for s, g in zip(SEEDS, values[3:6] - values[:3], strict=True)
+        }
         family[f]["b_minus_a"] = family[f][ARMS[1]] - family[f][ARMS[0]]
     return {
         "families": family,
@@ -188,6 +193,8 @@ def compare(scores, doc_strata, text_baselines, draws=DRAWS):
         competence[a] = {
             "mean_text_nll": float(nll[i].mean()),
             "unigram": float(grid[6].mean()),
+            "trigram_nll_minus_model_nll": float(grid[7].mean() - nll[i].mean()),
+            "trigram_win_seeds": [s for s, x in zip(SEEDS, nll[i], strict=True) if x < grid[7].mean()],
             "text_unigram_pass": text_ok,
             "unigram_win_seeds": [s for s, ok in zip(SEEDS, better, strict=True) if ok],
             "checked_task_checks": details,
