@@ -16,6 +16,7 @@ python training/aleph_rlt_placement/gym.py --smoke
 python "$D/bounded.py" --core 0 --wall 7200 architecture_lab.py train --out "$O/arch"
 python "$D/bounded.py" --core 0 --wall 7200 architecture_lab.py score --out "$O/arch"
 python "$D/bounded.py" --core 0 --wall 3600 arch_spectral.py --out "$O/arch"
+python "$D/bounded.py" --core 0 --wall 600 arch_edit_depth.py --out "$O/arch"
 python "$D/arch_atlas.py" "$O/arch"
 
 python "$D/bounded.py" --core 0 --wall 5400 decoder_lab.py train --v2 ../receipt-v2 --out "$O/decoder"

@@ -22,6 +22,7 @@ def main():
         choices=(
             "architecture_lab.py",
             "arch_spectral.py",
+            "arch_edit_depth.py",
             "arch_scoring.py",
             "decoder_lab.py",
             "decoder_pooled.py",

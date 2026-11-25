@@ -19,6 +19,7 @@
     "arch/scores.json": "b127fb7052d4b41fafa4ef770650a4a9d7d0a19ddbab6f94ba14d7cbaf9ea4fb",
     "arch/summary.json": "0d1f21e53211da032ce101e7aaf313a092e5b61beef6e9012bf1e2d0a2c7bdaf",
     "arch/spectra.json": "b4a3f788aa1dd9aa3b4f129b1e755bc3c4681b9eae66b3f61ff57da85fff43a0",
+    "arch/edit-depth.json": "0c502bceebb0e824c47b6d26594ff3f9a44b44434dc7d4786983c4f29ee5dc1b",
     "decoder/training.json": "8475093e40981af6f6f9671ea842c00fbc8db07b18aed81f025221d626d61ebd",
     "decoder/fit-scores.json": "930c05cdd38eb20088ac0e5f96c087ca12937a3c18a375c163084ca46ef9e049",
     "decoder/results.json": "13b88feaaf05617480e97e30bd7f3bd91e1f999c2082c3f0345e020f852622bf",

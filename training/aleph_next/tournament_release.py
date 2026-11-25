@@ -63,6 +63,7 @@ def public(root):
         "arch/scores.json",
         "arch/summary.json",
         "arch/spectra.json",
+        "arch/edit-depth.json",
         "decoder/training.json",
         "decoder/fit-scores.json",
         "decoder/results.json",
