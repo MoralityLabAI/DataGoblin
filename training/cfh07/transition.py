@@ -3,7 +3,6 @@ Env is constructed by a trusted mathematical evaluator, never by a proposer.
 Only observations and acquired/cheap predictions may restrict the version set.
 """
 from dataclasses import dataclass
-from functools import cache
 
 
 def require(ok, message):
@@ -23,20 +22,18 @@ class Env:
         n = len(self.truth[0]) if self.truth else 0
         require(n > 0 and len(self.truth) == len(self.cheap) == len(self.groups) == len(self.moduli), 'shape')
         require(type(self.n_groups) is int and self.n_groups > 0, 'group count')
-        for t, c, g, p in zip(self.truth, self.cheap, self.groups, self.moduli):
+        for t, c, g, p in zip(self.truth, self.cheap, self.groups, self.moduli, strict=True):
             require(type(p) is int and p >= 2 and len(t) == len(c) == len(g) == n, 'row shape')
-            for v, w, j in zip(t, c, g):
+            for v, w, j in zip(t, c, g, strict=True):
                 require(type(v) is int and 0 <= v < p, 'truth residue')
                 require(w is None or (type(w) is int and w == v), 'unsound cheap evidence')
                 require(type(j) is int and 0 <= j < self.n_groups, 'group id')
         return n
 
-    @cache
     def restrict(self, state, bought, q, answer, symbolic):
-        for h, (v, w, j) in enumerate(zip(self.truth[q], self.cheap[q], self.groups[q])):
-            if (bought >> j & 1) or (symbolic and w is not None):
-                if v != answer:
-                    state &= ~(1 << h)
+        for h, (v, w, j) in enumerate(zip(self.truth[q], self.cheap[q], self.groups[q], strict=True)):
+            if ((bought >> j & 1) or (symbolic and w is not None)) and v != answer:
+                state &= ~(1 << h)
         return state
 
 
