@@ -669,7 +669,16 @@ def build(out, lean):
         c.dump(stage / "REPLAY.json", first)
         # Attribution is inside general/records.jsonl; attach the complete
         # standard license text and the pinned tokenizer notice as well.
-        download("https://creativecommons.org/licenses/by/4.0/legalcode.txt", stage / "CC-BY-4.0.txt")
+        # License texts are committed, so a late network error cannot discard a completed replay.
+        for name, blob in (
+            ("CC-BY-4.0.txt", "13ca539f377dc705af32b8d2ce89262298ea2f06"),
+            ("Apache-2.0.txt", "137069b823873b8bcf42979bcf8e9371052d26a2"),
+        ):
+            license_file = HERE / "licenses" / name
+            raw_license = license_file.read_bytes()
+            actual = hashlib.sha1(f"blob {len(raw_license)}\0".encode() + raw_license).hexdigest()
+            need(actual == blob, f"pinned license text changed: {name}")
+            shutil.copyfile(license_file, stage / name)
         (stage / "TOKENIZER-NOTICE.md").write_text(
             f"SmolLM2 tokenizer, Apache-2.0 declaration at the pinned upstream model revision.\n{TOKEN_URL}\n"
             f"Tokenizer SHA-256: {TOKENIZER_SHA256}\n", encoding="utf8",
