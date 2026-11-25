@@ -1,6 +1,6 @@
 # Data Goblin Aleph · Architecture and distributed researcher tournament
 
-**25 November 2026 · Keep the 10B-token expenditure on hold.** Keep two-pass dense direct recurrence as Aleph A. If reserving a second configuration now, reserve B for **two-pass global constant damping**. B is the strongest simple text control on the longer two-pass native pilot. The intervention still needs to win a fresh, adequately powered comparison on the research tasks. No receipt sender, source gate, learned clock or RLT schedule has earned a paid run from this evidence.
+**25 November 2026. Keep the second 10B-token slot open.** At 14.18M parameters, direct recurrence (A) and global constant damping (B) both qualified on native development in all three matched seeds. On 12 fresh authors, B reduced byte loss by 0.389%, below the 1% minimum. Its verified reasoning score fell by 0.217 percentage points. Neither architecture solved a complete unseen register counterfactual orbit or a changed two-turn graph. Keep A as the two-pass dense reference for local training. The fresh result supersedes the earlier provisional reservation for B. [Three-seed confirmation and decision](CONFIRM14_RESULTS.md)
 
 | Question | Decision |
 |---|---|

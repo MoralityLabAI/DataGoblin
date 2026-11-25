@@ -9,6 +9,7 @@ The [consolidated report](REPORT.md) gives the strict-1B recommendation, measure
 | ALEPH-04 | Certified nonlinear encoders, LDT allocation and new mathematical programs | [Protocol](NONLINEAR_PROTOCOL.md) · [Mathematics](NONLINEAR_MATH.md) · [Results](NONLINEAR_RESULTS.md) |
 | ALEPH-05 | Seven ways to retain three mathematical skills through two training stages | [Protocol](CONTINUAL_PROTOCOL.md) · [Results](CONTINUAL_RESULTS.md) |
 | ALEPH-06 | Paired dense controls and a source challenger under successive halving | [Protocol](SCALE_PROTOCOL.md) · [Results](SCALE_RESULTS.md) |
+| 14M confirmation | Direct versus global constant damping, three matched seeds on fresh documents and reasoning families | [Decision and evidence](CONFIRM14_RESULTS.md) · [Replay](CONFIRM14_REPLAY.md) |
 | Native mixed replay | Three-seed, 192-update prelude versus same-site read, with archived direct and damping controls | [Replay and checks](MIXED_REPLAY.md) |
 | Researcher population | Verified receiver repairs and costed choices generated from train-only games | [Corpus interface](CORPUS.md) |
 | Joint-query game | Exact coalition counterexample to ranking independent bits by their individual gain | [Derivation and verifier](JOINT_QUERY.md) |
