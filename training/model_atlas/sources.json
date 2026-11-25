@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "source_id": "lbf14",
+      "study_id": "LBF-14",
+      "family": "lite_braille_fresco",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "commit": "3d8243818858c19c5031c36e2bf7e328f831cf25",
+      "manifest_path": "research/lite_braille_fresco/results/lbf14/manifest.json",
+      "manifest_git_blob_sha1": "89d29047bc421df190b1e6945021eba347a58fab",
+      "manifest_schema": "lbf14.bidir_fresco.v1",
+      "adapter": "fit_manifest",
+      "scope": "open_development_summary",
+      "independent_roots": 32,
+      "reference_budget": 128,
+      "registered_recipe": {
+        "optimizer": "AdamW",
+        "learning_rate": 0.001,
+        "optimizer_steps": 360,
+        "objective": "Candidate-mean MSE of sigmoid outcome logits against fixed-policy continuation utility; both passes supervised.",
+        "data": "Training roots only; smaller-frontier trajectories; forced choice between two frontier layers.",
+        "registered_passes": 2,
+        "width": 32
+      },
+      "architecture_predecessor": "LBF-13",
+      "registration_path": "research/lite_braille_fresco/LBF_14_BIDIRECTIONAL_FRESCO_REGISTRATION.md",
+      "report_path": "research/lite_braille_fresco/LBF_14_BIDIRECTIONAL_FRESCO_RESULTS.md",
+      "implementation_path": "research/lite_braille_fresco/lbf14_bidirectional_fresco.py",
+      "mechanistic_artifact_paths": [
+        "research/lite_braille_fresco/results/lbf14/raw_boundary_tensors.pt.gz"
+      ],
+      "policy_aliases": {
+        "opened": [
+          "opened_normal",
+          "opened_zero",
+          "opened_roll"
+        ],
+        "standard": [
+          "standard_normal",
+          "standard_zero",
+          "standard_roll"
+        ]
+      },
+      "interpretation_notes": [
+        "Both registered competence and memory screens missed.",
+        "Explicit message bank lesions preserve ordinary residual recurrence."
+      ]
+    },
+    {
+      "source_id": "lbf15",
+      "study_id": "LBF-15",
+      "family": "lite_braille_fresco",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "commit": "3d8243818858c19c5031c36e2bf7e328f831cf25",
+      "manifest_path": "research/lite_braille_fresco/results/lbf15/manifest.json",
+      "manifest_git_blob_sha1": "0d9dd705f11c678ac5f06fc5e8bf1b119d6cacdf",
+      "manifest_schema": "lbf15.meeting_potential_fresco.v1",
+      "adapter": "fit_manifest",
+      "scope": "open_development_summary",
+      "independent_roots": 48,
+      "reference_budget": 128,
+      "registered_recipe": {
+        "optimizer": "AdamW",
+        "learning_rate": 0.002,
+        "weight_decay": 0.0001,
+        "gradient_clip": 1,
+        "optimizer_steps": 480,
+        "objective": "Pass-weighted matrix BCE, node softmax cross-entropy and marginal-utility MSE.",
+        "data": "Train-only geometric and exploratory bidirectional rollouts."
+      },
+      "architecture_predecessor": "LBF-14",
+      "registration_path": "research/lite_braille_fresco/LBF_15_MEETING_POTENTIAL_REGISTRATION.md",
+      "report_path": "research/lite_braille_fresco/LBF_15_MEETING_POTENTIAL_RESULTS.md",
+      "implementation_path": "research/lite_braille_fresco/lbf15_meeting_fresco.py",
+      "mechanistic_artifact_paths": [
+        "research/lite_braille_fresco/results/lbf15/raw_fresco_tensors.pt.gz"
+      ],
+      "policy_aliases": {
+        "recurrent_opened": [
+          "opened_normal",
+          "opened_zero",
+          "opened_roll",
+          "opened_scramble",
+          "opened_no_persist"
+        ]
+      },
+      "interpretation_notes": [
+        "Symbolic heuristic comparison and causal screens missed; scramble/zero controls inverted."
+      ]
+    },
+    {
+      "source_id": "lbf16",
+      "study_id": "LBF-16",
+      "family": "lite_braille_fresco",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "commit": "3d8243818858c19c5031c36e2bf7e328f831cf25",
+      "manifest_path": "research/lite_braille_fresco/results/lbf16/manifest.json",
+      "manifest_git_blob_sha1": "324f51e9f19dfa2265a449c63c081b161613472c",
+      "manifest_schema": "lbf16.equivariant_horizon_fresco.v1",
+      "adapter": "fit_manifest",
+      "scope": "open_development_summary",
+      "independent_roots": 48,
+      "reference_budget": 128,
+      "registered_recipe": {
+        "optimizer": "AdamW",
+        "optimizer_steps": 240,
+        "batch_size": 6,
+        "learning_rate": 0.003,
+        "final_learning_rate": 0.0002,
+        "lr_schedule": "cosine",
+        "objective": "Relative geodesic bridge and counterfactual continuation targets, pass weights k^2.",
+        "data": "Train-only geom_mm and graph_bridge rollouts."
+      },
+      "architecture_predecessor": "LBF-15",
+      "registration_path": "research/lite_braille_fresco/LBF_16_EQUIVARIANT_FRESCO_REGISTRATION.md",
+      "report_path": "research/lite_braille_fresco/LBF_16_EQUIVARIANT_FRESCO_RESULTS.md",
+      "implementation_path": "research/lite_braille_fresco/lbf16_equivariant_fresco.py",
+      "mechanistic_artifact_paths": [
+        "research/lite_braille_fresco/results/lbf16/raw_fresco_tensors.pt.gz",
+        "research/lite_braille_fresco/results/lbf16/fresco_manuscript.svg"
+      ],
+      "policy_aliases": {
+        "recurrent_opened": [
+          "opened_normal",
+          "opened_zero",
+          "opened_roll",
+          "opened_scramble",
+          "opened_no_persist"
+        ]
+      },
+      "interpretation_notes": [
+        "All four registered descriptive screens passed.",
+        "LBF-17 refuted the claimed exact positionwise horizon-support property; preserve results but do not treat the original theorem as established.",
+        "Recurrence-versus-single-pass interval included zero."
+      ]
+    },
+    {
+      "source_id": "lbf17",
+      "study_id": "LBF-17",
+      "family": "lite_braille_fresco",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "commit": "3d8243818858c19c5031c36e2bf7e328f831cf25",
+      "manifest_path": "research/lite_braille_fresco/results/lbf17/manifest.json",
+      "manifest_git_blob_sha1": "00edfefe658de7d0ce0f199a518856216cc52c57",
+      "manifest_schema": "lbf17.relational_provenance_fresco.v1",
+      "adapter": "fit_manifest",
+      "scope": "open_development_summary",
+      "independent_roots": 48,
+      "reference_budget": 128,
+      "registered_recipe": {
+        "optimizer": "AdamW",
+        "optimizer_steps": 240,
+        "batch_size": 6,
+        "learning_rate": 0.003,
+        "final_learning_rate": 0.0002,
+        "lr_schedule": "cosine",
+        "objective": "Train-only relative bridge and counterfactual continuation supervision, relational envelope and glyph objectives; consult pinned implementation for exact coefficients.",
+        "data": "Matched frame draw schedules across architecture arms."
+      },
+      "architecture_predecessor": "LBF-16",
+      "registration_path": "research/lite_braille_fresco/LBF_17_REGISTRATION.md",
+      "report_path": "research/lite_braille_fresco/LBF_17_RESULTS.md",
+      "implementation_path": "research/lite_braille_fresco/lbf17_relational_fresco.py",
+      "mechanistic_artifact_paths": [
+        "research/lite_braille_fresco/results/lbf17/raw_fresco_tensors.pt.gz",
+        "research/lite_braille_fresco/results/lbf17/fresco_manuscript.svg",
+        "research/lite_braille_fresco/results/lbf17/abstraction_diagnostics.json"
+      ],
+      "policy_aliases": {
+        "rel_prov_opened": [
+          "rel_prov_opened",
+          "rel_prov_ablate_axial",
+          "rel_prov_env_roll",
+          "rel_prov_env_zero",
+          "rel_prov_mat_roll",
+          "rel_prov_mat_zero",
+          "rel_prov_scramble_ribbon",
+          "rel_prov_scramble_window"
+        ]
+      },
+      "interpretation_notes": [
+        "All five registered calibration screens passed; three seeds share 48 independent roots.",
+        "Independent referee found unsound pass-two suppression, finite precision failures, timing/profiling confounds and no detected advantage over symbolic propagation plus learned readout.",
+        "LBF-18 repairs support and re-evaluates without altering these historical checkpoints."
+      ]
+    },
+    {
+      "source_id": "lbf18",
+      "study_id": "LBF-18",
+      "family": "lite_braille_fresco",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "commit": "0f73bc883ee891a513dd6fda5f5a73c73f2f57dc",
+      "manifest_path": "research/lite_braille_fresco/results/lbf18/calibration_phase_summary.json",
+      "manifest_git_blob_sha1": "0352b1655188ce65f9cc6be3e82b2e7cee0cf542",
+      "manifest_schema": "lbf18.calibration_and_incremental.v2",
+      "adapter": "lbf18_calibration",
+      "scope": "open_development_summary",
+      "independent_roots": 48,
+      "reference_budget": 128,
+      "registered_recipe": {
+        "optimizer": "AdamW",
+        "weight_decay": 0.0001,
+        "optimizer_steps": 240,
+        "batch_size": 6,
+        "learning_rate": 0.003,
+        "final_learning_rate": 0.0002,
+        "lr_schedule": "cosine",
+        "objective": "Hybrid symbolic progressive bitsets and learned recurrent cross-frontier readout.",
+        "data": "LBF-17 train-only frames and exact matched draw schedule."
+      },
+      "architecture_predecessor": "LBF-17",
+      "registration_path": "research/lite_braille_fresco/LBF_18_INCREMENTAL_FRESCO_SPECIFICATION.md",
+      "report_path": "research/lite_braille_fresco/LBF_18_RESULTS.md",
+      "implementation_path": "research/lite_braille_fresco/lbf18_incremental_fresco.py",
+      "mechanistic_artifact_paths": [
+        "research/lite_braille_fresco/results/lbf18/fresco_incremental_architecture.svg",
+        "research/lite_braille_fresco/results/lbf18/fresco_cost_breakeven.svg"
+      ],
+      "policy_aliases": {},
+      "interpretation_notes": [
+        "Only Phase 1 open calibration summary is collected. Sealed confirmation outcomes and raw episodes are excluded.",
+        "Frozen earlier LBF-17 checkpoints are linked, not counted as newly trained models.",
+        "Guarded Boolean abstract interpretation and float brightness are separate; cost models distinguish charged work from unique enumeration."
+      ],
+      "reuses_study": "LBF-17",
+      "reuse_policy_map": {
+        "compute_nonrecurrent_py": "compute_nonrecurrent",
+        "hybrid_sym_rec_guarded_rust_cold": "hybrid_sym_rec_opened",
+        "lbf16_pos1_opened_py": "lbf16_pos1_opened",
+        "param_nonrecurrent_rust_cold": "param_nonrecurrent",
+        "rel_prov_adaptive_rust_cold": "rel_prov_opened",
+        "rel_prov_guarded_inc_py_cold": "rel_prov_opened",
+        "rel_prov_guarded_inc_py_warm": "rel_prov_opened",
+        "rel_prov_guarded_inc_rust_cold": "rel_prov_opened",
+        "rel_prov_guarded_inc_rust_warm": "rel_prov_opened",
+        "rel_prov_guarded_uncached_py": "rel_prov_opened",
+        "rel_prov_legacy_inc_rust_cold": "rel_prov_opened",
+        "rel_prov_legacy_uncached_py": "rel_prov_opened",
+        "rel_prov_mask_guard_inc_rust_cold": "rel_prov_opened",
+        "sym_prov_readout_guarded_rust_cold": "sym_prov_readout",
+        "sym_prov_readout_legacy_rust_cold": "sym_prov_readout"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+name: model-atlas-metadata
+on:
+  pull_request:
+    paths:
+      - "src/datagoblin/model_atlas.py"
+      - "training/model_atlas/**"
+      - "tests/unit/test_model_atlas.py"
+      - ".github/workflows/model-atlas.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  collate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/unit/test_model_atlas.py
+      - run: ruff check src/datagoblin/model_atlas.py tests/unit/test_model_atlas.py
+      - name: Collect pinned public metadata only
+        run: |
+          python -m datagoblin.model_atlas --sources training/model_atlas/sources.json \
+            --cache runs/model-atlas/cache --out runs/model-atlas/collated --fetch-metadata
+          python -c "import json; from pathlib import Path; m=json.loads(Path('runs/model-atlas/collated/inventory.json').read_text()); assert m['model_count']==55 and m['study_count']==5 and m['training_examples_released']==0"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-atlas-lbf-first-import
+          path: runs/model-atlas/collated/
+          retention-days: 14
