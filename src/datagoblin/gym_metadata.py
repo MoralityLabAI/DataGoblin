@@ -12,7 +12,10 @@ from .model_atlas import HEX40, HEX64, MAX_BYTES, REPO, _name, _path, canonical,
 KINDS = {"trained_gym", "checkpoint_reuse", "study_only", "synthetic_gym", "registration_only"}
 CUSTODY = {"training_ready": False, "custody_lane": "discovery", "data_split": "unassigned",
            "data_rights_review": "pending"}
-PROTECTED = re.compile(r"sealed|holdout|private|raw|ordinary|ood|test_split", re.IGNORECASE)
+PROTECTED = re.compile(
+    r"(?:^|[/_.-])(?:sealed|holdout|private|raw|ordinary|ood|test_split)(?:$|[/_.-])",
+    re.IGNORECASE,
+)
 FIELDS = {"id", "family", "kind", "scope", "sources", "architecture", "recipe", "metrics",
           "checkpoints", "limits"}
 CHECKPOINT_FIELDS = {"sha256", "training_seed", "steps", "calibration_accuracy",

@@ -97,3 +97,20 @@ def test_recent_gym_metadata_is_deterministic_and_discovery_only(tmp_path):
         a = (tmp_path / "first" / file).read_bytes()
         assert a == (tmp_path / "second" / file).read_bytes()
         assert all(not json.loads(line)["training_ready"] for line in a.splitlines())
+
+
+def test_recent_gym_metadata_rejects_protected_source_path(tmp_path):
+    import json
+    from pathlib import Path
+
+    import pytest
+
+    from datagoblin.gym_metadata import collate
+
+    source = Path("training/model_atlas/gym_metadata/sources.json")
+    data = json.loads(source.read_text())
+    data["modules"][0]["sources"][0]["path"] = "analysis/roc_sealed_metrics.json"
+    path = tmp_path / "sources.json"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="pinned open metadata"):
+        collate(path)
