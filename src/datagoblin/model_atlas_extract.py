@@ -38,7 +38,7 @@ NON_VALUE_KEY_WORDS = ("sha", "hash", "path", "file", "uri", "url", "commit", "u
 CKPT_KEY = re.compile(r"(checkpoint|ckpt|model|weights?|state_dict)")
 CKPT_KEY_SUFFIX = re.compile(r"(sha256|_sha|_hash|_digest)")
 CKPT_KEY_REJECT = re.compile(r"(source_sha|_src|code_|config|manifest|optimizer|decomposition|probe|calibration|"
-                             r"dataset|"
+                             r"dataset|sample|"
                              r"tokenizer|answer_tape|draws|trace|environment|git_blob|zip|artifact_|archive|lock)")
 LABEL_KEYS = frozenset({
     "arch", "arm", "architecture", "model", "model_name", "name", "variant", "kind", "topology", "mode", "family",
