@@ -77,3 +77,40 @@ def test_reject_custody_paths(tmp_path, path):
     src["manifest_path"] = path
     with pytest.raises(ValueError):
         validate_source(src)
+
+
+def test_recent_gym_metadata_is_deterministic_and_discovery_only(tmp_path):
+    import json
+    from pathlib import Path
+
+    from datagoblin.gym_metadata import emit
+
+    catalog = Path("training/model_atlas/gym_metadata/sources.json")
+    first = emit(catalog, tmp_path / "first")
+    second = emit(catalog, tmp_path / "second")
+    assert first == second
+    assert first["module_count"] == 8
+    assert first["checkpoint_digest_count"] == 16
+    assert first["terminal_fit_digest_count"] == 3
+    assert first["training_examples_released"] == 0
+    for file in ("gym_modules.jsonl", "checkpoint_index.jsonl", "inventory.json"):
+        a = (tmp_path / "first" / file).read_bytes()
+        assert a == (tmp_path / "second" / file).read_bytes()
+        assert all(not json.loads(line)["training_ready"] for line in a.splitlines())
+
+
+def test_recent_gym_metadata_rejects_protected_source_path(tmp_path):
+    import json
+    from pathlib import Path
+
+    import pytest
+
+    from datagoblin.gym_metadata import collate
+
+    source = Path("training/model_atlas/gym_metadata/sources.json")
+    data = json.loads(source.read_text())
+    data["modules"][0]["sources"][0]["path"] = "analysis/roc_sealed_metrics.json"
+    path = tmp_path / "sources.json"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="pinned open metadata"):
+        collate(path)

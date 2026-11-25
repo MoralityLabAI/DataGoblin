@@ -2,6 +2,7 @@ name: model-atlas-metadata
 on:
   pull_request:
     paths:
+      - "src/datagoblin/gym_metadata.py"
       - "src/datagoblin/model_atlas*.py"
       - "schemas/model_atlas_*.json"
       - "training/model_atlas/**"
@@ -22,7 +23,7 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: python -m pip install jsonschema
       - run: python -m pytest tests/unit/test_model_atlas.py tests/unit/test_model_atlas_corpus.py
-      - run: ruff check src/datagoblin/model_atlas*.py tests/unit/test_model_atlas*.py
+      - run: ruff check src/datagoblin/gym_metadata.py src/datagoblin/model_atlas*.py tests/unit/test_model_atlas*.py
       - name: Collect pinned public metadata only
         run: |
           python -m datagoblin.model_atlas --sources training/model_atlas/sources.json \
@@ -43,4 +44,15 @@ jobs:
         with:
           name: model-atlas-corpus
           path: runs/model-atlas/corpus/
+          retention-days: 14
+
+      - name: Collate recently indexed gym metadata offline
+        run: |
+          python -m datagoblin.gym_metadata \
+            --sources training/model_atlas/gym_metadata/sources.json \
+            --out runs/model-atlas/gym-metadata
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-atlas-recent-gym-metadata
+          path: runs/model-atlas/gym-metadata/
           retention-days: 14
