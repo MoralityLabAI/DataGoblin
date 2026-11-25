@@ -1,6 +1,6 @@
 """Independent replay and small exhaustive oracle checks."""
 from dataclasses import replace
-from itertools import product
+from itertools import pairwise, product
 
 import pytest
 
@@ -42,19 +42,19 @@ def test_normalization(n):
         for style in range(4):
             tr = trace(instantiate(offset(k, style), n))
             assert tr[-1] == numeral(n + k)
-            assert all(one_step(a, b) for a, b in zip(tr, tr[1:], strict=False))
+            assert all(one_step(a, b) for a, b in pairwise(tr))
 
 
 def test_attacks():
     x, rows = optimal_proof()
     rid, n, refs, tr = rows[-1]
-    candidates = [[], rows[:-1], rows + [rows[-1]],
-                  rows[:-1] + [(len(x.rules), n, refs, tr)],
-                  rows[:-1] + [(rid, x.limit+1, refs, tr)],
-                  rows[:-1] + [(rid, n, (len(rows)-1, *refs[1:]), tr)],
-                  rows[:-1] + [(rid, n, refs, ())],
-                  rows[:-1] + [(rid, n, refs, ((Z,), *tr[1:]))],
-                  rows[:-1] + [(rid, n, refs, (tr[0] + (numeral(x.limit+1),), *tr[1:]))]]
+    candidates = [[], rows[:-1], [*rows, rows[-1]],
+                  [*rows[:-1], (len(x.rules), n, refs, tr)],
+                  [*rows[:-1], (rid, x.limit+1, refs, tr)],
+                  [*rows[:-1], (rid, n, (len(rows)-1, *refs[1:]), tr)],
+                  [*rows[:-1], (rid, n, refs, ())],
+                  [*rows[:-1], (rid, n, refs, ((Z,), *tr[1:]))],
+                  [*rows[:-1], (rid, n, refs, ((*tr[0], numeral(x.limit+1)), *tr[1:]))]]
     for bad in candidates:
         with pytest.raises(ValueError):
             verify(x, bad)

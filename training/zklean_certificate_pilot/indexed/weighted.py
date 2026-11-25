@@ -7,7 +7,8 @@ import math
 import random
 import statistics
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache, lru_cache
+from itertools import pairwise
 
 # Natural terms: Z, S(t), Add(t,u), free binder n. Normal forms are Peano numerals.
 Z = ('z',)
@@ -16,7 +17,7 @@ INF = 10**12
 FAMILIES = 2
 
 
-@lru_cache(maxsize=None)
+@cache
 def numeral(n):
     assert n >= 0
     return Z if n == 0 else ('s', numeral(n - 1))
@@ -35,7 +36,7 @@ def offset(k, style):
     return ('a', ('a', V, Z), numeral(k))
 
 
-@lru_cache(maxsize=None)
+@cache
 def instantiate(t, n):
     if t == V:
         return numeral(n)
@@ -240,7 +241,7 @@ def verify(x, rows):
         for (family, t), tr in zip(expected, conversions, strict=True):
             if not tr or tr[0] != t:
                 raise ValueError('wrong conversion start')
-            if any(not one_step(a, b) for a, b in zip(tr, tr[1:], strict=False)):
+            if any(not one_step(a, b) for a, b in pairwise(tr)):
                 raise ValueError('invalid iota step')
             v = value(t)
             if tr[-1] != numeral(v) or not 0 <= v <= x.limit:
