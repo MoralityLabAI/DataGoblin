@@ -451,16 +451,17 @@ def self_test(backend, dtype):
     return result
 
 
-def run(args,backend):
+def run(args,backend,*,snapshot_pin=PIN,replay_path=RECEIPT,replacement=False):
     started=time.monotonic()
     if backend.kind!="xla":
         raise RuntimeError("full-size execution requires TPU")
     if backend.identity["memory_limit"]<28_000_000_000:
         raise RuntimeError("need a 32 GB HBM class TPU")
-    if digest(RECIPE)!=RECIPE_SHA or digest(args.base/"index.json")!=PIN:
+    if digest(RECIPE)!=RECIPE_SHA or digest(args.base/"index.json")!=snapshot_pin:
         raise ValueError("frozen recipe/index differs")
     cfg=read(RECIPE)
-    groups=read(RECEIPT)["bounded_replay"]["steps"]
+    receipt=read(replay_path)
+    groups=receipt["steps"] if replacement else receipt["bounded_replay"]["steps"]
     if len(groups)!=39:
         raise ValueError("unexpected frozen groups")
     if args.resume:
@@ -479,7 +480,7 @@ def run(args,backend):
     assert list(schedule(2,1))==[0,*range(1,11),*range(1,11),11,12,13]
     net=net.to(backend.device)
     opt=FP32AdamW(net,cfg,backend)
-    identity={"recipe":RECIPE_SHA,"index":PIN,"receipt":digest(RECEIPT),
+    identity={"recipe":RECIPE_SHA,"index":snapshot_pin,"receipt":digest(replay_path),
               "code":digest(Path(__file__)),"cuda_reference":digest(HERE/"colab10m.py"),
               "native":digest(HERE.parents[1]/"aleph_rlt_placement/gym.py"),
               "packer":digest(HERE.parents[1]/"aleph_rlt_placement/packing.py"),
@@ -502,7 +503,7 @@ def run(args,backend):
     last_cursor = cursor
     train_deadline = started+args.wall_seconds-args.checkpoint_reserve_seconds
     with ExitStack() as stack:
-        stream=MixedStream(args.base,args.base/"index.json",PIN,stack,cursor)
+        stream=MixedStream(args.base,args.base/"index.json",snapshot_pin,stack,cursor)
         assert sum(stream.totals.values())==(groups[opt.step-1]["stop"] if opt.step else 0)
         for i in range(opt.step,args.max_groups):
             if time.monotonic()>=train_deadline:
