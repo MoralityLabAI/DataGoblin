@@ -8,6 +8,7 @@ import argparse
 import copy
 import hashlib
 import json
+import math
 import os
 import random
 import shutil
@@ -121,6 +122,8 @@ def self_test(device):
         num = F.cross_entropy(zz,yy,reduction="sum")
         (num/total).backward()
         packed_loss += float(num.detach())
+    if not math.isclose(ref_loss,packed_loss,rel_tol=rtol,abs_tol=atol*total):
+        raise ValueError("loss numerator parity failed")
     errors=[]
     for (n,p),(m,q) in zip(native.named_parameters(),other.named_parameters(),strict=True):
         assert n==m and p.grad is not None and q.grad is not None
@@ -172,6 +175,8 @@ def save(out,identity,net,opt,stream,group,records):
     state=dict(identity=identity,model=net.state_dict(),optimizer=opt.state_dict(),
                group=group,cursor=stream.checkpoint(),rng=rng_state(),
                cuda_rng=torch.cuda.get_rng_state(),records=records)
+    if shutil.disk_usage(out).free<13_000_000_000:
+        raise RuntimeError("insufficient free space for a complete checkpoint")
     path=out/f"group_{group:03d}.pt"
     tmp=path.with_suffix(".partial")
     if path.exists():raise FileExistsError(path)
@@ -203,8 +208,9 @@ def main_run(args):
         if not (args.out/"LATEST.json").is_file():raise ValueError("no published checkpoint")
     else:
         args.out.mkdir(parents=True,exist_ok=False)
-    if shutil.disk_usage(args.out).free<26_000_000_000:
-        raise RuntimeError("insufficient checkpoint storage; retain two complete generations")
+    needed_groups = sum(1 for g in set((1,19,39,args.max_groups)) if g<=args.max_groups and not (args.out/f"group_{g:03d}.pt").exists())
+    if shutil.disk_usage(args.out).free<13_000_000_000*max(needed_groups,1):
+        raise RuntimeError("insufficient storage for all planned checkpoint generations")
     torch.set_num_threads(1);torch.manual_seed(137);random.seed(137);np.random.seed(137)
     torch.backends.cuda.matmul.allow_tf32=False
     self_test(device)
