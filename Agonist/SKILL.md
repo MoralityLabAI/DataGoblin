@@ -159,3 +159,5 @@ adapters with their own exact verifiers.
 ## Storyworld-to-reasoner continual learning
 
 For richer SWMD worlds, Bonsai 2 27B / Inky Mini authoring, provenance-aware replay, inductive conjectures, Lean proof traces and continual compact-model training, use [AGN-03](skills/agonist03/SKILL.md). Its offline bridge exports development-only candidate views; it does not authorize live teacher calls or training promotion.
+
+For the live teacher generation, mechanical verification and repair pipeline that AGN-03's offline bridge stops short of, use [AGN-04](skills/agonist04/SKILL.md). It is a skill definition and verification-record schema only; an operator must still authorize each live generation batch.

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagoblin.local/schemas/agn04_world_verification_record.schema.json",
+  "title": "AGN-04 independent world verification record",
+  "description": "One independently-checked storyworld, prior to any Lean pass (AGN-05) or training promotion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "family_id",
+    "root_id",
+    "mechanism",
+    "split",
+    "source_digest",
+    "difficulty",
+    "verification",
+    "training_ready",
+    "kernel_checked",
+    "evidence_class"
+  ],
+  "properties": {
+    "schema": {"const": "agn04.world_verification_record.v1"},
+    "family_id": {"type": "string", "minLength": 1},
+    "root_id": {"type": "string", "minLength": 1},
+    "mechanism": {
+      "enum": [
+        "historical_investigation",
+        "diplomacy",
+        "resource_allocation",
+        "scientific_discovery",
+        "spatial_reasoning",
+        "strategic_interaction",
+        "mathematical_deduction",
+        "conflicting_testimony",
+        "provenance",
+        "competing_goals",
+        "finite_resources",
+        "partial_information",
+        "multi_hop_logic"
+      ]
+    },
+    "split": {"enum": ["train", "dev", "heldout"]},
+    "source_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "difficulty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inference_depth",
+        "branching_factor",
+        "uncertainty",
+        "source_dependence",
+        "required_memory",
+        "revision_depth",
+        "opportunity_structure"
+      ],
+      "properties": {
+        "inference_depth": {"type": "integer", "minimum": 1},
+        "branching_factor": {"type": "integer", "minimum": 1},
+        "uncertainty": {"type": "number", "minimum": 0, "maximum": 1},
+        "source_dependence": {"type": "integer", "minimum": 0},
+        "required_memory": {"type": "integer", "minimum": 0},
+        "revision_depth": {"type": "integer", "minimum": 0},
+        "opportunity_structure": {"type": "number", "minimum": 0}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solver",
+        "optimality_gap_reported",
+        "realized_policy_utility",
+        "attainable_opportunity_capture",
+        "informative_decision_accuracy",
+        "min_optimal_planning_horizon",
+        "shortcut_policy_strength",
+        "ending_reachable"
+      ],
+      "properties": {
+        "solver": {"enum": ["exact", "bounded_search"]},
+        "optimality_gap_reported": {
+          "description": "Required (non-null) whenever solver is bounded_search; null only for an exact solve.",
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "realized_policy_utility": {"type": "number"},
+        "attainable_opportunity_capture": {"type": "number", "minimum": 0, "maximum": 1},
+        "informative_decision_accuracy": {"type": "number", "minimum": 0, "maximum": 1},
+        "min_optimal_planning_horizon": {"type": "integer", "minimum": 0},
+        "shortcut_policy_strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "counterfactual_effect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["intervention", "matched_budget", "outcome_delta"],
+          "properties": {
+            "intervention": {"type": "string", "minLength": 1},
+            "matched_budget": {"type": "boolean"},
+            "outcome_delta": {"type": "number"}
+          }
+        },
+        "reaction_sensitivity": {"type": "number", "minimum": 0},
+        "evidence_provenance_correct": {"type": "boolean"},
+        "ending_reachable": {"type": "boolean"}
+      }
+    },
+    "training_ready": {"const": false},
+    "kernel_checked": {"const": false},
+    "evidence_class": {
+      "enum": ["proposed", "finite_replay_checked", "kernel_checked_conditional", "independently_measured_transfer"]
+    },
+    "rejected_attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["attempt_digest", "failure_code"],
+        "properties": {
+          "attempt_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "failure_code": {
+            "enum": [
+              "inert_variable",
+              "hidden_prerequisite",
+              "redundant_reaction",
+              "unreachable_ending",
+              "oracle_mismatch",
+              "counterfactual_budget_mismatch",
+              "shortcut_dominant"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
