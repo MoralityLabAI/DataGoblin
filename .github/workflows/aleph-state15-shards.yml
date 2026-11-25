@@ -1,0 +1,89 @@
+name: Aleph STATE15 disjoint kernel replay
+on:
+  pull_request:
+    paths:
+      - 'training/aleph_next/state01/state15_*.py'
+      - 'training/aleph_next/state01/STATE15_REWRITE_WITNESSES.json'
+      - '.github/workflows/aleph-state15-shards.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aleph-state15-sharded-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Restore and hash the registered archives
+        run: |
+          python -m pip install numpy==2.3.5
+          python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+          python training/aleph_next/state01/state15_replay.py --regenerate --prepare-only --archive-root "$RUNNER_TEMP/archives" --out "$RUNNER_TEMP/prepared"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: state15-frozen-prepared
+          path: ${{ runner.temp }}/prepared/
+          retention-days: 14
+  shard:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        index: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: state15-frozen-prepared
+          path: ${{ runner.temp }}/prepared
+      - name: Install the pinned Lean core compiler
+        run: |
+          curl -fL --retry 2 https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/lean-4.19.0-linux/bin" >> "$GITHUB_PATH"
+      - name: Check disjoint theorem and control queries on one thread
+        run: |
+          python3 training/aleph_next/state01/state15_shards.py run --prepared "$RUNNER_TEMP/prepared" --out "$RUNNER_TEMP/shard" --count 8 --index ${{ matrix.index }} --timeout 600
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: state15-checks-${{ matrix.index }}
+          path: |
+            ${{ runner.temp }}/shard/*.json
+            ${{ runner.temp }}/shard/*.log
+          if-no-files-found: warn
+          retention-days: 14
+  audit:
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    needs: [prepare, shard]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: state15-frozen-prepared
+          path: ${{ runner.temp }}/prepared
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: state15-checks-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/joined
+      - name: Verify complete coverage, source and log hashes, axiom sets and costs
+        run: |
+          python3 training/aleph_next/state01/state15_shards.py collect --prepared "$RUNNER_TEMP/prepared" --out "$RUNNER_TEMP/joined" --count 8 --summary "$RUNNER_TEMP/STATE15_SHARD_AUDIT.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: state15-disjoint-audit
+          path: ${{ runner.temp }}/STATE15_SHARD_AUDIT.json
+          retention-days: 14
