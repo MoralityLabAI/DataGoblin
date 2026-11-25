@@ -5,7 +5,7 @@ The [19 November 2026 landscape report](../reports/2026-11-19_data_landscape.md)
 | File | Contents |
 | --- | --- |
 | [public_pretraining_catalog.json](public_pretraining_catalog.json) | 24 public pretraining and solution sources, including access, ancestry and license notes. |
-| [formal_game_catalog.json](formal_game_catalog.json) | 16 formal-math/game datasets, repositories and generator families. |
+| [formal_game_catalog.json](formal_game_catalog.json) | 17 formal-math/game datasets, repositories and generator families. |
 | [owned_corpus_catalog.json](owned_corpus_catalog.json) | Owned corpus receipts, pinned Lean source inventories and the local checked Campsite repair pack. |
 | [aleph_20b_30b_mix.json](aleph_20b_30b_mix.json) | Proposed quotas, repeat limits, fallback rules, objectives and accounting requirements. |
 | [aleph_20b_30b_estimates.json](../estimates/aleph_20b_30b_estimates.json) | Reproducible analytical compute cases for 10B, 20B and 30B tokens. |
@@ -60,6 +60,10 @@ Illustrative post-filter, post-tokenization targets in millions of loss-bearing 
 Compare raw response SFT, compressed subgoal supervision, and state-transition supervision at matched loss-bearing token and planned recurrent-cell budgets. The last view carries state, proposal, independently checked outcome (or unknown), and revised action. Keep tool/environment output as context, mask non-target spans, and preserve failed actions as attributed proposals. Teacher self-grades do not supply independent truth labels.
 
 Admission requires pinned dataset/file revisions, origin and teacher-attribution evidence, rights review (including applicable provider terms), secret/PII screening, deduplication across aggregates, root-level split custody and the existing four-presentation cap. Retain unknown outcomes as masked labels; verify Lean with the kernel and software repair with isolated tests. Record accepted unique and loss-bearing Aleph tokens with the frozen tokenizer, actual replay costs and source-specific exclusions. CPU/RAM inventory and sampling should precede any separately authorized GPU or Silico run. No dataset downloads or training are authorized by this catalog.
+
+## Research conjectures: pinned external Lean source (2026-11-25)
+
+[solved-conjectures](https://github.com/1337isnot1337/solved-conjectures/tree/e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e) is registered in the formal-game catalog under the existing `formal_lean` lane. The pinned tree has 5,882 Lean paths (272,157,737 bytes), of which 5,215 are under `lean/` (262,579,836 bytes). These are raw source counts; result directories, archived snapshots and generated certificates do not count as independent theorem tasks. The two large filename-prefix groups Loneliness and Frankl alone contribute 246,395,879 bytes under `lean/`. Stage the primary sources before considering archives, preserve upstream credits and per-file license notices, and sample generated certificates separately. The pinned Lean 4.35.0 and mathlib lock, result-level scope reviews, strict axiom audit and independent replay are prerequisites for checked supervision. Keep public conjecture families separate from reserved evaluation roots. No source payload was downloaded, no proof was independently replayed, and no Aleph token volume or quota credit is claimed. Existing owned-corpus totals and mixture allocations are unchanged.
 
 ## Generation measurement
 

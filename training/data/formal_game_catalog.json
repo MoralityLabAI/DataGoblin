@@ -151,6 +151,77 @@
       "training_ready": false
     },
     {
+      "id": "solved_conjectures_davis_astra",
+      "name": "Solved conjectures in combinatorics and number theory (Davis and GPT-6.2 Astra)",
+      "kind": "source_repository_and_result_level_verification_receipts",
+      "urls": [
+        "https://github.com/1337isnot1337/solved-conjectures",
+        "https://github.com/1337isnot1337/solved-conjectures/blob/e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e/docs/lean-status.md",
+        "https://github.com/1337isnot1337/solved-conjectures/blob/e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e/docs/verification.md",
+        "https://github.com/1337isnot1337/solved-conjectures/blob/e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e/CITATION.cff"
+      ],
+      "checked_at": "2026-11-25",
+      "source_revision": "e1cf80b80c2fe9d22d83f1dc3673410a2ac1bf2e",
+      "source_tree": "820e408af56584901ee105f696a9f9aa2a140e3b",
+      "size": "5,882 .lean paths / 272,157,737 raw Git blob bytes repository-wide; 5,215 paths / 262,579,836 bytes in lean/; exact-blob distinct count 5,407 across all paths, 5,215 under lean/. No tokenizer count or unique theorem count measured.",
+      "license": "MIT root; imported CKZUpstream and MotzkinImported have Apache-2.0 notices, LineSizeImported has CC0-1.0; retain applicable notices and verify file/result-specific rights and paper/teacher provenance before admission.",
+      "priority": "core_after_filtering",
+      "use": "Formal Lean source LM, independently replayed proof and counterexample supervision, premise retrieval, theorem/subgoal/tactic-state traces; use result-level informal statements and scope reviews for alignment only after provenance and rights checks.",
+      "risks": "Catalog contains complete, partial and nonformalized results. Do not equate a result directory, Lean file, claimed status, upstream receipt, or successful build alone with an independently verified original conjecture. Generated certificate families dominate raw bytes; deduplicate within and across sources, isolate shared dependencies, split by original problem/family, and quarantine evaluation roots before extraction.",
+      "intake": {
+        "lane": "formal_lean",
+        "status": "pinned_candidate_inventory",
+        "checkout": "https://github.com/1337isnot1337/solved-conjectures.git",
+        "primary_source_glob": "lean/**/*.lean",
+        "archive_policy": "Exclude docs/ and results/ Lean snapshots from default source LM; use only as provenance or separately reviewed unique source. Keep metadata and receipts out of target spans.",
+        "lean_toolchain": "leanprover/lean4:v4.35.0",
+        "mathlib_revision": "56a005855ea17e0b0958f73ec801ae140b0a1679",
+        "dependency_lock": "lean/lake-manifest.json",
+        "dependency_lock_blob": "f0c403ca7db2b5d8e162f465e9963b2fa475335a",
+        "inventory": {
+          "method": "Complete recursive Git tree; count regular .lean blobs and sum raw path sizes; distinct counts by blob SHA; no downloads or theorem replay.",
+          "tree_truncated": false,
+          "all_lean_paths": 5882,
+          "all_lean_bytes": 272157737,
+          "distinct_lean_blobs": 5407,
+          "distinct_lean_blob_bytes": 268038784,
+          "primary_lean_paths": 5215,
+          "primary_lean_bytes": 262579836,
+          "primary_distinct_blobs": 5215,
+          "docs_lean_paths": 657,
+          "results_lean_paths": 10,
+          "result_directories": 159,
+          "receipt_json_paths": 119,
+          "files_gt_1m_bytes": 6,
+          "bytes_gt_1m": 9743250,
+          "primary_filename_prefix_groups": [
+            {
+              "prefix": "Loneliness",
+              "files": 2581,
+              "bytes": 199506734
+            },
+            {
+              "prefix": "Frankl",
+              "files": 1178,
+              "bytes": 46889145
+            }
+          ]
+        },
+        "admission_gates": [
+          "Retain source commit, path, blob SHA, declaration and original problem ID; cite result-level authors and original papers; preserve applicable licenses.",
+          "Stage a read-only checkout; inspect dependency and verification scripts before executing in a resource-capped isolated environment. Pin the Lean version and lockfile; check all transitive axioms for candidate endpoints (reject sorryAx and unapproved axioms), and independently replay kernel certificates.",
+          "Separate complete proofs, counterexamples, partial claims and open statements. Audit statement correspondence to the original conjecture; upstream evidence stays attributed until independently checked.",
+          "Group theorem descendants, variants, shared problem families and equivalent statements before splitting. Cross-deduplicate against mathlib, owned Lean and public proof datasets; exclude existing held-out benchmark roots.",
+          "Stratify generated numeric/combinatorial certificates separately and cap repetition with the existing four-presentation root cap. Measure accepted unique and loss-bearing tokens with the frozen Aleph tokenizer before quota credit."
+        ],
+        "accepted_unique_aleph_tokens": null,
+        "accepted_loss_bearing_aleph_tokens": null,
+        "independent_replay_performed": false
+      },
+      "aleph_unique_tokens_measured": null,
+      "training_ready": false
+    },
+    {
       "id": "reasoning_gym",
       "name": "Reasoning Gym",
       "kind": "procedural_generator",
