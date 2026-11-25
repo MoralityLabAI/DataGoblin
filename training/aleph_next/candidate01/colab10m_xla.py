@@ -130,6 +130,16 @@ def block_forward(block, h, pos, mask, dtype):
     return h + dense(g*u, block.down.weight, dtype).float()
 
 
+class CheckpointVisit(torch.nn.Module):
+    def __init__(self, block, dtype):
+        super().__init__()
+        self.block = block
+        self.dtype = dtype
+
+    def forward(self, h, pos, mask):
+        return block_forward(self.block, h, pos, mask, self.dtype)
+
+
 def logits(net, ids, pos, seg, dtype, remat=True):
     h = net.embed(ids).float()
     mask = sdpa_mask(seg)
@@ -138,8 +148,18 @@ def logits(net, ids, pos, seg, dtype, remat=True):
         if remat:
             # No random operators occur in the frozen block. Bind the actual
             # shared block as an argument to avoid late-binding closure errors.
-            h = checkpoint(block_forward, b, h, pos, mask, dtype,
-                           use_reentrant=False, preserve_rng_state=False)
+            if h.device.type == "xla":
+                from torch_xla.utils.checkpoint import checkpoint as xla_checkpoint
+
+                # XLA 2.9 requires its own reentrant implementation, which
+                # inserts optimization barriers. Use a bound module method so
+                # the barrier sees the block weights as well as input tensors.
+                visit = CheckpointVisit(b, dtype)
+                h = xla_checkpoint(visit.forward, h, pos, mask,
+                                   use_reentrant=True, preserve_rng_state=False)
+            else:
+                h = checkpoint(block_forward, b, h, pos, mask, dtype,
+                               use_reentrant=False, preserve_rng_state=False)
         else:
             h = block_forward(b, h, pos, mask, dtype)
     return dense(norm(h, net.norm), net.embed.weight, dtype).float()
