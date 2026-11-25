@@ -29,3 +29,34 @@ jobs:
           path: ${{ runner.temp }}/aleph-recovery-sources
           if-no-files-found: error
           retention-days: 30
+  build-replacement:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: src
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      RAYON_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . tokenizers==0.22.2
+      - run: |
+          curl -fL --retry 3 https://github.com/leanprover/lean4/releases/download/v4.28.0/lean-4.28.0-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/lean-4.28.0-linux/bin/lean" --version
+      - run: python -u training/aleph_next/recovery/build10m.py build --base "$RUNNER_TEMP/replacement" --lean "$RUNNER_TEMP/lean-4.28.0-linux/bin/lean"
+      - run: |
+          mkdir "$RUNNER_TEMP/delivery"
+          python -u training/aleph_next/recovery/build10m.py pack --base "$RUNNER_TEMP/replacement" --archive "$RUNNER_TEMP/delivery/Aleph-10M-replacement-v2.zip" --release "$RUNNER_TEMP/delivery/RELEASE.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aleph-10M-replacement-v2
+          path: ${{ runner.temp }}/delivery/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
