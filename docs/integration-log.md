@@ -8,12 +8,12 @@ continual-learning program. Append; do not rewrite earlier entries.
 **Assumptions made:**
 
 - "Maya loader" (task instruction: "use the recently ported Maya loader for fast tps on Inky")
-  is read as the recently-ported **squid5080** engine (`tensorfish/squid5090` port at
-  `Documents\Codex\squid5090`, upstream PR `tensorfish/squid5090#5`), since no file, repo or
-  tool named "Maya" exists anywhere searched (`goose`, `Goose-Experiments`, `HybridTRMLDT`,
-  `adapter-bits`, `Documents\Codex`). This is the only recently-ported fast local loader for Inky
-  Mini (Inkling-2-Mini) on this machine. Unresolved: confirm with the operator whether "Maya"
-  names something else not yet recorded here.
+  is read as the packaged **squid5080** server at `C:\Users\patri\tools\squid5080\`
+  (`serve.sh`/`stop.sh`, port 18090, model `inkling-2-mini`; engine ported from
+  `tensorfish/squid5090`), confirmed mid-task when the operator pointed directly at that tool's
+  README. No file, repo or tool literally named "Maya" exists anywhere searched (`goose`,
+  `Goose-Experiments`, `HybridTRMLDT`, `adapter-bits`, `Documents\Codex`); resolved as above
+  regardless. Resolved — no longer open.
 - "Pocket Goblin GDK app inside Goose" is read as `goblin-gdk`
   (`HybridTRMLDT/MCP/goose_gdk_app`), the existing Rust/Goose tool app with its own CI smoke
   test. No literal "Pocket Goblin" name exists; this is the closest and only Goose-hosted GDK app

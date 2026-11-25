@@ -7,13 +7,24 @@ each live generation batch before this skill's pipeline is run against a real ba
 
 ## Local serving path (operator-selected)
 
-- **Inky Mini, fast local decode:** serve `thinkingmachines/Inkling-2-Mini` through the
-  **squid5080** engine (`Documents\Codex\squid5090`, upstream `tensorfish/squid5090#5`) rather
-  than a slower llama.cpp path. squid5080 is verified at 148–254 tok/s generate and ~1,900 tok/s
-  prefill on the shared 5080; treat that as the realistic throughput budget when sizing a
-  generation batch, not an assumed number. If "fast tps on Inky" names a different, newer loader,
-  substitute it here — nothing else matching "Maya" exists on this machine as of this pass (see
-  `docs/integration-log.md`).
+- **Inky Mini, fast local decode:** serve `thinkingmachines/Inkling-2-Mini` (pinned HF revision
+  `c9d02830`) through the packaged **squid5080** server at `C:\Users\patri\tools\squid5080\`
+  (engine ported from `tensorfish/squid5090`, dev clone `Documents\Codex\squid5090`, upstream
+  `tensorfish/squid5090#5`):
+
+      bash C:/Users/patri/tools/squid5080/serve.sh            # port 18090; load takes 4-9 min
+      curl -s http://127.0.0.1:18090/v1/models                # ready check
+      bash C:/Users/patri/tools/squid5080/stop.sh              # releases the vramorama lease
+
+  OpenAI-compatible `POST /v1/chat/completions` (`stream: true` for SSE) and `/v1/completions`,
+  model name `inkling-2-mini`. The model thinks first: read the answer from
+  `message.content` and the reasoning from `message.reasoning_content`, and budget `max_tokens`
+  for both. Measured ~250 tok/s decode (MTP 7, dynamic 150 W) / ~165 tok/s (fixed 80 W); a 45K-token
+  prompt prefills in ~15 s. It queues through vramorama under owner `squid5080-serve`
+  (15,000 MiB lease) — queue a teacher batch behind it with `vramorama run --after
+  owner:squid5080-serve` rather than starting a second server. "Maya" does not appear as a literal
+  name anywhere on this machine; this is read as the "recently ported ... loader for fast tps on
+  Inky" the task names, confirmed by the operator pointing at this README mid-task.
 - **Bonsai 2 27B:** served as in AGN-01–03, through the existing resident local server; do not
   restart it or displace another queued job (see `Agonist/SKILL.md`'s local teacher contract).
 - **Bounded-context authoring surface ("Pocket Goblin GDK app inside Goose"):** run the

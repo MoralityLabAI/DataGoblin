@@ -81,11 +81,13 @@ Two pieces of recently-landed local infra satisfy AGN-04's "fast tps on Inky" an
 local resource wrapper" requirements, named directly in this task's own instructions:
 
 - **Inky Mini fast serving ("Maya loader"):** no repo or file on this machine is literally named
-  "Maya". The one recently-ported, verified-fast loader for Inky Mini (`thinkingmachines/
-  Inkling-2-Mini`) is **squid5080** — the Zig+CUDA engine ported from `tensorfish/squid5090`
-  (`Documents\Codex\squid5090`, upstream PR `tensorfish/squid5090#5`), verified at 148–254 tok/s
-  generate / up to ~1,900 tok/s prefill on the 5080. This map proceeds on the assumption that
-  "Maya loader" refers to that port; flag/correct if a different, newer loader is meant.
+  "Maya". The packaged, ready-to-run server is **squid5080** at
+  `C:\Users\patri\tools\squid5080\` (`serve.sh` / `stop.sh`, OpenAI-compatible on port `18090`,
+  model `inkling-2-mini`) — the Zig+CUDA engine ported from `tensorfish/squid5090` (dev clone
+  `Documents\Codex\squid5090`, upstream PR `tensorfish/squid5090#5`), measured at ~165-254 tok/s
+  decode and a 45K-token prompt prefilling in ~15 s on the 5080. Confirmed mid-task by the
+  operator pointing at that tool's README; see `Agonist/skills/agonist04/SKILL.md` for the exact
+  serve/stop/queue commands.
 - **"Pocket Goblin GDK app inside Goose":** matches `goblin-gdk` at
   `HybridTRMLDT/MCP/goose_gdk_app` — a Rust app on `goose-agent`/`goose-providers`
   `0.1.0-alpha.14`, built in WSL, with its own CI smoke test (`ci_smoke.py`,
