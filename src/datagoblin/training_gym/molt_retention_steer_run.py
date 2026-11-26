@@ -149,7 +149,8 @@ def run(train_roots: int, dev_roots: int, steps: int, seeds: tuple[int, ...]):
             "dev_manifest_digest": digest([asdict(w) for w in dev]), "sources": sources, "fits": fits,
             "parity": parity, "strong_sham_audit": dose, "summary": summarize(rows), "contrasts": contrasts(rows),
             "rows_digest": digest(rows), "audit_digest": digest(audits), "rows": rows, "audits": audits,
-            "score_rounding_decimals": 10, "confirmation_ready": False, "promotion_authorized": False, "native_bpd": False}
+            "score_rounding_decimals": 10, "confirmation_ready": False,
+            "promotion_authorized": False, "native_bpd": False}
 
 
 def main():
