@@ -23,3 +23,10 @@ diagnostic; do not allocate GiB merely to increase the reported RAM. Use
 RMP's full-sequence tensor rows for the large-memory study. The budget covers
 bank tensor payload and tags, not total RAM. Use the resource watchdog and
 count external process-tree RSS, preparation and evaluation.
+
+Map admission amendment: the absolute 0.5 weight cosine gate applies only to
+a frozen exported map. Rank-truncated SVD explained energy is rank-dependent;
+for example rank-16/128 random initialization can have cosine below 0.5.
+SVD and native live maps require a nonzero reconstruction cosine, and all
+feedback still requires positive current/historical gradient alignment.
+Neither gate establishes causal fidelity.
