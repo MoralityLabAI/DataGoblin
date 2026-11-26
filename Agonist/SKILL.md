@@ -155,3 +155,7 @@ Never write generated runs, source posts, weights, API credentials, private
 test seeds or full model activations into the repository. New generators,
 videogame renderers and longer-horizon simulators belong behind versioned
 adapters with their own exact verifiers.
+
+## Storyworld-to-reasoner continual learning
+
+For richer SWMD worlds, Bonsai 2 27B / Inky Mini authoring, provenance-aware replay, inductive conjectures, Lean proof traces and continual compact-model training, use [AGN-03](skills/agonist03/SKILL.md). Its offline bridge exports development-only candidate views; it does not authorize live teacher calls or training promotion.
