@@ -1,0 +1,18 @@
+{
+  "recipe": "58fd8c2805f04ed918b4547d5a177624f839648c6be98dc749426ba39cd32e87",
+  "index": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+  "receipt": "e274e031922e48ef40808c058bd20d62233648117771966633620b3a9ad133bc",
+  "code": "2e17982ad299a137d454f683f0d085d2362eb381e9a92edce4bb11402dcd35d2",
+  "cuda_reference": "f621549d70b9a6a160fcab873bf87879ddad766c518a551e75b18ceeae4b3f57",
+  "native": "7491dc5177aedbaf4b9b5d2b73fa5d40c3794e6329d4a7a4085a62a8bddb197b",
+  "packer": "6fae20996642ce1bf94a455ad366b7b1db3893761bdb803ed356d5d64795c465",
+  "torch": "2.14.1+cu130",
+  "microbatch": 1,
+  "context": 2048,
+  "precision": "explicit-bf16-dense-fp32-master",
+  "backend": "cuda",
+  "hardware": "NVIDIA A100-SXM4-40GB",
+  "world_size": 1,
+  "cuda": "13.0",
+  "memory_limit": 42405855232
+}

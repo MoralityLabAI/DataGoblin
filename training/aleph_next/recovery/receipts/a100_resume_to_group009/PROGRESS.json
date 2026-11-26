@@ -1,0 +1,333 @@
+{
+  "records": [
+    {
+      "group": 1,
+      "labels": 137391,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "6995719370f507138829a6736c9cf5bd312e735f208a773fc154130abecde8a6",
+      "stop": 262144,
+      "loss": 11.280680727699595,
+      "gradient_norm": 15.898950576782227,
+      "lr": 3.2768000000000003e-07,
+      "lane_loss_sums": {
+        "general": 1039419.375,
+        "custom_research": 142721.75,
+        "verified": 152097.46875,
+        "procedural": 206202.515625,
+        "failure_directed": 9422.896484375
+      },
+      "lane_label_counts": {
+        "general": 92043,
+        "custom_research": 12791,
+        "verified": 13510,
+        "procedural": 18187,
+        "failure_directed": 860
+      },
+      "update_wall_seconds": 58.068617793000044,
+      "first_microbatch_seconds": 0.4754056430000446,
+      "median_microbatch_seconds": 0.446597722999968,
+      "useful_positions_per_second": 4514.383327229815,
+      "hbm": {
+        "bytes_free": 20366950400,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21483225088
+      }
+    },
+    {
+      "group": 2,
+      "labels": 127164,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "7de78756c402f4f53bde03b477f1239ab54729b46cd76ecc1227f20a895e0524",
+      "stop": 524288,
+      "loss": 11.238826321534102,
+      "gradient_norm": 12.432690620422363,
+      "lr": 6.553600000000001e-07,
+      "lane_loss_sums": {
+        "failure_directed": 11002.8447265625,
+        "custom_research": 142878.625,
+        "general": 1038386.8125,
+        "procedural": 97103.796875,
+        "verified": 139802.03125
+      },
+      "lane_label_counts": {
+        "failure_directed": 1007,
+        "custom_research": 12875,
+        "general": 92042,
+        "procedural": 8665,
+        "verified": 12575
+      },
+      "update_wall_seconds": 58.15781825699969,
+      "first_microbatch_seconds": 0.4666585770000893,
+      "median_microbatch_seconds": 0.44682631549994767,
+      "useful_positions_per_second": 4507.459321145514,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 3,
+      "labels": 124797,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "ac1e71a1cdb34899d12a2b5db605bf83641b688a73476192aaff8999e5736d21",
+      "stop": 786432,
+      "loss": 11.161090431172724,
+      "gradient_norm": 12.975729942321777,
+      "lr": 9.8304e-07,
+      "lane_loss_sums": {
+        "procedural": 88587.15625,
+        "verified": 140930.46875,
+        "custom_research": 141817.4375,
+        "general": 1012127.3125,
+        "failure_directed": 9408.2275390625
+      },
+      "lane_label_counts": {
+        "procedural": 7993,
+        "verified": 13069,
+        "custom_research": 12888,
+        "general": 89981,
+        "failure_directed": 866
+      },
+      "update_wall_seconds": 58.02618206499983,
+      "first_microbatch_seconds": 0.437538768000195,
+      "median_microbatch_seconds": 0.44735468000021683,
+      "useful_positions_per_second": 4517.68478764209,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 4,
+      "labels": 126091,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "06ef7c78b7ab9cb5c95318efa8878f1e18a11ab996c690f38e1a7e03382e3c54",
+      "stop": 1048576,
+      "loss": 11.051249901794636,
+      "gradient_norm": 12.558680534362793,
+      "lr": 1.3107200000000001e-06,
+      "lane_loss_sums": {
+        "general": 1031345.125,
+        "custom_research": 139279.125,
+        "verified": 128996.2421875,
+        "failure_directed": 10851.1279296875,
+        "procedural": 82991.53125
+      },
+      "lane_label_counts": {
+        "general": 92033,
+        "custom_research": 12835,
+        "verified": 12528,
+        "failure_directed": 1005,
+        "procedural": 7690
+      },
+      "update_wall_seconds": 57.76359138800035,
+      "first_microbatch_seconds": 0.437647262000155,
+      "median_microbatch_seconds": 0.44731971600003817,
+      "useful_positions_per_second": 4538.221978601855,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 5,
+      "labels": 126704,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "8a61eb6f1bfa7eee70709f35fc89f01391c2a0bdb53e5a800cc3d663ff2519d3",
+      "stop": 1310720,
+      "loss": 10.887899821508201,
+      "gradient_norm": 12.352487564086914,
+      "lr": 1.6384e-06,
+      "lane_loss_sums": {
+        "verified": 127480.6875,
+        "general": 1025339.625,
+        "custom_research": 136875.3125,
+        "procedural": 80689.6171875,
+        "failure_directed": 9155.216796875
+      },
+      "lane_label_counts": {
+        "verified": 13193,
+        "general": 92027,
+        "custom_research": 12851,
+        "procedural": 7774,
+        "failure_directed": 859
+      },
+      "update_wall_seconds": 57.89230851499997,
+      "first_microbatch_seconds": 0.437510704000033,
+      "median_microbatch_seconds": 0.4473955959997511,
+      "useful_positions_per_second": 4528.131745378199,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 6,
+      "labels": 126484,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "fb20f5974504ce9cea2447f241cd9fe54d059d06de72c5aab39e3ab9e6b99245",
+      "stop": 1572864,
+      "loss": 10.70590865556612,
+      "gradient_norm": 11.679952621459961,
+      "lr": 1.96608e-06,
+      "lane_loss_sums": {
+        "general": 1018209.375,
+        "custom_research": 133206.265625,
+        "verified": 117916.890625,
+        "procedural": 75749.09375,
+        "failure_directed": 9044.525390625
+      },
+      "lane_label_counts": {
+        "general": 92041,
+        "custom_research": 12828,
+        "verified": 13059,
+        "procedural": 7696,
+        "failure_directed": 860
+      },
+      "update_wall_seconds": 57.989310796000154,
+      "first_microbatch_seconds": 0.43763518200012186,
+      "median_microbatch_seconds": 0.4472744950001015,
+      "useful_positions_per_second": 4520.557261357925,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 7,
+      "labels": 126242,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "f5c57ef9da65dcb6b8269c0906612dabab73d5174bad893be7b1811b37fa829b",
+      "stop": 1835008,
+      "loss": 10.52947307737817,
+      "gradient_norm": 10.670307159423828,
+      "lr": 2.29376e-06,
+      "lane_loss_sums": {
+        "failure_directed": 10496.458984375,
+        "custom_research": 130173.0546875,
+        "general": 1010388.125,
+        "procedural": 71890.6015625,
+        "verified": 106313.5
+      },
+      "lane_label_counts": {
+        "failure_directed": 1017,
+        "custom_research": 12769,
+        "general": 92034,
+        "procedural": 7768,
+        "verified": 12654
+      },
+      "update_wall_seconds": 57.76723957499962,
+      "first_microbatch_seconds": 0.4377910799998972,
+      "median_microbatch_seconds": 0.4473481694999464,
+      "useful_positions_per_second": 4537.93537528579,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 8,
+      "labels": 124668,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "8f5cb1ea9607d9ba40c5ad4bc0a263bd971bb89821dd5c5f10c13ea44fe2d390",
+      "stop": 2097152,
+      "loss": 10.285626796646895,
+      "gradient_norm": 9.982608795166016,
+      "lr": 2.6214400000000003e-06,
+      "lane_loss_sums": {
+        "procedural": 68408.90625,
+        "verified": 101642.3359375,
+        "custom_research": 124239.1875,
+        "general": 979029.125,
+        "failure_directed": 8968.966796875
+      },
+      "lane_label_counts": {
+        "procedural": 8043,
+        "verified": 13067,
+        "custom_research": 12695,
+        "general": 89975,
+        "failure_directed": 888
+      },
+      "update_wall_seconds": 57.90126215999999,
+      "first_microbatch_seconds": 0.43753833599976133,
+      "median_microbatch_seconds": 0.44741671650012904,
+      "useful_positions_per_second": 4527.431531209303,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    },
+    {
+      "group": 9,
+      "labels": 126020,
+      "packs": 128,
+      "padding": 0,
+      "positions": 262144,
+      "sha256": "a8213d133f493ad3b0e2602da7e1b591736917fc23258c41d17fb67bbfdcad51",
+      "stop": 2359296,
+      "loss": 10.125164656403745,
+      "gradient_norm": 9.349493026733398,
+      "lr": 2.9491200000000004e-06,
+      "lane_loss_sums": {
+        "general": 991937.625,
+        "custom_research": 120556.4375,
+        "verified": 93583.3828125,
+        "failure_directed": 9980.54296875,
+        "procedural": 59915.26171875
+      },
+      "lane_label_counts": {
+        "general": 92033,
+        "custom_research": 12762,
+        "verified": 12607,
+        "failure_directed": 1012,
+        "procedural": 7606
+      },
+      "update_wall_seconds": 58.009762251999746,
+      "first_microbatch_seconds": 0.43765455800030395,
+      "median_microbatch_seconds": 0.4473054929999307,
+      "useful_positions_per_second": 4518.9635299869415,
+      "hbm": {
+        "bytes_free": 20421476352,
+        "bytes_total": 42405855232,
+        "peak_allocated": 20388972032,
+        "peak_reserved": 21428699136
+      }
+    }
+  ],
+  "session_wall_seconds": 692.725166658,
+  "complete_10m": false,
+  "durable_group": 9,
+  "distributed_qualified": false,
+  "production_launch_authorized": false
+}

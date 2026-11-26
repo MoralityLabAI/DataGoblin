@@ -1,0 +1,161 @@
+name: Aleph recovered training source packet
+on:
+  pull_request:
+    paths:
+      - 'training/aleph_next/recovery/**'
+      - '.github/workflows/aleph-recover-sources.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PYTHONPATH: src
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - run: python training/aleph_next/recovery/recover_sources.py --out "${{ runner.temp }}/aleph-recovery-sources"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aleph-recovery-train-source-candidates
+          path: ${{ runner.temp }}/aleph-recovery-sources
+          if-no-files-found: error
+          retention-days: 30
+  build-replacement:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: src
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      RAYON_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . tokenizers==0.22.2
+      - run: |
+          curl -fL --retry 3 https://github.com/leanprover/lean4/releases/download/v4.28.0/lean-4.28.0-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/lean-4.28.0-linux/bin/lean" --version
+      - run: python -u training/aleph_next/recovery/build10m.py build --base "$RUNNER_TEMP/replacement" --lean "$RUNNER_TEMP/lean-4.28.0-linux/bin/lean"
+      - run: |
+          mkdir "$RUNNER_TEMP/delivery"
+          python -u training/aleph_next/recovery/build10m.py pack --base "$RUNNER_TEMP/replacement" --archive "$RUNNER_TEMP/delivery/Aleph-10M-replacement-v2.zip" --release "$RUNNER_TEMP/delivery/RELEASE.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aleph-10M-replacement-v2
+          path: ${{ runner.temp }}/delivery/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+  verify-replacement:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      actions: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: src
+      CUDA_VISIBLE_DEVICES: '-1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      RAYON_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . tokenizers==0.22.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: Aleph-10M-replacement-v2
+          path: ${{ runner.temp }}/delivery
+          run-id: 45722542334
+          github-token: ${{ github.token }}
+      - name: Verify the independently packaged payload
+        run: |
+          receipt="$RUNNER_TEMP/delivery/RELEASE.json"
+          sha="ce2d0d5c637b39945fed7d92f022da3d92ab575d4b0e79fb35b8553a8dfaf509"
+          cmp "$receipt" training/aleph_next/recovery/RELEASE.v2.json
+          python -u training/aleph_next/recovery/verify_bundle.py --archive "$RUNNER_TEMP/delivery/Aleph-10M-replacement-v2.zip" --release "$receipt" --release-sha256 "$sha" --out "$RUNNER_TEMP/fresh-corpus"
+  publish-replacement:
+    needs: verify-replacement
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/aleph-recovery-sources-20261125'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: aleph-replacement-evidence-v2
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evidence/aleph-10m-replacement-v2-20261126
+      - uses: actions/download-artifact@v4
+        with:
+          name: Aleph-10M-replacement-v2
+          path: ${{ runner.temp }}/delivery
+          run-id: 45722542334
+          github-token: ${{ github.token }}
+      - name: Publish verified release without replacing existing data
+        env:
+          DELIVERY: ${{ runner.temp }}/delivery
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, shutil, zipfile
+          d = pathlib.Path(os.environ["DELIVERY"])
+          assert hashlib.sha256((d/"RELEASE.json").read_bytes()).hexdigest() == "ce2d0d5c637b39945fed7d92f022da3d92ab575d4b0e79fb35b8553a8dfaf509"
+          r = json.loads((d/"RELEASE.json").read_bytes())
+          z = d/"Aleph-10M-replacement-v2.zip"
+          dest = pathlib.Path("assets/evidence")
+          dest.mkdir(parents=True, exist_ok=True)
+          def verify(archive, receipt):
+              stamp = json.loads(receipt.read_bytes())
+              assert stamp["schema"] == "aleph-direct-A-10m-replacement-v2"
+              assert stamp["train_only"] and stamp["fresh_replay_pass"]
+              assert stamp["full_positions"] == 10000000 and stamp["update_groups"] == 39
+              assert not stamp["production_launch_authorized"]
+              assert hashlib.sha256(archive.read_bytes()).hexdigest() == stamp["archive_sha256"]
+              assert archive.stat().st_size == stamp["archive_bytes"] < 95000000
+              with zipfile.ZipFile(archive) as f:
+                  assert f.testzip() is None
+                  assert hashlib.sha256(f.read("index.json")).hexdigest() == stamp["index_sha256"]
+                  assert hashlib.sha256(f.read("REPLAY.json")).hexdigest() == stamp["replay_sha256"]
+              return stamp
+          verify(z, d/"RELEASE.json")
+          archive = dest/"Aleph-10M-replacement-v2-a0579b31.zip"
+          receipt = dest/"Aleph-10M-replacement-v2-a0579b31.RELEASE.json"
+          if archive.exists() or receipt.exists():
+              published = verify(archive, receipt)
+              print("Existing immutable release retained", json.dumps(published, sort_keys=True))
+          else:
+              shutil.copyfile(z, archive)
+              shutil.copyfile(d/"RELEASE.json", receipt)
+              print("Publishing verified release", json.dumps(r, sort_keys=True))
+          print("RELEASE.json SHA-256", hashlib.sha256(receipt.read_bytes()).hexdigest())
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f assets/evidence/Aleph-10M-replacement-v2-a0579b31.zip assets/evidence/Aleph-10M-replacement-v2-a0579b31.RELEASE.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish verified Aleph replacement 10M train-only archive'
+            git push origin HEAD:refs/heads/evidence/aleph-10m-replacement-v2-20261126
+          fi
+          git log -1 --format='Evidence commit: %H'

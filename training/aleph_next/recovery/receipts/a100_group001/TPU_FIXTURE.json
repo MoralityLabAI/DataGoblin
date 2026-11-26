@@ -1,0 +1,25 @@
+{
+  "backend": {
+    "backend": "cuda",
+    "hardware": "NVIDIA A100-SXM4-40GB",
+    "world_size": 1,
+    "cuda": "13.0",
+    "memory_limit": 42405855232
+  },
+  "dtype": "torch.bfloat16",
+  "labels": 4,
+  "reference_loss": 4.191351652145386,
+  "static_loss": 4.193158149719238,
+  "max_gradient_abs_error": 0.009471029043197632,
+  "gradient_relative_l2": 0.008887511048347596,
+  "gradient_relative_l2_limit": 0.12,
+  "logit_tolerance": [
+    0.12,
+    0.1
+  ],
+  "isolated_document_gradient": true,
+  "all_masked_zero_gradient": true,
+  "unequal_label_counts": true,
+  "fixture_restart": true,
+  "fullsize_steps": 0
+}
