@@ -128,8 +128,7 @@ def paired(out,split,arm,cap=0,eviction='lru',control='heuristic',control_cap=0,
     def group(a,c,e):
         d={}
         for row in out:
-            if (row['split'],row['arm'],row['cap'],row['eviction'])==(split,a,c,e):
-                d.setdefault(row['root'],[]).append(row)
+            if (row['split'],row['arm'],row['cap'],row['eviction'])==(split,a,c,e): d.setdefault(row['root'],[]).append(row)
         return d
     a,b=group(arm,cap,eviction),group(control,control_cap,control_eviction); assert a.keys()==b.keys()
     ds=[mean(r['work'] for r in a[k])-mean(r['work'] for r in b[k]) for k in sorted(a)]
