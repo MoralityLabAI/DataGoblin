@@ -5,6 +5,7 @@ import math
 import subprocess
 import sys
 import time
+from contextlib import suppress
 
 
 def positive(value):
@@ -100,10 +101,8 @@ def main():
                     # Measurement/identity errors are never a reason to signal a process.
                     continue
             samples = fresh
-            try:
+            with suppress(subprocess.TimeoutExpired):
                 root_child.wait(timeout=a.sample_seconds)
-            except subprocess.TimeoutExpired:
-                pass
     except psutil.NoSuchProcess:
         pass
     rc = root_child.wait()

@@ -1,9 +1,9 @@
 import importlib.util
 import json
-from pathlib import Path
 import subprocess
 import sys
 import unittest
+from pathlib import Path
 
 SCRIPT = Path(__file__).with_name("gym_ram_watchdog.py")
 PARENT = """import subprocess, sys
