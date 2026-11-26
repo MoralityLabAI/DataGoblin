@@ -1,0 +1,146 @@
+{
+  "schema": "datagoblin-research-v2-model-registry-1",
+  "observed_date": "2026-11-26",
+  "endpoint_policy": "An operator binds an already provisioned endpoint to a pinned model identity. Registry entries never download weights or allocate compute.",
+  "comparison_policy": "Use the same text JSON action protocol and task budget. Record the provider template, inference precision, recurrence and all generated tokens. Report model variants separately.",
+  "models": [
+    {
+      "id": "baby-goblin-10m-v2-native",
+      "display_name": "Baby Goblin, direct A, 10M v2",
+      "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+      "revision": null,
+      "weights_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+      "artifact": "native/model.safetensors",
+      "parameters": 999352320,
+      "precision": "fp32-native",
+      "recurrence": {
+        "core_blocks": 10,
+        "core_passes": 2,
+        "executed_blocks": 24
+      },
+      "context_length": 2048,
+      "protocol": "raw-completion",
+      "template": "Frozen training serialization, without a chat template. For a GGUF export use completion mode and separately record its hash.",
+      "endpoint_status": "unbound",
+      "availability": "Native export is recorded on the operator's Google Drive. The named private Hugging Face repository was empty in the repository receipt.",
+      "source": "pre-trains/aleph-direct-a-10m-v2/README.md",
+      "training_positions": 10000000,
+      "training_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0"
+    },
+    {
+      "id": "dory-4b-bf16-loop2",
+      "display_name": "Dory 1.0 4B BF16, two loops",
+      "model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "revision": "ee517dd388a9b348890ae1e00dacc5eb4d0c750d",
+      "parameters": 3975229440,
+      "precision": "bf16",
+      "recurrence": {
+        "n_recurrent_loops": 2,
+        "recurrent_kv_cache_mode": "per_loop"
+      },
+      "context_length": 262144,
+      "protocol": "chat-completions",
+      "template": "Pinned repository chat template, with enable_thinking explicitly recorded. vLLM tool parsing requires qwen3_coder and reasoning parsing requires nemotron_v3 when native tools are used.",
+      "endpoint_status": "unbound",
+      "source": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/tree/ee517dd388a9b348890ae1e00dacc5eb4d0c750d",
+      "license": "OpenMDW-1.1",
+      "config_sha256": "d2d086f5949598a043a00d70e2c28c45305bca7703682de3e4f990a7fd3279a4",
+      "tokenizer_config_sha256": "0f5c10ba0a8ab4dbd331fd54959f4c41b9fa6807ebf0d9d1056b4676acd302f1"
+    },
+    {
+      "id": "nanbeige42-3b-loop2",
+      "display_name": "Nanbeige 4.2 3B, two loops",
+      "model_id": "Nanbeige/Nanbeige4.2-3B",
+      "revision": "b82e54bd609793562a75cbf9337970a93369eab5",
+      "parameters": 4169800704,
+      "parameter_label_note": "The 3B model name refers to non-embedding parameters. The full checkpoint contains 4,169,800,704 parameters.",
+      "precision": "bf16",
+      "recurrence": {
+        "num_loops": 2
+      },
+      "context_length": 262144,
+      "protocol": "chat-completions",
+      "template": "Pinned tokenizer template; record enable_thinking and preserve_thinking explicitly. Upstream recommends preserve_thinking for agent work and requires model-specific code for its architecture.",
+      "endpoint_status": "unbound",
+      "source": "https://huggingface.co/Nanbeige/Nanbeige4.2-3B/tree/b82e54bd609793562a75cbf9337970a93369eab5",
+      "license": "Apache-2.0",
+      "config_sha256": "f6cb15b22847664f3a6049dc4b58fdd10f1650d112ac99a1da3d051f17c2ca19",
+      "tokenizer_config_sha256": "3edfa64a0826a77e9412b9008f1febf3fe906a68fd616b6de4cd15897a8c8518"
+    },
+    {
+      "id": "qwen3-4b",
+      "display_name": "Qwen3 4B",
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "parameters": 4022468096,
+      "precision": "bf16",
+      "recurrence": null,
+      "context_length": 40960,
+      "protocol": "chat-completions",
+      "template": "Pinned tokenizer chat template. Set enable_thinking explicitly, count reasoning tokens against the generation budget and report thinking-mode variants separately.",
+      "endpoint_status": "unbound",
+      "source": "https://huggingface.co/Qwen/Qwen3-4B/tree/1cfa9a7208912126459214e8b04321603b3df60c",
+      "license": "Apache-2.0",
+      "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+      "tokenizer_config_sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101"
+    },
+    {
+      "id": "hrm-text-1b-h2-l3",
+      "display_name": "HRM-Text 1B, H2/L3",
+      "model_id": "sapientinc/HRM-Text-1B",
+      "revision": "22097cbcecdd1301afe30a19a3ee61b96a9863e5",
+      "parameters": 1182795264,
+      "precision": "bf16",
+      "recurrence": {
+        "H_cycles": 2,
+        "L_cycles": 3
+      },
+      "context_length": 4096,
+      "protocol": "prefix-lm-completion",
+      "template": "Use <|im_start|><|quad_end|><|object_ref_end|>{prompt}<|im_end|> for the synth,cot condition, or <|object_ref_start|> for direct. Prefill token_type_ids must be 1 for every prompt position. Record the selected condition.",
+      "endpoint_status": "unbound",
+      "required_adapter": "A PrefixLM-aware serving adapter that preserves bidirectional prompt attention and performs no implicit chat templating; the common JSON action protocol is rendered inside the condition envelope.",
+      "source": "https://huggingface.co/sapientinc/HRM-Text-1B/tree/22097cbcecdd1301afe30a19a3ee61b96a9863e5",
+      "license": "Apache-2.0",
+      "config_sha256": "5a708f1230e8abe305c875c92cf4ed481377ba39d34d4d93a45ea5c9a5b924e2",
+      "tokenizer_config_sha256": "260d448d6f45ec227e6ae53ebc793357aacb3eb09575ffa45877bb4930fc106d"
+    },
+    {
+      "id": "inky-mini-varloop-research-pass3",
+      "display_name": "Inky Mini research counterpart, TML d24 variable loop, three passes",
+      "model_id": "thinkingmachines/TML-d24-varloop-research",
+      "revision": "91a57fe2b779bbd12c0f74d1f518cbd5b84e8d0d",
+      "parameters": 26388646440,
+      "active_parameters_approx": 5400000000,
+      "parameter_label_note": "The model card reports 26.4B total and 3.4B active at one pass, adding about 1.0B effective active parameters per extra pass. This variable-loop research counterpart has a distinct identity from fixed-loop Inkling 2 Mini.",
+      "precision": "native-mixed-nvfp4-mxfp8-bf16",
+      "recurrence": {
+        "text_config.loop_config.num_passes": 3
+      },
+      "context_length": 1048576,
+      "protocol": "chat-completions",
+      "template": "Pinned repository tokenizer and text-only input. Record pass count and serving implementation. No official hosted API is promised by the model release.",
+      "endpoint_status": "unbound",
+      "required_adapter": "Operator-provided serving implementation for Inkling2LoopForConditionalGeneration with the native mixed-precision checkpoint.",
+      "source": "https://huggingface.co/thinkingmachines/TML-d24-varloop-research/tree/91a57fe2b779bbd12c0f74d1f518cbd5b84e8d0d",
+      "license": "Apache-2.0",
+      "config_sha256": "32a0abdfa3deb7bf6da7f411570cb7828dca4db569205d6ec04e52ce97fd9c9f",
+      "tokenizer_config_sha256": "bf09342d285139fd37ce10c70878af1d52cb390e9901e10248654293a80ee636"
+    }
+  ],
+  "future_checkpoint_contract": {
+    "required": [
+      "id",
+      "model_id",
+      "weights_sha256",
+      "precision",
+      "context_length",
+      "protocol",
+      "template",
+      "training_positions",
+      "training_index_sha256"
+    ],
+    "revision_rule": "Use an immutable source revision where hosted, and the SHA-256 of the exact evaluated weights or export. A name or moving branch is insufficient.",
+    "variant_rule": "Different weight export, quantization, recurrence, template or thinking mode receives its own run identity. Preserve the native 999,352,320-parameter count for the tied Baby Goblin model, while recording expanded export storage separately."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "research-v2-specialist-sources-v1",
+  "source_id": "jinn-beast-audited-tags-v1",
+  "repository": "MoralityLabAI/jinn-or-beast-paper",
+  "revision": "01512c40be082ad88aa69594abca43a2b41908cc",
+  "visibility": "private",
+  "use": "internal_specialist_training",
+  "public_redistribution": "unknown",
+  "rights_basis": "operator_authorized_internal_intake",
+  "source_kind": "audited_synthetic_policy_tags",
+  "claim_scope": "Emulation of a supplied policy over audited tags; policy labels carry no independent normative truth claim.",
+  "files": {
+    "dataset": {
+      "path": "experiments/two_frame_metta_ldt_v1/outputs/canonical/shared_candidates.jsonl",
+      "sha256": "2a4594c672ed0ca2439bf28e09612474dc6e1e576d32a175d0653be2b24f0151",
+      "bytes": 3300682
+    },
+    "jinn": {
+      "path": "experiments/two_frame_metta_ldt_v1/policies/jinn_erratic_reasoner_v2.metta",
+      "sha256": "85e544c35fe17f67019564a6d3e59dfe697e1fdfbf6ce294e24f0ef32e618576",
+      "bytes": 2099
+    },
+    "beast": {
+      "path": "experiments/two_frame_metta_ldt_v1/policies/beast_optimized_servitor_v2.metta",
+      "sha256": "8828fbe417f099ba6ac1e418adae5f1685cd7f672e34b2de9ff018b2bd4e45ff",
+      "bytes": 1865
+    }
+  },
+  "expected_rows": 2304,
+  "expected_splits": {"train": 1440, "validation": 432, "test": 432},
+  "source_row_schema": "two_frame_tagged_candidate_v1",
+  "train_minimum": "0.7",
+  "reject_maximum": "0.3",
+  "root_rule": "jinn-beast: + SHA256(canonical sorted audited tag list)",
+  "hold_policy": "Every original validation/test tag set and every supplied held semantic/root digest is excluded from training and all derived variants.",
+  "counterfactual_policy": "An optional own-frame tag view shares the original root. Deduplicate each frame and semantic digest; skip every held collision."
+}

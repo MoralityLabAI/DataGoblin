@@ -92,6 +92,16 @@ SHA-256 (artwork above, UTF-8/LF): 9c81e286b69e370a5d7d80594b13395e53a4840c23e3f
 
 # DataGoblin
 
+## Baby Goblin research evaluation
+
+[Research Verifiers v2](docs/research_verifiers_v2.md) adds bounded research episodes
+for the 10M Baby Goblin checkpoint, Dory, Nanbeige, Qwen3, HRM-Text and the variable-loop
+Inky research model. It executes tiny TRM-style and LDT fits, checks external persona
+state, and verifies research plans, belief updates, Boolean repairs and checkpoint
+recovery. The [model registry](configs/research_v2/models.json) pins each comparison
+entry and supports future checkpoints. A private Jinn/Beast importer stages the
+specialist training rows with their original split custody.
+
 DataGoblin is an offline-first research orchestrator for synthetic data aimed at non-language-centric learners. It turns a typed learner snapshot into competing falsifiable hypotheses, a bounded data recipe, adversarial critique, narrow builder tickets, independently verified experiment records, and future research-model training examples. Its “constitution” is an executable research-integrity and control policy; it is not proof of alignment.
 
 ```text
