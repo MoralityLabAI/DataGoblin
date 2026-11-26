@@ -16,3 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s training/metamath_gym -p 'test_*.py' -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mm03-registered-source
+          path: training/metamath_gym/
