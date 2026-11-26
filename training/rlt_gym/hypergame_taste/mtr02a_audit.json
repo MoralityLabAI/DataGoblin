@@ -1,0 +1,59 @@
+{
+  "scope": "receipt arithmetic and finite parameter checks; not independent policy replay",
+  "checks": 168,
+  "details": [
+    {
+      "split": "ordinary",
+      "seedMeans": {
+        "rlt": [
+          7.225242946599612,
+          6.801835209293705,
+          6.118737407081153
+        ],
+        "damping": [
+          6.596947196705334,
+          6.391449763280305,
+          5.4686132400939815
+        ],
+        "pooled": [
+          6.811104053984731,
+          6.51543333773377,
+          6.492322754844349
+        ]
+      },
+      "queryRatioVsDamping": 1.0171911854094504,
+      "queryRatioVsPooled": 1.007961270167539,
+      "creditRatioVsDamping": 1.0159465649051427,
+      "creditRatioVsPooled": 1.0115447867723648
+    },
+    {
+      "split": "ood",
+      "seedMeans": {
+        "rlt": [
+          3.5582833916411465,
+          3.3164075951354173,
+          1.5669773482039449
+        ],
+        "damping": [
+          2.8622713751523317,
+          2.4667035747373904,
+          2.195388722509815
+        ],
+        "pooled": [
+          3.252727690709128,
+          2.573308456862961,
+          2.820656766764616
+        ]
+      },
+      "queryRatioVsDamping": 1.0254010849485065,
+      "queryRatioVsPooled": 1.022557596977758,
+      "creditRatioVsDamping": 1.030814626636039,
+      "creditRatioVsPooled": 1.030055404208636
+    }
+  ],
+  "blobSHA": {
+    "receipt": "5cc8436fa9c9beab95ab15380f6b79eab5f6b39b",
+    "weights": "035f33abc82e08568957b321b47f8c2a49d2caa5",
+    "source": "9bdeb0fe543ca8e3c924d879cdd80628255de861"
+  }
+}
