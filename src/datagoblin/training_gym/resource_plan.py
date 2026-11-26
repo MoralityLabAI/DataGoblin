@@ -80,7 +80,9 @@ def schedule(jobs: Iterable[Job], caps: tuple[int, int, int]) -> tuple[dict[str,
         for key in sorted(pending):
             j = pending[key]
             demands = (j.ram, j.vram, j.cores)
-            if set(j.dependencies) <= completed and all(u + x <= cap for u, x, cap in zip(used, demands, caps, strict=True)):
+            if set(j.dependencies) <= completed and all(
+                u + x <= cap for u, x, cap in zip(used, demands, caps, strict=True)
+            ):
                 active[key] = (t + j.ticks, j)
                 intervals[key] = (t, t + j.ticks)
                 used = [u + x for u, x in zip(used, demands, strict=True)]
