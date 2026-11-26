@@ -30,6 +30,8 @@ def features(world) -> np.ndarray:
 
 
 def dataset(worlds, shuffle_seed: int | None = None):
+    if not worlds or any(w.split != "train" for w in worlds):
+        raise ValueError("fit data must contain TRAIN worlds only")
     xs, ys = [], []
     rng = np.random.default_rng(shuffle_seed) if shuffle_seed is not None else None
     for world in worlds:
