@@ -78,6 +78,7 @@ def main():
                 time.sleep(a.sample_seconds)
                 continue
             fresh = {}
+            acted_this_pass = False
             for worker in children:
                 try:
                     key = (worker.pid, worker.create_time())
@@ -99,7 +100,7 @@ def main():
                             since = start
                     fresh[key] = (now, ticks, since)
                     prior = acted.get(key)
-                    if (now - since < a.idle_seconds or
+                    if (acted_this_pass or now - since < a.idle_seconds or
                             (prior is not None and (a.report_only or prior[1] or
                                                     now - prior[0] < a.kill_grace_seconds))):
                         continue
@@ -123,7 +124,8 @@ def main():
                         triggered = True
                     acted[key] = (now, bool(prior))
                     print(json.dumps(event), file=sys.stderr, flush=True)
-                    break  # Recheck memory before reclaiming another worker.
+                    # Keep sampling siblings, but recheck pressure next pass before acting again.
+                    acted_this_pass = True
                 except (psutil.Error, OSError):
                     # Measurement/identity errors are never a reason to signal a process.
                     continue
