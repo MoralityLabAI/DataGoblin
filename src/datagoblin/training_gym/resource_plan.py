@@ -1,7 +1,7 @@
 """DG-Gym v0.2: deterministic planning primitives, not a hardware profiler."""
 from __future__ import annotations
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 @dataclass(frozen=True)
 class Storage:
@@ -17,7 +17,10 @@ def peak_bytes(storages: Iterable[Storage]) -> dict[str, int]:
     seen = {}
     events = {}
     for s in storages:
-        if not s.key or not s.pool or type(s.size) is not int or s.size < 0 or type(s.start) is not int or type(s.end) is not int or not 0 <= s.start < s.end:
+        if (
+            not s.key or not s.pool or type(s.size) is not int or s.size < 0
+            or type(s.start) is not int or type(s.end) is not int or not 0 <= s.start < s.end
+        ):
             raise ValueError("invalid storage record")
         if s.key in seen:
             if seen[s.key] != s:
@@ -59,7 +62,7 @@ def schedule(jobs: Iterable[Job], caps: tuple[int, int, int]) -> tuple[dict[str,
         if not j.key or j.key in pending or type(j.ticks) is not int or j.ticks <= 0:
             raise ValueError("invalid job identity or duration")
         demands = (j.ram, j.vram, j.cores)
-        if any(type(x) is not int or x < 0 or x > cap for x, cap in zip(demands, caps)):
+        if any(type(x) is not int or x < 0 or x > cap for x, cap in zip(demands, caps, strict=True)):
             raise ValueError("job exceeds resource cap")
         pending[j.key] = j
     if any(set(j.dependencies) - pending.keys() for j in pending.values()):
@@ -69,7 +72,7 @@ def schedule(jobs: Iterable[Job], caps: tuple[int, int, int]) -> tuple[dict[str,
     intervals = {}
     t = 0
     while pending or active:
-        for key, (end, j) in list(active.items()):
+        for key, (end, _j) in list(active.items()):
             if end == t:
                 completed.add(key)
                 del active[key]
@@ -77,10 +80,10 @@ def schedule(jobs: Iterable[Job], caps: tuple[int, int, int]) -> tuple[dict[str,
         for key in sorted(pending):
             j = pending[key]
             demands = (j.ram, j.vram, j.cores)
-            if set(j.dependencies) <= completed and all(u + x <= cap for u, x, cap in zip(used, demands, caps)):
+            if set(j.dependencies) <= completed and all(u + x <= cap for u, x, cap in zip(used, demands, caps, strict=True)):
                 active[key] = (t + j.ticks, j)
                 intervals[key] = (t, t + j.ticks)
-                used = [u + x for u, x in zip(used, demands)]
+                used = [u + x for u, x in zip(used, demands, strict=True)]
                 del pending[key]
         if active:
             t = min(end for end, _ in active.values())
@@ -95,7 +98,7 @@ def paired_outcomes(a: Iterable[int], b: Iterable[int]) -> dict:
     if not a or len(a) != len(b) or any(type(x) is not int or x not in (0, 1) for x in a + b):
         raise ValueError("invalid paired binary outcomes")
     n00 = n01 = n10 = n11 = 0
-    for x, y in zip(a, b):
+    for x, y in zip(a, b, strict=True):
         n00 += (x, y) == (0, 0)
         n01 += (x, y) == (0, 1)
         n10 += (x, y) == (1, 0)
@@ -119,7 +122,9 @@ class WorkerWindow:
     heartbeat_stale: bool
 
 
-def reclaim_candidates(windows: Iterable[WorkerWindow], *, pressure: bool, min_rss: int, max_cpu_seconds: float) -> list[tuple[int, str]]:
+def reclaim_candidates(
+    windows: Iterable[WorkerWindow], *, pressure: bool, min_rss: int, max_cpu_seconds: float
+) -> list[tuple[int, str]]:
     """Advisory only. The caller must revalidate process identity before any kill.
 
     CPU-idle GPU/I/O workers and unknown GPU activity are protected. RSS is a
