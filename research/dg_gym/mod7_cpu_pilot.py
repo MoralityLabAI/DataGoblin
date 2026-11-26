@@ -12,6 +12,7 @@ from torch.nn import functional as F
 
 from datagoblin.training_gym.resource_plan import paired_outcomes
 
+
 class Core(nn.Module):
     def __init__(self):
         super().__init__()
