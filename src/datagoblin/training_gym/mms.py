@@ -135,7 +135,8 @@ class MechanisticMemory:
         self.cpu_seconds = 0.
         self.native = hasattr(module, 'V') and hasattr(module, 'U')
         self.map_kind = (
-            'native_live_bpd' if self.native else ('native_export_unverified_semantics' if map_file else 'svd_seed_proxy')
+            'native_live_bpd' if self.native
+            else ('native_export_unverified_semantics' if map_file else 'svd_seed_proxy')
         )
         if self.native and map_file:
             raise ValueError('native live site cannot also use an export')
