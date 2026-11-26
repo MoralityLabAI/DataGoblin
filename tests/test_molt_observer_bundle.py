@@ -47,18 +47,20 @@ def test_mixed_rank_exhaustive():
 def test_report_ingest_exact_roster():
     report = {"schema": "molt08-observer-error-v1", "status": "development_only",
               "conditional_real_arithmetic_only": True, "formal_certificate_authorized": False,
-              "rows": []}
-    for dose, rank in itertools.product((0.25, 0.5, 1.0), range(1, 6)):
-        report["rows"].append({"seed": 137, "root": "world0", "dose": dose, "rank": rank,
+              "model_seeds": [137], "world_roots": 2, "rows": []}
+    for length, dose, rank in itertools.product((8, 12), (0.25, 0.5, 1.0), range(1, 6)):
+        report["rows"].append({"seed": 137, "root": f"molt08-{length}-0", "dose": dose, "rank": rank,
                                "accepts": {"interval16_scalar": rank == 5},
                                "sign_parity": True, "approx": [1, 2, 3, 4, 5]})
     result = report_bundles(report, "interval16_scalar")
-    assert result["groups"] == 1
-    assert result["records"] == 3
-    assert result["dense_bytes"] == result["planned_bytes"] == 384
+    assert result["groups"] == 2
+    assert result["records"] == 6
+    assert result["dense_bytes"] == result["planned_bytes"] == 768
     assert result["map_groups"] == 0
     with pytest.raises(ValueError):
         report_bundles(report, "linear_only")
+    with pytest.raises(ValueError):
+        report_bundles({**report, "rows": report["rows"][:15]}, "interval16_scalar")
     report["rows"][-1]["sign_parity"] = False
     with pytest.raises(ValueError):
         report_bundles(report, "interval16_scalar")
