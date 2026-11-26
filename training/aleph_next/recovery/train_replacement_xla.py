@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--wall-seconds", required=True, type=int)
     parser.add_argument("--checkpoint-reserve-seconds", type=int, default=120)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--device", choices=("xla", "cuda"), default="xla")
     args = parser.parse_args()
     if not (args.execute and 1 <= args.max_groups <= 39
             and 0 <= args.checkpoint_reserve_seconds < args.wall_seconds <= 5400):
@@ -34,7 +35,7 @@ def main():
     from colab10m_xla import Backend, run
 
     torch.set_num_threads(1)
-    run(args, Backend("xla"), snapshot_pin=release["index_sha256"],
+    run(args, Backend(args.device), snapshot_pin=release["index_sha256"],
         replay_path=args.base / "REPLAY.json", replacement=True)
 
 

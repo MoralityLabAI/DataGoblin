@@ -41,6 +41,22 @@ class Backend:
             self.device = torch.device("cpu")
             self.identity = {"backend": "cpu", "world_size": 1}
             return
+        if kind == "cuda":
+            # Same static-shape math on one CUDA device; FP32 matmuls stay exact.
+            if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
+                raise RuntimeError("a BF16 CUDA accelerator is required")
+            if torch.cuda.device_count() != 1:
+                raise RuntimeError("require exactly one addressable device")
+            torch.backends.cuda.matmul.allow_tf32 = False
+            torch.backends.cudnn.allow_tf32 = False
+            self.device = torch.device("cuda:0")
+            prop = torch.cuda.get_device_properties(self.device)
+            self.identity = {
+                "backend": "cuda", "hardware": prop.name, "world_size": 1,
+                "cuda": str(torch.version.cuda),
+                "memory_limit": int(prop.total_memory),
+            }
+            return
         if any(os.environ.get(k, "").lower() not in ("", "0", "false") for k in
                ("XLA_USE_BF16", "XLA_DOWNCAST_BF16", "XLA_USE_SPMD")):
             raise RuntimeError("global BF16 conversion and SPMD are forbidden")
@@ -68,8 +84,15 @@ class Backend:
     def sync(self):
         if self.xla is not None:
             self.xla.sync(wait=True)
+        elif self.kind == "cuda":
+            torch.cuda.synchronize(self.device)
 
     def memory(self):
+        if self.kind == "cuda":
+            free, total = torch.cuda.mem_get_info(self.device)
+            return {"bytes_free": int(free), "bytes_total": int(total),
+                    "peak_allocated": int(torch.cuda.max_memory_allocated(self.device)),
+                    "peak_reserved": int(torch.cuda.max_memory_reserved(self.device))}
         return {} if self.kind != "xla" else {
             k: int(v) for k, v in self.xm.get_memory_info(self.device).items()
         }
@@ -80,15 +103,20 @@ class Backend:
         torch.manual_seed(seed)
         if self.xm is not None:
             self.xm.set_rng_state(seed, device=str(self.device))
+        if self.kind == "cuda":
+            torch.cuda.manual_seed_all(seed)
 
     def get_rng(self):
         return {"host": rng_state(), "xla": None if self.xm is None else
-                int(self.xm.get_rng_state(device=str(self.device)))}
+                int(self.xm.get_rng_state(device=str(self.device))),
+                "cuda": torch.cuda.get_rng_state(self.device) if self.kind == "cuda" else None}
 
     def set_rng(self, state):
         restore_rng(state["host"])
         if self.xm is not None:
             self.xm.set_rng_state(state["xla"], device=str(self.device))
+        if self.kind == "cuda":
+            torch.cuda.set_rng_state(state["cuda"].cpu(), self.device)
 
 
 def tensors(pack, device, context):
@@ -453,10 +481,14 @@ def self_test(backend, dtype):
 
 def run(args,backend,*,snapshot_pin=PIN,replay_path=RECEIPT,replacement=False):
     started=time.monotonic()
-    if backend.kind!="xla":
-        raise RuntimeError("full-size execution requires TPU")
-    if backend.identity["memory_limit"]<28_000_000_000:
-        raise RuntimeError("need a 32 GB HBM class TPU")
+    if backend.kind not in ("xla","cuda"):
+        raise RuntimeError("full-size execution requires one TPU or CUDA accelerator")
+    if backend.identity["memory_limit"]<(28_000_000_000 if backend.kind=="xla" else 38_000_000_000):
+        raise RuntimeError("need a 32 GB HBM TPU or a 40 GB class CUDA accelerator")
+    if backend.kind=="cuda":
+        free,_=torch.cuda.mem_get_info(backend.device)
+        if free<30*2**30:
+            raise RuntimeError(f"need a mostly empty accelerator; free={free}")
     if digest(RECIPE)!=RECIPE_SHA or digest(args.base/"index.json")!=snapshot_pin:
         raise ValueError("frozen recipe/index differs")
     cfg=read(RECIPE)
@@ -583,7 +615,7 @@ def run(args,backend,*,snapshot_pin=PIN,replay_path=RECEIPT,replacement=False):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--self-test",action="store_true")
-    p.add_argument("--device",choices=("cpu","xla","xla-cpu"),default="cpu")
+    p.add_argument("--device",choices=("cpu","xla","xla-cpu","cuda"),default="cpu")
     p.add_argument("--bf16",action="store_true",help="also exercise BF16 on CPU fixture")
     p.add_argument("--execute",action="store_true")
     p.add_argument("--base",type=Path)
@@ -598,11 +630,11 @@ def main():
         b=Backend(args.device)
         self_test(b,torch.bfloat16 if args.device!="cpu" or args.bf16 else torch.float32)
         return
-    if not (args.execute and args.device=="xla" and args.base and args.out and
+    if not (args.execute and args.device in ("xla","cuda") and args.base and args.out and
             args.wall_seconds and 0<=args.checkpoint_reserve_seconds<args.wall_seconds<=5400 and
             1<=args.max_groups<=39):
-        p.error("explicit --execute --device xla --base --out --wall-seconds (1..5400) required")
-    run(args,Backend("xla"))
+        p.error("explicit --execute --device xla|cuda --base --out --wall-seconds (1..5400) required")
+    run(args,Backend(args.device))
 
 
 if __name__=="__main__":
