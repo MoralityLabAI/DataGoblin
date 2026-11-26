@@ -93,3 +93,7 @@ Store raw training content, generated runs and evaluation labels outside this di
 ## Model Atlas: small-model research specimens
 
 [Model Atlas collator](../model_atlas/README.md) stages pinned fit receipts, recipes, development benchmarks, causal and mechanistic summaries for Aleph's research-learning corpus. The first catalog targets 55 distinct archived LBF fits. Generated candidate documents are discovery-only until rights, evidence, lineage and token-admission review; no additional training quota is assumed.
+
+## Verified mathematical discovery source candidates
+
+- [CFH-01 / solved-conjectures source custody](cfh01_source_custody.md): pinned candidate for research-discovery supervision, public development family only; training_ready=false. No quota changes or corpus import.
