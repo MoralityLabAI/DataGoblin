@@ -59,3 +59,22 @@ Same runner and corpus, fresh A100-SXM4-40GB (8.16 units/hr). Drive was mounted 
 The group-24 checkpoint was in its `.partial` write at 03:52:26Z and does not exist on Drive. The external stop at 03:58:30Z ended the runtime before the sync published it; whether the save or the copy was unfinished is not known because the VM's logs were lost with it. Groups 20 to 24 are therefore recorded in `records_groups_1_24.json` but cannot be resumed from. Resuming needs a new runtime, a Drive mount, and the group-19 checkpoint.
 
 The first lost run (no Drive) and this one show the same step costs. Cost for this session: the runtime billed 8.16 units/hr from about 03:14:50Z to 03:58:30Z (about 5.9 units). The balance readout lagged the stop time, so the exact figure should be read from the account.
+
+## Resume from the Drive checkpoint: groups 20-29 (2026-11-26, third A100 session)
+
+A third A100-SXM4-40GB session restored the group-19 checkpoint from Drive (4,980,736 positions) and continued under the same code, corpus and recipe. The Drive restore itself took about 15 minutes because a cold Drive read ran at roughly 10-20 MB/s; the run then loaded the checkpoint and trained.
+
+| Item | Result |
+| --- | --- |
+| Restart parity at full size | groups 20-24 after the restore match the earlier uninterrupted run exactly: loss 8.133123830165928, 8.021380064598935, 7.956167734402898, 7.844779107406732, 7.807662496800789 and gradient norms identical to every printed digit, with identical lane label counts |
+| Groups trained, cumulative | 29 of 39 (7,602,176 of 10,000,000 positions, 3,669,519 supervised labels) |
+| Loss, group 19 to 29 | 8.2788 to 7.4763; gradient norm 5.148 to 2.161 |
+| Time per group | 57.8 to 58.2 s, 4,506 to 4,537 useful positions/s |
+| Peak memory | 20,390,020,608 bytes allocated of 42,405,855,232 |
+| Final checkpoint | group 29, saved in 120.6 s, copied to Drive and hash-verified in 147.1 s (`group_029_fa6008f98a36` under `MyDrive/aleph-v2-run/`, also listed by the Drive connector) |
+
+Lane labels over groups 1-29: general 2,656,567; custom research 366,948; verified 376,913; procedural 242,323; failure-directed 26,768.
+
+Stopped on the 6 compute-unit limit, not on the 10M target: 10 groups (2.6M positions) remain. The runtime billed 8.16 units/hr from about 04:44:30Z to 05:27:40Z, about 5.9 units; the balance readout lagged, so read the exact figure from the account. Resuming needs a new runtime, a Drive mount, a restore of `group_029_fa6008f98a36` (plan for the slow cold read, or start the restore as soon as the mount succeeds), and 10 groups at about 58 s each plus a 2-minute final save.
+
+The first restore script's long copy outlived my client's timeout and auto-launched the trainer with a 1800 s wall; that run (groups 20-22 only) was killed and relaunched with a deadline that left time for the final save, so no work from it is counted above.
