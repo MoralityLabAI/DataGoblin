@@ -40,3 +40,22 @@ The A100 billed 8.16 compute units per hour. Total consumption for the task was 
 - TPU v6e-1 was requested three times; Colab answered with two read timeouts and one `Service Unavailable`. No TPU result exists.
 - The nine-group loss path covers 23.6% of the first 10M positions with a warm-up learning rate, so it says nothing about final quality.
 - The corpus is the replacement v2 release, not the original Aleph-10M archive. Its results are not comparable with the original private evaluation panel.
+
+## Rerun with Drive persistence (2026-11-26, second A100 session)
+
+Same runner and corpus, fresh A100-SXM4-40GB (8.16 units/hr). Drive was mounted through the CLI's own flow before the checkpoints were due; a sync process on the VM copied each finished checkpoint into `MyDrive/aleph-v2-run/`, compared every file by SHA-256, and wrote the pointer last. The Drive connector independently lists `group_001_0454b5ce16ea` and `group_019_3f3c570e1824` there, with `CHECKPOINT_001.json`, `CHECKPOINT_019.json` and `PROGRESS.json`.
+
+| Item | Result |
+| --- | --- |
+| Groups trained | 24 of 39 (6,291,456 of 10,000,000 positions), one uninterrupted process |
+| Loss, group 1 to 24 | 11.2807 to 7.8077 |
+| Gradient norm, group 1 to 24 | 15.899 to 3.195 |
+| Time per group | 57.8 to 58.3 s, 4,498 to 4,538 useful positions/s |
+| Peak memory | 20,390,020,608 bytes allocated, 21,483,225,088 reserved of 42,405,855,232 |
+| Supervised labels, 24 groups | 3,038,681 (general 2,198,484; custom research 304,873; verified 311,585; procedural 201,596; failure-directed 22,143) |
+| Checkpoint saves | group 1 and group 19 each took about 121 s on the VM and 146 s to copy and verify on Drive |
+| Last durable checkpoint | group 19, 4,980,736 positions (loss 8.2788), verified on Drive |
+
+The group-24 checkpoint was in its `.partial` write at 03:52:26Z and does not exist on Drive. The external stop at 03:58:30Z ended the runtime before the sync published it; whether the save or the copy was unfinished is not known because the VM's logs were lost with it. Groups 20 to 24 are therefore recorded in `records_groups_1_24.json` but cannot be resumed from. Resuming needs a new runtime, a Drive mount, and the group-19 checkpoint.
+
+The first lost run (no Drive) and this one show the same step costs. Cost for this session: the runtime billed 8.16 units/hr from about 03:14:50Z to 03:58:30Z (about 5.9 units). The balance readout lagged the stop time, so the exact figure should be read from the account.
