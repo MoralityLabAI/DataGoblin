@@ -87,6 +87,11 @@ def valid_match(audit, condition, policy):
     return True
 
 
+def solve(world, scores, variant):
+    # Stabilize floating-point ties in the host's deterministic top-k rule.
+    return episode(world, tuple(float(v) for v in np.round(scores, 10)), 2, 1, variant)
+
+
 def run(train_roots: int, dev_roots: int, steps: int, seeds: tuple[int, ...]):
     if not 1 <= train_roots <= 4096 or not 1 <= dev_roots <= 256:
         raise ValueError("invalid root counts")
@@ -111,15 +116,16 @@ def run(train_roots: int, dev_roots: int, steps: int, seeds: tuple[int, ...]):
             reference = conditions["corrupt"]["intact"]
             corrupted = conditions["corrupt"]["corrupted"]
             for variant in VARIANTS:
-                def solve(scores):
-                    return episode(world, tuple(float(v) for v in scores), 2, 1, variant)
-
-                intact_correct = solve(reference)["verified"]
-                corrupt_correct = solve(corrupted)["verified"]
+                intact_result = solve(world, reference, variant)
+                intact_correct = intact_result["verified"]
+                corrupt_correct = solve(world, corrupted, variant)["verified"]
                 for condition, scores in conditions.items():
                     policies = POLICIES if condition == "corrupt" else ("intact", "reconstruction", *ACTIVE)
                     for policy in policies:
-                        result = solve(scores[policy])
+                        result = solve(world, scores[policy], variant)
+                        if (policy in {"reconstruction", "full_restore"}
+                                and result["stored"] != intact_result["stored"]):
+                            raise RuntimeError("reconstructed retention decision changed")
                         rows.append({**result, "training_seed": seed, "condition": condition, "policy": policy,
                                      "intact_correct": intact_correct, "corrupt_correct": corrupt_correct,
                                      "match_valid": valid_match(audit, condition, policy),
@@ -143,7 +149,7 @@ def run(train_roots: int, dev_roots: int, steps: int, seeds: tuple[int, ...]):
             "dev_manifest_digest": digest([asdict(w) for w in dev]), "sources": sources, "fits": fits,
             "parity": parity, "strong_sham_audit": dose, "summary": summarize(rows), "contrasts": contrasts(rows),
             "rows_digest": digest(rows), "audit_digest": digest(audits), "rows": rows, "audits": audits,
-            "confirmation_ready": False, "promotion_authorized": False, "native_bpd": False}
+            "score_rounding_decimals": 10, "confirmation_ready": False, "promotion_authorized": False, "native_bpd": False}
 
 
 def main():
