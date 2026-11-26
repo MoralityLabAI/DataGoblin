@@ -189,10 +189,7 @@ class Episode:
         if self.closed or not self.trace:
             raise ValueError("episode is not active")
         self.turns += 1
-        if not isinstance(action, dict):
-            obs = self._finish("invalid_schema")
-        else:
-            obs = self._transition(action)
+        obs = self._finish("invalid_schema") if not isinstance(action, dict) else self._transition(action)
         if not self.closed and self.turns >= self.turn_cap:
             obs = self._finish("turn_budget_exhausted")
         self.trace.append({"action": json.loads(json.dumps(action)), "observation": dict(obs)})
