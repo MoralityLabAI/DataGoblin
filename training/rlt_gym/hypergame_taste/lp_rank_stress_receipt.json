@@ -1,0 +1,239 @@
+{
+  "schema": "lp-rank-delayed-evidence-v1",
+  "seed": 20261127,
+  "perDepth": 16,
+  "scope": "public synthetic stress only; no learned policy",
+  "roots": 64,
+  "worldCertificateChecks": 49536,
+  "signatureChecks": 12960,
+  "cohorts": [
+    {
+      "d": 3,
+      "budget": 2,
+      "roots": 16,
+      "utility": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": -2,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": 2,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 3,
+      "budget": 3,
+      "roots": 16,
+      "utility": {
+        "exact": 7,
+        "rank_greedy": 7,
+        "fixed_order": -3,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 3,
+        "rank_greedy": 3,
+        "fixed_order": 3,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 3,
+      "budget": 4,
+      "roots": 16,
+      "utility": {
+        "exact": 7,
+        "rank_greedy": 7,
+        "fixed_order": -4,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 3,
+        "rank_greedy": 3,
+        "fixed_order": 4,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 4,
+      "budget": 3,
+      "roots": 16,
+      "utility": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": -3,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": 3,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 4,
+      "budget": 4,
+      "roots": 16,
+      "utility": {
+        "exact": 6,
+        "rank_greedy": 6,
+        "fixed_order": -4,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 4,
+        "rank_greedy": 4,
+        "fixed_order": 4,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 4,
+      "budget": 5,
+      "roots": 16,
+      "utility": {
+        "exact": 6,
+        "rank_greedy": 6,
+        "fixed_order": -5,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 4,
+        "rank_greedy": 4,
+        "fixed_order": 5,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 6,
+      "budget": 5,
+      "roots": 16,
+      "utility": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": -5,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": 5,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 6,
+      "budget": 6,
+      "roots": 16,
+      "utility": {
+        "exact": 4,
+        "rank_greedy": 4,
+        "fixed_order": -6,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 6,
+        "rank_greedy": 6,
+        "fixed_order": 6,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 6,
+      "budget": 7,
+      "roots": 16,
+      "utility": {
+        "exact": 4,
+        "rank_greedy": 4,
+        "fixed_order": -7,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 6,
+        "rank_greedy": 6,
+        "fixed_order": 7,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 8,
+      "budget": 7,
+      "roots": 16,
+      "utility": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": -7,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 0,
+        "rank_greedy": 0,
+        "fixed_order": 7,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 8,
+      "budget": 8,
+      "roots": 16,
+      "utility": {
+        "exact": 2,
+        "rank_greedy": 2,
+        "fixed_order": -8,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 8,
+        "rank_greedy": 8,
+        "fixed_order": 8,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    },
+    {
+      "d": 8,
+      "budget": 9,
+      "roots": 16,
+      "utility": {
+        "exact": 2,
+        "rank_greedy": 2,
+        "fixed_order": -9,
+        "myopic": 0,
+        "two_ply": 0
+      },
+      "cost": {
+        "exact": 8,
+        "rank_greedy": 8,
+        "fixed_order": 9,
+        "myopic": 0,
+        "two_ply": 0
+      }
+    }
+  ]
+}

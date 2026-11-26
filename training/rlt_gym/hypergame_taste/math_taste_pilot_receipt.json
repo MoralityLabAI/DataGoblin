@@ -1,0 +1,6986 @@
+{
+  "schema": "math-taste-pilot-v1",
+  "seed": 20261127,
+  "perCell": 16,
+  "scope": "public synthetic development; no neural policy",
+  "depths": [
+    0,
+    2,
+    4,
+    8,
+    12,
+    16
+  ],
+  "budgets": [
+    1,
+    2,
+    3
+  ],
+  "roots": 384,
+  "policyRootEvaluations": 6912,
+  "exactReplayChecks": 2304,
+  "certificateChecks": 44224,
+  "trainingRows": 1493,
+  "cohorts": [
+    {
+      "family": "nash",
+      "K": "0",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.650691,
+          "cost": 0.6875,
+          "checks": 0.6875,
+          "publish": 1,
+          "falsePublish": 0.026472,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.650691,
+          "cost": 0.6875,
+          "checks": 0.6875,
+          "publish": 1,
+          "falsePublish": 0.026472,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.650691,
+          "cost": 0.6875,
+          "checks": 0.6875,
+          "publish": 1,
+          "falsePublish": 0.026472,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 5.709325,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.808769,
+          "falsePublish": 0.060135,
+          "oracleGap": 2.941366,
+          "pairedNormal95": [
+            1.814136,
+            4.068596
+          ]
+        },
+        "no_probe": {
+          "utility": 5.920116,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.163195,
+          "oracleGap": 2.730575,
+          "pairedNormal95": [
+            1.4003,
+            4.06085
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.802026,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.956495,
+          "falsePublish": 0.070517,
+          "oracleGap": 1.848665,
+          "pairedNormal95": [
+            0.728053,
+            2.969276
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "all",
+      "budget": 1,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.508604,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.99861,
+          "falsePublish": 0.0241,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.508604,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.99861,
+          "falsePublish": 0.0241,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.508604,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.99861,
+          "falsePublish": 0.0241,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 5.751034,
+          "cost": 0.927083,
+          "checks": 0.927083,
+          "publish": 0.813146,
+          "falsePublish": 0.058134,
+          "oracleGap": 2.75757,
+          "pairedNormal95": [
+            2.295924,
+            3.219217
+          ]
+        },
+        "no_probe": {
+          "utility": 5.244348,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.958333,
+          "falsePublish": 0.173559,
+          "oracleGap": 3.264256,
+          "pairedNormal95": [
+            2.824321,
+            3.70419
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.117795,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.98688,
+          "falsePublish": 0.07004,
+          "oracleGap": 1.390809,
+          "pairedNormal95": [
+            1.050185,
+            1.731433
+          ]
+        }
+      }
+    },
+    {
+      "family": "all",
+      "K": "all",
+      "budget": 1,
+      "roots": 384,
+      "metrics": {
+        "exact": {
+          "utility": 6.810668,
+          "cost": 0.96875,
+          "checks": 0.96875,
+          "publish": 0.902857,
+          "falsePublish": 0.049966,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.810668,
+          "cost": 0.96875,
+          "checks": 0.96875,
+          "publish": 0.902857,
+          "falsePublish": 0.049966,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.810668,
+          "cost": 0.96875,
+          "checks": 0.96875,
+          "publish": 0.902857,
+          "falsePublish": 0.049966,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 3.172476,
+          "cost": 0.945313,
+          "checks": 0.945313,
+          "publish": 0.489232,
+          "falsePublish": 0.030981,
+          "oracleGap": 3.638192,
+          "pairedNormal95": [
+            3.44601,
+            3.830374
+          ]
+        },
+        "no_probe": {
+          "utility": 1.382784,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.302083,
+          "falsePublish": 0.065522,
+          "oracleGap": 5.427884,
+          "pairedNormal95": [
+            5.209864,
+            5.645903
+          ]
+        },
+        "fixed_order": {
+          "utility": 4.549831,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.728003,
+          "falsePublish": 0.069208,
+          "oracleGap": 2.260837,
+          "pairedNormal95": [
+            2.02039,
+            2.501283
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "0",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 9.033019,
+          "cost": 0.923578,
+          "checks": 0.923578,
+          "publish": 1,
+          "falsePublish": 0.001736,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 9.033019,
+          "cost": 0.923578,
+          "checks": 0.923578,
+          "publish": 1,
+          "falsePublish": 0.001736,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.889588,
+          "cost": 0.960172,
+          "checks": 0.772672,
+          "publish": 1,
+          "falsePublish": 0.00601,
+          "oracleGap": 0.143431,
+          "pairedNormal95": [
+            0.0145,
+            0.272362
+          ]
+        },
+        "native_exact": {
+          "utility": 7.077758,
+          "cost": 1.439847,
+          "checks": 1.189847,
+          "publish": 0.851761,
+          "falsePublish": 0,
+          "oracleGap": 1.955261,
+          "pairedNormal95": [
+            1.155074,
+            2.755448
+          ]
+        },
+        "no_probe": {
+          "utility": 5.920116,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.163195,
+          "oracleGap": 3.112903,
+          "pairedNormal95": [
+            1.672807,
+            4.552999
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.316518,
+          "cost": 1.901223,
+          "checks": 1.901223,
+          "publish": 1,
+          "falsePublish": 0.03129,
+          "oracleGap": 1.716501,
+          "pairedNormal95": [
+            0.974209,
+            2.458793
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "all",
+      "budget": 2,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.949228,
+          "cost": 1.034203,
+          "checks": 1.034203,
+          "publish": 1,
+          "falsePublish": 0.000663,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.949228,
+          "cost": 1.034203,
+          "checks": 1.034203,
+          "publish": 1,
+          "falsePublish": 0.000663,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.782238,
+          "cost": 1.183387,
+          "checks": 0.922971,
+          "publish": 1,
+          "falsePublish": 0.001375,
+          "oracleGap": 0.16699,
+          "pairedNormal95": [
+            0.112863,
+            0.221117
+          ]
+        },
+        "native_exact": {
+          "utility": 6.97371,
+          "cost": 1.476672,
+          "checks": 1.247506,
+          "publish": 0.852985,
+          "falsePublish": 0.003179,
+          "oracleGap": 1.975518,
+          "pairedNormal95": [
+            1.651297,
+            2.29974
+          ]
+        },
+        "no_probe": {
+          "utility": 5.244348,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.958333,
+          "falsePublish": 0.173559,
+          "oracleGap": 3.70488,
+          "pairedNormal95": [
+            3.20879,
+            4.20097
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.646383,
+          "cost": 1.925673,
+          "checks": 1.925673,
+          "publish": 0.99704,
+          "falsePublish": 0.015934,
+          "oracleGap": 1.302846,
+          "pairedNormal95": [
+            1.109904,
+            1.495787
+          ]
+        }
+      }
+    },
+    {
+      "family": "all",
+      "K": "all",
+      "budget": 2,
+      "roots": 384,
+      "metrics": {
+        "exact": {
+          "utility": 8.722214,
+          "cost": 1.273644,
+          "checks": 1.273644,
+          "publish": 1,
+          "falsePublish": 0.000166,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.722214,
+          "cost": 1.273644,
+          "checks": 1.273644,
+          "publish": 1,
+          "falsePublish": 0.000166,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.157698,
+          "cost": 1.676173,
+          "checks": 1.004298,
+          "publish": 0.995854,
+          "falsePublish": 0.004987,
+          "oracleGap": 0.564516,
+          "pairedNormal95": [
+            0.499599,
+            0.629432
+          ]
+        },
+        "native_exact": {
+          "utility": 4.185104,
+          "cost": 1.311461,
+          "checks": 1.254169,
+          "publish": 0.551643,
+          "falsePublish": 0.000795,
+          "oracleGap": 4.53711,
+          "pairedNormal95": [
+            4.326114,
+            4.748106
+          ]
+        },
+        "no_probe": {
+          "utility": 1.382784,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.302083,
+          "falsePublish": 0.065522,
+          "oracleGap": 7.339429,
+          "pairedNormal95": [
+            7.092604,
+            7.586255
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.379763,
+          "cost": 1.754074,
+          "checks": 1.754074,
+          "publish": 0.965671,
+          "falsePublish": 0.020915,
+          "oracleGap": 1.34245,
+          "pairedNormal95": [
+            1.190731,
+            1.494169
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "0",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 9.033019,
+          "cost": 0.923578,
+          "checks": 0.923578,
+          "publish": 1,
+          "falsePublish": 0.001736,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 9.033019,
+          "cost": 0.923578,
+          "checks": 0.923578,
+          "publish": 1,
+          "falsePublish": 0.001736,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.889588,
+          "cost": 0.960172,
+          "checks": 0.772672,
+          "publish": 1,
+          "falsePublish": 0.00601,
+          "oracleGap": 0.143431,
+          "pairedNormal95": [
+            0.0145,
+            0.272362
+          ]
+        },
+        "native_exact": {
+          "utility": 7.102523,
+          "cost": 1.44653,
+          "checks": 1.242219,
+          "publish": 0.854905,
+          "falsePublish": 0,
+          "oracleGap": 1.930497,
+          "pairedNormal95": [
+            1.121859,
+            2.739134
+          ]
+        },
+        "no_probe": {
+          "utility": 5.920116,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.163195,
+          "oracleGap": 3.112903,
+          "pairedNormal95": [
+            1.672807,
+            4.552999
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.58983,
+          "cost": 2.41017,
+          "checks": 2.380656,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 1.443189,
+          "pairedNormal95": [
+            1.173235,
+            1.713143
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "all",
+      "budget": 3,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.949228,
+          "cost": 1.034203,
+          "checks": 1.034203,
+          "publish": 1,
+          "falsePublish": 0.000663,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.949228,
+          "cost": 1.034203,
+          "checks": 1.034203,
+          "publish": 1,
+          "falsePublish": 0.000663,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.782238,
+          "cost": 1.183387,
+          "checks": 0.922971,
+          "publish": 1,
+          "falsePublish": 0.001375,
+          "oracleGap": 0.16699,
+          "pairedNormal95": [
+            0.112863,
+            0.221117
+          ]
+        },
+        "native_exact": {
+          "utility": 7.006486,
+          "cost": 1.467073,
+          "checks": 1.29947,
+          "publish": 0.853315,
+          "falsePublish": 0.002384,
+          "oracleGap": 1.942742,
+          "pairedNormal95": [
+            1.619401,
+            2.266084
+          ]
+        },
+        "no_probe": {
+          "utility": 5.244348,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.958333,
+          "falsePublish": 0.173559,
+          "oracleGap": 3.70488,
+          "pairedNormal95": [
+            3.20879,
+            4.20097
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.483203,
+          "cost": 2.477573,
+          "checks": 2.464212,
+          "publish": 0.996078,
+          "falsePublish": 0,
+          "oracleGap": 1.466025,
+          "pairedNormal95": [
+            1.366685,
+            1.565365
+          ]
+        }
+      }
+    },
+    {
+      "family": "all",
+      "K": "all",
+      "budget": 3,
+      "roots": 384,
+      "metrics": {
+        "exact": {
+          "utility": 8.725903,
+          "cost": 1.269955,
+          "checks": 1.269955,
+          "publish": 1,
+          "falsePublish": 0.000166,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.722214,
+          "cost": 1.273644,
+          "checks": 1.273644,
+          "publish": 1,
+          "falsePublish": 0.000166,
+          "oracleGap": 0.003689,
+          "pairedNormal95": [
+            0.000463,
+            0.006916
+          ]
+        },
+        "myopic": {
+          "utility": 8.293963,
+          "cost": 1.697443,
+          "checks": 1.025568,
+          "publish": 1,
+          "falsePublish": 0.000344,
+          "oracleGap": 0.43194,
+          "pairedNormal95": [
+            0.40052,
+            0.46336
+          ]
+        },
+        "native_exact": {
+          "utility": 4.19457,
+          "cost": 1.307789,
+          "checks": 1.265888,
+          "publish": 0.551726,
+          "falsePublish": 0.000596,
+          "oracleGap": 4.531333,
+          "pairedNormal95": [
+            4.319267,
+            4.743399
+          ]
+        },
+        "no_probe": {
+          "utility": 1.382784,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.302083,
+          "falsePublish": 0.065522,
+          "oracleGap": 7.343119,
+          "pairedNormal95": [
+            7.096148,
+            7.59009
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.918789,
+          "cost": 2.016041,
+          "checks": 2.012701,
+          "publish": 0.996614,
+          "falsePublish": 0.001252,
+          "oracleGap": 0.807114,
+          "pairedNormal95": [
+            0.738413,
+            0.875814
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "2",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.663465,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.018461,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.663465,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.018461,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.663465,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.018461,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 5.472313,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.786092,
+          "falsePublish": 0.060544,
+          "oracleGap": 3.191151,
+          "pairedNormal95": [
+            1.935178,
+            4.447125
+          ]
+        },
+        "no_probe": {
+          "utility": 6.072793,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.157088,
+          "oracleGap": 2.590671,
+          "pairedNormal95": [
+            1.621126,
+            3.560217
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.691331,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.964782,
+          "falsePublish": 0.03826,
+          "oracleGap": 0.972134,
+          "pairedNormal95": [
+            0.312527,
+            1.63174
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "2",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 9.024523,
+          "cost": 0.975477,
+          "checks": 0.975477,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 9.024523,
+          "cost": 0.975477,
+          "checks": 0.975477,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.875,
+          "cost": 1.125,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.149523,
+          "pairedNormal95": [
+            0.01731,
+            0.281735
+          ]
+        },
+        "native_exact": {
+          "utility": 6.773467,
+          "cost": 1.497484,
+          "checks": 1.309984,
+          "publish": 0.827095,
+          "falsePublish": 0,
+          "oracleGap": 2.251055,
+          "pairedNormal95": [
+            1.374708,
+            3.127403
+          ]
+        },
+        "no_probe": {
+          "utility": 6.072793,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.157088,
+          "oracleGap": 2.951729,
+          "pairedNormal95": [
+            1.745419,
+            4.15804
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.928443,
+          "cost": 1.935573,
+          "checks": 1.935573,
+          "publish": 1,
+          "falsePublish": 0.005439,
+          "oracleGap": 1.09608,
+          "pairedNormal95": [
+            0.803844,
+            1.388316
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "2",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 9.024523,
+          "cost": 0.975477,
+          "checks": 0.975477,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 9.024523,
+          "cost": 0.975477,
+          "checks": 0.975477,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.875,
+          "cost": 1.125,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.149523,
+          "pairedNormal95": [
+            0.01731,
+            0.281735
+          ]
+        },
+        "native_exact": {
+          "utility": 6.793031,
+          "cost": 1.47792,
+          "checks": 1.367661,
+          "publish": 0.827095,
+          "falsePublish": 0,
+          "oracleGap": 2.231492,
+          "pairedNormal95": [
+            1.353979,
+            3.109004
+          ]
+        },
+        "no_probe": {
+          "utility": 6.072793,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.157088,
+          "oracleGap": 2.951729,
+          "pairedNormal95": [
+            1.745419,
+            4.15804
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.523724,
+          "cost": 2.476276,
+          "checks": 2.476276,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 1.500799,
+          "pairedNormal95": [
+            1.286508,
+            1.71509
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "4",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.505128,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.024795,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.505128,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.024795,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.505128,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.024795,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 5.714463,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.861937,
+          "falsePublish": 0.078696,
+          "oracleGap": 2.790664,
+          "pairedNormal95": [
+            1.626749,
+            3.95458
+          ]
+        },
+        "no_probe": {
+          "utility": 5.307238,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.875,
+          "falsePublish": 0.13771,
+          "oracleGap": 3.19789,
+          "pairedNormal95": [
+            2.075871,
+            4.319908
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.28225,
+          "cost": 1,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0.06871,
+          "oracleGap": 1.222877,
+          "pairedNormal95": [
+            0.550813,
+            1.894941
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "4",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.943626,
+          "cost": 1.056374,
+          "checks": 1.056374,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.943626,
+          "cost": 1.056374,
+          "checks": 1.056374,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.787272,
+          "cost": 1.212728,
+          "checks": 0.962728,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.156354,
+          "pairedNormal95": [
+            0.014783,
+            0.297926
+          ]
+        },
+        "native_exact": {
+          "utility": 7.121796,
+          "cost": 1.457848,
+          "checks": 1.270348,
+          "publish": 0.865992,
+          "falsePublish": 0.003211,
+          "oracleGap": 1.821831,
+          "pairedNormal95": [
+            1.110376,
+            2.533285
+          ]
+        },
+        "no_probe": {
+          "utility": 5.307238,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.875,
+          "falsePublish": 0.13771,
+          "oracleGap": 3.636389,
+          "pairedNormal95": [
+            2.4293,
+            4.843478
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.706804,
+          "cost": 1.930092,
+          "checks": 1.930092,
+          "publish": 0.982239,
+          "falsePublish": 0.00742,
+          "oracleGap": 1.236822,
+          "pairedNormal95": [
+            0.848313,
+            1.625332
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "4",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.943626,
+          "cost": 1.056374,
+          "checks": 1.056374,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.943626,
+          "cost": 1.056374,
+          "checks": 1.056374,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.787272,
+          "cost": 1.212728,
+          "checks": 0.962728,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.156354,
+          "pairedNormal95": [
+            0.014783,
+            0.297926
+          ]
+        },
+        "native_exact": {
+          "utility": 7.141651,
+          "cost": 1.486158,
+          "checks": 1.392979,
+          "publish": 0.862781,
+          "falsePublish": 0,
+          "oracleGap": 1.801975,
+          "pairedNormal95": [
+            1.091642,
+            2.512308
+          ]
+        },
+        "no_probe": {
+          "utility": 5.307238,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.875,
+          "falsePublish": 0.13771,
+          "oracleGap": 3.636389,
+          "pairedNormal95": [
+            2.4293,
+            4.843478
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.423083,
+          "cost": 2.481515,
+          "checks": 2.481515,
+          "publish": 0.99046,
+          "falsePublish": 0,
+          "oracleGap": 1.520544,
+          "pairedNormal95": [
+            1.253952,
+            1.787135
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "8",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.280203,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 1,
+          "falsePublish": 0.031292,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.280203,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 1,
+          "falsePublish": 0.031292,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.280203,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 1,
+          "falsePublish": 0.031292,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 5.202518,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.680253,
+          "falsePublish": 0.0265,
+          "oracleGap": 3.077685,
+          "pairedNormal95": [
+            1.954348,
+            4.201022
+          ]
+        },
+        "no_probe": {
+          "utility": 4.058912,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.9375,
+          "falsePublish": 0.212644,
+          "oracleGap": 4.221291,
+          "pairedNormal95": [
+            3.18712,
+            5.255462
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.739406,
+          "cost": 1,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0.090424,
+          "oracleGap": 1.540797,
+          "pairedNormal95": [
+            0.596969,
+            2.484626
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "8",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.803027,
+          "cost": 1.140965,
+          "checks": 1.140965,
+          "publish": 1,
+          "falsePublish": 0.00224,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.803027,
+          "cost": 1.140965,
+          "checks": 1.140965,
+          "publish": 1,
+          "falsePublish": 0.00224,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.629143,
+          "cost": 1.314849,
+          "checks": 1.002349,
+          "publish": 1,
+          "falsePublish": 0.00224,
+          "oracleGap": 0.173884,
+          "pairedNormal95": [
+            0.056221,
+            0.291546
+          ]
+        },
+        "native_exact": {
+          "utility": 6.299656,
+          "cost": 1.525494,
+          "checks": 1.150494,
+          "publish": 0.799118,
+          "falsePublish": 0.006641,
+          "oracleGap": 2.503371,
+          "pairedNormal95": [
+            1.672812,
+            3.333931
+          ]
+        },
+        "no_probe": {
+          "utility": 4.058912,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.9375,
+          "falsePublish": 0.212644,
+          "oracleGap": 4.744115,
+          "pairedNormal95": [
+            3.607548,
+            5.880682
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.686138,
+          "cost": 1.939639,
+          "checks": 1.939639,
+          "publish": 1,
+          "falsePublish": 0.014969,
+          "oracleGap": 1.116889,
+          "pairedNormal95": [
+            0.819737,
+            1.414042
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "8",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.803027,
+          "cost": 1.140965,
+          "checks": 1.140965,
+          "publish": 1,
+          "falsePublish": 0.00224,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.803027,
+          "cost": 1.140965,
+          "checks": 1.140965,
+          "publish": 1,
+          "falsePublish": 0.00224,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.629143,
+          "cost": 1.314849,
+          "checks": 1.002349,
+          "publish": 1,
+          "falsePublish": 0.00224,
+          "oracleGap": 0.173884,
+          "pairedNormal95": [
+            0.056221,
+            0.291546
+          ]
+        },
+        "native_exact": {
+          "utility": 6.310147,
+          "cost": 1.515003,
+          "checks": 1.171949,
+          "publish": 0.799118,
+          "falsePublish": 0.006641,
+          "oracleGap": 2.49288,
+          "pairedNormal95": [
+            1.663509,
+            3.322251
+          ]
+        },
+        "no_probe": {
+          "utility": 4.058912,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.9375,
+          "falsePublish": 0.212644,
+          "oracleGap": 4.744115,
+          "pairedNormal95": [
+            3.607548,
+            5.880682
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.533151,
+          "cost": 2.466849,
+          "checks": 2.439729,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 1.269876,
+          "pairedNormal95": [
+            1.07332,
+            1.466432
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "12",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.343078,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.031277,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.343078,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.031277,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.343078,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0.031277,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 5.745494,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.844334,
+          "falsePublish": 0.067914,
+          "oracleGap": 2.597584,
+          "pairedNormal95": [
+            1.316501,
+            3.878667
+          ]
+        },
+        "no_probe": {
+          "utility": 4.407298,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.9375,
+          "falsePublish": 0.198708,
+          "oracleGap": 3.93578,
+          "pairedNormal95": [
+            2.925079,
+            4.946481
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.773135,
+          "cost": 1,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0.089075,
+          "oracleGap": 1.569942,
+          "pairedNormal95": [
+            0.69649,
+            2.443395
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "12",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.997433,
+          "cost": 1.002567,
+          "checks": 1.002567,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.997433,
+          "cost": 1.002567,
+          "checks": 1.002567,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.8125,
+          "cost": 1.1875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.184933,
+          "pairedNormal95": [
+            0.044378,
+            0.325487
+          ]
+        },
+        "native_exact": {
+          "utility": 7.020725,
+          "cost": 1.49245,
+          "checks": 1.36745,
+          "publish": 0.859892,
+          "falsePublish": 0.00343,
+          "oracleGap": 1.976708,
+          "pairedNormal95": [
+            1.058507,
+            2.894909
+          ]
+        },
+        "no_probe": {
+          "utility": 4.407298,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.9375,
+          "falsePublish": 0.198708,
+          "oracleGap": 4.590135,
+          "pairedNormal95": [
+            3.39501,
+            5.78526
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.758829,
+          "cost": 1.895477,
+          "checks": 1.895477,
+          "publish": 1,
+          "falsePublish": 0.013828,
+          "oracleGap": 1.238604,
+          "pairedNormal95": [
+            0.757081,
+            1.720127
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "12",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.997433,
+          "cost": 1.002567,
+          "checks": 1.002567,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.997433,
+          "cost": 1.002567,
+          "checks": 1.002567,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.8125,
+          "cost": 1.1875,
+          "checks": 0.875,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.184933,
+          "pairedNormal95": [
+            0.044378,
+            0.325487
+          ]
+        },
+        "native_exact": {
+          "utility": 7.065933,
+          "cost": 1.447241,
+          "checks": 1.362516,
+          "publish": 0.859892,
+          "falsePublish": 0.00343,
+          "oracleGap": 1.931499,
+          "pairedNormal95": [
+            1.03815,
+            2.824849
+          ]
+        },
+        "no_probe": {
+          "utility": 4.407298,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.9375,
+          "falsePublish": 0.198708,
+          "oracleGap": 4.590135,
+          "pairedNormal95": [
+            3.39501,
+            5.78526
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.365621,
+          "cost": 2.494437,
+          "checks": 2.470906,
+          "publish": 0.986006,
+          "falsePublish": 0,
+          "oracleGap": 1.631811,
+          "pairedNormal95": [
+            1.307674,
+            1.955948
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "16",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.60906,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.991658,
+          "falsePublish": 0.012301,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.60906,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.991658,
+          "falsePublish": 0.012301,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.60906,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.991658,
+          "falsePublish": 0.012301,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 6.662089,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.897493,
+          "falsePublish": 0.055013,
+          "oracleGap": 1.946971,
+          "pairedNormal95": [
+            1.089981,
+            2.803962
+          ]
+        },
+        "no_probe": {
+          "utility": 5.699733,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.172011,
+          "oracleGap": 2.909327,
+          "pairedNormal95": [
+            2.059374,
+            3.75928
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.418623,
+          "cost": 1,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0.063255,
+          "oracleGap": 1.190438,
+          "pairedNormal95": [
+            0.495731,
+            1.885144
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "16",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.893742,
+          "cost": 1.106258,
+          "checks": 1.106258,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.893742,
+          "cost": 1.106258,
+          "checks": 1.106258,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.699925,
+          "cost": 1.300075,
+          "checks": 1.050075,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.193817,
+          "pairedNormal95": [
+            0.041977,
+            0.345657
+          ]
+        },
+        "native_exact": {
+          "utility": 7.548859,
+          "cost": 1.446912,
+          "checks": 1.196912,
+          "publish": 0.914052,
+          "falsePublish": 0.00579,
+          "oracleGap": 1.344884,
+          "pairedNormal95": [
+            0.754666,
+            1.935101
+          ]
+        },
+        "no_probe": {
+          "utility": 5.699733,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.172011,
+          "oracleGap": 3.194009,
+          "pairedNormal95": [
+            2.263744,
+            4.124274
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.481566,
+          "cost": 1.952035,
+          "checks": 1.952035,
+          "publish": 1,
+          "falsePublish": 0.022656,
+          "oracleGap": 1.412176,
+          "pairedNormal95": [
+            0.924082,
+            1.90027
+          ]
+        }
+      }
+    },
+    {
+      "family": "nash",
+      "K": "16",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.893742,
+          "cost": 1.106258,
+          "checks": 1.106258,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.893742,
+          "cost": 1.106258,
+          "checks": 1.106258,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.699925,
+          "cost": 1.300075,
+          "checks": 1.050075,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.193817,
+          "pairedNormal95": [
+            0.041977,
+            0.345657
+          ]
+        },
+        "native_exact": {
+          "utility": 7.625631,
+          "cost": 1.429586,
+          "checks": 1.259494,
+          "publish": 0.9161,
+          "falsePublish": 0.004231,
+          "oracleGap": 1.268112,
+          "pairedNormal95": [
+            0.686824,
+            1.8494
+          ]
+        },
+        "no_probe": {
+          "utility": 5.699733,
+          "cost": 0,
+          "checks": 0,
+          "publish": 1,
+          "falsePublish": 0.172011,
+          "oracleGap": 3.194009,
+          "pairedNormal95": [
+            2.263744,
+            4.124274
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.463809,
+          "cost": 2.536191,
+          "checks": 2.536191,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 1.429933,
+          "pairedNormal95": [
+            1.278264,
+            1.581602
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "0",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.064553,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.989976,
+          "falsePublish": 0.033408,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.064553,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.989976,
+          "falsePublish": 0.033408,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.064553,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.989976,
+          "falsePublish": 0.033408,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.640842,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.419223,
+          "falsePublish": 0.022056,
+          "oracleGap": 5.423712,
+          "pairedNormal95": [
+            4.612184,
+            6.235239
+          ]
+        },
+        "no_probe": {
+          "utility": 0.547724,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.375,
+          "falsePublish": 0.128091,
+          "oracleGap": 7.516829,
+          "pairedNormal95": [
+            6.877326,
+            8.156331
+          ]
+        },
+        "fixed_order": {
+          "utility": 4.633183,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.86236,
+          "falsePublish": 0.119617,
+          "oracleGap": 3.43137,
+          "pairedNormal95": [
+            2.089572,
+            4.773168
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "all",
+      "budget": 1,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 7.262538,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.936437,
+          "falsePublish": 0.044073,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 7.262538,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.936437,
+          "falsePublish": 0.044073,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.262538,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.936437,
+          "falsePublish": 0.044073,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.589095,
+          "cost": 0.927083,
+          "checks": 0.927083,
+          "publish": 0.387674,
+          "falsePublish": 0.014423,
+          "oracleGap": 4.673442,
+          "pairedNormal95": [
+            4.311199,
+            5.035686
+          ]
+        },
+        "no_probe": {
+          "utility": 0.286789,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.25,
+          "falsePublish": 0.088528,
+          "oracleGap": 6.975749,
+          "pairedNormal95": [
+            6.651359,
+            7.300138
+          ]
+        },
+        "fixed_order": {
+          "utility": 4.713547,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.811141,
+          "falsePublish": 0.095914,
+          "oracleGap": 2.548991,
+          "pairedNormal95": [
+            2.118462,
+            2.97952
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "0",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.798722,
+          "cost": 1.201278,
+          "checks": 1.201278,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.798722,
+          "cost": 1.201278,
+          "checks": 1.201278,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.576387,
+          "cost": 1.423613,
+          "checks": 1.111113,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.222335,
+          "pairedNormal95": [
+            0.064447,
+            0.380223
+          ]
+        },
+        "native_exact": {
+          "utility": 3.426288,
+          "cost": 1.240342,
+          "checks": 1.240342,
+          "publish": 0.466663,
+          "falsePublish": 0,
+          "oracleGap": 5.372434,
+          "pairedNormal95": [
+            4.565777,
+            6.179092
+          ]
+        },
+        "no_probe": {
+          "utility": 0.547724,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.375,
+          "falsePublish": 0.128091,
+          "oracleGap": 8.250998,
+          "pairedNormal95": [
+            7.764775,
+            8.73722
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.265037,
+          "cost": 1.860602,
+          "checks": 1.860602,
+          "publish": 0.965042,
+          "falsePublish": 0.020991,
+          "oracleGap": 1.533685,
+          "pairedNormal95": [
+            0.808958,
+            2.258413
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "all",
+      "budget": 2,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.750801,
+          "cost": 1.249199,
+          "checks": 1.249199,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.750801,
+          "cost": 1.249199,
+          "checks": 1.249199,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.352244,
+          "cost": 1.647756,
+          "checks": 1.022756,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.398557,
+          "pairedNormal95": [
+            0.334529,
+            0.462585
+          ]
+        },
+        "native_exact": {
+          "utility": 3.438892,
+          "cost": 1.218155,
+          "checks": 1.218155,
+          "publish": 0.465705,
+          "falsePublish": 0,
+          "oracleGap": 5.311909,
+          "pairedNormal95": [
+            4.92339,
+            5.700427
+          ]
+        },
+        "no_probe": {
+          "utility": 0.286789,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.25,
+          "falsePublish": 0.088528,
+          "oracleGap": 8.464012,
+          "pairedNormal95": [
+            8.31777,
+            8.610254
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.148322,
+          "cost": 1.822772,
+          "checks": 1.822772,
+          "publish": 0.943607,
+          "falsePublish": 0.018599,
+          "oracleGap": 1.602478,
+          "pairedNormal95": [
+            1.316904,
+            1.888053
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "0",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.798722,
+          "cost": 1.201278,
+          "checks": 1.201278,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.798722,
+          "cost": 1.201278,
+          "checks": 1.201278,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.576387,
+          "cost": 1.423613,
+          "checks": 1.111113,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.222335,
+          "pairedNormal95": [
+            0.064447,
+            0.380223
+          ]
+        },
+        "native_exact": {
+          "utility": 3.426288,
+          "cost": 1.240342,
+          "checks": 1.240342,
+          "publish": 0.466663,
+          "falsePublish": 0,
+          "oracleGap": 5.372434,
+          "pairedNormal95": [
+            4.565777,
+            6.179092
+          ]
+        },
+        "no_probe": {
+          "utility": 0.547724,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.375,
+          "falsePublish": 0.128091,
+          "oracleGap": 8.250998,
+          "pairedNormal95": [
+            7.764775,
+            8.73722
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.793908,
+          "cost": 2.116522,
+          "checks": 2.116522,
+          "publish": 1,
+          "falsePublish": 0.003583,
+          "oracleGap": 1.004814,
+          "pairedNormal95": [
+            0.775728,
+            1.233901
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "all",
+      "budget": 3,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.750801,
+          "cost": 1.249199,
+          "checks": 1.249199,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.750801,
+          "cost": 1.249199,
+          "checks": 1.249199,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.352244,
+          "cost": 1.647756,
+          "checks": 1.022756,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.398557,
+          "pairedNormal95": [
+            0.334529,
+            0.462585
+          ]
+        },
+        "native_exact": {
+          "utility": 3.439868,
+          "cost": 1.217179,
+          "checks": 1.217179,
+          "publish": 0.465705,
+          "falsePublish": 0,
+          "oracleGap": 5.310932,
+          "pairedNormal95": [
+            4.922545,
+            5.69932
+          ]
+        },
+        "no_probe": {
+          "utility": 0.286789,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.25,
+          "falsePublish": 0.088528,
+          "oracleGap": 8.464012,
+          "pairedNormal95": [
+            8.31777,
+            8.610254
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.867208,
+          "cost": 2.071051,
+          "checks": 2.071051,
+          "publish": 0.997659,
+          "falsePublish": 0.001533,
+          "oracleGap": 0.883592,
+          "pairedNormal95": [
+            0.788316,
+            0.978869
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "2",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.955184,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.930863,
+          "falsePublish": 0.054138,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.955184,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.930863,
+          "falsePublish": 0.054138,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.955184,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.930863,
+          "falsePublish": 0.054138,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.822267,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.41842,
+          "falsePublish": 0.016977,
+          "oracleGap": 4.132917,
+          "pairedNormal95": [
+            3.211705,
+            5.054129
+          ]
+        },
+        "no_probe": {
+          "utility": 0.558095,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.375,
+          "falsePublish": 0.127676,
+          "oracleGap": 6.397089,
+          "pairedNormal95": [
+            5.509012,
+            7.285167
+          ]
+        },
+        "fixed_order": {
+          "utility": 4.41726,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.730687,
+          "falsePublish": 0.075584,
+          "oracleGap": 2.537924,
+          "pairedNormal95": [
+            1.491867,
+            3.58398
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "2",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.740729,
+          "cost": 1.259271,
+          "checks": 1.259271,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.740729,
+          "cost": 1.259271,
+          "checks": 1.259271,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.1875,
+          "cost": 1.8125,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.553229,
+          "pairedNormal95": [
+            0.412031,
+            0.694427
+          ]
+        },
+        "native_exact": {
+          "utility": 3.755843,
+          "cost": 1.231175,
+          "checks": 1.231175,
+          "publish": 0.498702,
+          "falsePublish": 0,
+          "oracleGap": 4.984886,
+          "pairedNormal95": [
+            3.838396,
+            6.131376
+          ]
+        },
+        "no_probe": {
+          "utility": 0.558095,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.375,
+          "falsePublish": 0.127676,
+          "oracleGap": 8.182634,
+          "pairedNormal95": [
+            7.642523,
+            8.722745
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.472918,
+          "cost": 1.843659,
+          "checks": 1.843659,
+          "publish": 0.964723,
+          "falsePublish": 0.013226,
+          "oracleGap": 1.267811,
+          "pairedNormal95": [
+            0.84185,
+            1.693771
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "2",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.740729,
+          "cost": 1.259271,
+          "checks": 1.259271,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.740729,
+          "cost": 1.259271,
+          "checks": 1.259271,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.1875,
+          "cost": 1.8125,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.553229,
+          "pairedNormal95": [
+            0.412031,
+            0.694427
+          ]
+        },
+        "native_exact": {
+          "utility": 3.755843,
+          "cost": 1.231175,
+          "checks": 1.231175,
+          "publish": 0.498702,
+          "falsePublish": 0,
+          "oracleGap": 4.984886,
+          "pairedNormal95": [
+            3.838396,
+            6.131376
+          ]
+        },
+        "no_probe": {
+          "utility": 0.558095,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.375,
+          "falsePublish": 0.127676,
+          "oracleGap": 8.182634,
+          "pairedNormal95": [
+            7.642523,
+            8.722745
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.948898,
+          "cost": 2.051102,
+          "checks": 2.051102,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.79183,
+          "pairedNormal95": [
+            0.712201,
+            0.87146
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "4",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.56719,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.911792,
+          "falsePublish": 0.062029,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.56719,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.911792,
+          "falsePublish": 0.062029,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.56719,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.911792,
+          "falsePublish": 0.062029,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.613784,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.374953,
+          "falsePublish": 0.01043,
+          "oracleGap": 3.953405,
+          "pairedNormal95": [
+            2.991361,
+            4.91545
+          ]
+        },
+        "no_probe": {
+          "utility": 0.005532,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.0625,
+          "falsePublish": 0.024779,
+          "oracleGap": 6.561658,
+          "pairedNormal95": [
+            5.731021,
+            7.392295
+          ]
+        },
+        "fixed_order": {
+          "utility": 3.81447,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.748521,
+          "falsePublish": 0.10683,
+          "oracleGap": 2.752719,
+          "pairedNormal95": [
+            1.696816,
+            3.808623
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "4",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.686271,
+          "cost": 1.313729,
+          "checks": 1.313729,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.686271,
+          "cost": 1.313729,
+          "checks": 1.313729,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.25,
+          "cost": 1.75,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.436271,
+          "pairedNormal95": [
+            0.295556,
+            0.576986
+          ]
+        },
+        "native_exact": {
+          "utility": 3.354301,
+          "cost": 1.173305,
+          "checks": 1.173305,
+          "publish": 0.452761,
+          "falsePublish": 0,
+          "oracleGap": 5.33197,
+          "pairedNormal95": [
+            4.285093,
+            6.378847
+          ]
+        },
+        "no_probe": {
+          "utility": 0.005532,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.0625,
+          "falsePublish": 0.024779,
+          "oracleGap": 8.680739,
+          "pairedNormal95": [
+            8.574988,
+            8.78649
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.428006,
+          "cost": 1.845326,
+          "checks": 1.845326,
+          "publish": 0.873397,
+          "falsePublish": 0.018426,
+          "oracleGap": 2.258265,
+          "pairedNormal95": [
+            1.393448,
+            3.123082
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "4",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.686271,
+          "cost": 1.313729,
+          "checks": 1.313729,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.686271,
+          "cost": 1.313729,
+          "checks": 1.313729,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.25,
+          "cost": 1.75,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.436271,
+          "pairedNormal95": [
+            0.295556,
+            0.576986
+          ]
+        },
+        "native_exact": {
+          "utility": 3.354301,
+          "cost": 1.173305,
+          "checks": 1.173305,
+          "publish": 0.452761,
+          "falsePublish": 0,
+          "oracleGap": 5.33197,
+          "pairedNormal95": [
+            4.285093,
+            6.378847
+          ]
+        },
+        "no_probe": {
+          "utility": 0.005532,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.0625,
+          "falsePublish": 0.024779,
+          "oracleGap": 8.680739,
+          "pairedNormal95": [
+            8.574988,
+            8.78649
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.742678,
+          "cost": 2.116855,
+          "checks": 2.116855,
+          "publish": 0.985953,
+          "falsePublish": 0,
+          "oracleGap": 0.943593,
+          "pairedNormal95": [
+            0.621979,
+            1.265206
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "8",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.966105,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.927407,
+          "falsePublish": 0.052319,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.966105,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.927407,
+          "falsePublish": 0.052319,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.966105,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.927407,
+          "falsePublish": 0.052319,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.529342,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.36757,
+          "falsePublish": 0.008354,
+          "oracleGap": 4.436763,
+          "pairedNormal95": [
+            3.581778,
+            5.291748
+          ]
+        },
+        "no_probe": {
+          "utility": 0.273421,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.3125,
+          "falsePublish": 0.114063,
+          "oracleGap": 6.692684,
+          "pairedNormal95": [
+            5.934211,
+            7.451158
+          ]
+        },
+        "fixed_order": {
+          "utility": 4.734783,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.796821,
+          "falsePublish": 0.089337,
+          "oracleGap": 2.231322,
+          "pairedNormal95": [
+            1.319124,
+            3.14352
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "8",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.708237,
+          "cost": 1.291763,
+          "checks": 1.291763,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.708237,
+          "cost": 1.291763,
+          "checks": 1.291763,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.1875,
+          "cost": 1.8125,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.520737,
+          "pairedNormal95": [
+            0.389911,
+            0.651564
+          ]
+        },
+        "native_exact": {
+          "utility": 3.461961,
+          "cost": 1.239286,
+          "checks": 1.239286,
+          "publish": 0.470125,
+          "falsePublish": 0,
+          "oracleGap": 5.246277,
+          "pairedNormal95": [
+            4.405334,
+            6.087219
+          ]
+        },
+        "no_probe": {
+          "utility": 0.273421,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.3125,
+          "falsePublish": 0.114063,
+          "oracleGap": 8.434816,
+          "pairedNormal95": [
+            8.069343,
+            8.80029
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.138153,
+          "cost": 1.782837,
+          "checks": 1.782837,
+          "publish": 0.940883,
+          "falsePublish": 0.019514,
+          "oracleGap": 1.570084,
+          "pairedNormal95": [
+            0.812697,
+            2.327472
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "8",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.708237,
+          "cost": 1.291763,
+          "checks": 1.291763,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.708237,
+          "cost": 1.291763,
+          "checks": 1.291763,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.1875,
+          "cost": 1.8125,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.520737,
+          "pairedNormal95": [
+            0.389911,
+            0.651564
+          ]
+        },
+        "native_exact": {
+          "utility": 3.467818,
+          "cost": 1.233429,
+          "checks": 1.233429,
+          "publish": 0.470125,
+          "falsePublish": 0,
+          "oracleGap": 5.240419,
+          "pairedNormal95": [
+            4.401903,
+            6.078935
+          ]
+        },
+        "no_probe": {
+          "utility": 0.273421,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.3125,
+          "falsePublish": 0.114063,
+          "oracleGap": 8.434816,
+          "pairedNormal95": [
+            8.069343,
+            8.80029
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.908009,
+          "cost": 2.091991,
+          "checks": 2.091991,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.800228,
+          "pairedNormal95": [
+            0.622055,
+            0.978401
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "12",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 7.380382,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.89844,
+          "falsePublish": 0.024161,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 7.380382,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.89844,
+          "falsePublish": 0.024161,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.380382,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.89844,
+          "falsePublish": 0.024161,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.357632,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.35097,
+          "falsePublish": 0.008583,
+          "oracleGap": 5.02275,
+          "pairedNormal95": [
+            4.093992,
+            5.951508
+          ]
+        },
+        "no_probe": {
+          "utility": 0.110367,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.125,
+          "falsePublish": 0.045585,
+          "oracleGap": 7.270014,
+          "pairedNormal95": [
+            6.408978,
+            8.131051
+          ]
+        },
+        "fixed_order": {
+          "utility": 5.054883,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.873947,
+          "falsePublish": 0.107383,
+          "oracleGap": 2.325499,
+          "pairedNormal95": [
+            1.419941,
+            3.231057
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "12",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.789168,
+          "cost": 1.210832,
+          "checks": 1.210832,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.789168,
+          "cost": 1.210832,
+          "checks": 1.210832,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.4375,
+          "cost": 1.5625,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.351668,
+          "pairedNormal95": [
+            0.189075,
+            0.51426
+          ]
+        },
+        "native_exact": {
+          "utility": 3.03171,
+          "cost": 1.184806,
+          "checks": 1.184806,
+          "publish": 0.421652,
+          "falsePublish": 0,
+          "oracleGap": 5.757457,
+          "pairedNormal95": [
+            4.845792,
+            6.669122
+          ]
+        },
+        "no_probe": {
+          "utility": 0.110367,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.125,
+          "falsePublish": 0.045585,
+          "oracleGap": 8.6788,
+          "pairedNormal95": [
+            8.497699,
+            8.859901
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.969446,
+          "cost": 1.797848,
+          "checks": 1.797848,
+          "publish": 0.959529,
+          "falsePublish": 0.03312,
+          "oracleGap": 1.819722,
+          "pairedNormal95": [
+            1.11922,
+            2.520224
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "12",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.789168,
+          "cost": 1.210832,
+          "checks": 1.210832,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.789168,
+          "cost": 1.210832,
+          "checks": 1.210832,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.4375,
+          "cost": 1.5625,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.351668,
+          "pairedNormal95": [
+            0.189075,
+            0.51426
+          ]
+        },
+        "native_exact": {
+          "utility": 3.03171,
+          "cost": 1.184806,
+          "checks": 1.184806,
+          "publish": 0.421652,
+          "falsePublish": 0,
+          "oracleGap": 5.757457,
+          "pairedNormal95": [
+            4.845792,
+            6.669122
+          ]
+        },
+        "no_probe": {
+          "utility": 0.110367,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.125,
+          "falsePublish": 0.045585,
+          "oracleGap": 8.6788,
+          "pairedNormal95": [
+            8.497699,
+            8.859901
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.851883,
+          "cost": 2.007708,
+          "checks": 2.007708,
+          "publish": 1,
+          "falsePublish": 0.005616,
+          "oracleGap": 0.937285,
+          "pairedNormal95": [
+            0.59988,
+            1.27469
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "16",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 7.641812,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.960144,
+          "falsePublish": 0.038385,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 7.641812,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.960144,
+          "falsePublish": 0.038385,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.641812,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.960144,
+          "falsePublish": 0.038385,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.570705,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.394908,
+          "falsePublish": 0.020135,
+          "oracleGap": 5.071107,
+          "pairedNormal95": [
+            4.348481,
+            5.793733
+          ]
+        },
+        "no_probe": {
+          "utility": 0.225595,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.25,
+          "falsePublish": 0.090976,
+          "oracleGap": 7.416217,
+          "pairedNormal95": [
+            6.710963,
+            8.12147
+          ]
+        },
+        "fixed_order": {
+          "utility": 5.6267,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.854508,
+          "falsePublish": 0.076735,
+          "oracleGap": 2.015112,
+          "pairedNormal95": [
+            0.985513,
+            3.044711
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "16",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.781679,
+          "cost": 1.218321,
+          "checks": 1.218321,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.781679,
+          "cost": 1.218321,
+          "checks": 1.218321,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.474576,
+          "cost": 1.525424,
+          "checks": 1.025424,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.307103,
+          "pairedNormal95": [
+            0.14403,
+            0.470175
+          ]
+        },
+        "native_exact": {
+          "utility": 3.60325,
+          "cost": 1.240015,
+          "checks": 1.240015,
+          "publish": 0.484326,
+          "falsePublish": 0,
+          "oracleGap": 5.178429,
+          "pairedNormal95": [
+            4.152936,
+            6.203922
+          ]
+        },
+        "no_probe": {
+          "utility": 0.225595,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.25,
+          "falsePublish": 0.090976,
+          "oracleGap": 8.556084,
+          "pairedNormal95": [
+            8.334991,
+            8.777178
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.616375,
+          "cost": 1.806359,
+          "checks": 1.806359,
+          "publish": 0.958066,
+          "falsePublish": 0.006317,
+          "oracleGap": 1.165304,
+          "pairedNormal95": [
+            0.549885,
+            1.780724
+          ]
+        }
+      }
+    },
+    {
+      "family": "rectangle",
+      "K": "16",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.781679,
+          "cost": 1.218321,
+          "checks": 1.218321,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.781679,
+          "cost": 1.218321,
+          "checks": 1.218321,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.474576,
+          "cost": 1.525424,
+          "checks": 1.025424,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.307103,
+          "pairedNormal95": [
+            0.14403,
+            0.470175
+          ]
+        },
+        "native_exact": {
+          "utility": 3.60325,
+          "cost": 1.240015,
+          "checks": 1.240015,
+          "publish": 0.484326,
+          "falsePublish": 0,
+          "oracleGap": 5.178429,
+          "pairedNormal95": [
+            4.152936,
+            6.203922
+          ]
+        },
+        "no_probe": {
+          "utility": 0.225595,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0.25,
+          "falsePublish": 0.090976,
+          "oracleGap": 8.556084,
+          "pairedNormal95": [
+            8.334991,
+            8.777178
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.957874,
+          "cost": 2.042126,
+          "checks": 2.042126,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.823805,
+          "pairedNormal95": [
+            0.660008,
+            0.987602
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "0",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.232931,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.844369,
+          "falsePublish": 0.04843,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.232931,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.844369,
+          "falsePublish": 0.04843,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.232931,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.844369,
+          "falsePublish": 0.04843,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.559322,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.400431,
+          "falsePublish": 0.0203,
+          "oracleGap": 3.673609,
+          "pairedNormal95": [
+            3.062018,
+            4.2852
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.232931,
+          "pairedNormal95": [
+            5.661217,
+            6.804645
+          ]
+        },
+        "fixed_order": {
+          "utility": 5.921795,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.846197,
+          "falsePublish": 0.061607,
+          "oracleGap": 0.311136,
+          "pairedNormal95": [
+            -0.066095,
+            0.688366
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "all",
+      "budget": 1,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 6.357882,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.87368,
+          "falsePublish": 0.055157,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.357882,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.87368,
+          "falsePublish": 0.055157,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.357882,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.87368,
+          "falsePublish": 0.055157,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.720922,
+          "cost": 0.989583,
+          "checks": 0.989583,
+          "publish": 0.437407,
+          "falsePublish": 0.026543,
+          "oracleGap": 3.63696,
+          "pairedNormal95": [
+            3.333135,
+            3.940785
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.357882,
+          "pairedNormal95": [
+            6.13893,
+            6.576834
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.21564,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.861508,
+          "falsePublish": 0.055978,
+          "oracleGap": 0.142243,
+          "pairedNormal95": [
+            0.035934,
+            0.248551
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "0",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.656815,
+          "cost": 1.343185,
+          "checks": 1.343185,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.656815,
+          "cost": 1.343185,
+          "checks": 1.343185,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.656815,
+          "pairedNormal95": [
+            0.609633,
+            0.703997
+          ]
+        },
+        "native_exact": {
+          "utility": 3.584853,
+          "cost": 1.284317,
+          "checks": 1.284317,
+          "publish": 0.486917,
+          "falsePublish": 0,
+          "oracleGap": 5.071962,
+          "pairedNormal95": [
+            4.488625,
+            5.6553
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.656815,
+          "pairedNormal95": [
+            8.609633,
+            8.703997
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.631029,
+          "cost": 1.368971,
+          "checks": 1.368971,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.025786,
+          "pairedNormal95": [
+            -0.010898,
+            0.06247
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "all",
+      "budget": 2,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.680213,
+          "cost": 1.319787,
+          "checks": 1.319787,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.680213,
+          "cost": 1.319787,
+          "checks": 1.319787,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.007457,
+          "cost": 1.992543,
+          "checks": 1.00296,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.672756,
+          "pairedNormal95": [
+            0.649528,
+            0.695985
+          ]
+        },
+        "native_exact": {
+          "utility": 3.636915,
+          "cost": 1.251412,
+          "checks": 1.251412,
+          "publish": 0.488833,
+          "falsePublish": 0,
+          "oracleGap": 5.043299,
+          "pairedNormal95": [
+            4.81849,
+            5.268107
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.680213,
+          "pairedNormal95": [
+            8.661573,
+            8.698853
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.666564,
+          "cost": 1.333436,
+          "checks": 1.333436,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.013649,
+          "pairedNormal95": [
+            0.003381,
+            0.023918
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "0",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.656815,
+          "cost": 1.343185,
+          "checks": 1.343185,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.656815,
+          "cost": 1.343185,
+          "checks": 1.343185,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.656815,
+          "pairedNormal95": [
+            0.609633,
+            0.703997
+          ]
+        },
+        "native_exact": {
+          "utility": 3.584853,
+          "cost": 1.284317,
+          "checks": 1.284317,
+          "publish": 0.486917,
+          "falsePublish": 0,
+          "oracleGap": 5.071962,
+          "pairedNormal95": [
+            4.488625,
+            5.6553
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.656815,
+          "pairedNormal95": [
+            8.609633,
+            8.703997
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.631029,
+          "cost": 1.368971,
+          "checks": 1.368971,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.025786,
+          "pairedNormal95": [
+            -0.010898,
+            0.06247
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "all",
+      "budget": 3,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.680213,
+          "cost": 1.319787,
+          "checks": 1.319787,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.680213,
+          "cost": 1.319787,
+          "checks": 1.319787,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.007457,
+          "cost": 1.992543,
+          "checks": 1.00296,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.672756,
+          "pairedNormal95": [
+            0.649528,
+            0.695985
+          ]
+        },
+        "native_exact": {
+          "utility": 3.636915,
+          "cost": 1.251412,
+          "checks": 1.251412,
+          "publish": 0.488833,
+          "falsePublish": 0,
+          "oracleGap": 5.043299,
+          "pairedNormal95": [
+            4.81849,
+            5.268107
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.680213,
+          "pairedNormal95": [
+            8.661573,
+            8.698853
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.666564,
+          "cost": 1.333436,
+          "checks": 1.333436,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.013649,
+          "pairedNormal95": [
+            0.003381,
+            0.023918
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "2",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.409643,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.865633,
+          "falsePublish": 0.049868,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.409643,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.865633,
+          "falsePublish": 0.049868,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.409643,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.865633,
+          "falsePublish": 0.049868,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.751881,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.427728,
+          "falsePublish": 0.021016,
+          "oracleGap": 3.657762,
+          "pairedNormal95": [
+            2.96884,
+            4.346683
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.409643,
+          "pairedNormal95": [
+            5.802452,
+            7.016834
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.230142,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.847683,
+          "falsePublish": 0.049868,
+          "oracleGap": 0.179501,
+          "pairedNormal95": [
+            -0.172321,
+            0.531323
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "2",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.683932,
+          "cost": 1.316068,
+          "checks": 1.316068,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.683932,
+          "cost": 1.316068,
+          "checks": 1.316068,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.683932,
+          "pairedNormal95": [
+            0.625689,
+            0.742175
+          ]
+        },
+        "native_exact": {
+          "utility": 3.359123,
+          "cost": 1.211378,
+          "checks": 1.211378,
+          "publish": 0.45705,
+          "falsePublish": 0,
+          "oracleGap": 5.324809,
+          "pairedNormal95": [
+            4.718903,
+            5.930714
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.683932,
+          "pairedNormal95": [
+            8.625689,
+            8.742175
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.665982,
+          "cost": 1.334018,
+          "checks": 1.334018,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.01795,
+          "pairedNormal95": [
+            -0.017232,
+            0.053132
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "2",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.683932,
+          "cost": 1.316068,
+          "checks": 1.316068,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.683932,
+          "cost": 1.316068,
+          "checks": 1.316068,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.683932,
+          "pairedNormal95": [
+            0.625689,
+            0.742175
+          ]
+        },
+        "native_exact": {
+          "utility": 3.359123,
+          "cost": 1.211378,
+          "checks": 1.211378,
+          "publish": 0.45705,
+          "falsePublish": 0,
+          "oracleGap": 5.324809,
+          "pairedNormal95": [
+            4.718903,
+            5.930714
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.683932,
+          "pairedNormal95": [
+            8.625689,
+            8.742175
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.665982,
+          "cost": 1.334018,
+          "checks": 1.334018,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.01795,
+          "pairedNormal95": [
+            -0.017232,
+            0.053132
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "4",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.237966,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.868464,
+          "falsePublish": 0.057867,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.237966,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.868464,
+          "falsePublish": 0.057867,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.237966,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.868464,
+          "falsePublish": 0.057867,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.853128,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.483786,
+          "falsePublish": 0.039389,
+          "oracleGap": 3.384837,
+          "pairedNormal95": [
+            2.53807,
+            4.231604
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.237966,
+          "pairedNormal95": [
+            5.683964,
+            6.791967
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.17388,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.862693,
+          "falsePublish": 0.058122,
+          "oracleGap": 0.064086,
+          "pairedNormal95": [
+            -0.048878,
+            0.177049
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "4",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.679471,
+          "cost": 1.320529,
+          "checks": 1.320529,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.679471,
+          "cost": 1.320529,
+          "checks": 1.320529,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.679471,
+          "pairedNormal95": [
+            0.634127,
+            0.724815
+          ]
+        },
+        "native_exact": {
+          "utility": 3.774235,
+          "cost": 1.251588,
+          "checks": 1.251588,
+          "publish": 0.502582,
+          "falsePublish": 0,
+          "oracleGap": 4.905236,
+          "pairedNormal95": [
+            4.396385,
+            5.414087
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.679471,
+          "pairedNormal95": [
+            8.634127,
+            8.724815
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.6737,
+          "cost": 1.3263,
+          "checks": 1.3263,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.005771,
+          "pairedNormal95": [
+            -0.00554,
+            0.017081
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "4",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.679471,
+          "cost": 1.320529,
+          "checks": 1.320529,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.679471,
+          "cost": 1.320529,
+          "checks": 1.320529,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.679471,
+          "pairedNormal95": [
+            0.634127,
+            0.724815
+          ]
+        },
+        "native_exact": {
+          "utility": 3.774235,
+          "cost": 1.251588,
+          "checks": 1.251588,
+          "publish": 0.502582,
+          "falsePublish": 0,
+          "oracleGap": 4.905236,
+          "pairedNormal95": [
+            4.396385,
+            5.414087
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.679471,
+          "pairedNormal95": [
+            8.634127,
+            8.724815
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.6737,
+          "cost": 1.3263,
+          "checks": 1.3263,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.005771,
+          "pairedNormal95": [
+            -0.00554,
+            0.017081
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "8",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.350478,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.925755,
+          "falsePublish": 0.076283,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.350478,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.925755,
+          "falsePublish": 0.076283,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.350478,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.925755,
+          "falsePublish": 0.076283,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.443353,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.414511,
+          "falsePublish": 0.02807,
+          "oracleGap": 3.907125,
+          "pairedNormal95": [
+            3.291447,
+            4.522804
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.350478,
+          "pairedNormal95": [
+            5.771424,
+            6.929532
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.317547,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.922462,
+          "falsePublish": 0.076283,
+          "oracleGap": 0.032931,
+          "pairedNormal95": [
+            -0.031614,
+            0.097476
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "8",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.679852,
+          "cost": 1.320148,
+          "checks": 1.320148,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.679852,
+          "cost": 1.320148,
+          "checks": 1.320148,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.679852,
+          "pairedNormal95": [
+            0.637433,
+            0.722271
+          ]
+        },
+        "native_exact": {
+          "utility": 3.477333,
+          "cost": 1.271369,
+          "checks": 1.271369,
+          "publish": 0.47487,
+          "falsePublish": 0,
+          "oracleGap": 5.202519,
+          "pairedNormal95": [
+            4.82736,
+            5.577678
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.679852,
+          "pairedNormal95": [
+            8.637433,
+            8.722271
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.674961,
+          "cost": 1.325039,
+          "checks": 1.325039,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.004891,
+          "pairedNormal95": [
+            -0.002093,
+            0.011875
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "8",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.679852,
+          "cost": 1.320148,
+          "checks": 1.320148,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.679852,
+          "cost": 1.320148,
+          "checks": 1.320148,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.679852,
+          "pairedNormal95": [
+            0.637433,
+            0.722271
+          ]
+        },
+        "native_exact": {
+          "utility": 3.477333,
+          "cost": 1.271369,
+          "checks": 1.271369,
+          "publish": 0.47487,
+          "falsePublish": 0,
+          "oracleGap": 5.202519,
+          "pairedNormal95": [
+            4.82736,
+            5.577678
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.679852,
+          "pairedNormal95": [
+            8.637433,
+            8.722271
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.674961,
+          "cost": 1.325039,
+          "checks": 1.325039,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.004891,
+          "pairedNormal95": [
+            -0.002093,
+            0.011875
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "12",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.376779,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.873006,
+          "falsePublish": 0.054131,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.376779,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.873006,
+          "falsePublish": 0.054131,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.376779,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.873006,
+          "falsePublish": 0.054131,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.737455,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.420932,
+          "falsePublish": 0.018875,
+          "oracleGap": 3.639324,
+          "pairedNormal95": [
+            2.797028,
+            4.481619
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.376779,
+          "pairedNormal95": [
+            5.896502,
+            6.857056
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.110977,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.825157,
+          "falsePublish": 0.045624,
+          "oracleGap": 0.265802,
+          "pairedNormal95": [
+            -0.087847,
+            0.619452
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "12",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.703696,
+          "cost": 1.296304,
+          "checks": 1.296304,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.703696,
+          "cost": 1.296304,
+          "checks": 1.296304,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.044742,
+          "cost": 1.955258,
+          "checks": 1.017758,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.658954,
+          "pairedNormal95": [
+            0.562841,
+            0.755067
+          ]
+        },
+        "native_exact": {
+          "utility": 3.789213,
+          "cost": 1.245049,
+          "checks": 1.245049,
+          "publish": 0.503426,
+          "falsePublish": 0,
+          "oracleGap": 4.914483,
+          "pairedNormal95": [
+            4.292015,
+            5.53695
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.703696,
+          "pairedNormal95": [
+            8.660958,
+            8.746434
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.680005,
+          "cost": 1.319995,
+          "checks": 1.319995,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.023691,
+          "pairedNormal95": [
+            -0.008902,
+            0.056284
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "12",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.703696,
+          "cost": 1.296304,
+          "checks": 1.296304,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.703696,
+          "cost": 1.296304,
+          "checks": 1.296304,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8.044742,
+          "cost": 1.955258,
+          "checks": 1.017758,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.658954,
+          "pairedNormal95": [
+            0.562841,
+            0.755067
+          ]
+        },
+        "native_exact": {
+          "utility": 3.789213,
+          "cost": 1.245049,
+          "checks": 1.245049,
+          "publish": 0.503426,
+          "falsePublish": 0,
+          "oracleGap": 4.914483,
+          "pairedNormal95": [
+            4.292015,
+            5.53695
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.703696,
+          "pairedNormal95": [
+            8.660958,
+            8.746434
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.680005,
+          "cost": 1.319995,
+          "checks": 1.319995,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.023691,
+          "pairedNormal95": [
+            -0.008902,
+            0.056284
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "16",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 6.539496,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.864855,
+          "falsePublish": 0.044362,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 6.539496,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.864855,
+          "falsePublish": 0.044362,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 6.539496,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.864855,
+          "falsePublish": 0.044362,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.980392,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.477053,
+          "falsePublish": 0.031606,
+          "oracleGap": 3.559105,
+          "pairedNormal95": [
+            2.655453,
+            4.462756
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 6.539496,
+          "pairedNormal95": [
+            6.053315,
+            7.025678
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.539496,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.864855,
+          "falsePublish": 0.044362,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "16",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.677513,
+          "cost": 1.322487,
+          "checks": 1.322487,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.677513,
+          "cost": 1.322487,
+          "checks": 1.322487,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.677513,
+          "pairedNormal95": [
+            0.637316,
+            0.717711
+          ]
+        },
+        "native_exact": {
+          "utility": 3.83673,
+          "cost": 1.244769,
+          "checks": 1.244769,
+          "publish": 0.50815,
+          "falsePublish": 0,
+          "oracleGap": 4.840784,
+          "pairedNormal95": [
+            4.22491,
+            5.456657
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.677513,
+          "pairedNormal95": [
+            8.637316,
+            8.717711
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.673707,
+          "cost": 1.326293,
+          "checks": 1.326293,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.003806,
+          "pairedNormal95": [
+            -0.003654,
+            0.011267
+          ]
+        }
+      }
+    },
+    {
+      "family": "graph",
+      "K": "16",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.677513,
+          "cost": 1.322487,
+          "checks": 1.322487,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.677513,
+          "cost": 1.322487,
+          "checks": 1.322487,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 8,
+          "cost": 2,
+          "checks": 1,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.677513,
+          "pairedNormal95": [
+            0.637316,
+            0.717711
+          ]
+        },
+        "native_exact": {
+          "utility": 3.83673,
+          "cost": 1.244769,
+          "checks": 1.244769,
+          "publish": 0.50815,
+          "falsePublish": 0,
+          "oracleGap": 4.840784,
+          "pairedNormal95": [
+            4.22491,
+            5.456657
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.677513,
+          "pairedNormal95": [
+            8.637316,
+            8.717711
+          ]
+        },
+        "fixed_order": {
+          "utility": 8.673707,
+          "cost": 1.326293,
+          "checks": 1.326293,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.003806,
+          "pairedNormal95": [
+            -0.003654,
+            0.011267
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "0",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 5.625605,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.85308,
+          "falsePublish": 0.076208,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 5.625605,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.85308,
+          "falsePublish": 0.076208,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 5.625605,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.85308,
+          "falsePublish": 0.076208,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 2.027082,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.386132,
+          "falsePublish": 0.03337,
+          "oracleGap": 3.598523,
+          "pairedNormal95": [
+            2.77925,
+            4.417797
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 5.625605,
+          "pairedNormal95": [
+            4.825823,
+            6.425386
+          ]
+        },
+        "fixed_order": {
+          "utility": 0.258333,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.298811,
+          "falsePublish": 0.069191,
+          "oracleGap": 5.367272,
+          "pairedNormal95": [
+            4.491845,
+            6.242699
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "all",
+      "budget": 1,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 5.113648,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.8027,
+          "falsePublish": 0.076534,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 5.113648,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.8027,
+          "falsePublish": 0.076534,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 5.113648,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.8027,
+          "falsePublish": 0.076534,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 1.628853,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.318699,
+          "falsePublish": 0.024825,
+          "oracleGap": 3.484795,
+          "pairedNormal95": [
+            3.196159,
+            3.773431
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 5.113648,
+          "pairedNormal95": [
+            4.805979,
+            5.421316
+          ]
+        },
+        "fixed_order": {
+          "utility": 0.152344,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.252486,
+          "falsePublish": 0.054901,
+          "oracleGap": 4.961304,
+          "pairedNormal95": [
+            4.630716,
+            5.291892
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "0",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.543393,
+          "cost": 1.456607,
+          "checks": 1.456607,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.543393,
+          "cost": 1.456607,
+          "checks": 1.456607,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.519913,
+          "cost": 1.813187,
+          "checks": 1.063187,
+          "publish": 1,
+          "falsePublish": 0.026676,
+          "oracleGap": 1.02348,
+          "pairedNormal95": [
+            0.501103,
+            1.545858
+          ]
+        },
+        "native_exact": {
+          "utility": 2.865686,
+          "cost": 1.30854,
+          "checks": 1.30854,
+          "publish": 0.417423,
+          "falsePublish": 0,
+          "oracleGap": 5.677708,
+          "pairedNormal95": [
+            5.138966,
+            6.216449
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.543393,
+          "pairedNormal95": [
+            8.461308,
+            8.625479
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.001929,
+          "cost": 1.945549,
+          "checks": 1.945549,
+          "publish": 0.98694,
+          "falsePublish": 0.076877,
+          "oracleGap": 2.541464,
+          "pairedNormal95": [
+            1.643437,
+            3.439491
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "all",
+      "budget": 2,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.508613,
+          "cost": 1.491387,
+          "checks": 1.491387,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.508613,
+          "cost": 1.491387,
+          "checks": 1.491387,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.488853,
+          "cost": 1.881006,
+          "checks": 1.068506,
+          "publish": 0.983415,
+          "falsePublish": 0.018572,
+          "oracleGap": 1.019759,
+          "pairedNormal95": [
+            0.809922,
+            1.229597
+          ]
+        },
+        "native_exact": {
+          "utility": 2.690899,
+          "cost": 1.299605,
+          "checks": 1.299605,
+          "publish": 0.39905,
+          "falsePublish": 0,
+          "oracleGap": 5.817714,
+          "pairedNormal95": [
+            5.605504,
+            6.029924
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.508613,
+          "pairedNormal95": [
+            8.472267,
+            8.544958
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.057784,
+          "cost": 1.934413,
+          "checks": 1.934413,
+          "publish": 0.922037,
+          "falsePublish": 0.049127,
+          "oracleGap": 2.450828,
+          "pairedNormal95": [
+            2.092436,
+            2.80922
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "0",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.561584,
+          "cost": 1.438416,
+          "checks": 1.438416,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.543393,
+          "cost": 1.456607,
+          "checks": 1.456607,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.01819,
+          "pairedNormal95": [
+            -0.017463,
+            0.053843
+          ]
+        },
+        "myopic": {
+          "utility": 8.06773,
+          "cost": 1.93227,
+          "checks": 1.18227,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.493854,
+          "pairedNormal95": [
+            0.33464,
+            0.653067
+          ]
+        },
+        "native_exact": {
+          "utility": 2.881544,
+          "cost": 1.292682,
+          "checks": 1.292682,
+          "publish": 0.417423,
+          "falsePublish": 0,
+          "oracleGap": 5.68004,
+          "pairedNormal95": [
+            5.142404,
+            6.217676
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.561584,
+          "pairedNormal95": [
+            8.482753,
+            8.640414
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.638356,
+          "cost": 2.265232,
+          "checks": 2.265232,
+          "publish": 1,
+          "falsePublish": 0.003856,
+          "oracleGap": 0.923227,
+          "pairedNormal95": [
+            0.751558,
+            1.094897
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "all",
+      "budget": 3,
+      "roots": 96,
+      "metrics": {
+        "exact": {
+          "utility": 8.52337,
+          "cost": 1.47663,
+          "checks": 1.47663,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.508613,
+          "cost": 1.491387,
+          "checks": 1.491387,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.014758,
+          "pairedNormal95": [
+            0.002057,
+            0.027458
+          ]
+        },
+        "myopic": {
+          "utility": 8.033915,
+          "cost": 1.966085,
+          "checks": 1.153585,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.489455,
+          "pairedNormal95": [
+            0.434785,
+            0.544126
+          ]
+        },
+        "native_exact": {
+          "utility": 2.695012,
+          "cost": 1.295492,
+          "checks": 1.295492,
+          "publish": 0.39905,
+          "falsePublish": 0,
+          "oracleGap": 5.828358,
+          "pairedNormal95": [
+            5.615922,
+            6.040794
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.52337,
+          "pairedNormal95": [
+            8.490468,
+            8.556272
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.658182,
+          "cost": 2.182105,
+          "checks": 2.182105,
+          "publish": 0.992718,
+          "falsePublish": 0.003476,
+          "oracleGap": 0.865188,
+          "pairedNormal95": [
+            0.748258,
+            0.982118
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "2",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 5.001406,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.842661,
+          "falsePublish": 0.097008,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 5.001406,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.842661,
+          "falsePublish": 0.097008,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 5.001406,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.842661,
+          "falsePublish": 0.097008,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 1.743784,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.284339,
+          "falsePublish": 0.008984,
+          "oracleGap": 3.257622,
+          "pairedNormal95": [
+            2.778048,
+            3.737197
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 5.001406,
+          "pairedNormal95": [
+            4.319924,
+            5.682889
+          ]
+        },
+        "fixed_order": {
+          "utility": -0.277389,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.187593,
+          "falsePublish": 0.046133,
+          "oracleGap": 5.278795,
+          "pairedNormal95": [
+            4.756492,
+            5.801099
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "2",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.483317,
+          "cost": 1.516683,
+          "checks": 1.516683,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.483317,
+          "cost": 1.516683,
+          "checks": 1.516683,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.274019,
+          "cost": 1.942032,
+          "checks": 1.067032,
+          "publish": 0.965018,
+          "falsePublish": 0.017365,
+          "oracleGap": 1.209298,
+          "pairedNormal95": [
+            0.703095,
+            1.715501
+          ]
+        },
+        "native_exact": {
+          "utility": 2.697285,
+          "cost": 1.279872,
+          "checks": 1.279872,
+          "publish": 0.397716,
+          "falsePublish": 0,
+          "oracleGap": 5.786032,
+          "pairedNormal95": [
+            5.354198,
+            6.217866
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.483317,
+          "pairedNormal95": [
+            8.381194,
+            8.58544
+          ]
+        },
+        "fixed_order": {
+          "utility": 5.841442,
+          "cost": 1.966977,
+          "checks": 1.966977,
+          "publish": 0.871492,
+          "falsePublish": 0.03626,
+          "oracleGap": 2.641875,
+          "pairedNormal95": [
+            1.56713,
+            3.71662
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "2",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.512384,
+          "cost": 1.487616,
+          "checks": 1.487616,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.483317,
+          "cost": 1.516683,
+          "checks": 1.516683,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.029067,
+          "pairedNormal95": [
+            -0.027904,
+            0.086037
+          ]
+        },
+        "myopic": {
+          "utility": 7.964473,
+          "cost": 2.035527,
+          "checks": 1.160527,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.547911,
+          "pairedNormal95": [
+            0.433637,
+            0.662186
+          ]
+        },
+        "native_exact": {
+          "utility": 2.697285,
+          "cost": 1.279872,
+          "checks": 1.279872,
+          "publish": 0.397716,
+          "falsePublish": 0,
+          "oracleGap": 5.815098,
+          "pairedNormal95": [
+            5.387397,
+            6.2428
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.512384,
+          "pairedNormal95": [
+            8.431892,
+            8.592875
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.677477,
+          "cost": 2.212414,
+          "checks": 2.212414,
+          "publish": 1,
+          "falsePublish": 0.004404,
+          "oracleGap": 0.834907,
+          "pairedNormal95": [
+            0.56242,
+            1.107393
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "4",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 4.849955,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.840343,
+          "falsePublish": 0.102139,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 4.849955,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.840343,
+          "falsePublish": 0.102139,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 4.849955,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.840343,
+          "falsePublish": 0.102139,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 1.383428,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.303699,
+          "falsePublish": 0.028642,
+          "oracleGap": 3.466527,
+          "pairedNormal95": [
+            2.849651,
+            4.083403
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 4.849955,
+          "pairedNormal95": [
+            4.236571,
+            5.46334
+          ]
+        },
+        "fixed_order": {
+          "utility": 0.125273,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.218947,
+          "falsePublish": 0.042568,
+          "oracleGap": 4.724683,
+          "pairedNormal95": [
+            4.026093,
+            5.423272
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "4",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.485386,
+          "cost": 1.514614,
+          "checks": 1.514614,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.485386,
+          "cost": 1.514614,
+          "checks": 1.514614,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.3719,
+          "cost": 1.936283,
+          "checks": 1.061283,
+          "publish": 1,
+          "falsePublish": 0.027673,
+          "oracleGap": 1.113486,
+          "pairedNormal95": [
+            0.549884,
+            1.677088
+          ]
+        },
+        "native_exact": {
+          "utility": 2.648613,
+          "cost": 1.341896,
+          "checks": 1.341896,
+          "publish": 0.399051,
+          "falsePublish": 0,
+          "oracleGap": 5.836773,
+          "pairedNormal95": [
+            5.288622,
+            6.384924
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.485386,
+          "pairedNormal95": [
+            8.406291,
+            8.564481
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.348167,
+          "cost": 1.926131,
+          "checks": 1.926131,
+          "publish": 0.952379,
+          "falsePublish": 0.04998,
+          "oracleGap": 2.137219,
+          "pairedNormal95": [
+            1.304785,
+            2.969653
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "4",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.485386,
+          "cost": 1.514614,
+          "checks": 1.514614,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.485386,
+          "cost": 1.514614,
+          "checks": 1.514614,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.98249,
+          "cost": 2.01751,
+          "checks": 1.14251,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.502895,
+          "pairedNormal95": [
+            0.378955,
+            0.626836
+          ]
+        },
+        "native_exact": {
+          "utility": 2.648613,
+          "cost": 1.341896,
+          "checks": 1.341896,
+          "publish": 0.399051,
+          "falsePublish": 0,
+          "oracleGap": 5.836773,
+          "pairedNormal95": [
+            5.288622,
+            6.384924
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.485386,
+          "pairedNormal95": [
+            8.406291,
+            8.564481
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.483859,
+          "cost": 2.119108,
+          "checks": 2.119108,
+          "publish": 0.97624,
+          "falsePublish": 0.006377,
+          "oracleGap": 1.001526,
+          "pairedNormal95": [
+            0.518295,
+            1.484758
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "8",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 5.092991,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.76539,
+          "falsePublish": 0.062436,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 5.092991,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.76539,
+          "falsePublish": 0.062436,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 5.092991,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.76539,
+          "falsePublish": 0.062436,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 1.777752,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.35708,
+          "falsePublish": 0.031722,
+          "oracleGap": 3.315239,
+          "pairedNormal95": [
+            2.64542,
+            3.985057
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 5.092991,
+          "pairedNormal95": [
+            4.224987,
+            5.960994
+          ]
+        },
+        "fixed_order": {
+          "utility": 0.372128,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.315521,
+          "falsePublish": 0.071323,
+          "oracleGap": 4.720862,
+          "pairedNormal95": [
+            3.839436,
+            5.602289
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "8",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.5409,
+          "cost": 1.4591,
+          "checks": 1.4591,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.5409,
+          "cost": 1.4591,
+          "checks": 1.4591,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.59822,
+          "cost": 1.85021,
+          "checks": 1.10021,
+          "publish": 0.992413,
+          "falsePublish": 0.019028,
+          "oracleGap": 0.94268,
+          "pairedNormal95": [
+            0.420435,
+            1.464924
+          ]
+        },
+        "native_exact": {
+          "utility": 3.076861,
+          "cost": 1.312833,
+          "checks": 1.312833,
+          "publish": 0.438969,
+          "falsePublish": 0,
+          "oracleGap": 5.464039,
+          "pairedNormal95": [
+            4.992222,
+            5.935856
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.5409,
+          "pairedNormal95": [
+            8.450613,
+            8.631186
+          ]
+        },
+        "fixed_order": {
+          "utility": 5.867414,
+          "cost": 1.915241,
+          "checks": 1.915241,
+          "publish": 0.894123,
+          "falsePublish": 0.046343,
+          "oracleGap": 2.673485,
+          "pairedNormal95": [
+            1.874118,
+            3.472853
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "8",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.542712,
+          "cost": 1.457288,
+          "checks": 1.457288,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.5409,
+          "cost": 1.4591,
+          "checks": 1.4591,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.001813,
+          "pairedNormal95": [
+            -0.00174,
+            0.005365
+          ]
+        },
+        "myopic": {
+          "utility": 8.0803,
+          "cost": 1.9197,
+          "checks": 1.1697,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.462413,
+          "pairedNormal95": [
+            0.304975,
+            0.61985
+          ]
+        },
+        "native_exact": {
+          "utility": 3.076861,
+          "cost": 1.312833,
+          "checks": 1.312833,
+          "publish": 0.438969,
+          "falsePublish": 0,
+          "oracleGap": 5.465851,
+          "pairedNormal95": [
+            4.993016,
+            5.938687
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.542712,
+          "pairedNormal95": [
+            8.452457,
+            8.632968
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.73687,
+          "cost": 2.165972,
+          "checks": 2.165972,
+          "publish": 1,
+          "falsePublish": 0.003886,
+          "oracleGap": 0.805843,
+          "pairedNormal95": [
+            0.613588,
+            0.998097
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "12",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 4.820399,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.734931,
+          "falsePublish": 0.061157,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 4.820399,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.734931,
+          "falsePublish": 0.061157,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 4.820399,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.734931,
+          "falsePublish": 0.061157,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 1.406255,
+          "cost": 0.9375,
+          "checks": 0.9375,
+          "publish": 0.281273,
+          "falsePublish": 0.018759,
+          "oracleGap": 3.414144,
+          "pairedNormal95": [
+            2.642548,
+            4.18574
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 4.820399,
+          "pairedNormal95": [
+            4.063847,
+            5.57695
+          ]
+        },
+        "fixed_order": {
+          "utility": 0.18364,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.221849,
+          "falsePublish": 0.041394,
+          "oracleGap": 4.636758,
+          "pairedNormal95": [
+            3.623618,
+            5.649899
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "12",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.47147,
+          "cost": 1.52853,
+          "checks": 1.52853,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.47147,
+          "cost": 1.52853,
+          "checks": 1.52853,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.490624,
+          "cost": 1.878968,
+          "checks": 1.066468,
+          "publish": 0.967567,
+          "falsePublish": 0.012243,
+          "oracleGap": 0.980846,
+          "pairedNormal95": [
+            0.500596,
+            1.461096
+          ]
+        },
+        "native_exact": {
+          "utility": 2.373078,
+          "cost": 1.254392,
+          "checks": 1.254392,
+          "publish": 0.362747,
+          "falsePublish": 0,
+          "oracleGap": 6.098392,
+          "pairedNormal95": [
+            5.647094,
+            6.549691
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.47147,
+          "pairedNormal95": [
+            8.369984,
+            8.572956
+          ]
+        },
+        "fixed_order": {
+          "utility": 6.4018,
+          "cost": 1.921888,
+          "checks": 1.921888,
+          "publish": 0.91966,
+          "falsePublish": 0.034916,
+          "oracleGap": 2.06967,
+          "pairedNormal95": [
+            1.431486,
+            2.707853
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "12",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.501924,
+          "cost": 1.498076,
+          "checks": 1.498076,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.47147,
+          "cost": 1.52853,
+          "checks": 1.52853,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.030454,
+          "pairedNormal95": [
+            -0.00213,
+            0.063038
+          ]
+        },
+        "myopic": {
+          "utility": 8.033045,
+          "cost": 1.966955,
+          "checks": 1.154455,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.468879,
+          "pairedNormal95": [
+            0.337479,
+            0.600279
+          ]
+        },
+        "native_exact": {
+          "utility": 2.373078,
+          "cost": 1.254392,
+          "checks": 1.254392,
+          "publish": 0.362747,
+          "falsePublish": 0,
+          "oracleGap": 6.128846,
+          "pairedNormal95": [
+            5.673497,
+            6.584195
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.501924,
+          "pairedNormal95": [
+            8.420343,
+            8.583505
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.8062,
+          "cost": 2.131205,
+          "checks": 2.131205,
+          "publish": 0.99374,
+          "falsePublish": 0,
+          "oracleGap": 0.695724,
+          "pairedNormal95": [
+            0.533781,
+            0.857666
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "16",
+      "budget": 1,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 5.29153,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.779796,
+          "falsePublish": 0.060257,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 5.29153,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.779796,
+          "falsePublish": 0.060257,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 5.29153,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.779796,
+          "falsePublish": 0.060257,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "native_exact": {
+          "utility": 1.434816,
+          "cost": 0.875,
+          "checks": 0.875,
+          "publish": 0.299671,
+          "falsePublish": 0.027476,
+          "oracleGap": 3.856715,
+          "pairedNormal95": [
+            2.973898,
+            4.739532
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 5.29153,
+          "pairedNormal95": [
+            4.471423,
+            6.111638
+          ]
+        },
+        "fixed_order": {
+          "utility": 0.252078,
+          "cost": 1,
+          "checks": 1,
+          "publish": 0.272196,
+          "falsePublish": 0.058795,
+          "oracleGap": 5.039453,
+          "pairedNormal95": [
+            4.204779,
+            5.874127
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "16",
+      "budget": 2,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.527209,
+          "cost": 1.472791,
+          "checks": 1.472791,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.527209,
+          "cost": 1.472791,
+          "checks": 1.472791,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "myopic": {
+          "utility": 7.678443,
+          "cost": 1.865354,
+          "checks": 1.052854,
+          "publish": 0.975494,
+          "falsePublish": 0.008446,
+          "oracleGap": 0.848766,
+          "pairedNormal95": [
+            0.299027,
+            1.398506
+          ]
+        },
+        "native_exact": {
+          "utility": 2.483869,
+          "cost": 1.300098,
+          "checks": 1.300098,
+          "publish": 0.378397,
+          "falsePublish": 0,
+          "oracleGap": 6.043341,
+          "pairedNormal95": [
+            5.382157,
+            6.704524
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.527209,
+          "pairedNormal95": [
+            8.44352,
+            8.610898
+          ]
+        },
+        "fixed_order": {
+          "utility": 5.885954,
+          "cost": 1.930693,
+          "checks": 1.930693,
+          "publish": 0.907625,
+          "falsePublish": 0.050384,
+          "oracleGap": 2.641256,
+          "pairedNormal95": [
+            1.599941,
+            3.68257
+          ]
+        }
+      }
+    },
+    {
+      "family": "lp",
+      "K": "16",
+      "budget": 3,
+      "roots": 16,
+      "metrics": {
+        "exact": {
+          "utility": 8.536231,
+          "cost": 1.463769,
+          "checks": 1.463769,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0,
+          "pairedNormal95": [
+            0,
+            0
+          ]
+        },
+        "two_ply": {
+          "utility": 8.527209,
+          "cost": 1.472791,
+          "checks": 1.472791,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.009022,
+          "pairedNormal95": [
+            -0.008661,
+            0.026704
+          ]
+        },
+        "myopic": {
+          "utility": 8.07545,
+          "cost": 1.92455,
+          "checks": 1.11205,
+          "publish": 1,
+          "falsePublish": 0,
+          "oracleGap": 0.460781,
+          "pairedNormal95": [
+            0.33302,
+            0.588542
+          ]
+        },
+        "native_exact": {
+          "utility": 2.492692,
+          "cost": 1.291275,
+          "checks": 1.291275,
+          "publish": 0.378397,
+          "falsePublish": 0,
+          "oracleGap": 6.043539,
+          "pairedNormal95": [
+            5.382331,
+            6.704747
+          ]
+        },
+        "no_probe": {
+          "utility": 0,
+          "cost": 0,
+          "checks": 0,
+          "publish": 0,
+          "falsePublish": 0,
+          "oracleGap": 8.536231,
+          "pairedNormal95": [
+            8.456512,
+            8.61595
+          ]
+        },
+        "fixed_order": {
+          "utility": 7.606331,
+          "cost": 2.198699,
+          "checks": 2.198699,
+          "publish": 0.986329,
+          "falsePublish": 0.00233,
+          "oracleGap": 0.9299,
+          "pairedNormal95": [
+            0.607487,
+            1.252314
+          ]
+        }
+      }
+    }
+  ]
+}
