@@ -4,11 +4,11 @@ Native BPD sites supply V[in,C], U[C,out]; ordinary Linear sites use a
 SHA-pinned exported factor map or an explicitly labelled SVD seed proxy.
 Store detached physical cotangents, not historical component indices.
 """
-from contextlib import contextmanager
 import hashlib
 import math
-from pathlib import Path
 import time
+from contextlib import contextmanager
+from pathlib import Path
 
 import torch
 from torch import nn
@@ -97,7 +97,9 @@ class GradientBank:
                     queries=self.queries, writes=self.writes, collisions=self.collisions)
 
     def load_state_dict(self, state):
-        if (tuple(state['shape']), state['capacity'], state['budget_bytes'], state['page_rows']) != (self.shape, self.capacity, self.budget_bytes, self.page_rows):
+        expected = (self.shape, self.capacity, self.budget_bytes, self.page_rows)
+        actual = (tuple(state['shape']), state['capacity'], state['budget_bytes'], state['page_rows'])
+        if actual != expected:
             raise ValueError('MMS checkpoint budget/shape mismatch')
         self.pages = state['pages']
         for k in ('hits', 'queries', 'writes', 'collisions'):
@@ -132,7 +134,9 @@ class MechanisticMemory:
         self.admitted = self.updates = self.map_refreshes = 0
         self.cpu_seconds = 0.
         self.native = hasattr(module, 'V') and hasattr(module, 'U')
-        self.map_kind = 'native_live_bpd' if self.native else ('native_export_unverified_semantics' if map_file else 'svd_seed_proxy')
+        self.map_kind = (
+            'native_live_bpd' if self.native else ('native_export_unverified_semantics' if map_file else 'svd_seed_proxy')
+        )
         if self.native and map_file:
             raise ValueError('native live site cannot also use an export')
         if not self.native and not isinstance(module, nn.Linear):

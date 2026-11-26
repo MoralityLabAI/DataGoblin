@@ -1,9 +1,10 @@
 import copy
+
 import pytest
 
 torch = pytest.importorskip('torch')
-from research.dg_gym.mod7_mms import ExposedGRUCell, keys_for
-from datagoblin.training_gym.mms import MechanisticMemory
+from datagoblin.training_gym.mms import MechanisticMemory  # noqa: E402
+from research.dg_gym.mod7_mms import ExposedGRUCell, keys_for  # noqa: E402
 
 
 def test_gru_output_and_gradient_parity():
