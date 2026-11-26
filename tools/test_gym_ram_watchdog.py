@@ -4,6 +4,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 SCRIPT = Path(__file__).with_name("gym_ram_watchdog.py")
 PARENT = """import subprocess, sys
@@ -37,6 +38,20 @@ class WatchdogTests(unittest.TestCase):
     def test_idle_survives_without_pressure(self):
         got = self.exercise(IDLE, 1)
         self.assertEqual((got.returncode, got.stdout.strip(), got.stderr), (0, "0", ""))
+
+    def test_cgroup_pressure_independent_of_host(self):
+        with TemporaryDirectory() as tmp:
+            group = Path(tmp)
+            mib = 1024**2
+            (group / "memory.max").write_text(str(2048 * mib), encoding="ascii")
+            current = group / "memory.current"
+            current.write_text(str(1894 * mib), encoding="ascii")
+            low = self.exercise(IDLE, 1, "--report-only", "--cgroup-dir", tmp)
+            self.assertEqual(low.returncode, 0, low.stderr)
+            self.assertEqual(json.loads(low.stderr.splitlines()[0])["cgroup_headroom_mib"], 154)
+            current.write_text(str(1024 * mib), encoding="ascii")
+            healthy = self.exercise(IDLE, 1, "--report-only", "--cgroup-dir", tmp)
+            self.assertEqual((healthy.returncode, healthy.stderr), (0, ""))
 
     def test_unrelated_process_survives_reap(self):
         sibling = subprocess.Popen([sys.executable, "-c",

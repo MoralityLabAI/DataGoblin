@@ -40,4 +40,7 @@ Linux/WSL Bash invocation. The watchdog runs inside the existing capped unit,
 using the launcher's Python interpreter, which must have psutil. Leave the flag
 unset (or `off`) for accelerator or unknown workloads. Its JSON lines go to
 the service stderr/journal; the existing summary still records an aborted run.
-Host-pressure thresholds do not replace the unit's own MemoryMax limit.
+In this launcher, pressure means either less than 2 GiB available across WSL or
+less than 256 MiB left under this unit’s 2 GiB cap. The existing hard cap stays
+in effect. If the cgroup measurements are unavailable, only host pressure is
+used. This is not an end-to-end validation of the WSL runtime.

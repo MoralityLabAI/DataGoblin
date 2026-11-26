@@ -18,17 +18,6 @@ shift 5
 shift
 [[ $# -gt 0 ]] || usage
 command=("$@")
-case ${DATAGOBLIN_RAM_WATCHDOG:-off} in
-  off) ;;
-  report|reap)
-    watchdog="$(cd "$(dirname "$0")/../tools" && pwd)/gym_ram_watchdog.py"
-    [[ -r "$watchdog" ]] || { echo "missing CPU watchdog: $watchdog" >&2; exit 78; }
-    watch_flags=(--cpu-only)
-    [[ $DATAGOBLIN_RAM_WATCHDOG != report ]] || watch_flags+=(--report-only)
-    command=("$python_bin" "$watchdog" "${watch_flags[@]}" -- "${command[@]}")
-    ;;
-  *) echo "DATAGOBLIN_RAM_WATCHDOG must be off, report, or reap" >&2; exit 64 ;;
-esac
 [[ $run_id =~ ^[a-zA-Z0-9_.-]+$ ]] || { echo "run ID contains unsupported characters" >&2; exit 64; }
 
 ram_mb=2048
@@ -65,6 +54,17 @@ summary="$out_dir/summary.json"
 properties="$out_dir/unit_properties.txt"
 unit="${run_id}.service"
 cgroup="/sys/fs/cgroup/system.slice/$unit"
+case ${DATAGOBLIN_RAM_WATCHDOG:-off} in
+  off) ;;
+  report|reap)
+    watchdog="$(cd "$(dirname "$0")/../tools" && pwd)/gym_ram_watchdog.py"
+    [[ -r "$watchdog" ]] || { echo "missing CPU watchdog: $watchdog" >&2; exit 78; }
+    watch_flags=(--cpu-only --cgroup-dir "$cgroup" --cgroup-reserve-mib 256)
+    [[ $DATAGOBLIN_RAM_WATCHDOG != report ]] || watch_flags+=(--report-only)
+    command=("$python_bin" "$watchdog" "${watch_flags[@]}" -- "${command[@]}")
+    ;;
+  *) echo "DATAGOBLIN_RAM_WATCHDOG must be off, report, or reap" >&2; exit 64 ;;
+esac
 guard="$(cd "$(dirname "$0")" && pwd)/training_gym_cgroup_guard.sh"
 io_rule="$device rbps=$io_bytes_per_second wbps=$io_bytes_per_second"
 

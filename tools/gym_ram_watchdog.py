@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 from contextlib import suppress
+from pathlib import Path
 
 
 def positive(value):
@@ -15,9 +16,34 @@ def positive(value):
     return n
 
 
+def cgroup_headroom_mib(directory):
+    """Read a nominated cgroup v2's finite memory headroom, if observable."""
+    if directory is None:
+        return None
+    try:
+        limit = int((directory / "memory.max").read_text(encoding="ascii").strip())
+        used = int((directory / "memory.current").read_text(encoding="ascii").strip())
+    except (OSError, ValueError):
+        return None
+    if limit <= 0 or used < 0:
+        return None
+    return max(0, limit - used) / 1024**2
+
+
+def pressure(psutil, args):
+    free = psutil.virtual_memory().available / 1024**2
+    cgroup_free = cgroup_headroom_mib(args.cgroup_dir)
+    low = free < args.reserve_mib or (
+        cgroup_free is not None and cgroup_free < args.cgroup_reserve_mib
+    )
+    return low, free, cgroup_free
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--reserve-mib", type=positive, default=2048)
+    p.add_argument("--cgroup-dir", type=Path, help="optional owned Linux cgroup v2 directory")
+    p.add_argument("--cgroup-reserve-mib", type=positive, default=256)
     p.add_argument("--worker-mib", type=positive, default=512)
     p.add_argument("--idle-seconds", type=positive, default=120)
     p.add_argument("--sample-seconds", type=positive, default=5)
@@ -45,7 +71,7 @@ def main():
         while root_child.poll() is None:
             now = time.monotonic()
             try:
-                free = psutil.virtual_memory().available / mib
+                under_pressure, free, cgroup_free = pressure(psutil, a)
                 children = root.children(recursive=True)
             except (psutil.Error, OSError):
                 samples.clear()
@@ -58,7 +84,7 @@ def main():
                     cpu = worker.cpu_times()
                     ticks = cpu.user + cpu.system
                     rss = worker.memory_info().rss / mib
-                    eligible = (free < a.reserve_mib and rss >= a.worker_mib
+                    eligible = (under_pressure and rss >= a.worker_mib
                                 and worker.status() not in (psutil.STATUS_STOPPED,
                                                             psutil.STATUS_ZOMBIE)
                                 and not worker.children())
@@ -81,11 +107,12 @@ def main():
                     if (root_child.poll() is not None or not root.is_running()
                             or not worker.is_running() or worker.children()
                             or worker not in root.children(recursive=True)
-                            or psutil.virtual_memory().available / mib >= a.reserve_mib):
+                            or not pressure(psutil, a)[0]):
                         continue
                     event = {"event": "gym_ram_watchdog", "pid": key[0],
                              "rss_mib": round(rss), "available_mib": round(free),
                              "idle_seconds": round(now - since, 2),
+                             "cgroup_headroom_mib": cgroup_free,
                              "action": ("would_terminate" if a.report_only else
                                         "kill" if prior else "terminate")}
                     if not a.report_only:
