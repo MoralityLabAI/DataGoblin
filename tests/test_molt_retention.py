@@ -19,7 +19,8 @@ from datagoblin.training_gym.molt_retention_train import TiedScorer, dataset, fe
 
 def test_public_scores_and_receipt_retraction():
     world = make_world("calibration_short", 2, 0)
-    altered = replace(world, query=tuple(reversed(world.query)), edited_source=(world.edited_source + 1) % 10)
+    altered = replace(world, query=tuple(i for i in range(10) if i not in world.query)[:2],
+                      edited_source=(world.edited_source + 1) % 10)
     assert public_features(world) == public_features(altered)
     for p in ("fifo", "random", "scope", "generator_rank"):
         assert baseline_scores(world, p) == baseline_scores(altered, p)
@@ -70,6 +71,8 @@ def test_bptt_against_finite_differences():
 
 def test_fit_matched_controls_and_labels():
     worlds = [make_world("train", 3, i) for i in range(16)]
+    with pytest.raises(ValueError):
+        dataset([make_world("calibration_short", 3, 0)])
     x, y = dataset(worlds)
     x2, y2 = dataset(worlds, 72)
     np.testing.assert_array_equal(x, x2)
