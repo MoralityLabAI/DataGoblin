@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import itertools
+import json
+import math
 import random
 from dataclasses import asdict, dataclass
 from fractions import Fraction
@@ -68,8 +70,6 @@ def public_features(world: World) -> tuple[tuple[int, int, int, int, int], ...]:
 
 def retain(scores: tuple[float, ...], capacity: int) -> tuple[int, ...]:
     """Streaming top-k: discard low priorities on arrival, no future query reads."""
-    import math
-
     if type(capacity) is not int or not 1 <= capacity <= len(scores):
         raise ValueError("invalid capacity")
     if not all(math.isfinite(v) for v in scores):
@@ -173,5 +173,6 @@ def episode(world: World, scores: tuple[float, ...], capacity: int,
         "invalidated": invalidated, "requested": requested, "verifier_calls": len(requested),
         "verified": success, "answer": answer,
         "receipt_ids": [r.receipt_id for r in sorted(receipts, key=lambda r: r.source)],
-        "peak_payload_bytes": len(str([asdict(issue(world, i, "clean")) for i in stored]).encode()),
+        "peak_payload_bytes": len(json.dumps([asdict(issue(world, i, "clean")) for i in stored],
+                                             separators=(",", ":")).encode()),
     }
