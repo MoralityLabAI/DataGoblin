@@ -191,8 +191,8 @@ def rollout(r,prior,arm,model=None,cap=0,eviction='lru'):
     start=time.perf_counter_ns(); closed=visit((0,r.n)); elapsed=time.perf_counter_ns()-start
     assert work<=budget and calls<=callcap and peak<=cap and not pending
     if closed and not cap: assert work==mandatory(r.n)+accepted_overhead+rejected_work
-    return dict(closed=closed,work=work,calls=calls,rejects=reject,rejected_work=rejected_work,
-                hits=hits,peak=peak,object_peak=object_peak,pending_peak=pending_peak,scans=scans,score_ns=infer_ns,elapsed_ns=elapsed,accepted_overhead=accepted_overhead)
+    return dict(closed=closed,work=work,calls=calls,rejects=reject,rejected_work=rejected_work,hits=hits,peak=peak,
+                object_peak=object_peak,pending_peak=pending_peak,scans=scans,score_ns=infer_ns,elapsed_ns=elapsed,accepted_overhead=accepted_overhead)
 
 def rss():
     with open('/proc/self/statm') as f: return int(f.read().split()[1])*os.sysconf('SC_PAGE_SIZE')
