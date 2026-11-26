@@ -8,7 +8,6 @@ from pathlib import Path
 import torch
 from torch.nn import functional as F
 
-
 SEEDS = (11, 23, 37)
 ARMS = ('task', 'concept', 'shuffled')
 LENGTHS = (6, 32, 128, 512)
@@ -125,9 +124,12 @@ def main():
             row = dict(seed=seed, arm=arm, parameters=logits.numel(), updates=600, draws=57600, visits=158400,
                        train_wall_seconds=wall, train_cpu_seconds=cpu,
                        checkpoint_sha256=hashlib.sha256(logits.numpy().tobytes()).hexdigest(), **evaluate(logits, data))
+            Path('checkpoints').mkdir(exist_ok=True)
+            Path(f'checkpoints/{seed}_{arm}.f32').write_bytes(logits.numpy().tobytes())
             fits.append(row)
             print(json.dumps(row), flush=True)
-    receipt = dict(status='PUBLIC_DEVELOPMENT_ONLY', source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    receipt = dict(status='PUBLIC_DEVELOPMENT_ONLY',
+                   source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                    torch=torch.__version__, platform=platform.platform(), cpu_threads=1, budget='fixed exposure',
                    per_fit_peak_ram=None, gpu_rates=None, fits=fits)
     Path('mod7_state_receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
