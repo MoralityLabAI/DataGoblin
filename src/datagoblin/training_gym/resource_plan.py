@@ -1,7 +1,9 @@
 """DG-Gym v0.2: deterministic planning primitives, not a hardware profiler."""
 from __future__ import annotations
+
 from collections.abc import Iterable
 from dataclasses import dataclass
+
 
 @dataclass(frozen=True)
 class Storage:
