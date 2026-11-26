@@ -4,7 +4,6 @@ from pathlib import Path
 here=Path(__file__).resolve().parent
 base=next(p for p in (here.parent/'alg_descent_v5',here.parent/'v5') if (p/'export_bank.py').exists())
 sys.path.insert(0,str(base))
-# import by explicit filename to avoid name collision with this script
 import importlib.util
 spec=importlib.util.spec_from_file_location('v5_export',base/'export_bank.py')
 v5=importlib.util.module_from_spec(spec); spec.loader.exec_module(v5)
