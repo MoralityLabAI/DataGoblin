@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import platform
 import time
 from collections import OrderedDict
 from collections.abc import Callable
@@ -226,6 +228,8 @@ def run_panel(worlds: list[World], mode: str, client: ActionClient, *,
                             record.update(prompt_tokens=p, completion_tokens=c, unknown_usage_calls=missing)
                     except ValueError:
                         record["unknown_usage_calls"] = int(record.get("inference_requests", 0) > 0)
+                if record.get("inference_requests", 0) and "prompt_tokens" not in record:
+                    record["unknown_usage_calls"] = record["inference_requests"]
                 calls.append(record)
                 break
             calls.append(record)
@@ -252,8 +256,14 @@ def run_panel(worlds: list[World], mode: str, client: ActionClient, *,
     for row in rows:
         by_root.setdefault(row["root_id"], []).append(int(row["terminal"]["optimal"]))
     summary["equal_root_macro_optimal"] = sum(sum(v) / len(v) for v in by_root.values()) / len(by_root)
+    source_paths = ("molt_goblin.py", "molt_episode.py", "molt_episode_policy.py", "molt_memory_panel.py")
+    sources = {name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
+               for name in source_paths}
     return {"schema": "molt-memory-panel-v3", "status": "development_only", "mode": mode,
             "identity": identity, "roster_digest": digest([asdict(w) for w in worlds]),
+            "sources": sources, "python": platform.python_version(), "rows_digest": digest(rows),
+            "model_responses_received": sum(
+                c.get("inference_requests", 0) > 0 and "action" in c for r in rows for c in r["calls"]),
             "limits": {"max_actions": max_actions, "wall_seconds": wall_seconds,
                        "context_tokens": CONTEXT_TOKENS, "max_output_tokens": MAX_OUTPUT_TOKENS},
             "summary": summary, "rows": rows, "promotion_authorized": False}
