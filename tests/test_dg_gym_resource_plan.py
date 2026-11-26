@@ -12,6 +12,7 @@ from datagoblin.training_gym.resource_plan import (
     schedule,
 )
 
+
 class TestPlan(unittest.TestCase):
     def test_lifetimes(self):
         a=Storage('a','ram',100,0,3)
