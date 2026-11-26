@@ -173,6 +173,6 @@ def episode(world: World, scores: tuple[float, ...], capacity: int,
         "invalidated": invalidated, "requested": requested, "verifier_calls": len(requested),
         "verified": success, "answer": answer,
         "receipt_ids": [r.receipt_id for r in sorted(receipts, key=lambda r: r.source)],
-        "peak_payload_bytes": len(json.dumps([asdict(issue(world, i, "clean")) for i in stored],
+        "retained_payload_bytes": len(json.dumps([asdict(issue(world, i, "clean")) for i in stored],
                                              separators=(",", ":")).encode()),
     }
