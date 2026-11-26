@@ -101,6 +101,14 @@ def report_bundles(report: dict, method: str) -> dict:
     rows = report.get("rows")
     if not isinstance(rows, list) or not 1 <= len(rows) <= 7680:
         raise ValueError("invalid candidate roster")
+    seeds, roots = report.get("model_seeds"), report.get("world_roots")
+    if (not isinstance(seeds, list) or not 1 <= len(seeds) <= 8
+            or any(type(s) is not int or not 0 <= s <= 10000 for s in seeds)
+            or len(set(seeds)) != len(seeds)
+            or type(roots) is not int or not 2 <= roots <= 64 or roots % 2):
+        raise ValueError("invalid model/world roster")
+    expected = {(seed, f"molt08-{length}-{i}") for seed in seeds
+                for length in (8, 12) for i in range(roots // 2)}
     groups: dict[tuple[int, str], dict[float, dict[int, bool]]] = {}
     metadata: dict[tuple[int, str], int] = {}
     for row in rows:
@@ -123,6 +131,8 @@ def report_bundles(report: dict, method: str) -> dict:
         if not isinstance(approx, list) or len(approx) != 5:
             raise ValueError("fixture readout dimension changed")
         metadata[key] = 16 * len(approx) if method.endswith("_signed") else 8
+    if set(groups) != expected:
+        raise ValueError("incomplete model/world roster")
     bundles = []
     for (seed, root), doses in sorted(groups.items()):
         if set(doses) != {0.25, 0.5, 1.0} or any(set(rs) != set(range(1, 6)) for rs in doses.values()):
