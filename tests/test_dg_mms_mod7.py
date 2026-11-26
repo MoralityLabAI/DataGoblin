@@ -1,5 +1,7 @@
 import copy
-import torch
+import pytest
+
+torch = pytest.importorskip('torch')
 from research.dg_gym.mod7_mms import ExposedGRUCell, keys_for
 from datagoblin.training_gym.mms import MechanisticMemory
 
