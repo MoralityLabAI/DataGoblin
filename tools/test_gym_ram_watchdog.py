@@ -1,3 +1,4 @@
+import importlib.util
 import json
 from pathlib import Path
 import subprocess
@@ -13,6 +14,7 @@ IDLE = "import time; buf = bytearray(64 * 1024**2); time.sleep(3)"
 BUSY = "import time; buf = bytearray(64 * 1024**2); end = time.monotonic() + 2\nwhile time.monotonic() < end: pass"
 
 
+@unittest.skipUnless(importlib.util.find_spec("psutil"), "requires psutil")
 class WatchdogTests(unittest.TestCase):
     def exercise(self, worker, reserve, *flags):
         return subprocess.run(

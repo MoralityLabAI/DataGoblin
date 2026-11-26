@@ -31,3 +31,13 @@ can legitimately be blocked on I/O; use report-only or a longer quiet window
 It takes effect only for commands launched through it.
 
 Focused test: `python tools/test_gym_ram_watchdog.py`.
+
+## Capped WSL launcher
+
+For an explicitly CPU-only workload using `scripts/run_training_gym_capped_wsl.sh`,
+set `DATAGOBLIN_RAM_WATCHDOG=report` (dry run) or `reap` in the environment of the
+Linux/WSL Bash invocation. The watchdog runs inside the existing capped unit,
+using the launcher's Python interpreter, which must have psutil. Leave the flag
+unset (or `off`) for accelerator or unknown workloads. Its JSON lines go to
+the service stderr/journal; the existing summary still records an aborted run.
+Host-pressure thresholds do not replace the unit's own MemoryMax limit.
