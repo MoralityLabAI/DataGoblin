@@ -1,0 +1,203 @@
+{
+  "status": "PUBLIC_DEVELOPMENT_ONLY",
+  "campaign": "MMS-01-05-cross-gym",
+  "host_limits": {
+    "ram_total_gib": 47.12,
+    "ram_free_gib_at_start": 5.56,
+    "commit_limit_gib": 94.24,
+    "commit_free_gib_at_start": 9.71,
+    "cpu_load_pct_at_start": 100
+  },
+  "lbf20d": {
+    "zero_0m": {
+      "mean_regret": 1.2250694655999999,
+      "mean_expected_queries": 3.8761900662533333,
+      "updates": 240,
+      "train_cpu_s": 1.4375,
+      "train_wall_s": 0.7916447000025073
+    },
+    "obs_4m": {
+      "mean_regret": 1.2250694655999999,
+      "mean_expected_queries": 3.8761900662533333,
+      "updates": 240,
+      "train_cpu_s": 24.453125,
+      "train_wall_s": 12.70669610000914
+    },
+    "bpd_svd_4m": {
+      "mean_regret": 1.1687685255999998,
+      "mean_expected_queries": 3.8198891262533334,
+      "updates": 240,
+      "train_cpu_s": 22.890625,
+      "train_wall_s": 13.635582599992631
+    },
+    "bpd_svd_16m": {
+      "mean_regret": 1.1687685255999998,
+      "mean_expected_queries": 3.8198891262533334,
+      "updates": 240,
+      "train_cpu_s": 21.25,
+      "train_wall_s": 10.868070999989868
+    },
+    "bpd_learned_16m": {
+      "mean_regret": 1.2443748389333333,
+      "mean_expected_queries": 3.8954954395866666,
+      "updates": 240,
+      "train_cpu_s": 19.609375,
+      "train_wall_s": 10.137922099995194
+    },
+    "dense_16m": {
+      "mean_regret": 1.1754276456,
+      "mean_expected_queries": 3.8265482462533336,
+      "updates": 240,
+      "train_cpu_s": 22.015625,
+      "train_wall_s": 11.316410900006304
+    },
+    "sham_16m": {
+      "mean_regret": 1.2217035856,
+      "mean_expected_queries": 3.8728241862533332,
+      "updates": 240,
+      "train_cpu_s": 20.46875,
+      "train_wall_s": 11.35907700000098
+    },
+    "zero_cpu_matched": {
+      "mean_regret": 1.1302375832799998,
+      "mean_expected_queries": 3.7813581839333334,
+      "updates": 3600,
+      "train_cpu_s": 17.265625,
+      "train_wall_s": 8.823325399978785
+    }
+  },
+  "lbf20f": {
+    "zero_0m": {
+      "mean_nodes": 3.0833333333333335,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 2.21875
+    },
+    "obs_4m": {
+      "mean_nodes": 3.0833333333333335,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 5.359375
+    },
+    "bpd_svd_4m": {
+      "mean_nodes": 3.0833333333333335,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 6.78125
+    },
+    "bpd_svd_16m": {
+      "mean_nodes": 3.0833333333333335,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 10.859375
+    },
+    "bpd_learned_16m": {
+      "mean_nodes": 3.0833333333333335,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 10.25
+    },
+    "dense_16m": {
+      "mean_nodes": 3.0833333333333335,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 10.03125
+    },
+    "sham_16m": {
+      "mean_nodes": 3.25,
+      "statuses": {
+        "solved": 11,
+        "refuted": 1,
+        "budget": 0
+      },
+      "train_cpu_s": 9.34375
+    }
+  },
+  "mod7_mms": {
+    "zero": {
+      "c6": 80,
+      "ce6": 1.9451075792312622,
+      "cpu_s": 14.796875
+    },
+    "obs_4m": {
+      "c6": 80,
+      "ce6": 1.9451075792312622,
+      "cpu_s": 106.484375
+    },
+    "dense_4m": {
+      "c6": 77,
+      "ce6": 1.9452940225601196,
+      "cpu_s": 109.0
+    },
+    "bpd_svd_4m": {
+      "c6": 69,
+      "ce6": 1.9462417364120483,
+      "cpu_s": 107.4375
+    },
+    "bpd_learned_4m": {
+      "c6": 79,
+      "ce6": 1.9464267492294312,
+      "cpu_s": 76.984375
+    },
+    "sham_4m": {
+      "c6": 80,
+      "ce6": 1.9465861320495605,
+      "cpu_s": 101.3125
+    }
+  },
+  "lbf20m_exact": {
+    "mib_0": {
+      "exact_all": true,
+      "cpu_sum_s": 0.1719,
+      "wall_sum_s": 0.1731,
+      "peak_charged_bytes": 0,
+      "root0_messages": 172
+    },
+    "mib_0p05": {
+      "exact_all": true,
+      "cpu_sum_s": 0.125,
+      "wall_sum_s": 0.1315,
+      "peak_charged_bytes": 11804,
+      "root0_messages": 127
+    },
+    "mib_0p25": {
+      "exact_all": true,
+      "cpu_sum_s": 0.125,
+      "wall_sum_s": 0.114,
+      "peak_charged_bytes": 11804,
+      "root0_messages": 127
+    },
+    "mib_1": {
+      "exact_all": true,
+      "cpu_sum_s": 0.125,
+      "wall_sum_s": 0.1267,
+      "peak_charged_bytes": 11804,
+      "root0_messages": 127
+    },
+    "mib_4": {
+      "exact_all": true,
+      "cpu_sum_s": 0.125,
+      "wall_sum_s": 0.1045,
+      "peak_charged_bytes": 11804,
+      "root0_messages": 127
+    }
+  }
+}

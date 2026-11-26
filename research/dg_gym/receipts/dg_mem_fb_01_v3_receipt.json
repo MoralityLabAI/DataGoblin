@@ -1,0 +1,1499 @@
+{
+  "status": "PUBLIC_DEVELOPMENT_ONLY",
+  "experiment": "DG-MEM-FB-01",
+  "device": "cpu",
+  "gpu_name": null,
+  "torch": "2.11.0+cu128",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "credit_cap": 160000,
+  "seeds": [
+    11,
+    23,
+    37
+  ],
+  "source_sha256": "8c1bcd4490ae92479e3b846bba8a82e12792b47e203d35254e6c784d51708925",
+  "process_rss_mb": 612.16,
+  "process_peak_wset_mb": 612.64,
+  "seed_baselines": [
+    {
+      "seed": 11,
+      "parameters": 35399,
+      "base_checkpoint_sha256": "3e24a3084f0a25a36dc2c2d970e477119539f60ff6a76a6fca0d35299505c6f4",
+      "base_eval_accuracy": 0.8125,
+      "defect_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "defect_eval_accuracy": 0.123047,
+      "defect_info": {
+        "defect_layer": "l1_down",
+        "defect_components": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "defect_ids": [
+          "l1_down:c0",
+          "l1_down:c1",
+          "l1_down:c2",
+          "l1_down:c3"
+        ],
+        "defect_scales": [
+          -0.8,
+          -0.5,
+          -0.2,
+          0.1
+        ]
+      },
+      "pretrain_steps": 2200,
+      "pretrain_wall_s": 24.6726
+    },
+    {
+      "seed": 23,
+      "parameters": 35399,
+      "base_checkpoint_sha256": "6d8a0eaa6290006146a3cb40b3b1399fa07ab981cc9a8c10284c7c8eb8f272bd",
+      "base_eval_accuracy": 0.871094,
+      "defect_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "defect_eval_accuracy": 0.130859,
+      "defect_info": {
+        "defect_layer": "l1_down",
+        "defect_components": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "defect_ids": [
+          "l1_down:c0",
+          "l1_down:c1",
+          "l1_down:c2",
+          "l1_down:c3"
+        ],
+        "defect_scales": [
+          -0.8,
+          -0.5,
+          -0.2,
+          0.1
+        ]
+      },
+      "pretrain_steps": 2200,
+      "pretrain_wall_s": 23.2832
+    },
+    {
+      "seed": 37,
+      "parameters": 35399,
+      "base_checkpoint_sha256": "aff8cef1fcb814913f63c4a4d1215b4af576a2431adcd3e70f26d242e0197414",
+      "base_eval_accuracy": 0.837891,
+      "defect_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "defect_eval_accuracy": 0.128906,
+      "defect_info": {
+        "defect_layer": "l1_down",
+        "defect_components": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "defect_ids": [
+          "l1_down:c0",
+          "l1_down:c1",
+          "l1_down:c2",
+          "l1_down:c3"
+        ],
+        "defect_scales": [
+          -0.8,
+          -0.5,
+          -0.2,
+          0.1
+        ]
+      },
+      "pretrain_steps": 2200,
+      "pretrain_wall_s": 25.2163
+    }
+  ],
+  "summary_by_arm": {
+    "task_reinvest": {
+      "mms_ram_budget_mb": 0.0,
+      "mean_eval_accuracy": 0.225261,
+      "mean_gain_vs_task_reinvest": 0.0,
+      "per_seed_gain_vs_task_reinvest": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mean_defect_localization_recall": 0.0,
+      "mean_updates": 208.0,
+      "mean_credits": 159744.0,
+      "mean_audit_credits": 0.0,
+      "mean_wall_seconds": 1.9855,
+      "mean_cpu_seconds": 1.9375,
+      "mean_visits_per_wall_second": 80673.8,
+      "mean_map_allocated_bytes": 0.0,
+      "mean_map_evictions": 0.0,
+      "paired_outcomes_vs_task_reinvest": {
+        "n00": 1190,
+        "n01": 0,
+        "n10": 0,
+        "n11": 346,
+        "gain": 0.0,
+        "recovery": 0.0,
+        "corruption": 0.0
+      }
+    },
+    "static_cyclic": {
+      "mms_ram_budget_mb": 0.0,
+      "mean_eval_accuracy": 0.217448,
+      "mean_gain_vs_task_reinvest": -0.007813,
+      "per_seed_gain_vs_task_reinvest": [
+        0.003906,
+        -0.011719,
+        -0.015625
+      ],
+      "mean_defect_localization_recall": 0.0,
+      "mean_updates": 208.0,
+      "mean_credits": 159744.0,
+      "mean_audit_credits": 0.0,
+      "mean_wall_seconds": 2.8763,
+      "mean_cpu_seconds": 2.8958,
+      "mean_visits_per_wall_second": 55627.1,
+      "mean_map_allocated_bytes": 0.0,
+      "mean_map_evictions": 0.0,
+      "paired_outcomes_vs_task_reinvest": {
+        "n00": 1117,
+        "n01": 73,
+        "n10": 85,
+        "n11": 261,
+        "gain": -0.0078125,
+        "recovery": 0.06134453781512605,
+        "corruption": 0.24566473988439305
+      }
+    },
+    "shuffled_map": {
+      "mms_ram_budget_mb": 4.0,
+      "mean_eval_accuracy": 0.203776,
+      "mean_gain_vs_task_reinvest": -0.021485,
+      "per_seed_gain_vs_task_reinvest": [
+        -0.027344,
+        -0.023438,
+        -0.013672
+      ],
+      "mean_defect_localization_recall": 0.0,
+      "mean_updates": 202.0,
+      "mean_credits": 160000.0,
+      "mean_audit_credits": 4864.0,
+      "mean_wall_seconds": 2.1833,
+      "mean_cpu_seconds": 2.1198,
+      "mean_visits_per_wall_second": 73423.0,
+      "mean_map_allocated_bytes": 190976.0,
+      "mean_map_evictions": 0.0,
+      "paired_outcomes_vs_task_reinvest": {
+        "n00": 1044,
+        "n01": 146,
+        "n10": 179,
+        "n11": 167,
+        "gain": -0.021484375,
+        "recovery": 0.1226890756302521,
+        "corruption": 0.5173410404624278
+      }
+    },
+    "mms_guided_tiny": {
+      "mms_ram_budget_mb": 0.02,
+      "mean_eval_accuracy": 0.197266,
+      "mean_gain_vs_task_reinvest": -0.027995,
+      "per_seed_gain_vs_task_reinvest": [
+        -0.044922,
+        -0.013672,
+        -0.02539
+      ],
+      "mean_defect_localization_recall": 0.25,
+      "mean_updates": 182.7,
+      "mean_credits": 159744.0,
+      "mean_audit_credits": 19456.0,
+      "mean_wall_seconds": 2.5568,
+      "mean_cpu_seconds": 2.4844,
+      "mean_visits_per_wall_second": 62642.0,
+      "mean_map_allocated_bytes": 20864.0,
+      "mean_map_evictions": 404.7,
+      "paired_outcomes_vs_task_reinvest": {
+        "n00": 1072,
+        "n01": 118,
+        "n10": 161,
+        "n11": 185,
+        "gain": -0.027994791666666668,
+        "recovery": 0.09915966386554621,
+        "corruption": 0.4653179190751445
+      }
+    },
+    "mms_guided_med": {
+      "mms_ram_budget_mb": 0.25,
+      "mean_eval_accuracy": 0.198568,
+      "mean_gain_vs_task_reinvest": -0.026693,
+      "per_seed_gain_vs_task_reinvest": [
+        -0.035157,
+        -0.009766,
+        -0.035156
+      ],
+      "mean_defect_localization_recall": 0.25,
+      "mean_updates": 202.0,
+      "mean_credits": 160000.0,
+      "mean_audit_credits": 4864.0,
+      "mean_wall_seconds": 3.189,
+      "mean_cpu_seconds": 2.4791,
+      "mean_visits_per_wall_second": 58759.7,
+      "mean_map_allocated_bytes": 190976.0,
+      "mean_map_evictions": 0.0,
+      "paired_outcomes_vs_task_reinvest": {
+        "n00": 1044,
+        "n01": 146,
+        "n10": 187,
+        "n11": 159,
+        "gain": -0.026692708333333332,
+        "recovery": 0.1226890756302521,
+        "corruption": 0.5404624277456648
+      }
+    },
+    "mms_guided_full": {
+      "mms_ram_budget_mb": 4.0,
+      "mean_eval_accuracy": 0.198568,
+      "mean_gain_vs_task_reinvest": -0.026693,
+      "per_seed_gain_vs_task_reinvest": [
+        -0.035157,
+        -0.009766,
+        -0.035156
+      ],
+      "mean_defect_localization_recall": 0.25,
+      "mean_updates": 202.0,
+      "mean_credits": 160000.0,
+      "mean_audit_credits": 4864.0,
+      "mean_wall_seconds": 2.7623,
+      "mean_cpu_seconds": 2.6198,
+      "mean_visits_per_wall_second": 63500.1,
+      "mean_map_allocated_bytes": 190976.0,
+      "mean_map_evictions": 0.0,
+      "paired_outcomes_vs_task_reinvest": {
+        "n00": 1044,
+        "n01": 146,
+        "n10": 187,
+        "n11": 159,
+        "gain": -0.026692708333333332,
+        "recovery": 0.1226890756302521,
+        "corruption": 0.5404624277456648
+      }
+    }
+  },
+  "runs": [
+    {
+      "arm": "task_reinvest",
+      "seed": 11,
+      "mms_ram_budget_mb": 0.0,
+      "start_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "end_checkpoint_sha256": "da1c514ebad86c22ab273ce9d41e8720f73d2a6bbcdcc2c3a72d33ea2c4e1d39",
+      "updates": 208,
+      "credits": 159744,
+      "audit_credits": 0,
+      "train_credits": 159744,
+      "unused_credits": 256,
+      "audits_run": 0,
+      "audits_skipped": 0,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [],
+      "eval_accuracy": 0.228516,
+      "eval_loss": 1.814439,
+      "per_regime_accuracy": {
+        "regime_0": 0.1172,
+        "regime_1": 0.2946,
+        "regime_2": 0.3359,
+        "regime_3": 0.1654
+      },
+      "wall_seconds": 2.0457,
+      "cpu_seconds": 2.0156,
+      "visits_per_wall_second": 78086.7,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.0,
+        "budget_bytes": 0,
+        "allocated_bytes": 0,
+        "peak_allocated_bytes": 0,
+        "utilization_ratio": 0.0,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 0,
+        "misses": 0,
+        "writes": 0,
+        "section_bytes": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        },
+        "section_counts": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        }
+      }
+    },
+    {
+      "arm": "static_cyclic",
+      "seed": 11,
+      "mms_ram_budget_mb": 0.0,
+      "start_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "end_checkpoint_sha256": "8b5c332b624867888e306b79664cc5ef552b95f728a241ee48f965f9cb6d2802",
+      "updates": 208,
+      "credits": 159744,
+      "audit_credits": 0,
+      "train_credits": 159744,
+      "unused_credits": 256,
+      "audits_run": 0,
+      "audits_skipped": 0,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [],
+      "eval_accuracy": 0.232422,
+      "eval_loss": 1.8223,
+      "per_regime_accuracy": {
+        "regime_0": 0.1094,
+        "regime_1": 0.3256,
+        "regime_2": 0.3516,
+        "regime_3": 0.1417
+      },
+      "wall_seconds": 2.7202,
+      "cpu_seconds": 2.8594,
+      "visits_per_wall_second": 58725.2,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.0,
+        "budget_bytes": 0,
+        "allocated_bytes": 0,
+        "peak_allocated_bytes": 0,
+        "utilization_ratio": 0.0,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 0,
+        "misses": 0,
+        "writes": 0,
+        "section_bytes": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        },
+        "section_counts": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        }
+      }
+    },
+    {
+      "arm": "shuffled_map",
+      "seed": 11,
+      "mms_ram_budget_mb": 4.0,
+      "start_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "end_checkpoint_sha256": "e1cbac48b1527ab8975ee739ef076ef70d85a92dbc420c1aff7fb4fc08e18e0d",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [
+        [
+          "l0_down:c15",
+          "l0_down:c12",
+          "l1_up:c0",
+          "l1_down:c14"
+        ]
+      ],
+      "eval_accuracy": 0.201172,
+      "eval_loss": 1.857843,
+      "per_regime_accuracy": {
+        "regime_0": 0.125,
+        "regime_1": 0.3023,
+        "regime_2": 0.25,
+        "regime_3": 0.126
+      },
+      "wall_seconds": 2.0985,
+      "cpu_seconds": 2.0625,
+      "visits_per_wall_second": 76245.0,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 4.0,
+        "budget_bytes": 4194304,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.045532,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_tiny",
+      "seed": 11,
+      "mms_ram_budget_mb": 0.02,
+      "start_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "end_checkpoint_sha256": "1c28cf12470519745395f96a2255151b1022bf62a1c2e94af58362964fb37878",
+      "updates": 176,
+      "credits": 159488,
+      "audit_credits": 24320,
+      "train_credits": 135168,
+      "unused_credits": 512,
+      "audits_run": 5,
+      "audits_skipped": 3,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l0_down:c4",
+          "l0_up:c6",
+          "l0_up:c3"
+        ],
+        [
+          "l0_down:c7",
+          "l1_down:c1",
+          "l0_down:c0",
+          "l1_up:c1"
+        ],
+        [
+          "l0_down:c3",
+          "l0_down:c1",
+          "l1_up:c6",
+          "l0_up:c4"
+        ],
+        [
+          "l0_down:c1",
+          "l0_down:c3",
+          "l0_down:c7",
+          "l0_down:c2"
+        ],
+        [
+          "l0_down:c3",
+          "l0_down:c2",
+          "l0_down:c1",
+          "l1_up:c6"
+        ]
+      ],
+      "eval_accuracy": 0.183594,
+      "eval_loss": 1.86886,
+      "per_regime_accuracy": {
+        "regime_0": 0.125,
+        "regime_1": 0.2248,
+        "regime_2": 0.2812,
+        "regime_3": 0.1024
+      },
+      "wall_seconds": 2.4458,
+      "cpu_seconds": 2.4688,
+      "visits_per_wall_second": 65208.4,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.02,
+        "budget_bytes": 20972,
+        "allocated_bytes": 20864,
+        "peak_allocated_bytes": 20928,
+        "utilization_ratio": 0.99485,
+        "evictions": 482,
+        "budget_rejections": 751,
+        "hits": 20,
+        "misses": 0,
+        "writes": 1003,
+        "section_bytes": {
+          "bpd_components": 7040,
+          "causal_contributions": 1664,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 1664,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 2304,
+          "component_stability": 0,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 11,
+          "causal_contributions": 13,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 13,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 12,
+          "component_stability": 0,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_med",
+      "seed": 11,
+      "mms_ram_budget_mb": 0.25,
+      "start_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "end_checkpoint_sha256": "076831913705452bc8cc8ced7de3307efa16f6af17d5c904101d67b72cba8d0f",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l0_down:c4",
+          "l0_up:c6",
+          "l0_up:c3"
+        ]
+      ],
+      "eval_accuracy": 0.193359,
+      "eval_loss": 1.836747,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2326,
+        "regime_2": 0.2734,
+        "regime_3": 0.1181
+      },
+      "wall_seconds": 2.0393,
+      "cpu_seconds": 2.0,
+      "visits_per_wall_second": 78459.5,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.25,
+        "budget_bytes": 262144,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.728516,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_full",
+      "seed": 11,
+      "mms_ram_budget_mb": 4.0,
+      "start_checkpoint_sha256": "ea1a5b4d2e1bdfaab43fd882b95f75ccc9200788f4bc7f2e5d629d81aaba9165",
+      "end_checkpoint_sha256": "076831913705452bc8cc8ced7de3307efa16f6af17d5c904101d67b72cba8d0f",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l0_down:c4",
+          "l0_up:c6",
+          "l0_up:c3"
+        ]
+      ],
+      "eval_accuracy": 0.193359,
+      "eval_loss": 1.836747,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2326,
+        "regime_2": 0.2734,
+        "regime_3": 0.1181
+      },
+      "wall_seconds": 2.0768,
+      "cpu_seconds": 2.0781,
+      "visits_per_wall_second": 77040.8,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 4.0,
+        "budget_bytes": 4194304,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.045532,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "task_reinvest",
+      "seed": 23,
+      "mms_ram_budget_mb": 0.0,
+      "start_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "end_checkpoint_sha256": "1a982751fb2423ff668c745cb8c37f7e8d654200ee30bcfb52a13300bcc0dca2",
+      "updates": 208,
+      "credits": 159744,
+      "audit_credits": 0,
+      "train_credits": 159744,
+      "unused_credits": 256,
+      "audits_run": 0,
+      "audits_skipped": 0,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [],
+      "eval_accuracy": 0.210938,
+      "eval_loss": 1.866624,
+      "per_regime_accuracy": {
+        "regime_0": 0.2031,
+        "regime_1": 0.2558,
+        "regime_2": 0.2578,
+        "regime_3": 0.126
+      },
+      "wall_seconds": 1.8424,
+      "cpu_seconds": 1.8438,
+      "visits_per_wall_second": 86705.0,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.0,
+        "budget_bytes": 0,
+        "allocated_bytes": 0,
+        "peak_allocated_bytes": 0,
+        "utilization_ratio": 0.0,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 0,
+        "misses": 0,
+        "writes": 0,
+        "section_bytes": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        },
+        "section_counts": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        }
+      }
+    },
+    {
+      "arm": "static_cyclic",
+      "seed": 23,
+      "mms_ram_budget_mb": 0.0,
+      "start_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "end_checkpoint_sha256": "19e6d8212c8b816c10104d1b4a859d5d004d6c80d9cc4a72a157f9c1bca566f5",
+      "updates": 208,
+      "credits": 159744,
+      "audit_credits": 0,
+      "train_credits": 159744,
+      "unused_credits": 256,
+      "audits_run": 0,
+      "audits_skipped": 0,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [],
+      "eval_accuracy": 0.199219,
+      "eval_loss": 1.877426,
+      "per_regime_accuracy": {
+        "regime_0": 0.2188,
+        "regime_1": 0.2248,
+        "regime_2": 0.2422,
+        "regime_3": 0.1102
+      },
+      "wall_seconds": 2.9221,
+      "cpu_seconds": 2.9531,
+      "visits_per_wall_second": 54667.8,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.0,
+        "budget_bytes": 0,
+        "allocated_bytes": 0,
+        "peak_allocated_bytes": 0,
+        "utilization_ratio": 0.0,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 0,
+        "misses": 0,
+        "writes": 0,
+        "section_bytes": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        },
+        "section_counts": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        }
+      }
+    },
+    {
+      "arm": "shuffled_map",
+      "seed": 23,
+      "mms_ram_budget_mb": 4.0,
+      "start_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "end_checkpoint_sha256": "e2588a4baedc60c7a738bca35fc45bb58a50481491b0830674be71adc52a7dfe",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [
+        [
+          "l1_down:c5",
+          "l0_up:c3",
+          "l0_down:c6",
+          "l0_down:c5"
+        ]
+      ],
+      "eval_accuracy": 0.1875,
+      "eval_loss": 1.889448,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2403,
+        "regime_2": 0.2578,
+        "regime_3": 0.1024
+      },
+      "wall_seconds": 2.1343,
+      "cpu_seconds": 2.1094,
+      "visits_per_wall_second": 74967.7,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 4.0,
+        "budget_bytes": 4194304,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.045532,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_tiny",
+      "seed": 23,
+      "mms_ram_budget_mb": 0.02,
+      "start_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "end_checkpoint_sha256": "d07e7cbe8ddbccfb9daac7b7de32a1e5a11989cdaa5761a0dd3ebc7ba5b4cca5",
+      "updates": 183,
+      "credits": 160000,
+      "audit_credits": 19456,
+      "train_credits": 140544,
+      "unused_credits": 0,
+      "audits_run": 4,
+      "audits_skipped": 4,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l1_up:c0",
+          "l0_up:c5",
+          "l0_down:c9"
+        ],
+        [
+          "l0_up:c3",
+          "l1_down:c1",
+          "l1_down:c0",
+          "l0_down:c4"
+        ],
+        [
+          "l1_down:c1",
+          "l0_up:c3",
+          "l1_down:c0",
+          "l0_up:c5"
+        ],
+        [
+          "l1_down:c1",
+          "l0_up:c3",
+          "l0_up:c5",
+          "l0_up:c6"
+        ]
+      ],
+      "eval_accuracy": 0.197266,
+      "eval_loss": 1.884157,
+      "per_regime_accuracy": {
+        "regime_0": 0.1641,
+        "regime_1": 0.2403,
+        "regime_2": 0.25,
+        "regime_3": 0.1339
+      },
+      "wall_seconds": 2.7457,
+      "cpu_seconds": 2.7188,
+      "visits_per_wall_second": 58273.1,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.02,
+        "budget_bytes": 20972,
+        "allocated_bytes": 20864,
+        "peak_allocated_bytes": 20928,
+        "utilization_ratio": 0.99485,
+        "evictions": 432,
+        "budget_rejections": 535,
+        "hits": 13,
+        "misses": 3,
+        "writes": 871,
+        "section_bytes": {
+          "bpd_components": 1920,
+          "causal_contributions": 384,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 384,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 2688,
+          "component_stability": 7296,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 3,
+          "causal_contributions": 3,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 3,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 14,
+          "component_stability": 57,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_med",
+      "seed": 23,
+      "mms_ram_budget_mb": 0.25,
+      "start_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "end_checkpoint_sha256": "3317a6583e02486159a7d5158aa377f0c1a09ef754a73297439997c5886dbf7e",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l1_up:c0",
+          "l0_up:c5",
+          "l0_down:c9"
+        ]
+      ],
+      "eval_accuracy": 0.201172,
+      "eval_loss": 1.88595,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2636,
+        "regime_2": 0.1953,
+        "regime_3": 0.1969
+      },
+      "wall_seconds": 2.4023,
+      "cpu_seconds": 2.4062,
+      "visits_per_wall_second": 66602.5,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.25,
+        "budget_bytes": 262144,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.728516,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_full",
+      "seed": 23,
+      "mms_ram_budget_mb": 4.0,
+      "start_checkpoint_sha256": "24f29afc2c63834eae968d83bb67eaf57ddd223f5dbd11f07baafa2a00bfdf9e",
+      "end_checkpoint_sha256": "3317a6583e02486159a7d5158aa377f0c1a09ef754a73297439997c5886dbf7e",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l1_up:c0",
+          "l0_up:c5",
+          "l0_down:c9"
+        ]
+      ],
+      "eval_accuracy": 0.201172,
+      "eval_loss": 1.88595,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2636,
+        "regime_2": 0.1953,
+        "regime_3": 0.1969
+      },
+      "wall_seconds": 2.1649,
+      "cpu_seconds": 2.1562,
+      "visits_per_wall_second": 73906.5,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 4.0,
+        "budget_bytes": 4194304,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.045532,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "task_reinvest",
+      "seed": 37,
+      "mms_ram_budget_mb": 0.0,
+      "start_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "end_checkpoint_sha256": "8a5b5eedf5e9cd2f0d82a2895264394e72987dd64157dd2626a5bdf8e6089426",
+      "updates": 208,
+      "credits": 159744,
+      "audit_credits": 0,
+      "train_credits": 159744,
+      "unused_credits": 256,
+      "audits_run": 0,
+      "audits_skipped": 0,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [],
+      "eval_accuracy": 0.236328,
+      "eval_loss": 1.858293,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.3101,
+        "regime_2": 0.3359,
+        "regime_3": 0.1496
+      },
+      "wall_seconds": 2.0684,
+      "cpu_seconds": 1.9531,
+      "visits_per_wall_second": 77229.7,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.0,
+        "budget_bytes": 0,
+        "allocated_bytes": 0,
+        "peak_allocated_bytes": 0,
+        "utilization_ratio": 0.0,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 0,
+        "misses": 0,
+        "writes": 0,
+        "section_bytes": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        },
+        "section_counts": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        }
+      }
+    },
+    {
+      "arm": "static_cyclic",
+      "seed": 37,
+      "mms_ram_budget_mb": 0.0,
+      "start_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "end_checkpoint_sha256": "c322ee4f98279ba44609fa8aba0496cbdb595a2bd4d6758136bdbbf3d58cd37b",
+      "updates": 208,
+      "credits": 159744,
+      "audit_credits": 0,
+      "train_credits": 159744,
+      "unused_credits": 256,
+      "audits_run": 0,
+      "audits_skipped": 0,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [],
+      "eval_accuracy": 0.220703,
+      "eval_loss": 1.87101,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2713,
+        "regime_2": 0.3203,
+        "regime_3": 0.1417
+      },
+      "wall_seconds": 2.9865,
+      "cpu_seconds": 2.875,
+      "visits_per_wall_second": 53488.4,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.0,
+        "budget_bytes": 0,
+        "allocated_bytes": 0,
+        "peak_allocated_bytes": 0,
+        "utilization_ratio": 0.0,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 0,
+        "misses": 0,
+        "writes": 0,
+        "section_bytes": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        },
+        "section_counts": {
+          "bpd_components": 0,
+          "causal_contributions": 0,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 0,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 0,
+          "component_stability": 0,
+          "marginal_gains": 0
+        }
+      }
+    },
+    {
+      "arm": "shuffled_map",
+      "seed": 37,
+      "mms_ram_budget_mb": 4.0,
+      "start_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "end_checkpoint_sha256": "ab83de7857f33b09725ff957f65374f4d2c732749bc2fea0f183016f52f89bd6",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.0,
+      "selected_windows": [
+        [
+          "l0_down:c2",
+          "l1_up:c9",
+          "l1_up:c7",
+          "l1_up:c5"
+        ]
+      ],
+      "eval_accuracy": 0.222656,
+      "eval_loss": 1.866851,
+      "per_regime_accuracy": {
+        "regime_0": 0.1328,
+        "regime_1": 0.2791,
+        "regime_2": 0.3359,
+        "regime_3": 0.1417
+      },
+      "wall_seconds": 2.317,
+      "cpu_seconds": 2.1875,
+      "visits_per_wall_second": 69056.2,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 4.0,
+        "budget_bytes": 4194304,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.045532,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_tiny",
+      "seed": 37,
+      "mms_ram_budget_mb": 0.02,
+      "start_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "end_checkpoint_sha256": "19f81b6a1891fe7dc3e82bf5d5c2e2a1e367c7bd1bbd1705a2fb2a9e310f96f5",
+      "updates": 189,
+      "credits": 159744,
+      "audit_credits": 14592,
+      "train_credits": 145152,
+      "unused_credits": 256,
+      "audits_run": 3,
+      "audits_skipped": 5,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0"
+        ],
+        [
+          "l1_up:c2",
+          "l1_down:c0",
+          "l0_down:c2",
+          "l0_up:c0"
+        ],
+        [
+          "l1_up:c2",
+          "l1_down:c0",
+          "l0_down:c2",
+          "l0_down:c6"
+        ]
+      ],
+      "eval_accuracy": 0.210938,
+      "eval_loss": 1.866551,
+      "per_regime_accuracy": {
+        "regime_0": 0.1953,
+        "regime_1": 0.2558,
+        "regime_2": 0.2969,
+        "regime_3": 0.0945
+      },
+      "wall_seconds": 2.4788,
+      "cpu_seconds": 2.2656,
+      "visits_per_wall_second": 64444.4,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.02,
+        "budget_bytes": 20972,
+        "allocated_bytes": 20864,
+        "peak_allocated_bytes": 20928,
+        "utilization_ratio": 0.99485,
+        "evictions": 300,
+        "budget_rejections": 404,
+        "hits": 8,
+        "misses": 1,
+        "writes": 653,
+        "section_bytes": {
+          "bpd_components": 2560,
+          "causal_contributions": 512,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 512,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 2304,
+          "component_stability": 6784,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 4,
+          "causal_contributions": 4,
+          "activation_stats": 0,
+          "jacobian_grad_alignment": 4,
+          "cross_pass_transport": 0,
+          "intervention_outcomes": 12,
+          "component_stability": 53,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_med",
+      "seed": 37,
+      "mms_ram_budget_mb": 0.25,
+      "start_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "end_checkpoint_sha256": "c904127b9c486b84b21040ca1f81ddc99bd6f462429a7e5488017fd1c4368eaf",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l0_up:c4",
+          "l1_up:c0",
+          "l1_up:c3"
+        ]
+      ],
+      "eval_accuracy": 0.201172,
+      "eval_loss": 1.870006,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2868,
+        "regime_2": 0.2578,
+        "regime_3": 0.1102
+      },
+      "wall_seconds": 5.1254,
+      "cpu_seconds": 3.0312,
+      "visits_per_wall_second": 31217.2,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 0.25,
+        "budget_bytes": 262144,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.728516,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    },
+    {
+      "arm": "mms_guided_full",
+      "seed": 37,
+      "mms_ram_budget_mb": 4.0,
+      "start_checkpoint_sha256": "d7957731741a8c482dd9f9efa55e4a9eedafd81ccc271b8113471084fe06dae8",
+      "end_checkpoint_sha256": "c904127b9c486b84b21040ca1f81ddc99bd6f462429a7e5488017fd1c4368eaf",
+      "updates": 202,
+      "credits": 160000,
+      "audit_credits": 4864,
+      "train_credits": 155136,
+      "unused_credits": 0,
+      "audits_run": 1,
+      "audits_skipped": 8,
+      "defect_localization_recall": 0.25,
+      "selected_windows": [
+        [
+          "l1_down:c0",
+          "l0_up:c4",
+          "l1_up:c0",
+          "l1_up:c3"
+        ]
+      ],
+      "eval_accuracy": 0.201172,
+      "eval_loss": 1.870006,
+      "per_regime_accuracy": {
+        "regime_0": 0.1484,
+        "regime_1": 0.2868,
+        "regime_2": 0.2578,
+        "regime_3": 0.1102
+      },
+      "wall_seconds": 4.0452,
+      "cpu_seconds": 3.625,
+      "visits_per_wall_second": 39553.0,
+      "vram_peak_mb": 0.0,
+      "map_receipt": {
+        "mms_ram_budget_mb": 4.0,
+        "budget_bytes": 4194304,
+        "allocated_bytes": 190976,
+        "peak_allocated_bytes": 190976,
+        "utilization_ratio": 0.045532,
+        "evictions": 0,
+        "budget_rejections": 0,
+        "hits": 4,
+        "misses": 0,
+        "writes": 364,
+        "section_bytes": {
+          "bpd_components": 40960,
+          "causal_contributions": 8192,
+          "activation_stats": 14336,
+          "jacobian_grad_alignment": 8192,
+          "cross_pass_transport": 99840,
+          "intervention_outcomes": 3072,
+          "component_stability": 8192,
+          "marginal_gains": 8192
+        },
+        "section_counts": {
+          "bpd_components": 64,
+          "causal_contributions": 64,
+          "activation_stats": 16,
+          "jacobian_grad_alignment": 64,
+          "cross_pass_transport": 12,
+          "intervention_outcomes": 16,
+          "component_stability": 64,
+          "marginal_gains": 64
+        }
+      }
+    }
+  ]
+}
