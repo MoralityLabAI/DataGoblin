@@ -1,0 +1,3002 @@
+{
+  "blocked_or_deferred_registry_entries": [
+    {
+      "blocking_reason": "Native FP32 checkpoint verified locally (999,352,320 tied parameters, 4/4 token_checks match, 2.68e-6 KV-cache parity), but CPU PyTorch FP32 decode (~3.5 tok/s, ~146s for 512 unigram tokens) exceeds Research v2's hard 30s per-turn transport timeout while the workstation RTX 5080 (16 GiB) was leased by concurrent external vramorama jobs (squid5080-serve / gym-b25). Full 32-case held-panel rollout was executed via the separate registered deployment arm baby-goblin-10m-v2-q4km (~38 tok/s CPU, 0 timeouts).",
+      "local_verification": {
+        "deployment_arm_evaluated_on_held32": "baby-goblin-10m-v2-q4km",
+        "estimated_512_token_turn_seconds_cpu": 146.3,
+        "exact_parameter_count_verified": 999352320,
+        "kv_cache_max_abs_diff": 2.68e-06,
+        "measured_cpu_decode_tok_s": 3.5,
+        "token_checks_ids_match": "4/4",
+        "token_checks_top1_match": "4/4",
+        "weights_loaded": true
+      },
+      "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+      "parameters": 999352320,
+      "precision": "fp32-native",
+      "recurrence": {
+        "core_blocks": 10,
+        "core_passes": 2,
+        "executed_blocks": 24,
+        "visit_schedule": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      },
+      "registry_id": "baby-goblin-10m-v2-native",
+      "revision": "9ac6fe2e1fe422431303969a2a2fc141e08b1efe",
+      "status": "verified_local_parity_blocked_30s_cpu_deadline_evaluated_via_q4km_arm",
+      "weights_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8"
+    },
+    {
+      "blocking_reason": "Pinned BF16 weights and config hashes verified locally and loaded natively in transformers 5.24.1 (3,975,229,440 params, 2 recurrent loops, per_loop KV cache, 8.26 GiB RAM). Two-loop BF16 prefill+decode on CPU exceeds Research v2's 30s per-turn deadline and triggered host paging alongside active external vramorama GPU jobs (RTX 5080 15.6/15.9 GiB in use by squid5080-serve with gym-b25 queued); deferred pending free GPU lease.",
+      "config_sha256": "d2d086f5949598a043a00d70e2c28c45305bca7703682de3e4f990a7fd3279a4",
+      "local_verification": {
+        "exact_parameter_count_verified": 3975229440,
+        "load_seconds_cpu": 17.984,
+        "peak_ram_mib": 8258.61,
+        "transformers_model_type": "dory",
+        "weights_loaded": true
+      },
+      "model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "parameters": 3975229440,
+      "precision": "bf16",
+      "recurrence": {
+        "n_recurrent_loops": 2,
+        "recurrent_kv_cache_mode": "per_loop"
+      },
+      "registry_id": "dory-4b-bf16-loop2",
+      "revision": "ee517dd388a9b348890ae1e00dacc5eb4d0c750d",
+      "status": "verified_local_load_blocked_gpu_lease_and_30s_cpu_deadline",
+      "tokenizer_config_sha256": "0f5c10ba0a8ab4dbd331fd54959f4c41b9fa6807ebf0d9d1056b4676acd302f1",
+      "weights_sha256": "207483664dfef54c4c4438863260d3ba423bf3d6009b43fe84264b281e9fda23"
+    },
+    {
+      "blocking_reason": "Pinned BF16 weights and config hashes verified locally (4,169,800,704 actual total parameters, num_loops=2; manual DynamicCache greedy loop resolved transformers 5.24.1 cache-kwarg incompatibility). Two-loop 4.17B BF16 execution on CPU exceeded the 29s worker / 30s transport per-turn deadline on smoke test while workstation RTX 5080 remained leased by external vramorama jobs; deferred pending free GPU lease.",
+      "config_sha256": "f6cb15b22847664f3a6049dc4b58fdd10f1650d112ac99a1da3d051f17c2ca19",
+      "local_verification": {
+        "cpu_smoke_result": "exceeded_29s_worker_deadline_on_251_tok_prefill_plus_64_tok_decode",
+        "custom_dynamic_cache_adapter_verified": true,
+        "exact_parameter_count_verified": 4169800704,
+        "transformers_model_type": "nanbeige",
+        "weights_loaded": true
+      },
+      "model_id": "Nanbeige/Nanbeige4.2-3B",
+      "parameter_label_note": "3B marketing label excludes embeddings; verified total checkpoint parameters = 4,169,800,704.",
+      "parameters": 4169800704,
+      "precision": "bf16",
+      "recurrence": {
+        "num_loops": 2
+      },
+      "registry_id": "nanbeige42-3b-loop2",
+      "revision": "b82e54bd609793562a75cbf9337970a93369eab5",
+      "status": "verified_local_load_blocked_gpu_lease_and_30s_cpu_deadline",
+      "tokenizer_config_sha256": "3edfa64a0826a77e9412b9008f1febf3fe906a68fd616b6de4cd15897a8c8518",
+      "weights_sha256": "503dbea9295a02537fd621348731228937be7b4072550bb02de2603483e996b3"
+    },
+    {
+      "blocking_reason": "Pinned BF16 weights, PrefixLM all-ones token_type_ids adapter, and both condition envelopes (direct and synth,cot) verified locally (1,182,795,264 parameters, H2/L3 = 8x effective inner recurrence passes). Effective 8x recurrent depth exceeded the 28.5s worker / 30s transport per-turn deadline on CPU while workstation RTX 5080 remained leased by external vramorama jobs; deferred pending free GPU lease.",
+      "config_sha256": "5a708f1230e8abe305c875c92cf4ed481377ba39d34d4d93a45ea5c9a5b924e2",
+      "local_verification": {
+        "bindings_prepared": [
+          "direct",
+          "synth,cot"
+        ],
+        "cpu_smoke_result": "exceeded_28.5s_worker_deadline_on_268_tok_prefill_plus_64_tok_decode",
+        "exact_parameter_count_verified": 1182795264,
+        "prefix_lm_token_type_ids_all_ones_adapter_verified": true,
+        "transformers_model_type": "hrm_text",
+        "weights_loaded": true
+      },
+      "model_id": "sapientinc/HRM-Text-1B",
+      "parameters": 1182795264,
+      "precision": "bf16",
+      "recurrence": {
+        "H_cycles": 2,
+        "L_cycles": 3
+      },
+      "registry_id": "hrm-text-1b-h2-l3",
+      "revision": "22097cbcecdd1301afe30a19a3ee61b96a9863e5",
+      "status": "verified_local_load_blocked_gpu_lease_and_30s_cpu_deadline",
+      "tokenizer_config_sha256": "260d448d6f45ec227e6ae53ebc793357aacb3eb09575ffa45877bb4930fc106d",
+      "weights_sha256": "f8fe2b2bf6948414e8e8d6538659198726d98f967c55b533b7aabe8a1fa9a584"
+    },
+    {
+      "blocking_reason": "Pinned Qwen/Qwen3-4B BF16 was evaluated on the full 32-case held panel with thinking_mode=disabled (6/32 turns completed under 29s, 26/32 hit 29s CPU deadline). The separate thinking_mode=enabled variant exceeded the 29s CPU turn deadline on 100% of smoke probes due to extended <think> chains at ~2.5 tok/s CPU; deferred pending free GPU lease.",
+      "local_verification": {
+        "thinking_disabled_held32_report_sha256": "bf5a0c4cd9132e607a788884427b2fb95a29d4627a31b27c877c52cfbcc8b67a",
+        "thinking_enabled_cpu_smoke_error": "TimeoutError: worker_generation_deadline",
+        "thinking_enabled_cpu_smoke_seconds": 29.05
+      },
+      "model_id": "Qwen/Qwen3-4B",
+      "parameters": 4022468096,
+      "precision": "bf16",
+      "recurrence": null,
+      "registry_id": "qwen3-4b (thinking_mode=enabled)",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "status": "disabled_mode_evaluated_on_held32_enabled_mode_blocked_30s_cpu_deadline",
+      "weights_sha256": "6abb9b5dee4ee6083461cb19c5815848d48bb93fdbafae8017585ded4fbd3d04"
+    },
+    {
+      "active_parameters_approx": 5400000000,
+      "blocking_reason": "Native mixed-precision (nvfp4-mxfp8-bf16, ~20.2 GB) lacks a local Inkling2LoopForConditionalGeneration serving runtime and exceeds the workstation's 16 GiB RTX 5080 VRAM (which is also leased externally). The separate local IQ4_NL GGUF deployment arm (17.63 GB, SHA e9f70a16..., 3 passes via --override-kv inkling2_loop.loop.count=int:3) timed out at 240s llama-server startup from virtual Drive storage and previously required >15.7 GiB VRAM + 180s turn timeouts in dedicated Vulkan pilots, exceeding Research v2's 30s per-turn cap without authorized external GPU provisioning.",
+      "config_sha256": "32a0abdfa3deb7bf6da7f411570cb7828dca4db569205d6ec04e52ce97fd9c9f",
+      "local_verification": {
+        "iq4_nl_cpu_startup_probe": "RuntimeError: llama-server startup timeout (>240s loading 17.63 GiB GGUF from virtual Drive mount under shared host RAM pressure)",
+        "iq4_nl_gguf_bytes": 17627940800,
+        "iq4_nl_gguf_local_verified_sha256": "e9f70a167e54794bebce2d456b2118730b74fa7c35e23cb1abd4378f66b17bb2",
+        "native_checkpoint_bytes_remote": 20190000000
+      },
+      "model_id": "thinkingmachines/TML-d24-varloop-research",
+      "parameters": 26388646440,
+      "precision": "native-mixed-nvfp4-mxfp8-bf16",
+      "recurrence": {
+        "text_config.loop_config.num_passes": 3
+      },
+      "registry_id": "inky-mini-varloop-research-pass3",
+      "revision": "91a57fe2b779bbd12c0f74d1f518cbd5b84e8d0d",
+      "status": "blocked_missing_native_runtime_and_vram_capacity",
+      "tokenizer_config_sha256": "bf09342d285139fd37ce10c70878af1d52cb390e9901e10248654293a80ee636"
+    }
+  ],
+  "deterministic_controls": [
+    {
+      "candidate_id": "control/reference",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": null,
+        "expanded_export_parameters": null,
+        "hrm_condition": null,
+        "model_id": null,
+        "parameters": null,
+        "precision": null,
+        "protocol": null,
+        "recurrence": null,
+        "revision": null,
+        "thinking_mode": null,
+        "tokenizer_sha256": null,
+        "weights_sha256": null
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a86e93601e7006db54a2a57ddf05270130bae03751d8edc2d18bc5a41ee664d3",
+      "concrete_failure_samples": [],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": false,
+      "report_sha256": "965ade551e03494b46b4c7621b8473e2ebb50aa822f58ada3d221efad6524271",
+      "resources": {
+        "completion_tokens": 0,
+        "cpu_seconds": null,
+        "device": null,
+        "gpu_seconds": null,
+        "load_seconds": null,
+        "parity_checks": null,
+        "peak_ram_mib": null,
+        "peak_vram_mib": null,
+        "prompt_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "results_sha256": "fcdadc362ebc62fe69c1b2250e26cbcf4143c5192987a9476fa0b9f01a840080",
+      "role": "control",
+      "rollout_accounting": {
+        "action_counts": {},
+        "attempted_actions": 0,
+        "budget_exhausted_unattempted_cases": 0,
+        "http_requests": 0,
+        "inference_requests": 0,
+        "learner_mean_delta_from_init": 0.312826,
+        "learner_submitted_deltas": [
+          0.59375,
+          0.08203125,
+          0.234375,
+          0.6484375,
+          0.234375,
+          0.19921875,
+          0.63671875,
+          0.26171875,
+          0.1640625,
+          0.57421875,
+          0.07421875,
+          0.05078125
+        ],
+        "learner_weights_changed_submissions": 12,
+        "persisted_artifact_count": 24,
+        "request_failures": 0,
+        "session_error_messages": {},
+        "stop_reasons": {
+          "unknown": 32
+        },
+        "successful_responses": 0,
+        "total_experiments": 24,
+        "total_format_or_tool_errors": 0,
+        "total_measured_cell_calls": 2709504,
+        "total_optimizer_updates_reserved": 768,
+        "total_turns": 56,
+        "total_verifier_checks": 0,
+        "transport_error_codes": {},
+        "unknown_usage_calls": 0,
+        "verifier_checks_failed": 0,
+        "verifier_checks_passed": 0
+      },
+      "suite_sha256": "ccffeaa912041bccf2e1a0753885d6ed088d2925793fc7ef2d675177c25f37ad",
+      "summary": {
+        "cases": 32,
+        "families": {
+          "belief_update": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 1.0,
+            "successes": 4
+          },
+          "boolean_repair": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 1.0,
+            "successes": 4
+          },
+          "cursor_recovery": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 1.0,
+            "successes": 4
+          },
+          "evidence_custody": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 1.0,
+            "successes": 4
+          },
+          "experiment_design": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 1.0,
+            "successes": 4
+          },
+          "ldt_filter": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 0.9609375,
+            "successes": 4
+          },
+          "persona_externalization": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 0.951171875,
+            "successes": 4
+          },
+          "trm_training": {
+            "cases": 4,
+            "completed": 4,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 4,
+            "mean_score": 1.0,
+            "successes": 4
+          }
+        },
+        "macro_score": 0.989013671875,
+        "success_rate": 1.0
+      }
+    },
+    {
+      "candidate_id": "control/noop",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": null,
+        "expanded_export_parameters": null,
+        "hrm_condition": null,
+        "model_id": null,
+        "parameters": null,
+        "precision": null,
+        "protocol": null,
+        "recurrence": null,
+        "revision": null,
+        "thinking_mode": null,
+        "tokenizer_sha256": null,
+        "weights_sha256": null
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a86e93601e7006db54a2a57ddf05270130bae03751d8edc2d18bc5a41ee664d3",
+      "concrete_failure_samples": [],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": false,
+      "report_sha256": "739527a579dadaf95e48a02d9b7e7bd39f0ef56caba450bf86786afb72dc4473",
+      "resources": {
+        "completion_tokens": 0,
+        "cpu_seconds": null,
+        "device": null,
+        "gpu_seconds": null,
+        "load_seconds": null,
+        "parity_checks": null,
+        "peak_ram_mib": null,
+        "peak_vram_mib": null,
+        "prompt_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "results_sha256": "f83d79c84a80e3aa0ca2f0a97f19594ea27ffdf6f151c4c110b3a3b6fa20a401",
+      "role": "control",
+      "rollout_accounting": {
+        "action_counts": {},
+        "attempted_actions": 0,
+        "budget_exhausted_unattempted_cases": 0,
+        "http_requests": 0,
+        "inference_requests": 0,
+        "learner_mean_delta_from_init": null,
+        "learner_submitted_deltas": [],
+        "learner_weights_changed_submissions": 0,
+        "persisted_artifact_count": 0,
+        "request_failures": 0,
+        "session_error_messages": {},
+        "stop_reasons": {
+          "unknown": 32
+        },
+        "successful_responses": 0,
+        "total_experiments": 0,
+        "total_format_or_tool_errors": 0,
+        "total_measured_cell_calls": 0,
+        "total_optimizer_updates_reserved": 0,
+        "total_turns": 0,
+        "total_verifier_checks": 0,
+        "transport_error_codes": {},
+        "unknown_usage_calls": 0,
+        "verifier_checks_failed": 0,
+        "verifier_checks_passed": 0
+      },
+      "suite_sha256": "ccffeaa912041bccf2e1a0753885d6ed088d2925793fc7ef2d675177c25f37ad",
+      "summary": {
+        "cases": 32,
+        "families": {
+          "belief_update": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "boolean_repair": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "cursor_recovery": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "evidence_custody": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "experiment_design": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "ldt_filter": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "persona_externalization": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "trm_training": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          }
+        },
+        "macro_score": 0.0,
+        "success_rate": 0.0
+      }
+    }
+  ],
+  "dev_fixture_paired_comparison": {
+    "candidates": [
+      {
+        "id": "baby-goblin-10m-v2-q4km",
+        "summary": {
+          "cases": 8,
+          "families": {
+            "belief_update": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "boolean_repair": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "cursor_recovery": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "evidence_custody": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "experiment_design": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "ldt_filter": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "persona_externalization": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "trm_training": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            }
+          },
+          "macro_score": 0.0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "id": "qwen3-4b-instruct-2507-q8",
+        "summary": {
+          "cases": 8,
+          "families": {
+            "belief_update": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "boolean_repair": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "cursor_recovery": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "evidence_custody": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "experiment_design": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "ldt_filter": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 8,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "persona_externalization": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "trm_training": {
+              "cases": 1,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            }
+          },
+          "macro_score": 0.0,
+          "success_rate": 0.0
+        }
+      }
+    ],
+    "paired": [
+      {
+        "candidate_id": "qwen3-4b-instruct-2507-q8",
+        "complete_denominator": 8,
+        "family_deltas": {
+          "belief_update": 0.0,
+          "boolean_repair": 0.0,
+          "cursor_recovery": 0.0,
+          "evidence_custody": 0.0,
+          "experiment_design": 0.0,
+          "ldt_filter": 0.0,
+          "persona_externalization": 0.0,
+          "trm_training": 0.0
+        },
+        "interval_status": "descriptive_only",
+        "macro_delta": 0.0,
+        "paired_root_bootstrap_95": [
+          0.0,
+          0.0
+        ],
+        "rank_eligible": false,
+        "reference_id": "baby-goblin-10m-v2-q4km"
+      }
+    ],
+    "schema": "research-v2-paired-comparison-1",
+    "scope": "Frozen task comparison; public development and failed runs remain explicitly labeled.",
+    "suite_sha256": "ccffeaa912041bccf2e1a0753885d6ed088d2925793fc7ef2d675177c25f37ad",
+    "winner": null
+  },
+  "dev_fixture_runs": [
+    {
+      "candidate_id": "baby-goblin-10m-v2-q4km",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": "fea26f940056e44e7c639fc4bfb05951339b01eff7a7e6b79d9ea4c0a40cd3bf",
+        "expanded_export_parameters": 1673640000,
+        "hrm_condition": null,
+        "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+        "parameters": 999352320,
+        "precision": "q4_k_m-gguf",
+        "protocol": "raw-completion",
+        "recurrence": {
+          "core_blocks": 10,
+          "core_passes": 2,
+          "executed_blocks": 24
+        },
+        "revision": "9ac6fe2e1fe422431303969a2a2fc141e08b1efe",
+        "thinking_mode": "not_applicable",
+        "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+        "weights_sha256": "c66b3756710fe71ab4501abdfadcfc3ce0b7e2a3acb2c7e61b1991acc2b40d5f"
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a487b866b49a9b1512413bf8e18b4e86c9ffd4c72839eec35d74de815766f3cd",
+      "concrete_failure_samples": [
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 28.5516,
+          "prompt_tokens": 295,
+          "request": 1,
+          "task_id": "trm_training/e9d4c0a22ef3a92d",
+          "usage": null
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 22.8684,
+          "prompt_tokens": 282,
+          "request": 2,
+          "task_id": "ldt_filter/81c8b5536b1badee",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 282,
+            "total_tokens": 794
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 23.9892,
+          "prompt_tokens": 545,
+          "request": 3,
+          "task_id": "persona_externalization/ac128d6077f0826e",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 545,
+            "total_tokens": 1057
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 22.7537,
+          "prompt_tokens": 251,
+          "request": 4,
+          "task_id": "experiment_design/4687ffbb0a2854b7",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 251,
+            "total_tokens": 763
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 27.3236,
+          "prompt_tokens": 228,
+          "request": 5,
+          "task_id": "boolean_repair/eacad7eca6bc58b9",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 228,
+            "total_tokens": 740
+          }
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 28.5996,
+          "prompt_tokens": 217,
+          "request": 6,
+          "task_id": "belief_update/67122d6dcc32b09f",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 28.5976,
+          "prompt_tokens": 442,
+          "request": 7,
+          "task_id": "evidence_custody/24b6aed9fe851598",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 28.6505,
+          "prompt_tokens": 420,
+          "request": 8,
+          "task_id": "cursor_recovery/0756b0d736e8f0b3",
+          "usage": null
+        }
+      ],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": false,
+      "report_sha256": "888397596cf106e8e37e36abd6146f9c023917bea7aac9733813b28fe986c038",
+      "resources": {
+        "completion_tokens": 2048,
+        "cpu_seconds": 1142.2969,
+        "device": "cpu",
+        "gpu_seconds": 0.0,
+        "load_seconds": 1.547,
+        "parity_checks": {
+          "llama_server_port": 60498,
+          "ngl": 0,
+          "threads": 8
+        },
+        "peak_ram_mib": 2302.47,
+        "peak_vram_mib": 0.0,
+        "prompt_tokens": 1306,
+        "wall_seconds": 211.337156
+      },
+      "results_sha256": "2c8156b7b96e58cc5deae11d9e861a93bc855993ed3e06cd2bf24deb8e816516",
+      "role": "checkpoint",
+      "rollout_accounting": {
+        "action_counts": {},
+        "attempted_actions": 8,
+        "budget_exhausted_unattempted_cases": 0,
+        "http_requests": 16,
+        "inference_requests": 8,
+        "learner_mean_delta_from_init": null,
+        "learner_submitted_deltas": [],
+        "learner_weights_changed_submissions": 0,
+        "persisted_artifact_count": 0,
+        "request_failures": 8,
+        "session_error_messages": {},
+        "stop_reasons": {
+          "TransportError": 8
+        },
+        "successful_responses": 0,
+        "total_experiments": 0,
+        "total_format_or_tool_errors": 0,
+        "total_measured_cell_calls": 0,
+        "total_optimizer_updates_reserved": 0,
+        "total_turns": 0,
+        "total_verifier_checks": 0,
+        "transport_error_codes": {
+          "generation_truncated": 4,
+          "http_status_500": 4
+        },
+        "unknown_usage_calls": 4,
+        "verifier_checks_failed": 0,
+        "verifier_checks_passed": 0
+      },
+      "suite_sha256": "ccffeaa912041bccf2e1a0753885d6ed088d2925793fc7ef2d675177c25f37ad",
+      "summary": {
+        "cases": 8,
+        "families": {
+          "belief_update": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "boolean_repair": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "cursor_recovery": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "evidence_custody": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "experiment_design": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "ldt_filter": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "persona_externalization": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "trm_training": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          }
+        },
+        "macro_score": 0.0,
+        "success_rate": 0.0
+      }
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": "f383fa7be76dd3e226fd48d9c8471fdeef9542f328cd73343722801cfd74c334",
+        "expanded_export_parameters": null,
+        "hrm_condition": null,
+        "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+        "parameters": 4022468096,
+        "precision": "q8_0-gguf",
+        "protocol": "chat-completions",
+        "recurrence": null,
+        "revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+        "thinking_mode": "model_default",
+        "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "weights_sha256": "c892d3128b07169d55d67eb8aa11e071f8e47d3b341eac2c463c9cb5e10d65bc"
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a487b866b49a9b1512413bf8e18b4e86c9ffd4c72839eec35d74de815766f3cd",
+      "concrete_failure_samples": [
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 28.5683,
+          "prompt_tokens": 276,
+          "request": 1,
+          "task_id": "trm_training/e9d4c0a22ef3a92d",
+          "usage": null
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 167,
+            "config_keys": [
+              "critical_veto",
+              "learner",
+              "learning_rate",
+              "steps",
+              "train_examples",
+              "train_seed"
+            ],
+            "reply_sha256": "8a480e21930709ef",
+            "valid_json": true
+          },
+          "request": 2,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 3,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 167,
+            "config_keys": [
+              "critical_veto",
+              "learner",
+              "learning_rate",
+              "steps",
+              "train_examples",
+              "train_seed"
+            ],
+            "reply_sha256": "8a480e21930709ef",
+            "valid_json": true
+          },
+          "request": 4,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 5,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 167,
+            "config_keys": [
+              "critical_veto",
+              "learner",
+              "learning_rate",
+              "steps",
+              "train_examples",
+              "train_seed"
+            ],
+            "reply_sha256": "8a480e21930709ef",
+            "valid_json": true
+          },
+          "request": 6,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 7,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 167,
+            "config_keys": [
+              "critical_veto",
+              "learner",
+              "learning_rate",
+              "steps",
+              "train_examples",
+              "train_seed"
+            ],
+            "reply_sha256": "8a480e21930709ef",
+            "valid_json": true
+          },
+          "request": 8,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 9,
+          "task_id": "ldt_filter/81c8b5536b1badee"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_keys": [
+              "artifact_id",
+              "baseline_id",
+              "claim",
+              "memory"
+            ],
+            "char_len": 132,
+            "reply_sha256": "42c1d96699ed439d",
+            "valid_json": true
+          },
+          "request": 11,
+          "task_id": "persona_externalization/ac128d6077f0826e"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_keys": [
+              "artifact_id",
+              "baseline_id",
+              "claim",
+              "memory"
+            ],
+            "char_len": 128,
+            "reply_sha256": "439a89c8a74e1cc6",
+            "valid_json": true
+          },
+          "request": 13,
+          "task_id": "persona_externalization/ac128d6077f0826e"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_keys": [
+              "artifact_id",
+              "baseline_id",
+              "claim",
+              "memory"
+            ],
+            "char_len": 128,
+            "reply_sha256": "439a89c8a74e1cc6",
+            "valid_json": true
+          },
+          "request": 14,
+          "task_id": "persona_externalization/ac128d6077f0826e"
+        }
+      ],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": true,
+      "report_sha256": "4b798a8fe0c0ea689047c73da4d339c9d298bed47b627f4b594a88b92d2c8308",
+      "resources": {
+        "completion_tokens": 2100,
+        "cpu_seconds": 4006.1719,
+        "device": "cpu",
+        "gpu_seconds": 0.0,
+        "load_seconds": 4.11,
+        "parity_checks": {
+          "llama_server_port": 58863,
+          "ngl": 0,
+          "threads": 8
+        },
+        "peak_ram_mib": 5618.98,
+        "peak_vram_mib": 0.0,
+        "prompt_tokens": 18529,
+        "wall_seconds": 577.084588
+      },
+      "results_sha256": "73accf9e475678db1d60ee965294cc232267465dac10982a4e3e788a0acae781",
+      "role": "checkpoint",
+      "rollout_accounting": {
+        "action_counts": {
+          "check": 26,
+          "run_experiment": 28
+        },
+        "attempted_actions": 56,
+        "budget_exhausted_unattempted_cases": 0,
+        "http_requests": 112,
+        "inference_requests": 56,
+        "learner_mean_delta_from_init": null,
+        "learner_submitted_deltas": [],
+        "learner_weights_changed_submissions": 0,
+        "persisted_artifact_count": 2,
+        "request_failures": 2,
+        "session_error_messages": {
+          "check unavailable; learned artifacts receive a final test after submission": 18,
+          "experiment unavailable": 22,
+          "unknown or inapplicable learner config field": 4
+        },
+        "stop_reasons": {
+          "TransportError": 2,
+          "session_closed": 6
+        },
+        "successful_responses": 54,
+        "total_experiments": 2,
+        "total_format_or_tool_errors": 44,
+        "total_measured_cell_calls": 65792,
+        "total_optimizer_updates_reserved": 256,
+        "total_turns": 54,
+        "total_verifier_checks": 8,
+        "transport_error_codes": {
+          "http_status_500": 1,
+          "request_deadline_exceeded": 1
+        },
+        "unknown_usage_calls": 2,
+        "verifier_checks_failed": 8,
+        "verifier_checks_passed": 0
+      },
+      "suite_sha256": "ccffeaa912041bccf2e1a0753885d6ed088d2925793fc7ef2d675177c25f37ad",
+      "summary": {
+        "cases": 8,
+        "families": {
+          "belief_update": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "boolean_repair": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "cursor_recovery": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "evidence_custody": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "experiment_design": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "ldt_filter": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 8,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "persona_externalization": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "trm_training": {
+            "cases": 1,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          }
+        },
+        "macro_score": 0.0,
+        "success_rate": 0.0
+      }
+    }
+  ],
+  "families": [
+    "trm_training",
+    "ldt_filter",
+    "persona_externalization",
+    "experiment_design",
+    "boolean_repair",
+    "belief_update",
+    "evidence_custody",
+    "cursor_recovery"
+  ],
+  "held_panel_paired_comparison": {
+    "candidates": [
+      {
+        "id": "baby-goblin-10m-v2-q4km",
+        "summary": {
+          "cases": 32,
+          "families": {
+            "belief_update": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "boolean_repair": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "cursor_recovery": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "evidence_custody": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "experiment_design": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "ldt_filter": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "persona_externalization": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "trm_training": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            }
+          },
+          "macro_score": 0.0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "id": "qwen3-4b-instruct-2507-q8",
+        "summary": {
+          "cases": 32,
+          "families": {
+            "belief_update": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "boolean_repair": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "cursor_recovery": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "evidence_custody": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "experiment_design": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 8,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "ldt_filter": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 8,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "persona_externalization": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 6,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "trm_training": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 8,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            }
+          },
+          "macro_score": 0.0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "id": "qwen3-4b",
+        "summary": {
+          "cases": 32,
+          "families": {
+            "belief_update": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "boolean_repair": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "cursor_recovery": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 1,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "evidence_custody": {
+              "cases": 4,
+              "completed": 2,
+              "format_or_tool_errors": 2,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "experiment_design": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "ldt_filter": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "persona_externalization": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            },
+            "trm_training": {
+              "cases": 4,
+              "completed": 0,
+              "format_or_tool_errors": 0,
+              "integrity_passes": 0,
+              "mean_score": 0.0,
+              "successes": 0
+            }
+          },
+          "macro_score": 0.0,
+          "success_rate": 0.0
+        }
+      }
+    ],
+    "paired": [
+      {
+        "candidate_id": "qwen3-4b-instruct-2507-q8",
+        "complete_denominator": 32,
+        "family_deltas": {
+          "belief_update": 0.0,
+          "boolean_repair": 0.0,
+          "cursor_recovery": 0.0,
+          "evidence_custody": 0.0,
+          "experiment_design": 0.0,
+          "ldt_filter": 0.0,
+          "persona_externalization": 0.0,
+          "trm_training": 0.0
+        },
+        "interval_status": "paired_within_family",
+        "macro_delta": 0.0,
+        "paired_root_bootstrap_95": [
+          0.0,
+          0.0
+        ],
+        "rank_eligible": false,
+        "reference_id": "baby-goblin-10m-v2-q4km"
+      },
+      {
+        "candidate_id": "qwen3-4b",
+        "complete_denominator": 32,
+        "family_deltas": {
+          "belief_update": 0.0,
+          "boolean_repair": 0.0,
+          "cursor_recovery": 0.0,
+          "evidence_custody": 0.0,
+          "experiment_design": 0.0,
+          "ldt_filter": 0.0,
+          "persona_externalization": 0.0,
+          "trm_training": 0.0
+        },
+        "interval_status": "paired_within_family",
+        "macro_delta": 0.0,
+        "paired_root_bootstrap_95": [
+          0.0,
+          0.0
+        ],
+        "rank_eligible": false,
+        "reference_id": "baby-goblin-10m-v2-q4km"
+      }
+    ],
+    "schema": "research-v2-paired-comparison-1",
+    "scope": "Frozen task comparison; public development and failed runs remain explicitly labeled.",
+    "suite_sha256": "cc87253ea6c9108def9e894cbed25957dd84a46928f2d13c271b3b4a39c292e1",
+    "winner": null
+  },
+  "held_panel_runs": [
+    {
+      "candidate_id": "baby-goblin-10m-v2-q4km",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": "d1c3f711bb90d5a94f7ecd2d8644f0c31cc45d75ea2da8e8d68d0a553112e0f0",
+        "expanded_export_parameters": 1673640000,
+        "hrm_condition": null,
+        "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+        "parameters": 999352320,
+        "precision": "q4_k_m-gguf",
+        "protocol": "raw-completion",
+        "recurrence": {
+          "core_blocks": 10,
+          "core_passes": 2,
+          "executed_blocks": 24
+        },
+        "revision": "9ac6fe2e1fe422431303969a2a2fc141e08b1efe",
+        "thinking_mode": "not_applicable",
+        "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+        "weights_sha256": "c66b3756710fe71ab4501abdfadcfc3ce0b7e2a3acb2c7e61b1991acc2b40d5f"
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a487b866b49a9b1512413bf8e18b4e86c9ffd4c72839eec35d74de815766f3cd",
+      "concrete_failure_samples": [
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 15.5549,
+          "prompt_tokens": 295,
+          "request": 1,
+          "task_id": "trm_training/3619b09983a0e7b9",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 295,
+            "total_tokens": 807
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 13.7064,
+          "prompt_tokens": 282,
+          "request": 2,
+          "task_id": "ldt_filter/a32b45659a6b6500",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 282,
+            "total_tokens": 794
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 14.7423,
+          "prompt_tokens": 545,
+          "request": 3,
+          "task_id": "persona_externalization/72a94682c0a483f4",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 545,
+            "total_tokens": 1057
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 14.0982,
+          "prompt_tokens": 251,
+          "request": 4,
+          "task_id": "experiment_design/0f6bb1f42a8a2bb4",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 251,
+            "total_tokens": 763
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 12.9274,
+          "prompt_tokens": 226,
+          "request": 5,
+          "task_id": "boolean_repair/670612341ca76f87",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 226,
+            "total_tokens": 738
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 12.8727,
+          "prompt_tokens": 213,
+          "request": 6,
+          "task_id": "belief_update/39d3463af229e2fa",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 213,
+            "total_tokens": 725
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 12.9266,
+          "prompt_tokens": 442,
+          "request": 7,
+          "task_id": "evidence_custody/c0c08cf126df4f3b",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 442,
+            "total_tokens": 954
+          }
+        },
+        {
+          "error_code": "generation_truncated",
+          "kind": "transport_error",
+          "latency_seconds": 14.184,
+          "prompt_tokens": 420,
+          "request": 8,
+          "task_id": "cursor_recovery/56624b5c277b4ea5",
+          "usage": {
+            "completion_tokens": 512,
+            "prompt_tokens": 420,
+            "total_tokens": 932
+          }
+        }
+      ],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": false,
+      "report_sha256": "fd646d39f99b55f64b87571293c1aeb0a976d111d0b507c3e5b4882687df690b",
+      "resources": {
+        "completion_tokens": 16384,
+        "cpu_seconds": 3242.5938,
+        "device": "cpu",
+        "gpu_seconds": 0.0,
+        "load_seconds": 2.312,
+        "parity_checks": {
+          "llama_server_port": 62044,
+          "ngl": 0,
+          "threads": 8
+        },
+        "peak_ram_mib": 2853.58,
+        "peak_vram_mib": 0.0,
+        "prompt_tokens": 10708,
+        "wall_seconds": 440.292697
+      },
+      "results_sha256": "abfa0d3f874084cc653ee3c227a4e689618d1595586d1f00ea00fd4afdc1c2aa",
+      "role": "checkpoint",
+      "rollout_accounting": {
+        "action_counts": {},
+        "attempted_actions": 32,
+        "budget_exhausted_unattempted_cases": 0,
+        "http_requests": 64,
+        "inference_requests": 32,
+        "learner_mean_delta_from_init": null,
+        "learner_submitted_deltas": [],
+        "learner_weights_changed_submissions": 0,
+        "persisted_artifact_count": 0,
+        "request_failures": 32,
+        "session_error_messages": {},
+        "stop_reasons": {
+          "TransportError": 32
+        },
+        "successful_responses": 0,
+        "total_experiments": 0,
+        "total_format_or_tool_errors": 0,
+        "total_measured_cell_calls": 0,
+        "total_optimizer_updates_reserved": 0,
+        "total_turns": 0,
+        "total_verifier_checks": 0,
+        "transport_error_codes": {
+          "generation_truncated": 32
+        },
+        "unknown_usage_calls": 0,
+        "verifier_checks_failed": 0,
+        "verifier_checks_passed": 0
+      },
+      "suite_sha256": "cc87253ea6c9108def9e894cbed25957dd84a46928f2d13c271b3b4a39c292e1",
+      "summary": {
+        "cases": 32,
+        "families": {
+          "belief_update": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "boolean_repair": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "cursor_recovery": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "evidence_custody": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "experiment_design": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "ldt_filter": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "persona_externalization": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "trm_training": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          }
+        },
+        "macro_score": 0.0,
+        "success_rate": 0.0
+      }
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": "3278a7d4427b24b883959ba28ead07c52e9d36d83e54e5b132187e01dd432203",
+        "expanded_export_parameters": null,
+        "hrm_condition": null,
+        "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+        "parameters": 4022468096,
+        "precision": "q8_0-gguf",
+        "protocol": "chat-completions",
+        "recurrence": null,
+        "revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+        "thinking_mode": "model_default",
+        "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "weights_sha256": "c892d3128b07169d55d67eb8aa11e071f8e47d3b341eac2c463c9cb5e10d65bc"
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a487b866b49a9b1512413bf8e18b4e86c9ffd4c72839eec35d74de815766f3cd",
+      "concrete_failure_samples": [
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 154,
+            "config_keys": [
+              "learning_rate",
+              "recursions",
+              "steps",
+              "train_examples",
+              "train_seed",
+              "trm_width"
+            ],
+            "reply_sha256": "010735849dfe3ac9",
+            "valid_json": true
+          },
+          "request": 1,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 2,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 154,
+            "config_keys": [
+              "learning_rate",
+              "recursions",
+              "steps",
+              "train_examples",
+              "train_seed",
+              "trm_width"
+            ],
+            "reply_sha256": "010735849dfe3ac9",
+            "valid_json": true
+          },
+          "request": 3,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 4,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 154,
+            "config_keys": [
+              "learning_rate",
+              "recursions",
+              "steps",
+              "train_examples",
+              "train_seed",
+              "trm_width"
+            ],
+            "reply_sha256": "010735849dfe3ac9",
+            "valid_json": true
+          },
+          "request": 5,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 6,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 154,
+            "config_keys": [
+              "learning_rate",
+              "recursions",
+              "steps",
+              "train_examples",
+              "train_seed",
+              "trm_width"
+            ],
+            "reply_sha256": "010735849dfe3ac9",
+            "valid_json": true
+          },
+          "request": 7,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 8,
+          "task_id": "trm_training/3619b09983a0e7b9"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 167,
+            "config_keys": [
+              "critical_veto",
+              "learner",
+              "learning_rate",
+              "steps",
+              "train_examples",
+              "train_seed"
+            ],
+            "reply_sha256": "05c804967dbb332b",
+            "valid_json": true
+          },
+          "request": 9,
+          "task_id": "ldt_filter/a32b45659a6b6500"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 10,
+          "task_id": "ldt_filter/a32b45659a6b6500"
+        },
+        {
+          "error": "unknown or inapplicable learner config field",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 167,
+            "config_keys": [
+              "critical_veto",
+              "learner",
+              "learning_rate",
+              "steps",
+              "train_examples",
+              "train_seed"
+            ],
+            "reply_sha256": "05c804967dbb332b",
+            "valid_json": true
+          },
+          "request": 11,
+          "task_id": "ldt_filter/a32b45659a6b6500"
+        },
+        {
+          "error": "check unavailable; learned artifacts receive a final test after submission",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "check",
+            "answer_type": "str",
+            "char_len": 74,
+            "reply_sha256": "83035df75bf36908",
+            "valid_json": true
+          },
+          "request": 12,
+          "task_id": "ldt_filter/a32b45659a6b6500"
+        },
+        {
+          "check_passed": true,
+          "kind": "check_passed_without_subsequent_submit",
+          "reply_summary": {
+            "action": "check",
+            "answer_keys": [
+              "equivalent",
+              "witness"
+            ],
+            "char_len": 62,
+            "reply_sha256": "fda47e67c3d14253",
+            "valid_json": true
+          },
+          "request": 34,
+          "task_id": "boolean_repair/670612341ca76f87"
+        },
+        {
+          "check_passed": true,
+          "kind": "check_passed_without_subsequent_submit",
+          "reply_summary": {
+            "action": "check",
+            "answer_keys": [
+              "equivalent",
+              "witness"
+            ],
+            "char_len": 62,
+            "reply_sha256": "fda47e67c3d14253",
+            "valid_json": true
+          },
+          "request": 36,
+          "task_id": "boolean_repair/670612341ca76f87"
+        }
+      ],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": true,
+      "report_sha256": "f95a65e909f72f4b2dd8d5b9765f9b834bdd648246964fcff5e356e31fc11d86",
+      "resources": {
+        "completion_tokens": 2550,
+        "cpu_seconds": 3168.25,
+        "device": "cpu",
+        "gpu_seconds": 0.0,
+        "load_seconds": 3.078,
+        "parity_checks": {
+          "llama_server_port": 54383,
+          "ngl": 0,
+          "threads": 8
+        },
+        "peak_ram_mib": 5635.16,
+        "peak_vram_mib": 0.0,
+        "prompt_tokens": 21303,
+        "wall_seconds": 423.86797
+      },
+      "results_sha256": "ebfed192f7db8cc148d81ab7401dd947984a6a73bed69effab3f152108ac7ea0",
+      "role": "checkpoint",
+      "rollout_accounting": {
+        "action_counts": {
+          "check": 31,
+          "run_experiment": 33
+        },
+        "attempted_actions": 64,
+        "budget_exhausted_unattempted_cases": 24,
+        "http_requests": 128,
+        "inference_requests": 64,
+        "learner_mean_delta_from_init": null,
+        "learner_submitted_deltas": [],
+        "learner_weights_changed_submissions": 0,
+        "persisted_artifact_count": 2,
+        "request_failures": 0,
+        "session_error_messages": {
+          "check unavailable; learned artifacts receive a final test after submission": 23,
+          "experiment unavailable": 23,
+          "unknown or inapplicable learner config field": 8
+        },
+        "stop_reasons": {
+          "run_budget_exhausted": 24,
+          "session_closed": 8
+        },
+        "successful_responses": 64,
+        "total_experiments": 2,
+        "total_format_or_tool_errors": 54,
+        "total_measured_cell_calls": 65792,
+        "total_optimizer_updates_reserved": 256,
+        "total_turns": 64,
+        "total_verifier_checks": 8,
+        "transport_error_codes": {},
+        "unknown_usage_calls": 0,
+        "verifier_checks_failed": 4,
+        "verifier_checks_passed": 4
+      },
+      "suite_sha256": "cc87253ea6c9108def9e894cbed25957dd84a46928f2d13c271b3b4a39c292e1",
+      "summary": {
+        "cases": 32,
+        "families": {
+          "belief_update": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "boolean_repair": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "cursor_recovery": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "evidence_custody": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "experiment_design": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 8,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "ldt_filter": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 8,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "persona_externalization": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 6,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "trm_training": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 8,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          }
+        },
+        "macro_score": 0.0,
+        "success_rate": 0.0
+      }
+    },
+    {
+      "candidate_id": "qwen3-4b",
+      "checkpoint_metadata": {
+        "cap_wrapper_receipt_sha256": "e8bd10a1da5c7cbb0703ffe6bae7f83df1e5c104baa15be92e5b427e86603b5d",
+        "expanded_export_parameters": null,
+        "hrm_condition": null,
+        "model_id": "Qwen/Qwen3-4B",
+        "parameters": 4022468096,
+        "precision": "bf16",
+        "protocol": "chat-completions",
+        "recurrence": null,
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+        "thinking_mode": "disabled",
+        "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "weights_sha256": "6abb9b5dee4ee6083461cb19c5815848d48bb93fdbafae8017585ded4fbd3d04"
+      },
+      "checkpoint_rank_eligible": false,
+      "comparison_sha256": "a487b866b49a9b1512413bf8e18b4e86c9ffd4c72839eec35d74de815766f3cd",
+      "concrete_failure_samples": [
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.4298,
+          "prompt_tokens": 280,
+          "request": 1,
+          "task_id": "trm_training/3619b09983a0e7b9",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.4151,
+          "prompt_tokens": 268,
+          "request": 2,
+          "task_id": "ldt_filter/a32b45659a6b6500",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.3056,
+          "prompt_tokens": 511,
+          "request": 3,
+          "task_id": "persona_externalization/72a94682c0a483f4",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.6551,
+          "prompt_tokens": 225,
+          "request": 4,
+          "task_id": "experiment_design/0f6bb1f42a8a2bb4",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.2867,
+          "prompt_tokens": 222,
+          "request": 5,
+          "task_id": "boolean_repair/670612341ca76f87",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.3108,
+          "prompt_tokens": 200,
+          "request": 6,
+          "task_id": "belief_update/39d3463af229e2fa",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.5382,
+          "prompt_tokens": 397,
+          "request": 7,
+          "task_id": "evidence_custody/c0c08cf126df4f3b",
+          "usage": null
+        },
+        {
+          "error_code": "http_status_500",
+          "kind": "transport_error",
+          "latency_seconds": 29.5911,
+          "prompt_tokens": 399,
+          "request": 8,
+          "task_id": "cursor_recovery/56624b5c277b4ea5",
+          "usage": null
+        },
+        {
+          "error": "experiment unavailable",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 145,
+            "config_keys": [
+              "experiment_id",
+              "optimizer_updates",
+              "records"
+            ],
+            "reply_sha256": "94d0697078315a05",
+            "valid_json": true
+          },
+          "request": 15,
+          "task_id": "evidence_custody/68c2e9f6eb2a9c32"
+        },
+        {
+          "error": "experiment unavailable",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 157,
+            "config_keys": [
+              "experiment_id",
+              "optimizer_updates",
+              "train_records"
+            ],
+            "reply_sha256": "8d13cfbc22195a6c",
+            "valid_json": true
+          },
+          "request": 24,
+          "task_id": "evidence_custody/ccb19a567c5fad67"
+        },
+        {
+          "error": "experiment unavailable",
+          "kind": "session_action_error",
+          "reply_summary": {
+            "action": "run_experiment",
+            "char_len": 140,
+            "config_keys": [
+              "checkpoint",
+              "next_position",
+              "remaining_positions"
+            ],
+            "reply_sha256": "2e00698e3668092f",
+            "valid_json": true
+          },
+          "request": 26,
+          "task_id": "cursor_recovery/57ace6f8fdd47c4e"
+        }
+      ],
+      "implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+      "model_evaluated": true,
+      "report_sha256": "bf5a0c4cd9132e607a788884427b2fb95a29d4627a31b27c877c52cfbcc8b67a",
+      "resources": {
+        "completion_tokens": 270,
+        "cpu_seconds": 6772.9219,
+        "device": "cpu",
+        "gpu_seconds": 0.0,
+        "load_seconds": 19.141,
+        "parity_checks": {
+          "dtype": "torch.bfloat16",
+          "eos_ids": [
+            151643,
+            151645
+          ],
+          "model_type": "qwen3",
+          "parameters": 4022468096
+        },
+        "peak_ram_mib": 8572.03,
+        "peak_vram_mib": 0.0,
+        "prompt_tokens": 2389,
+        "wall_seconds": 900.083752
+      },
+      "results_sha256": "388fb06b8c97a7837d51593ec3a0642f1f42d80dfbd27d725ccfae8bf82b26ed",
+      "role": "checkpoint",
+      "rollout_accounting": {
+        "action_counts": {
+          "check": 1,
+          "run_experiment": 3,
+          "submit": 2
+        },
+        "attempted_actions": 32,
+        "budget_exhausted_unattempted_cases": 4,
+        "http_requests": 64,
+        "inference_requests": 32,
+        "learner_mean_delta_from_init": null,
+        "learner_submitted_deltas": [],
+        "learner_weights_changed_submissions": 0,
+        "persisted_artifact_count": 0,
+        "request_failures": 26,
+        "session_error_messages": {
+          "experiment unavailable": 3
+        },
+        "stop_reasons": {
+          "TransportError": 26,
+          "run_budget_exhausted": 4,
+          "session_closed": 2
+        },
+        "successful_responses": 6,
+        "total_experiments": 0,
+        "total_format_or_tool_errors": 3,
+        "total_measured_cell_calls": 0,
+        "total_optimizer_updates_reserved": 0,
+        "total_turns": 6,
+        "total_verifier_checks": 1,
+        "transport_error_codes": {
+          "http_status_500": 25,
+          "request_deadline_exceeded": 1
+        },
+        "unknown_usage_calls": 26,
+        "verifier_checks_failed": 1,
+        "verifier_checks_passed": 0
+      },
+      "suite_sha256": "cc87253ea6c9108def9e894cbed25957dd84a46928f2d13c271b3b4a39c292e1",
+      "summary": {
+        "cases": 32,
+        "families": {
+          "belief_update": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "boolean_repair": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "cursor_recovery": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 1,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "evidence_custody": {
+            "cases": 4,
+            "completed": 2,
+            "format_or_tool_errors": 2,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "experiment_design": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "ldt_filter": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "persona_externalization": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          },
+          "trm_training": {
+            "cases": 4,
+            "completed": 0,
+            "format_or_tool_errors": 0,
+            "integrity_passes": 0,
+            "mean_score": 0.0,
+            "successes": 0
+          }
+        },
+        "macro_score": 0.0,
+        "success_rate": 0.0
+      }
+    }
+  ],
+  "jinn_beast_persona_experiment": {
+    "claim_boundary": "Emulation of a supplied policy over audited tags; policy labels carry no independent normative truth claim. Original train/validation/test separation preserved; no test rows entered training.",
+    "external_ldt_head": {
+      "test_unseen_roots": {
+        "beast": {
+          "candidate_coverage": 1.0,
+          "critical_examples": 144,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.0,
+          "guarded_accuracy": 0.983796,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.983787,
+          "opposite_frame_top_lane_invariance": 0.951389,
+          "raw_accuracy": 0.976852,
+          "raw_critical_false_accepts": 3,
+          "raw_opposite_frame_invariance": 0.951389
+        },
+        "jinn": {
+          "candidate_coverage": 0.993056,
+          "critical_examples": 141,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.006944,
+          "guarded_accuracy": 0.967593,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.967561,
+          "opposite_frame_top_lane_invariance": 0.976852,
+          "raw_accuracy": 0.962963,
+          "raw_critical_false_accepts": 2,
+          "raw_opposite_frame_invariance": 0.976852
+        }
+      },
+      "train": {
+        "beast": {
+          "learning_curve": [
+            {
+              "epoch": 1,
+              "train_acc": 0.804167,
+              "train_loss": 0.921874
+            },
+            {
+              "epoch": 10,
+              "train_acc": 0.909722,
+              "train_loss": 0.4709
+            },
+            {
+              "epoch": 25,
+              "train_acc": 0.955556,
+              "train_loss": 0.316392
+            },
+            {
+              "epoch": 50,
+              "train_acc": 0.965278,
+              "train_loss": 0.22825
+            },
+            {
+              "epoch": 100,
+              "train_acc": 0.972222,
+              "train_loss": 0.165581
+            }
+          ],
+          "parameters": 75
+        },
+        "jinn": {
+          "learning_curve": [
+            {
+              "epoch": 1,
+              "train_acc": 0.760417,
+              "train_loss": 0.925246
+            },
+            {
+              "epoch": 10,
+              "train_acc": 0.9125,
+              "train_loss": 0.474885
+            },
+            {
+              "epoch": 25,
+              "train_acc": 0.949306,
+              "train_loss": 0.322102
+            },
+            {
+              "epoch": 50,
+              "train_acc": 0.969444,
+              "train_loss": 0.236505
+            },
+            {
+              "epoch": 100,
+              "train_acc": 0.975694,
+              "train_loss": 0.176994
+            }
+          ],
+          "parameters": 75
+        }
+      },
+      "validation": {
+        "beast": {
+          "candidate_coverage": 0.997685,
+          "critical_examples": 143,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.002315,
+          "guarded_accuracy": 0.962963,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.962872,
+          "opposite_frame_top_lane_invariance": 0.951389,
+          "raw_accuracy": 0.958333,
+          "raw_critical_false_accepts": 2,
+          "raw_opposite_frame_invariance": 0.951389
+        },
+        "jinn": {
+          "candidate_coverage": 1.0,
+          "critical_examples": 144,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.0,
+          "guarded_accuracy": 0.983796,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.983787,
+          "opposite_frame_top_lane_invariance": 0.974537,
+          "raw_accuracy": 0.979167,
+          "raw_critical_false_accepts": 2,
+          "raw_opposite_frame_invariance": 0.972222
+        }
+      }
+    },
+    "external_ldt_trm_rlt_head": {
+      "test_unseen_roots": {
+        "beast": {
+          "candidate_coverage": 1.0,
+          "critical_examples": 144,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.0,
+          "guarded_accuracy": 0.993056,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.993055,
+          "opposite_frame_top_lane_invariance": 1.0,
+          "raw_accuracy": 0.986111,
+          "raw_critical_false_accepts": 3,
+          "raw_opposite_frame_invariance": 1.0
+        },
+        "jinn": {
+          "candidate_coverage": 0.993056,
+          "critical_examples": 141,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.006944,
+          "guarded_accuracy": 0.983796,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.983795,
+          "opposite_frame_top_lane_invariance": 1.0,
+          "raw_accuracy": 0.981481,
+          "raw_critical_false_accepts": 1,
+          "raw_opposite_frame_invariance": 1.0
+        }
+      },
+      "train": {
+        "beast": {
+          "base": {
+            "learning_curve": [
+              {
+                "epoch": 1,
+                "train_acc": 0.797222,
+                "train_loss": 0.925744
+              },
+              {
+                "epoch": 10,
+                "train_acc": 0.909722,
+                "train_loss": 0.477346
+              },
+              {
+                "epoch": 25,
+                "train_acc": 0.951389,
+                "train_loss": 0.321221
+              },
+              {
+                "epoch": 50,
+                "train_acc": 0.966667,
+                "train_loss": 0.23102
+              },
+              {
+                "epoch": 100,
+                "train_acc": 0.979861,
+                "train_loss": 0.16682
+              },
+              {
+                "epoch": 120,
+                "train_acc": 0.98125,
+                "train_loss": 0.153931
+              }
+            ],
+            "parameters": 75
+          },
+          "rlt_curve": [
+            {
+              "epoch": 1,
+              "train_acc": 0.98125,
+              "train_loss": 0.153735
+            },
+            {
+              "epoch": 20,
+              "train_acc": 0.988194,
+              "train_loss": 0.145826
+            },
+            {
+              "epoch": 40,
+              "train_acc": 0.988889,
+              "train_loss": 0.116277
+            },
+            {
+              "epoch": 60,
+              "train_acc": 0.991667,
+              "train_loss": 0.070908
+            }
+          ],
+          "rlt_parameters": 123
+        },
+        "jinn": {
+          "base": {
+            "learning_curve": [
+              {
+                "epoch": 1,
+                "train_acc": 0.754861,
+                "train_loss": 0.93069
+              },
+              {
+                "epoch": 10,
+                "train_acc": 0.911806,
+                "train_loss": 0.478749
+              },
+              {
+                "epoch": 25,
+                "train_acc": 0.952778,
+                "train_loss": 0.325353
+              },
+              {
+                "epoch": 50,
+                "train_acc": 0.96875,
+                "train_loss": 0.238745
+              },
+              {
+                "epoch": 100,
+                "train_acc": 0.974306,
+                "train_loss": 0.178382
+              },
+              {
+                "epoch": 120,
+                "train_acc": 0.975694,
+                "train_loss": 0.166451
+              }
+            ],
+            "parameters": 75
+          },
+          "rlt_curve": [
+            {
+              "epoch": 1,
+              "train_acc": 0.975694,
+              "train_loss": 0.166329
+            },
+            {
+              "epoch": 20,
+              "train_acc": 0.977083,
+              "train_loss": 0.157152
+            },
+            {
+              "epoch": 40,
+              "train_acc": 0.978472,
+              "train_loss": 0.126025
+            },
+            {
+              "epoch": 60,
+              "train_acc": 0.984028,
+              "train_loss": 0.088812
+            }
+          ],
+          "rlt_parameters": 123
+        }
+      },
+      "validation": {
+        "beast": {
+          "candidate_coverage": 0.997685,
+          "critical_examples": 143,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.002315,
+          "guarded_accuracy": 0.981481,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.981473,
+          "opposite_frame_top_lane_invariance": 1.0,
+          "raw_accuracy": 0.976852,
+          "raw_critical_false_accepts": 2,
+          "raw_opposite_frame_invariance": 1.0
+        },
+        "jinn": {
+          "candidate_coverage": 1.0,
+          "critical_examples": 144,
+          "critical_reject_recall": 1.0,
+          "examples": 432,
+          "false_elimination_rate": 0.0,
+          "guarded_accuracy": 0.993056,
+          "guarded_critical_false_accepts": 0,
+          "macro_f1": 0.993055,
+          "opposite_frame_top_lane_invariance": 1.0,
+          "raw_accuracy": 0.988426,
+          "raw_critical_false_accepts": 2,
+          "raw_opposite_frame_invariance": 1.0
+        }
+      }
+    },
+    "intervention_comparison_432_unseen_roots": [
+      {
+        "arm": "base_in_context_post_revision_reset",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.283871,
+        "critical_policy_false_accepts_guarded": 44,
+        "critical_policy_false_accepts_raw": 44,
+        "cross_owner_leakage_rate": 0.583333,
+        "cross_owner_leaks": 252,
+        "episodes": 432,
+        "preference_fidelity": 0.074074,
+        "revocation_cases": 216,
+        "revocation_handling": 1.0,
+        "temporal_revision_correctness": 0.074074,
+        "unseen_root_policy_accuracy": 0.523148
+      },
+      {
+        "arm": "base_in_context_no_veto_full_window",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.025806,
+        "critical_policy_false_accepts_guarded": 4,
+        "critical_policy_false_accepts_raw": 4,
+        "cross_owner_leakage_rate": 0.0,
+        "cross_owner_leaks": 0,
+        "episodes": 432,
+        "preference_fidelity": 1.0,
+        "revocation_cases": 216,
+        "revocation_handling": 1.0,
+        "temporal_revision_correctness": 1.0,
+        "unseen_root_policy_accuracy": 0.967593
+      },
+      {
+        "arm": "external_ldt_persona_state",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.0,
+        "critical_policy_false_accepts_guarded": 0,
+        "critical_policy_false_accepts_raw": 4,
+        "cross_owner_leakage_rate": 0.0,
+        "cross_owner_leaks": 0,
+        "episodes": 432,
+        "preference_fidelity": 1.0,
+        "revocation_cases": 216,
+        "revocation_handling": 1.0,
+        "temporal_revision_correctness": 1.0,
+        "unseen_root_policy_accuracy": 0.976852
+      },
+      {
+        "arm": "external_ldt_plus_trm_routing_and_rlt_correction",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.0,
+        "critical_policy_false_accepts_guarded": 0,
+        "critical_policy_false_accepts_raw": 3,
+        "cross_owner_leakage_rate": 0.0,
+        "cross_owner_leaks": 0,
+        "episodes": 432,
+        "preference_fidelity": 1.0,
+        "revocation_cases": 216,
+        "revocation_handling": 1.0,
+        "temporal_revision_correctness": 1.0,
+        "unseen_root_policy_accuracy": 0.993056
+      },
+      {
+        "arm": "ablated_external_no_owner_binding",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.367742,
+        "critical_policy_false_accepts_guarded": 57,
+        "critical_policy_false_accepts_raw": 57,
+        "cross_owner_leakage_rate": 1.0,
+        "cross_owner_leaks": 432,
+        "episodes": 432,
+        "preference_fidelity": 0.0,
+        "revocation_cases": 216,
+        "revocation_handling": 1.0,
+        "temporal_revision_correctness": 0.0,
+        "unseen_root_policy_accuracy": 0.326389
+      },
+      {
+        "arm": "ablated_external_no_temporal_binding",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.264516,
+        "critical_policy_false_accepts_guarded": 41,
+        "critical_policy_false_accepts_raw": 42,
+        "cross_owner_leakage_rate": 0.0,
+        "cross_owner_leaks": 0,
+        "episodes": 432,
+        "preference_fidelity": 0.039352,
+        "revocation_cases": 216,
+        "revocation_handling": 0.472222,
+        "temporal_revision_correctness": 0.092593,
+        "unseen_root_policy_accuracy": 0.516204
+      },
+      {
+        "arm": "ablated_external_no_owner_no_temporal_no_scope",
+        "critical_examples": 155,
+        "critical_policy_false_accept_rate": 0.303226,
+        "critical_policy_false_accepts_guarded": 47,
+        "critical_policy_false_accepts_raw": 47,
+        "cross_owner_leakage_rate": 0.497685,
+        "cross_owner_leaks": 215,
+        "episodes": 432,
+        "preference_fidelity": 0.016204,
+        "revocation_cases": 216,
+        "revocation_handling": 0.0,
+        "temporal_revision_correctness": 0.041667,
+        "unseen_root_policy_accuracy": 0.458333
+      }
+    ],
+    "live_base_model_in_context_probes": [
+      {
+        "arm": "qwen3_4b_instruct_q8_in_context_full",
+        "critical_examples": 4,
+        "critical_policy_false_accepts": 0,
+        "cross_owner_leakage_rate": 0.0,
+        "episodes_probed": 16,
+        "mean_latency_seconds": 6.3832,
+        "parse_or_transport_errors": 0,
+        "post_revision_reset": false,
+        "preference_fidelity": 0.0625,
+        "protocol": "chat-completions",
+        "revocation_handling": 0.0,
+        "routed_unseen_policy_accuracy": 0.5,
+        "served_model": "Qwen3-4B-Instruct-2507-Q8_0",
+        "temporal_revision_correctness": 0.1875
+      },
+      {
+        "arm": "qwen3_4b_instruct_q8_in_context_post_reset",
+        "critical_examples": 4,
+        "critical_policy_false_accepts": 1,
+        "cross_owner_leakage_rate": 0.0,
+        "episodes_probed": 16,
+        "mean_latency_seconds": 5.6203,
+        "parse_or_transport_errors": 0,
+        "post_revision_reset": true,
+        "preference_fidelity": 0.1875,
+        "protocol": "chat-completions",
+        "revocation_handling": 0.125,
+        "routed_unseen_policy_accuracy": 0.4375,
+        "served_model": "Qwen3-4B-Instruct-2507-Q8_0",
+        "temporal_revision_correctness": 0.25
+      },
+      {
+        "arm": "baby_goblin_10m_v2_q4km_in_context_full",
+        "critical_examples": 4,
+        "critical_policy_false_accepts": 0,
+        "cross_owner_leakage_rate": 0.0,
+        "episodes_probed": 16,
+        "mean_latency_seconds": 4.3027,
+        "parse_or_transport_errors": 16,
+        "post_revision_reset": false,
+        "preference_fidelity": 0.0,
+        "protocol": "raw-completion",
+        "revocation_handling": 0.0,
+        "routed_unseen_policy_accuracy": 0.0,
+        "served_model": "aleph-direct-a-10m-v2-Q4_K_M",
+        "temporal_revision_correctness": 0.0
+      }
+    ],
+    "report_sha256": "2590bfd156d3ebc2db4c62576ef3deca4694246fbae1321220629fd2d00c0585",
+    "schema": "research-v2-jinn-beast-persona-experiment-v1",
+    "source_files_verified": {
+      "beast": {
+        "bytes": 1865,
+        "sha256": "8828fbe417f099ba6ac1e418adae5f1685cd7f672e34b2de9ff018b2bd4e45ff"
+      },
+      "dataset": {
+        "bytes": 3300682,
+        "sha256": "2a4594c672ed0ca2439bf28e09612474dc6e1e576d32a175d0653be2b24f0151"
+      },
+      "jinn": {
+        "bytes": 2099,
+        "sha256": "85e544c35fe17f67019564a6d3e59dfe697e1fdfbf6ce294e24f0ef32e618576"
+      }
+    },
+    "source_id": "jinn-beast-audited-tags-v1",
+    "source_revision": "01512c40be082ad88aa69594abca43a2b41908cc",
+    "split_integrity": {
+      "all_4608_source_labels_recomputed": true,
+      "prospective_research_v2_held_overlap": 0,
+      "test_roots": 432,
+      "test_targets": 864,
+      "train_roots": 1440,
+      "train_targets": 2880,
+      "train_test_overlap": 0,
+      "train_val_overlap": 0,
+      "val_test_overlap": 0,
+      "validation_roots": 432
+    },
+    "tag_vocab_size": 24,
+    "wall_seconds": 194.0774
+  },
+  "ledger_sha256": "26ba9ef908564995ee92eb412ceeed76c3aae7766b29ade5ab67298750f1670a",
+  "schema": "datagoblin-research-v2-benchmark-ledger-1",
+  "specialist_candidate_dataset_receipt": {
+    "accepted_supervised_tokens_by_family": {
+      "belief_update": 1162,
+      "boolean_repair": 417,
+      "cursor_recovery": 910,
+      "evidence_custody": 962,
+      "experiment_design": 2088,
+      "ldt_filter": 1216,
+      "persona_externalization": 1348,
+      "trm_training": 1288
+    },
+    "accepted_supervised_tokens_total": 9391,
+    "accepted_tokens_by_curriculum_bucket": {
+      "externalized_persona_control": 44049,
+      "failure_directed_trm_ldt": 59632,
+      "partial_state_retention_and_stopping": 21587,
+      "stopping_and_symbolic_verification": 21373
+    },
+    "accepted_tokens_by_family": {
+      "belief_update": 6340,
+      "boolean_repair": 5987,
+      "cursor_recovery": 10893,
+      "evidence_custody": 11578,
+      "experiment_design": 8162,
+      "ldt_filter": 29254,
+      "persona_externalization": 44049,
+      "trm_training": 30378
+    },
+    "accepted_tokens_total": 146641,
+    "aleph_tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "episodes_by_family": {
+      "belief_update": 16,
+      "boolean_repair": 16,
+      "cursor_recovery": 16,
+      "evidence_custody": 16,
+      "experiment_design": 16,
+      "ldt_filter": 16,
+      "persona_externalization": 16,
+      "trm_training": 16
+    },
+    "episodes_verified": 128,
+    "files": {
+      "candidate_train.jsonl": {
+        "bytes": 808445,
+        "sha256": "e03459a3205f03b9274dc1d8e314b7ee64d1ca5e75f286ab4787c29083673bf5"
+      },
+      "exclusion_manifest.json": {
+        "bytes": 1016,
+        "sha256": "df0984a60254b993faa4696db2fa8b7991bdc815ae57e2c97b3563a72b96ab54"
+      }
+    },
+    "generator_seed": 2026112601,
+    "private_jinn_beast_intake_aleph_tokens": {
+      "records": 2880,
+      "source_id": "jinn-beast-audited-tags-v1",
+      "supervised_target_tokens": 202515,
+      "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+      "tokens_by_frame": {
+        "beast": 893467,
+        "jinn": 957278
+      },
+      "total_sequence_tokens": 1850745,
+      "train_jsonl_sha256": "d82d7204e745495ac60cb31ee7d53ccb96be4987412a9e0eec0811321c6e539f",
+      "unique_train_roots": 1440,
+      "visibility": "private_manifest_only"
+    },
+    "receipt_sha256": "b7e6433eb84726dcd51b22ee7c120762dc130f79002a1ec2f7b92e53cbdbfdad",
+    "records_admitted": 288,
+    "records_by_family": {
+      "belief_update": 24,
+      "boolean_repair": 24,
+      "cursor_recovery": 24,
+      "evidence_custody": 24,
+      "experiment_design": 24,
+      "ldt_filter": 56,
+      "persona_externalization": 56,
+      "trm_training": 56
+    },
+    "schema": "datagoblin-research-v2-specialist-dataset-receipt-1",
+    "source_rights": {
+      "private_jinn_beast_intake": "operator_authorized_internal_intake (kept outside Git)",
+      "synthetic_research_v2_traces": "Apache-2.0 (public and internal train-only)"
+    },
+    "split": "train_only",
+    "unique_roots_admitted": 128
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "api_key_env": null,
+  "base_url": "http://127.0.0.1:18000/v1",
+  "cap_wrapper_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "chat_template_kwargs": {},
+  "config_sha256": "5a708f1230e8abe305c875c92cf4ed481377ba39d34d4d93a45ea5c9a5b924e2",
+  "context_limit": 2048,
+  "hrm_condition": "direct",
+  "model_id": "sapientinc/HRM-Text-1B",
+  "precision": "bf16",
+  "prefix_lm_prefill_ones": true,
+  "prompt_role": "raw",
+  "protocol": "prefix-lm-completion",
+  "recurrence": {
+    "H_cycles": 2,
+    "L_cycles": 3
+  },
+  "registry_id": "hrm-text-1b-h2-l3",
+  "resource_caps": {
+    "max_requests": 128,
+    "ram_mib": 16384,
+    "wall_seconds": 900
+  },
+  "revision": "22097cbcecdd1301afe30a19a3ee61b96a9863e5",
+  "sampling": {
+    "seed": 0,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "schema": "datagoblin-research-v2-binding-1",
+  "served_model": "sapientinc/HRM-Text-1B",
+  "template_sha256": "b793502555aaae0bae3002e12a679ae65cf4f4c5837f450682b02ba96ada383a",
+  "thinking_mode": "not_applicable",
+  "tokenize_path": "/tokenize",
+  "tokenizer_config_sha256": "260d448d6f45ec227e6ae53ebc793357aacb3eb09575ffa45877bb4930fc106d",
+  "tokenizer_sha256": "ba520107dc9b27d25643e8f43fc1d9921038c86d3ada9dcaabf18526c5836d50",
+  "weights_sha256": "f8fe2b2bf6948414e8e8d6538659198726d98f967c55b533b7aabe8a1fa9a584"
+}

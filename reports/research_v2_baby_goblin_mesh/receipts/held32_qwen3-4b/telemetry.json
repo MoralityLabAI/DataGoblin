@@ -1,0 +1,36 @@
+{
+  "backend": "hf_transformers",
+  "cpu_seconds": 6772.9219,
+  "device": "cpu",
+  "dtype": "bfloat16",
+  "generate_errors": 26,
+  "generate_requests": 32,
+  "gpu_seconds": 0.0,
+  "latencies_seconds": [
+    28.922,
+    20.906,
+    28.281,
+    17.172,
+    27.234,
+    19.625
+  ],
+  "load_seconds": 19.141,
+  "parameters": 4022468096,
+  "parity_checks": {
+    "dtype": "torch.bfloat16",
+    "eos_ids": [
+      151643,
+      151645
+    ],
+    "model_type": "qwen3",
+    "parameters": 4022468096
+  },
+  "peak_ram_mib": 8572.03,
+  "peak_vram_mib": 0.0,
+  "protocol": "chat-completions",
+  "served_model": "Qwen/Qwen3-4B",
+  "tokenize_requests": 32,
+  "total_completion_tokens": 270,
+  "total_prompt_tokens": 2389,
+  "wall_seconds": 928.297
+}

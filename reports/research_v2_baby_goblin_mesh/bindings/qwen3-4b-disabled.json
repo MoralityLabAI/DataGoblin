@@ -1,0 +1,35 @@
+{
+  "api_key_env": null,
+  "base_url": "http://127.0.0.1:18000/v1",
+  "cap_wrapper_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+  "context_limit": 2048,
+  "model_id": "Qwen/Qwen3-4B",
+  "precision": "bf16",
+  "prompt_role": "user",
+  "protocol": "chat-completions",
+  "recurrence": null,
+  "registry_id": "qwen3-4b",
+  "resource_caps": {
+    "max_requests": 128,
+    "ram_mib": 24576,
+    "wall_seconds": 900
+  },
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "sampling": {
+    "seed": 0,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "schema": "datagoblin-research-v2-binding-1",
+  "served_model": "Qwen/Qwen3-4B",
+  "template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "thinking_mode": "disabled",
+  "tokenize_path": "/tokenize",
+  "tokenizer_config_sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "weights_sha256": "6abb9b5dee4ee6083461cb19c5815848d48bb93fdbafae8017585ded4fbd3d04"
+}
