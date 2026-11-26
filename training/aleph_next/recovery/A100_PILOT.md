@@ -78,3 +78,23 @@ Lane labels over groups 1-29: general 2,656,567; custom research 366,948; verifi
 Stopped on the 6 compute-unit limit, not on the 10M target: 10 groups (2.6M positions) remain. The runtime billed 8.16 units/hr from about 04:44:30Z to 05:27:40Z, about 5.9 units; the balance readout lagged, so read the exact figure from the account. Resuming needs a new runtime, a Drive mount, a restore of `group_029_fa6008f98a36` (plan for the slow cold read, or start the restore as soon as the mount succeeds), and 10 groups at about 58 s each plus a 2-minute final save.
 
 The first restore script's long copy outlived my client's timeout and auto-launched the trainer with a 1800 s wall; that run (groups 20-22 only) was killed and relaunched with a deadline that left time for the final save, so no work from it is counted above.
+
+## Completion: groups 30-39, the full first 10M positions (2026-11-26, fourth A100 session)
+
+A fourth A100-SXM4-40GB session restored `group_029_fa6008f98a36` from Drive and finished the schedule under the same code, corpus and recipe. The restore used 24 parallel readers and moved 11.99 GB in 83 s (about 145 MB/s), against about 16 minutes for a single sequential copy in the previous session.
+
+| Item | Result |
+| --- | --- |
+| Groups trained, cumulative | 39 of 39 (stop position 10,000,000; `complete_10m` true, `durable_group` 39) |
+| Supervised labels, groups 1-39 | 4,825,552, equal to the release receipt (general 3,494,982; custom research 481,255; verified 496,906; procedural 317,244; failure-directed 35,165) |
+| Loss, group 29 to 39 | 7.4763 to 7.1252 (group 38: 7.0351; group 39 is the partial 38,528-position group); gradient norm 2.161 to 2.007 |
+| Learning rate | warm-up to 1.25e-05 at group 39 per the frozen schedule |
+| Time per full group | 57.8 to 58.1 s (median 57.9 s), about 4,520 useful positions/s; group 39 took 8.7 s |
+| Peak memory | 20,390,020,608 bytes allocated of 42,405,855,232 |
+| Final checkpoint | `group_039_7fbdb1f91cf8`: weights, FP32 AdamW moments, RNG and data cursor; saved in 120.4 s, copied to Drive and hash-verified in 54.0 s with parallel copy |
+
+Group 29 reproduced to the digit across the Drive restore (loss 7.476339272201238 in both sessions), extending the group 20-24 match noted above. Across the three A100 sessions the same trajectory was reproduced from a Drive-restored checkpoint twice.
+
+Run summary: the 10M-position pilot reached its stop position in four sessions (groups 1-9 on the first, 1-24 uninterrupted on the second, 20-29 on the third, 30-39 on the fourth). Only the final state is carried by the checkpoint on Drive. The corpus is the replacement v2 release, so its loss values are not comparable with the original private evaluation panel. This is a first-10M engineering pilot of direct A on one A100; it is not a production launch and does not qualify TPU or distributed training.
+
+Cost for this session: the runtime billed 8.16 units/hr from about 05:47:15Z to 06:06:40Z, about 2.6 units. The balance readout lags the stop time, so read the exact figure from the account.
