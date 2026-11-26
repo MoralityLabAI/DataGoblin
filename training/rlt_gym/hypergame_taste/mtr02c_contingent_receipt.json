@@ -1,0 +1,2052 @@
+{
+  "schema": "MTR-02C-contingent-posthoc-v1",
+  "sourceReceiptSchema": "MTR-02C-public-development-v1",
+  "scope": "post-hoc development control; no training; regenerated same public roots",
+  "boundChecks": 11297,
+  "replayChecks": 192,
+  "partitionChecks": 24289,
+  "rows": [
+    {
+      "id": "20261127/mtr02c/ordinary/0",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 14.221238938053098,
+          "lowerBound": 14.221238938053098,
+          "cost": 4.946902654867257,
+          "queries": 3.9469026548672566,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 14.20353982300885,
+          "lowerBound": 13.168141592920353,
+          "cost": 5.654867256637168,
+          "queries": 4.3097345132743365,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 14.20353982300885,
+          "lowerBound": 14.20353982300885,
+          "cost": 5.654867256637168,
+          "queries": 4.3097345132743365,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 14.20353982300885,
+          "lowerBound": 14.20353982300885,
+          "cost": 5.654867256637168,
+          "queries": 4.3097345132743365,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 1492,
+        "open": 334,
+        "contingent1": 133,
+        "contingent2": 41
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/1",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18.0375,
+          "lowerBound": 18.0375,
+          "cost": 5.9625,
+          "queries": 4.9625,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 15.9125,
+          "lowerBound": 12.175,
+          "cost": 6.3375,
+          "queries": 4.825,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 533,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/2",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18.023529411764706,
+          "lowerBound": 18.023529411764706,
+          "cost": 5.976470588235294,
+          "queries": 4.976470588235294,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17.094117647058823,
+          "lowerBound": 11.588235294117647,
+          "cost": 6.905882352941177,
+          "queries": 5.1647058823529415,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11406,
+        "open": 546,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/3",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 12.08,
+          "lowerBound": 11.346666666666666,
+          "cost": 4.826666666666667,
+          "queries": 3.8266666666666667,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4234,
+        "open": 480,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/4",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 12.779661016949152,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/5",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 15.71875,
+          "lowerBound": 13,
+          "cost": 7.15625,
+          "queries": 5.15625,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 9434,
+        "open": 550,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/6",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 13.285714285714286,
+          "lowerBound": 11.545454545454545,
+          "cost": 5.441558441558442,
+          "queries": 4.194805194805195,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4234,
+        "open": 478,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/7",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 17.5,
+          "lowerBound": 17.5,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17.5,
+          "lowerBound": 11,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17.5,
+          "lowerBound": 17.5,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17.5,
+          "lowerBound": 17.5,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4248,
+        "open": 466,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/8",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 12.950819672131148,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11406,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/9",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 13.358024691358025,
+          "lowerBound": 12.08641975308642,
+          "cost": 5.530864197530864,
+          "queries": 4.3580246913580245,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4234,
+        "open": 482,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/10",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 12.53125,
+          "lowerBound": 11.708333333333334,
+          "cost": 5.78125,
+          "queries": 4.416666666666667,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 6226,
+        "open": 534,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/11",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18.044444444444444,
+          "lowerBound": 18.044444444444444,
+          "cost": 5.955555555555556,
+          "queries": 4.955555555555556,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 12.088888888888889,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11406,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/12",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 13.158878504672897,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4234,
+        "open": 466,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/13",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18.025,
+          "lowerBound": 18.025,
+          "cost": 5.975,
+          "queries": 4.975,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 11.525,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/14",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 17.541176470588237,
+          "lowerBound": 17.541176470588237,
+          "cost": 6.458823529411765,
+          "queries": 4.964705882352941,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17.50588235294118,
+          "lowerBound": 11.08235294117647,
+          "cost": 6.4941176470588236,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17.50588235294118,
+          "lowerBound": 17.50588235294118,
+          "cost": 6.4941176470588236,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17.50588235294118,
+          "lowerBound": 17.50588235294118,
+          "cost": 6.4941176470588236,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/15",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 11.304347826086957,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 3322,
+        "open": 442,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/16",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18.008849557522122,
+          "lowerBound": 18.008849557522122,
+          "cost": 5.991150442477876,
+          "queries": 4.991150442477876,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 15.955752212389381,
+          "lowerBound": 12.68141592920354,
+          "cost": 6.238938053097345,
+          "queries": 4.8584070796460175,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 526,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/17",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18.0126582278481,
+          "lowerBound": 18.0126582278481,
+          "cost": 5.987341772151899,
+          "queries": 4.987341772151899,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 11.08860759493671,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11406,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/18",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 13.2875,
+          "lowerBound": 11.3,
+          "cost": 5.2625,
+          "queries": 4,
+          "falsePublication": 0.0125
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4234,
+        "open": 481,
+        "contingent1": 169,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/19",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18.04054054054054,
+          "lowerBound": 18.04054054054054,
+          "cost": 5.95945945945946,
+          "queries": 4.95945945945946,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 11.756756756756756,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18.04054054054054,
+          "lowerBound": 18,
+          "cost": 5.95945945945946,
+          "queries": 4.95945945945946,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 509,
+        "contingent1": 209,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/20",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 13.927272727272728,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 9434,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/21",
+      "split": "ordinary",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 12.72289156626506,
+          "lowerBound": 12.72289156626506,
+          "cost": 4.9879518072289155,
+          "queries": 3.9156626506024095,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 11.421686746987952,
+          "lowerBound": 11.421686746987952,
+          "cost": 6,
+          "queries": 4,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 12.72289156626506,
+          "lowerBound": 12.216867469879517,
+          "cost": 4.9879518072289155,
+          "queries": 3.9156626506024095,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 12.602409638554217,
+          "lowerBound": 12.602409638554217,
+          "cost": 4.9879518072289155,
+          "queries": 3.7349397590361444,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 1892,
+        "open": 329,
+        "contingent1": 124,
+        "contingent2": 35
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/22",
+      "split": "ordinary",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 18.02409638554217,
+          "lowerBound": 18.02409638554217,
+          "cost": 5.975903614457831,
+          "queries": 4.975903614457831,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 11.421686746987952,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 7818,
+        "open": 498,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ordinary/23",
+      "split": "ordinary",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18.012345679012345,
+          "lowerBound": 18.012345679012345,
+          "cost": 5.987654320987654,
+          "queries": 4.987654320987654,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 16.790123456790123,
+          "lowerBound": 12.518518518518519,
+          "cost": 7.209876543209877,
+          "queries": 5.209876543209877,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11406,
+        "open": 547,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/0",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 9.623931623931623,
+          "lowerBound": 9.623931623931623,
+          "cost": 6,
+          "queries": 3.606837606837607,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 9.623931623931623,
+          "lowerBound": 9.512820512820513,
+          "cost": 6,
+          "queries": 3.606837606837607,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 9.623931623931623,
+          "lowerBound": 9.512820512820513,
+          "cost": 6,
+          "queries": 3.606837606837607,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 9.623931623931623,
+          "lowerBound": 9.512820512820513,
+          "cost": 6,
+          "queries": 3.606837606837607,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 560,
+        "open": 226,
+        "contingent1": 82,
+        "contingent2": 28
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/1",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17,
+          "lowerBound": 10.897435897435898,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 5386,
+        "open": 498,
+        "contingent1": 185,
+        "contingent2": 73
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/2",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 16,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 14280,
+        "open": 546,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/3",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 13.162162162162161,
+          "lowerBound": 13.162162162162161,
+          "cost": 4.972972972972973,
+          "queries": 3.9864864864864864,
+          "falsePublication": 0.013513513513513514
+        },
+        "open": {
+          "utility": 13,
+          "lowerBound": 11,
+          "cost": 4,
+          "queries": 3.5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 13,
+          "lowerBound": 13,
+          "cost": 4,
+          "queries": 3.5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 13.162162162162161,
+          "lowerBound": 13,
+          "cost": 4.972972972972973,
+          "queries": 3.9864864864864864,
+          "falsePublication": 0.013513513513513514
+        }
+      },
+      "states": {
+        "exact": 2033,
+        "open": 296,
+        "contingent1": 107,
+        "contingent2": 43
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/4",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 11.909090909090908,
+          "lowerBound": 11.909090909090908,
+          "cost": 6.872727272727273,
+          "queries": 4.7727272727272725,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 11.472727272727273,
+          "lowerBound": 10.49090909090909,
+          "cost": 6.509090909090909,
+          "queries": 4.509090909090909,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 11.263636363636364,
+          "lowerBound": 10.49090909090909,
+          "cost": 6.336363636363636,
+          "queries": 4.336363636363636,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 11.636363636363637,
+          "lowerBound": 10.49090909090909,
+          "cost": 6.6,
+          "queries": 4.6,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4102,
+        "open": 525,
+        "contingent1": 216,
+        "contingent2": 53
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/5",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 16,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11630,
+        "open": 546,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/6",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 13.227272727272727,
+          "lowerBound": 13.227272727272727,
+          "cost": 6,
+          "queries": 4.488636363636363,
+          "falsePublication": 0.011363636363636364
+        },
+        "open": {
+          "utility": 12.886363636363637,
+          "lowerBound": 10.840909090909092,
+          "cost": 3.9545454545454546,
+          "queries": 3.465909090909091,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 12.886363636363637,
+          "lowerBound": 12.886363636363637,
+          "cost": 3.9545454545454546,
+          "queries": 3.465909090909091,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 13.227272727272727,
+          "lowerBound": 12.886363636363637,
+          "cost": 6,
+          "queries": 4.488636363636363,
+          "falsePublication": 0.011363636363636364
+        }
+      },
+      "states": {
+        "exact": 2033,
+        "open": 330,
+        "contingent1": 126,
+        "contingent2": 50
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/7",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 13.173913043478262,
+          "lowerBound": 13.173913043478262,
+          "cost": 6.6521739130434785,
+          "queries": 4.521739130434782,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 12.695652173913043,
+          "lowerBound": 10.304347826086957,
+          "cost": 7,
+          "queries": 4.521739130434782,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 13.130434782608695,
+          "lowerBound": 12.695652173913043,
+          "cost": 5.739130434782608,
+          "queries": 4.086956521739131,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 13.173913043478262,
+          "lowerBound": 12.76086956521739,
+          "cost": 6.6521739130434785,
+          "queries": 4.521739130434782,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 2810,
+        "open": 394,
+        "contingent1": 146,
+        "contingent2": 52
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/8",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 17.4,
+          "lowerBound": 17.4,
+          "cost": 6.6,
+          "queries": 4.9523809523809526,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 16.02857142857143,
+          "lowerBound": 13.82857142857143,
+          "cost": 7.304761904761905,
+          "queries": 5.304761904761905,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 11504,
+        "open": 606,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/9",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 14.048780487804878,
+          "lowerBound": 14.048780487804878,
+          "cost": 6,
+          "queries": 4.512195121951219,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 13.390243902439025,
+          "lowerBound": 11.170731707317072,
+          "cost": 6,
+          "queries": 4.512195121951219,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 14.048780487804878,
+          "lowerBound": 13.390243902439025,
+          "cost": 6,
+          "queries": 4.512195121951219,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 14.048780487804878,
+          "lowerBound": 13.390243902439025,
+          "cost": 6,
+          "queries": 4.512195121951219,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 2033,
+        "open": 370,
+        "contingent1": 133,
+        "contingent2": 49
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/10",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17,
+          "lowerBound": 10.92,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4197,
+        "open": 482,
+        "contingent1": 185,
+        "contingent2": 73
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/11",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18.01098901098901,
+          "lowerBound": 18.01098901098901,
+          "cost": 5.989010989010989,
+          "queries": 4.989010989010989,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 16,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 14280,
+        "open": 546,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/12",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 11.359649122807017,
+          "lowerBound": 11.359649122807017,
+          "cost": 5.7631578947368425,
+          "queries": 3.763157894736842,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 11.12280701754386,
+          "lowerBound": 10.87719298245614,
+          "cost": 6,
+          "queries": 4,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 11.359649122807017,
+          "lowerBound": 10.87719298245614,
+          "cost": 5.7631578947368425,
+          "queries": 3.763157894736842,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 11.359649122807017,
+          "lowerBound": 11.12280701754386,
+          "cost": 5.7631578947368425,
+          "queries": 3.763157894736842,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 1565,
+        "open": 299,
+        "contingent1": 96,
+        "contingent2": 30
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/13",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17,
+          "lowerBound": 11.379746835443038,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 5386,
+        "open": 498,
+        "contingent1": 185,
+        "contingent2": 73
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/14",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 17.53488372093023,
+          "lowerBound": 17.53488372093023,
+          "cost": 6.465116279069767,
+          "queries": 4.965116279069767,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17.5,
+          "lowerBound": 11.767441860465116,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17.5,
+          "lowerBound": 17.5,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17.5,
+          "lowerBound": 17.5,
+          "cost": 6.5,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 9650,
+        "open": 546,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/15",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 11.942028985507246,
+          "lowerBound": 11.942028985507246,
+          "cost": 4.3478260869565215,
+          "queries": 3.347826086956522,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 11.942028985507246,
+          "lowerBound": 10.289855072463768,
+          "cost": 4.3478260869565215,
+          "queries": 3.347826086956522,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 11.942028985507246,
+          "lowerBound": 11.942028985507246,
+          "cost": 4.3478260869565215,
+          "queries": 3.347826086956522,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 11.942028985507246,
+          "lowerBound": 11.942028985507246,
+          "cost": 4.3478260869565215,
+          "queries": 3.347826086956522,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 1575,
+        "open": 290,
+        "contingent1": 105,
+        "contingent2": 37
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/16",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 12.581196581196581,
+          "lowerBound": 12.581196581196581,
+          "cost": 6.427350427350428,
+          "queries": 4.35042735042735,
+          "falsePublication": 0.008547008547008548
+        },
+        "open": {
+          "utility": 12.034188034188034,
+          "lowerBound": 11.2991452991453,
+          "cost": 6.3076923076923075,
+          "queries": 4.3076923076923075,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 12.196581196581196,
+          "lowerBound": 11.427350427350428,
+          "cost": 6.316239316239316,
+          "queries": 4.316239316239316,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 12.205128205128204,
+          "lowerBound": 11.452991452991453,
+          "cost": 6.3076923076923075,
+          "queries": 4.3076923076923075,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 4102,
+        "open": 527,
+        "contingent1": 201,
+        "contingent2": 44
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/17",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 16,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 14280,
+        "open": 546,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/18",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 13.428571428571429,
+          "lowerBound": 13.428571428571429,
+          "cost": 6,
+          "queries": 4.488095238095238,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 13.261904761904763,
+          "lowerBound": 10.833333333333334,
+          "cost": 4.904761904761905,
+          "queries": 3.9404761904761907,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 13.261904761904763,
+          "lowerBound": 12.880952380952381,
+          "cost": 4.904761904761905,
+          "queries": 3.9404761904761907,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 13.428571428571429,
+          "lowerBound": 12.928571428571429,
+          "cost": 6,
+          "queries": 4.488095238095238,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 2033,
+        "open": 330,
+        "contingent1": 126,
+        "contingent2": 50
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/19",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17,
+          "lowerBound": 10.863636363636363,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 5386,
+        "open": 498,
+        "contingent1": 185,
+        "contingent2": 73
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/20",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 17.28440366972477,
+          "lowerBound": 17.28440366972477,
+          "cost": 6.715596330275229,
+          "queries": 4.935779816513762,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 15.81651376146789,
+          "lowerBound": 13.614678899082568,
+          "cost": 7.412844036697248,
+          "queries": 5.412844036697248,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 9340,
+        "open": 606,
+        "contingent1": 201,
+        "contingent2": 65
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/21",
+      "split": "ood",
+      "budget": 6,
+      "result": {
+        "exact": {
+          "utility": 10.5,
+          "lowerBound": 10.5,
+          "cost": 5.722222222222222,
+          "queries": 3.7222222222222223,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 10.222222222222221,
+          "lowerBound": 10.027777777777779,
+          "cost": 6,
+          "queries": 4,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 10.5,
+          "lowerBound": 10.027777777777779,
+          "cost": 5.722222222222222,
+          "queries": 3.7222222222222223,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 10.5,
+          "lowerBound": 10.222222222222221,
+          "cost": 5.722222222222222,
+          "queries": 3.7222222222222223,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 1010,
+        "open": 270,
+        "contingent1": 94,
+        "contingent2": 30
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/22",
+      "split": "ood",
+      "budget": 7,
+      "result": {
+        "exact": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 17,
+          "lowerBound": 10.746478873239436,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 17,
+          "lowerBound": 17,
+          "cost": 7,
+          "queries": 5,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 5386,
+        "open": 498,
+        "contingent1": 185,
+        "contingent2": 73
+      }
+    },
+    {
+      "id": "20261127/mtr02c/ood/23",
+      "split": "ood",
+      "budget": 8,
+      "result": {
+        "exact": {
+          "utility": 18.056338028169016,
+          "lowerBound": 18.056338028169016,
+          "cost": 5.943661971830986,
+          "queries": 4.943661971830986,
+          "falsePublication": 0
+        },
+        "open": {
+          "utility": 18,
+          "lowerBound": 16,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent1": {
+          "utility": 18,
+          "lowerBound": 18,
+          "cost": 6,
+          "queries": 5,
+          "falsePublication": 0
+        },
+        "contingent2": {
+          "utility": 18.028169014084508,
+          "lowerBound": 18,
+          "cost": 5.971830985915493,
+          "queries": 4.971830985915493,
+          "falsePublication": 0
+        }
+      },
+      "states": {
+        "exact": 14280,
+        "open": 565,
+        "contingent1": 213,
+        "contingent2": 65
+      }
+    }
+  ],
+  "aggregate": [
+    {
+      "split": "ordinary",
+      "roots": 24,
+      "exact": {
+        "utility": 17.5922613008992,
+        "lowerBound": 17.5922613008992,
+        "cost": 5.944363072701395,
+        "queries": 4.899929455881174,
+        "falsePublication": 0,
+        "oracleTies": 24
+      },
+      "open": {
+        "utility": 16.110201717343696,
+        "lowerBound": 12.026006044006195,
+        "cost": 6.055844631612516,
+        "queries": 4.763339051582488,
+        "falsePublication": 0.0005208333333333333,
+        "oracleTies": 6
+      },
+      "contingent1": {
+        "utility": 17.580513072592293,
+        "lowerBound": 17.559428735242896,
+        "cost": 5.984872362955205,
+        "queries": 4.9260582151615315,
+        "falsePublication": 0,
+        "oracleTies": 13
+      },
+      "contingent2": {
+        "utility": 17.5771821814602,
+        "lowerBound": 17.57549299227101,
+        "cost": 5.983183173766015,
+        "queries": 4.9168389054904145,
+        "falsePublication": 0,
+        "oracleTies": 13
+      }
+    },
+    {
+      "split": "ood",
+      "roots": 24,
+      "exact": {
+        "utility": 15.093467145901498,
+        "lowerBound": 15.093467145901498,
+        "cost": 6.227992348341529,
+        "queries": 4.597762532638266,
+        "falsePublication": 0.0013926732676732678,
+        "oracleTies": 24
+      },
+      "open": {
+        "utility": 14.83321478419917,
+        "lowerBound": 12.111042202128871,
+        "cost": 6.1350634418544265,
+        "queries": 4.559557182741991,
+        "falsePublication": 0,
+        "oracleTies": 10
+      },
+      "contingent1": {
+        "utility": 14.98805462338106,
+        "lowerBound": 14.81797049460372,
+        "cost": 6.024343622942022,
+        "queries": 4.483257653684658,
+        "falsePublication": 0,
+        "oracleTies": 13
+      },
+      "contingent2": {
+        "utility": 15.03483210154632,
+        "lowerBound": 14.842076158941081,
+        "cost": 6.243244849314159,
+        "queries": 4.596529976873545,
+        "falsePublication": 0.0010365479115479117,
+        "oracleTies": 17
+      }
+    }
+  ]
+}
