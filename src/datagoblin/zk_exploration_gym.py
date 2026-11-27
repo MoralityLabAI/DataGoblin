@@ -129,8 +129,11 @@ def recurrent_step(model, x, h):
     return sigmoid(model["wy"] @ new + model["by"][0]), new
 
 
-def fit(sequences):
+def fit(sequences, class_weights=None):
     """Masked teacher-label BPTT. All search actions and verifiers stay external."""
+    class_weights = (1.0, 1.0) if class_weights is None else class_weights
+    if len(class_weights) != 2 or any(not math.isfinite(v) or v <= 0 for v in class_weights):
+        raise ValueError("invalid binary class weights")
     model = parameters(170017)
     linear = np.zeros(DIM)
     rng = random.Random(170019)
@@ -154,12 +157,12 @@ def fit(sequences):
                 states.append(h)
                 probs.append(prob)
                 if label is not None:
-                    gl += (sigmoid(linear @ x)-label)*x/count
+                    gl += class_weights[label]*(sigmoid(linear @ x)-label)*x/count
             grad = {k: np.zeros_like(v) for k, v in model.items()}
             dh = np.zeros(HIDDEN)
             for t in reversed(range(len(seq))):
                 x, label = seq[t]
-                err = 0.0 if label is None else (probs[t]-label)/count
+                err = 0.0 if label is None else class_weights[label]*(probs[t]-label)/count
                 grad["wy"] += err*states[t+1]
                 grad["by"][0] += err
                 dz = (dh+err*model["wy"])*(1-states[t+1]**2)

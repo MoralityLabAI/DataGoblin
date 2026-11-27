@@ -1,0 +1,48 @@
+name: ZKL-18 counterfactual exploration teacher
+on:
+  pull_request:
+    paths:
+      - 'src/datagoblin/zk_counterfactual_gym.py'
+      - 'src/datagoblin/zk_exploration_gym.py'
+      - 'tests/test_zk_counterfactual_gym.py'
+      - '.github/workflows/zkl18.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/SatsHedgeZero
+          ref: 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
+          path: shz-pinned
+      - name: Pinned teacher and held-out root campaign
+        env:
+          PYTHONPATH: ${{ github.workspace }}/shz-pinned/research/zk_lean
+          ZKL13_CHECKER_ROOT: ${{ github.workspace }}/shz-pinned/research/zk_lean
+        run: |
+          test "$(git -C shz-pinned rev-parse HEAD)" = 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
+          python -m pip install -e '.[dev]'
+          ruff check src/datagoblin/zk_counterfactual_gym.py src/datagoblin/zk_exploration_gym.py tests/test_zk_counterfactual_gym.py
+          ulimit -v 524288
+          python -m pytest tests/test_zk_counterfactual_gym.py -v
+          /usr/bin/time -v python -m datagoblin.zk_counterfactual_gym --out zkl18-first.json
+          /usr/bin/time -v python -m datagoblin.zk_counterfactual_gym --test-start 18201 --out zkl18-fresh.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zkl18-paired-receipts
+          path: |
+            zkl18-first.json
+            zkl18-fresh.json

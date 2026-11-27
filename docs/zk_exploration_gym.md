@@ -40,3 +40,18 @@ or production authorization.
 This pilot tests whether recurrence contributes over simple exploration
 controls and the identical reset model. If it does not, preserve the
 strongest transparent control as the next baseline.
+
+## Hosted result
+
+[Workflow 46028006884](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46028006884)
+passed both evaluation blocks, targeted tests and Ruff. All seven branch
+workflows passed. At 96 columns, indexed/row-random/periodic/random-gate
+certified 42/43/46/45 out of 48; trained linear, recurrent and reset
+all certified 42 with zero exploration actions. At 24 columns, indexed,
+periodic and random-gate certified 38/39/40. Teacher labels were 231 exploit
+and 7 explore, across 96 trajectories and 337 steps. The learned gates
+collapsed to indexed exploitation. Periodic exploration offered 2295
+columns vs indexed 2590 at the 96-column budget. Both evaluation blocks
+used under 46 MiB whole-process peak RSS. No evidence for learned memory
+advantage. ZKL-18 uses verified counterfactual completion rather than
+reference-support imitation.
