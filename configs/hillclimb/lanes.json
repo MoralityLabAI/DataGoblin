@@ -1,0 +1,346 @@
+{
+  "schema": "datagoblin.hillclimb.lanes.v1",
+  "tiers": ["offline", "loopback", "gpu"],
+  "roots": {
+    "adapter_bits": {
+      "env": "DATAGOBLIN_ADAPTER_BITS",
+      "siblings": ["adapter-bits", "Compactification-Theory"],
+      "marker": "experiments/adaptergym/adaptergym/__main__.py"
+    }
+  },
+  "lanes": {
+    "self_adapter": {
+      "title": "Adapter on the driver model itself",
+      "climbs": "Decision accuracy of the model that drives this app on the hill-climb bench, raised by training an adapter on verified hill-climb decisions.",
+      "metric": {"name": "bench_accuracy", "direction": "up", "min_delta": 0.03, "split": "dev"},
+      "patience": 3,
+      "max_moves": 12,
+      "recipes": ["bench_make", "driver_bench", "export_driver_sft", "curate", "tinker_fixture",
+                  "adaptergym_status", "adaptergym_preflight", "adaptergym_launch"]
+    },
+    "looped_modules": {
+      "title": "Looped and recurrent modules",
+      "climbs": "Verified calibration success of the recurrent (RLT) student against the frozen suite, by changing depth, fit schedule, readout and seeds.",
+      "metric": {"name": "rlt_success_rate", "direction": "up", "min_delta": 0.02, "split": "calibration"},
+      "patience": 4,
+      "max_moves": 20,
+      "recipes": ["rlt_make_suite", "rlt_run", "rlt_replay", "gym_demo"]
+    },
+    "agonist_evals": {
+      "title": "Agonist: bigger local models build new evals",
+      "climbs": "Share of teacher replies from a bigger local model that the independent world verifier accepts as paired counterfactual eval worlds.",
+      "metric": {"name": "verified_pair_yield", "direction": "up", "min_delta": 0.05, "split": "dev"},
+      "patience": 3,
+      "max_moves": 12,
+      "recipes": ["agonist_demo", "agonist_stage", "agonist_send", "agonist_audit"]
+    },
+    "agonist_rollouts": {
+      "title": "Agonist: bigger local models produce rollouts",
+      "climbs": "Share of staged RLT tasks a bigger local teacher solves under the environment verifier; verified rollouts become distillation rows.",
+      "metric": {"name": "rollout_accuracy", "direction": "up", "min_delta": 0.05, "split": "train"},
+      "patience": 3,
+      "max_moves": 12,
+      "recipes": ["rlt_make_suite", "rollout_stage", "rollout_capture", "rollout_score"]
+    },
+    "curation": {
+      "title": "Curation for looped models and adapters",
+      "climbs": "Unique train roots admitted under split custody, deduplication and the per-root presentation cap.",
+      "metric": {"name": "admitted_roots", "direction": "up", "min_delta": 1, "split": "train"},
+      "patience": 3,
+      "max_moves": 20,
+      "recipes": ["curate"]
+    },
+    "research_loop": {
+      "title": "Other DataGoblin suite runs",
+      "climbs": "Nothing is promoted here: offline DataGoblin demos and checks that inform the other lanes.",
+      "metric": null,
+      "patience": 0,
+      "max_moves": 20,
+      "recipes": ["dg_demo", "dg_validate", "gym_demo", "etiquette_demo"]
+    }
+  },
+  "recipes": {
+    "bench_make": {
+      "tier": "offline",
+      "timeout_seconds": 120,
+      "description": "Write hill-climb bench tasks (gate verdicts, proposal legality, next lane) for one split; gold answers go to a separate file.",
+      "argv": ["{python}", "-m", "datagoblin.hillclimb.bench", "make", "--split", "{split}", "--seed", "{seed}",
+               "--count", "{count}", "--out", "{out}"],
+      "params": {
+        "split": {"type": "enum", "choices": ["train", "dev"]},
+        "seed": {"type": "int", "min": 0, "max": 1000000, "default": 0},
+        "count": {"type": "int", "min": 10, "max": 2000, "default": 120}
+      }
+    },
+    "driver_bench": {
+      "tier": "loopback",
+      "timeout_seconds": 7200,
+      "description": "Ask a local model (the driver, optionally with an adapter loaded) every bench task and score its answers exactly.",
+      "argv": ["{python}", "-m", "datagoblin.hillclimb.bench", "run", "--tasks", "{tasks}", "--base-url", "{base_url}",
+               "--model", "{model}", "--limit", "{limit}", "--max-tokens", "{max_tokens}",
+               "--timeout-seconds", "{timeout_seconds}", "--out", "{out}"],
+      "params": {
+        "tasks": {"type": "path", "kind": "dir"},
+        "base_url": {"type": "loopback_url"},
+        "model": {"type": "str", "pattern": "^[A-Za-z0-9._:/@+-]{1,200}$"},
+        "limit": {"type": "int", "min": 1, "max": 2000, "default": 120},
+        "max_tokens": {"type": "int", "min": 64, "max": 8192, "default": 1024},
+        "timeout_seconds": {"type": "int", "min": 10, "max": 900, "default": 300}
+      },
+      "produces": {
+        "bench_accuracy": {"artifact": "bench_score.json", "pointer": "/accuracy", "split_pointer": "/split",
+                           "contract": {"artifact": "bench_score.json", "pointer": "/evaluated_sha256"}}
+      }
+    },
+    "export_driver_sft": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Export train-split SFT rows for the driver adapter: exact bench answers, verified teacher answers and app transcripts whose tool calls all succeeded.",
+      "argv": ["{python}", "-m", "datagoblin.hillclimb.bench", "export-sft", "--tasks", "{tasks}",
+               "{answers?--answers}", "{receipts?--receipts}", "--out", "{out}"],
+      "params": {
+        "tasks": {"type": "path", "kind": "dir"},
+        "answers": {"type": "path", "kind": "dir", "optional": true},
+        "receipts": {"type": "path", "kind": "file", "optional": true}
+      }
+    },
+    "curate": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Admit candidate training rows under split custody: drop non-train splits, roots seen in other splits, duplicates and rows past the per-root cap.",
+      "argv": ["{python}", "-m", "datagoblin.hillclimb.curate", "--inputs", "{inputs*}",
+               "--max-per-root", "{max_per_root}", "--out", "{out}"],
+      "params": {
+        "inputs": {"type": "path_list", "kind": "file", "max_items": 16},
+        "max_per_root": {"type": "int", "min": 1, "max": 16, "default": 4}
+      },
+      "produces": {
+        "admitted_roots": {"artifact": "manifest.json", "pointer": "/admitted/roots", "split": "train"}
+      }
+    },
+    "tinker_fixture": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Offline DG-AGN-TINKER-01 fixture: the Inkling 2 Mini adapter curriculum, routing and repair roots with zero model calls.",
+      "argv": ["{python}", "-m", "Agonist.tinker_gym", "fixture", "--out", "{out}", "--groups", "{groups}"],
+      "params": {"groups": {"type": "int", "min": 1, "max": 16, "default": 4}}
+    },
+    "adaptergym_status": {
+      "tier": "offline",
+      "timeout_seconds": 60,
+      "requires": ["adapter_bits"],
+      "description": "Read the adapter-bits adaptergym plan status (which training and eval steps are done).",
+      "cwd": "{adapter_bits}/experiments/adaptergym",
+      "argv": ["{adaptergym_python}", "-m", "adaptergym", "status", "{plan}"],
+      "params": {"plan": {"type": "str", "pattern": "^plans/[A-Za-z0-9_.-]{1,80}\\.json$"}}
+    },
+    "adaptergym_preflight": {
+      "tier": "offline",
+      "timeout_seconds": 120,
+      "requires": ["adapter_bits"],
+      "description": "Run the adaptergym preflight (models, runtimes, GPU state) without starting any job.",
+      "cwd": "{adapter_bits}/experiments/adaptergym",
+      "argv": ["{adaptergym_python}", "-m", "adaptergym", "preflight", "{plan}", "--tags", "{tags}"],
+      "params": {
+        "plan": {"type": "str", "pattern": "^plans/[A-Za-z0-9_.-]{1,80}\\.json$"},
+        "tags": {"type": "str", "pattern": "^[a-z0-9_,-]{1,200}$"}
+      }
+    },
+    "adaptergym_launch": {
+      "tier": "gpu",
+      "timeout_seconds": 120,
+      "requires": ["adapter_bits"],
+      "description": "Launch adaptergym plan steps detached (adapter training and adapter evals); GPU work goes through vramorama leases.",
+      "cwd": "{adapter_bits}/experiments/adaptergym",
+      "argv": ["{adaptergym_python}", "-m", "adaptergym", "launch", "{plan}", "--tags", "{tags}"],
+      "params": {
+        "plan": {"type": "str", "pattern": "^plans/[A-Za-z0-9_.-]{1,80}\\.json$"},
+        "tags": {"type": "str", "pattern": "^[a-z0-9_,-]{1,200}$"}
+      }
+    },
+    "rlt_make_suite": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Freeze an RLT task suite with lineage-separated train, calibration and test splits.",
+      "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "make-suite", "--seed", "{seed}",
+               "--per-family", "{per_family}", "--out", "{out}"],
+      "params": {
+        "seed": {"type": "int", "min": 0, "max": 1000000, "default": 7},
+        "per_family": {"type": "int", "min": 1, "max": 16, "default": 4}
+      }
+    },
+    "rlt_run": {
+      "tier": "offline",
+      "timeout_seconds": 1200,
+      "description": "Fit small CPU recurrent controls (direct, RLT, matched damping) and score every visit on the calibration split with the environment verifier.",
+      "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "run", "--suite", "{suite}", "--seeds", "{seeds*}",
+               "--depths", "{depths*}", "--training-modes", "{training_modes*}", "--modes", "{modes*}",
+               "--splits", "calibration", "--terminal-only", "--training-depth", "{training_depth}",
+               "--readout-site", "{readout_site}", "--max-wall-seconds", "{max_wall_seconds}", "--out", "{out}"],
+      "env": {"OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
+      "params": {
+        "suite": {"type": "path", "kind": "dir"},
+        "seeds": {"type": "int_list", "min": 0, "max": 1000000, "max_items": 5, "default": [7, 19]},
+        "depths": {"type": "int_list", "choices": [1, 2, 4, 8, 16], "max_items": 5, "default": [1, 2, 4, 8]},
+        "training_modes": {"type": "enum_list", "choices": ["direct", "rlt", "matched_damping"], "max_items": 3,
+                           "default": ["direct", "rlt"]},
+        "modes": {"type": "enum_list", "choices": ["direct", "rlt", "matched_damping"], "max_items": 3,
+                  "default": ["direct", "rlt"]},
+        "training_depth": {"type": "int", "min": 1, "max": 16, "default": 4},
+        "readout_site": {"type": "enum", "choices": ["endpoint", "carried_answer"], "default": "carried_answer"},
+        "max_wall_seconds": {"type": "int", "min": 30, "max": 900, "default": 300}
+      },
+      "produces": {
+        "rlt_success_rate": {
+          "artifact": "summary.json",
+          "aggregate": {"list": "/cells", "where": {"mode": "rlt"}, "num": "verified_successes", "den": "episodes"},
+          "split": "calibration",
+          "contract": {"artifact": "manifest.json", "pointer": "/suite_manifest_sha256"}
+        }
+      }
+    },
+    "rlt_replay": {
+      "tier": "offline",
+      "timeout_seconds": 1200,
+      "description": "Recompute an RLT run's trajectories and checker receipts from its suite.",
+      "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "replay", "--suite", "{suite}", "--run", "{run}",
+               "--out", "{out}/replay.json"],
+      "mkdir_out": true,
+      "env": {"OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
+      "params": {
+        "suite": {"type": "path", "kind": "dir"},
+        "run": {"type": "path", "kind": "dir"}
+      }
+    },
+    "gym_demo": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Architecture training gym mock controls (LoRA, HRM-Text, looped candidates) through the frozen evaluation firewall; never promotion evidence.",
+      "argv": ["{python}", "-m", "datagoblin", "gym-demo", "--seed", "{seed}", "--out", "{out}"],
+      "params": {"seed": {"type": "int", "min": 0, "max": 1000000, "default": 7}}
+    },
+    "agonist_demo": {
+      "tier": "offline",
+      "timeout_seconds": 120,
+      "description": "AGN-01 wiring fixture: stage, synthetic replies, verify and archive with zero model calls.",
+      "argv": ["{python}", "-m", "Agonist.gym", "demo", "--tastes", "{tastes}", "--out", "{out}"],
+      "params": {"tastes": {"type": "path", "kind": "file", "default": "Agonist/fixtures/tastes.jsonl"}}
+    },
+    "agonist_stage": {
+      "tier": "offline",
+      "timeout_seconds": 120,
+      "description": "Turn research-taste seeds into AGN-01 teacher requests for a local world builder (no model call).",
+      "argv": ["{python}", "-m", "Agonist.gym", "stage", "--tastes", "{tastes}", "--out", "{out}",
+               "--max-context-tokens", "{max_context_tokens}"],
+      "params": {
+        "tastes": {"type": "path", "kind": "file", "default": "Agonist/fixtures/tastes.jsonl"},
+        "max_context_tokens": {"type": "int", "min": 1024, "max": 16384, "default": 12288}
+      }
+    },
+    "agonist_send": {
+      "tier": "loopback",
+      "timeout_seconds": 7200,
+      "description": "Send staged AGN-01 requests to an already running bigger local model and keep its replies and provider receipts.",
+      "argv": ["{python}", "-m", "datagoblin.hillclimb.agonist_worker", "--requests", "{requests}",
+               "--base-url", "{base_url}", "--model", "{model}", "--max-requests", "{max_requests}",
+               "--max-tokens", "{max_tokens}", "--temperature", "{temperature}",
+               "--timeout-seconds", "{timeout_seconds}", "--out", "{out}"],
+      "params": {
+        "requests": {"type": "path", "kind": "file"},
+        "base_url": {"type": "loopback_url"},
+        "model": {"type": "str", "pattern": "^[A-Za-z0-9._:/@+-]{1,200}$"},
+        "max_requests": {"type": "int", "min": 1, "max": 200, "default": 8},
+        "max_tokens": {"type": "int", "min": 256, "max": 8192, "default": 2048},
+        "temperature": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.7},
+        "timeout_seconds": {"type": "int", "min": 10, "max": 1800, "default": 600}
+      }
+    },
+    "agonist_audit": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Verify teacher replies with the independent AGN-01 world checker and archive accepted pairs, rejections and candidates.",
+      "argv": ["{python}", "-m", "Agonist.gym", "audit", "--requests", "{requests}", "--replies", "{replies}",
+               "--out", "{out}"],
+      "params": {
+        "requests": {"type": "path", "kind": "file"},
+        "replies": {"type": "path", "kind": "file"}
+      },
+      "produces": {
+        "verified_pair_yield": {"artifact": "manifest.json", "pointer": "/accepted_pairs",
+                                "denominator_sum": ["/accepted_pairs", "/rejected_replies"], "split": "dev",
+                                "forbid": {"artifact": "public_worlds.jsonl", "field": "teacher_model",
+                                           "values": ["offline_fixture_no_inference"]}}
+      }
+    },
+    "rollout_stage": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Freeze one-pass teacher request batches for a bigger local model from an RLT suite split.",
+      "argv": ["{python}", "-m", "datagoblin.training_gym.rlt_gym.inkling", "stage", "--suite", "{suite}",
+               "--out", "{out}", "--passes", "1", "--split", "{split}", "--max-tasks", "{max_tasks}",
+               "--model", "{model}"],
+      "params": {
+        "suite": {"type": "path", "kind": "dir"},
+        "split": {"type": "enum", "choices": ["train", "calibration"], "default": "train"},
+        "max_tasks": {"type": "int", "min": 1, "max": 1000, "default": 28},
+        "model": {"type": "str", "pattern": "^[A-Za-z0-9._:/@+-]{1,200}$"}
+      }
+    },
+    "rollout_capture": {
+      "tier": "loopback",
+      "timeout_seconds": 7200,
+      "description": "Capture one-pass answers from an already running local llama.cpp-compatible teacher for staged RLT tasks.",
+      "argv": ["{python}", "-m", "datagoblin.training_gym.rlt_gym.inkling", "capture", "--stage", "{stage}",
+               "--out", "{out}/p01", "--passes", "1", "--server-loop-passes", "1", "--base-url", "{base_url}",
+               "--served-model", "{model}", "--runtime", "llama_cpp", "--max-requests", "{max_requests}",
+               "--max-tokens", "{max_tokens}", "--timeout-seconds", "{timeout_seconds}",
+               "--max-wall-seconds", "{max_wall_seconds}"],
+      "params": {
+        "stage": {"type": "path", "kind": "dir"},
+        "base_url": {"type": "loopback_url"},
+        "model": {"type": "str", "pattern": "^[A-Za-z0-9._:/@+-]{1,200}$"},
+        "max_requests": {"type": "int", "min": 1, "max": 1000, "default": 28},
+        "max_tokens": {"type": "int", "min": 16, "max": 4096, "default": 768},
+        "timeout_seconds": {"type": "int", "min": 10, "max": 900, "default": 180},
+        "max_wall_seconds": {"type": "int", "min": 60, "max": 7000, "default": 3600}
+      }
+    },
+    "rollout_score": {
+      "tier": "offline",
+      "timeout_seconds": 600,
+      "description": "Reverify captured teacher answers with the RLT environment verifier and export verified SFT, repair and Aleph rows.",
+      "argv": ["{python}", "-m", "datagoblin.training_gym.rlt_gym.inkling", "score", "--stage", "{stage}",
+               "--captures", "{captures}", "--suite", "{suite}", "--out", "{out}"],
+      "params": {
+        "stage": {"type": "path", "kind": "dir"},
+        "captures": {"type": "path", "kind": "dir"},
+        "suite": {"type": "path", "kind": "dir"}
+      },
+      "produces": {
+        "rollout_accuracy": {"artifact": "manifest.json", "pointer": "/per_pass/0/accuracy", "split_pointer": "/split",
+                             "contract": {"artifact": "manifest.json", "pointer": "/suite_manifest_sha256"}}
+      }
+    },
+    "dg_demo": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "DataGoblin research loop demo: Scout, Alchemist, Rat, ResearchMembrane, builder tickets, verifier and ledger.",
+      "argv": ["{python}", "-m", "datagoblin", "demo", "--seed", "{seed}", "--out", "{out}"],
+      "params": {"seed": {"type": "int", "min": 0, "max": 1000000, "default": 7}}
+    },
+    "dg_validate": {
+      "tier": "offline",
+      "timeout_seconds": 60,
+      "description": "Validate a DataRecipe against the constitution (split custody, solver and verifier requirements, builder permissions).",
+      "argv": ["{python}", "-m", "datagoblin", "validate", "--recipe", "{recipe}"],
+      "params": {"recipe": {"type": "path", "kind": "file", "default": "examples/recipe.good.yaml"}}
+    },
+    "etiquette_demo": {
+      "tier": "offline",
+      "timeout_seconds": 300,
+      "description": "Collection-etiquette pipeline demo: reject, quarantine, discovery, verified and evaluation custody lanes.",
+      "argv": ["{python}", "-m", "datagoblin", "etiquette-demo", "--seed", "{seed}", "--out", "{out}"],
+      "params": {"seed": {"type": "int", "min": 0, "max": 1000000, "default": 7}}
+    }
+  }
+}
