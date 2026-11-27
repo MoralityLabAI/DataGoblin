@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter, defaultdict
 import gzip
 import hashlib
 import json
 import math
+from collections import Counter, defaultdict
 from pathlib import Path
 
 
