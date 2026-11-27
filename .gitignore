@@ -25,4 +25,5 @@ data/generated/*
 hf-cache/
 sealed_steward/
 sealed_labels.jsonl
+/outputs/datagoblin-research-v2--*/
 .env

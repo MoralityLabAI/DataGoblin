@@ -1,5 +1,14 @@
 # Aleph data planning
 
+## Jinn/Beast specialist records
+
+[Research Verifiers v2](../../docs/research_verifiers_v2.md#jinnbeast-specialist-intake)
+adds a pinned private intake for 1,440 original training roots and 2,880 policy targets.
+The importer independently recomputes both frames, preserves all original held roots,
+and checks the prospective research evaluation registry. The output carries attributed
+policy supervision. Accepted Aleph token counts and mixture admission follow in the
+next corpus intake; this addition does not change the frozen 10M corpus.
+
 [COL-DG-01](collatz_curriculum.md) supplies an offline arithmetic curriculum
 with independent trace replay, parameter-disjoint public splits and scaled-copy
 checks. Its generator admits finite cycle witnesses after verification and

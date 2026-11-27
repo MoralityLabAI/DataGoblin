@@ -1,0 +1,44 @@
+name: Research Verifiers v2
+
+on:
+  pull_request:
+    paths:
+      - "src/datagoblin/research_v2/**"
+      - "environments/datagoblin_research_v2/**"
+      - "configs/research_v2/**"
+      - "tests/**/test_research_v2*"
+      - "docs/research_verifiers_v2.md"
+      - "pyproject.toml"
+      - ".github/workflows/research-verifiers-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-verifiers-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cpu-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned environment
+        run: python -m pip install -e '.[dev]' -e environments/datagoblin_research_v2
+      - name: Check research code
+        run: >-
+          ruff check src/datagoblin/research_v2 environments/datagoblin_research_v2
+          tests/unit/test_research_v2* tests/integration/test_research_v2_verifiers.py
+      - name: Verify execution and rejection paths
+        run: python -m pytest tests/unit/test_research_v2* tests/integration/test_research_v2_verifiers.py
+      - name: Run upstream gold and no-op validation
+        run: vf-validate datagoblin-research-v2 --runtime.type subprocess -n 8

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "datagoblin-research-v2-1"
+version = "0.2.1"
+description = "Research Verifiers v2.1: Controller-Assisted Research and Externalized Persona"
+requires-python = ">=3.11,<3.15"
+dependencies = ["data-goblin", "verifiers==0.4.1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["datagoblin_research_v2_1"]
