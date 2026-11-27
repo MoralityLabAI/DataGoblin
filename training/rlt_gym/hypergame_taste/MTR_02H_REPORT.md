@@ -48,6 +48,9 @@ Child-cost bound is strictly stronger on 345 states, free-observation on 44, equ
 
 ## Native cache primitive measurement
 
+**Provenance correction (MTR-02I):** The v1 native timing receipt and numerical timing claims below lack verifiable execution provenance. They are preserved as a historical record but withdrawn as measured evidence. Use [the executed v2 replication](mtr02h_mass_native_replication.json) instead. The original native source was reproduced byte-for-byte (Git blob 8eb5354c988b880f6871481755085c2de09cac92) and run in fourteen fresh Node processes. V2 median elapsed 116.684754/105.106013 ms (full/split); median CPU 184081/170275 us; peak RSS 95516 KiB in both modes. Every checksum and cached-entry differential passes. Paired median elapsed/CPU reductions 11.43%/14.26%, with negative reductions in some pairs. No end-to-end policy or RSS improvement established. The original finite-game operation counts, policy receipts and arithmetic audits remain separate and unchanged.
+
+
 Separate standalone Node v22.16.0/Linux x64 benchmark: 24 deterministic synthetic roots, 24576 mixed mass/terminal requests per process, seven alternating fresh-process pairs. Oracle generation and differential checks are outside the timed query loop; process peak RSS includes generation/checks and runtime. All runs have checksum 1938578 and all cached entries pass independent exact verification. This is a microbenchmark on a separate trace, not native execution of the full research-policy experiment.
 
 | Metric | Full aggregation median | Split cache median |
