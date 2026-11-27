@@ -173,7 +173,9 @@ def test_service_moves_through_three_lanes(service: Service) -> None:
 
     status = service.call("ledger_status", {})
     assert status["records"] == 13
-    assert {lane["id"]: lane["promotions"] for lane in status["lanes"]}["curation"] == 1
+    curation = next(lane for lane in status["lanes"] if lane["id"] == "curation")
+    assert curation["promotions"] == 0
+    assert curation["incumbent"] == {"value": 2.0, "move_id": "m0002", "verdict": "baseline"}
 
 
 def test_service_refusals(service: Service, tmp_path: Path) -> None:

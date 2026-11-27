@@ -228,9 +228,9 @@ class Ledger:
                 move.status = "decided"
                 lane.open_move = None
                 if verdict in ("baseline", "promote"):
-                    lane.incumbent = {"value": body["value"], "move_id": move.move_id}
+                    lane.incumbent = {"value": body["value"], "move_id": move.move_id, "verdict": verdict}
                     lane.plateau = 0
-                    lane.promotions += 1
+                    lane.promotions += verdict == "promote"
                     lane.contract = body.get("contract") or lane.contract
                 elif verdict in ("reject", "invalid"):
                     lane.plateau += 1
