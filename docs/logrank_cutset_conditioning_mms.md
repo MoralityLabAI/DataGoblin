@@ -1,9 +1,11 @@
 # Cutset-conditioned MMS solver routing
 
-Source: https://github.com/MoralityLabAI/LoopedTransformers/tree/369b2a79d85f7f3c9e4079cdecfdad0514791d14/experiments/logrank_bpd_17.
+Source: https://github.com/MoralityLabAI/LoopedTransformers/tree/296380f733f012e7ddb7c38a201060d1cf53f0fb/experiments/logrank_bpd_17.
 
 17 extends the bounded-width likelihood kernel of 16 with a two-coordinate cutset. The cut arms enumerate four disjoint assignments and sum certified event weights. On nine new hub-chain worlds, both degree and scope-aware public graph selectors recover both planted hubs; the scope-3 kernel then matches exact scope-5 no-cut inference for all 72 structured target/noise cases. At noise .15, each exact arm certifies 28/36 structured queries, all correct in this sample. No dense arm certifies an answer at either noise rate. Exact inference still abstains under high noise.
 
 At 48D/.15, degree2 uses 550 peak counted live table slots versus 1488 for none5, 36 versus 9 kernel calls, and mean runtime 167.7 versus 83.6 ms. Scope-aware selection chooses the same hub cuts but takes 382.7 ms. No measured total RSS saving. Do not confuse table slots, integer payload bytes and actual RAM. This is a structural development result, not native BPD training or deployment evidence.
 
 Proposed MMS routing: estimate residual elimination scope using public factors and queries, try cheap degree-based separators when small cuts reduce the predicted width, and select exact component integration, exact elimination, or bounded approximate branch inference by measured total cost. Preserve probability intervals and abstention on dense controls. Next implement adaptive cut growth under explicit operation/workspace budgets; stream branches, reuse factor messages, and compare certified interval reduction per CPU-second and measured workspace byte on fresh families. Keep exact small references and independent replays. No confirmation release.
+
+Follow-up selector audit: all 216 cut choices and all 216 residual scope scores independently replayed using set-graph fill simulation, with 108 unique world/arm choices. All passed. This validates the recorded deterministic selection, not optimality or timing.
