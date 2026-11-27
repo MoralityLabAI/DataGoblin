@@ -172,15 +172,14 @@
     "rlt_run": {
       "tier": "offline",
       "timeout_seconds": 1200,
-      "description": "Fit small CPU recurrent controls (direct, RLT, matched damping) and score every visit on the calibration split with the environment verifier.",
-      "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "run", "--suite", "{suite}", "--seeds", "{seeds*}",
+      "description": "Fit small CPU recurrent controls (direct, RLT, matched damping) on the pinned fit seeds 7, 19 and 91 and score every visit on the calibration split with the environment verifier.",
+      "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "run", "--suite", "{suite}", "--seeds", "7", "19", "91",
                "--depths", "{depths*}", "--training-modes", "{training_modes*}", "--modes", "{modes*}",
                "--splits", "calibration", "--terminal-only", "--training-depth", "{training_depth}",
                "--readout-site", "{readout_site}", "--max-wall-seconds", "{max_wall_seconds}", "--out", "{out}"],
       "env": {"OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
       "params": {
         "suite": {"type": "path", "kind": "dir"},
-        "seeds": {"type": "int_list", "min": 0, "max": 1000000, "max_items": 5, "default": [7, 19]},
         "depths": {"type": "int_list", "choices": [1, 2, 4, 8, 16], "max_items": 5, "default": [1, 2, 4, 8]},
         "training_modes": {"type": "enum_list", "choices": ["direct", "rlt", "matched_damping"], "max_items": 3,
                            "default": ["direct", "rlt"]},
@@ -318,7 +317,8 @@
       },
       "produces": {
         "rollout_accuracy": {"artifact": "manifest.json", "pointer": "/per_pass/0/accuracy", "split_pointer": "/split",
-                             "contract": {"artifact": "manifest.json", "pointer": "/suite_manifest_sha256"}}
+                             "contract": {"artifact": "manifest.json",
+                                          "pointers": ["/suite_manifest_sha256", "/split", "/per_pass/0/tasks"]}}
       }
     },
     "dg_demo": {

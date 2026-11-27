@@ -106,7 +106,8 @@ TOOL_SPECS: list[dict[str, Any]] = [
     },
     {
         "name": "abandon_move",
-        "description": "Close an open move that cannot produce a valid result (counts as invalid toward the plateau).",
+        "description": "Close an open move that has no recorded result because its runs cannot succeed (counts as "
+                       "invalid toward the plateau). A move with a result is closed by decide, even when it is worse.",
         "inputSchema": _obj({"move_id": {"type": "string"}, "reason": {"type": "string"}}, ["move_id", "reason"]),
         "readOnly": False,
     },
@@ -215,7 +216,8 @@ def extract_metric(spec: Mapping[str, Any], out_dir: Path) -> dict[str, Any]:
     contract = None
     if "contract" in spec:
         contract_doc = json.loads((out_dir / spec["contract"]["artifact"]).read_text(encoding="utf-8"))
-        contract = str(_pointer(contract_doc, spec["contract"]["pointer"]))
+        pointers = spec["contract"].get("pointers") or [spec["contract"]["pointer"]]
+        contract = "|".join(str(_pointer(contract_doc, pointer)) for pointer in pointers)
     return {"value": value, "split": split, "contract": contract,
             "artifact": spec["artifact"], "artifact_sha256": _sha256(artifact)}
 
@@ -661,6 +663,12 @@ class Service:
         move = self._move(state, move_id)
         if move.status != "open":
             raise HillclimbError("move_not_open", move_id)
+        if move.results:
+            raise HillclimbError(
+                "move_has_results",
+                f"{move_id} has {len(move.results)} recorded result(s): call decide, so the gate records the "
+                "verdict (a worse result is a reject)",
+            )
         lane = self.registry.lanes[move.lane]
         ls = state.lanes[move.lane]
         stopped = lane.metric is not None and lane.patience > 0 and ls.plateau + 1 >= lane.patience

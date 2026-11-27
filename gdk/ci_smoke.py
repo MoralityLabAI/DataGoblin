@@ -68,7 +68,7 @@ def native_script(messages: list[dict[str, Any]]) -> dict[str, Any] | str:
         return call("rlt_run", {"move_id": move})
     if done == 7:
         suite = next(r["run_id"] for r in tool_results(messages) if isinstance(r, dict) and r.get("run_id"))
-        return call("rlt_run", {"move_id": move, "suite": f"run:{suite}", "seeds": [7], "depths": [1, 2],
+        return call("rlt_run", {"move_id": move, "suite": f"run:{suite}", "depths": [1, 2],
                                 "max_wall_seconds": 120})
     if done == 8:
         return call("agonist_send", {"move_id": move, "requests": "Agonist/fixtures/tastes.jsonl",

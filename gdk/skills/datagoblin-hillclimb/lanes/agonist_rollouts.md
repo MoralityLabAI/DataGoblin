@@ -4,8 +4,9 @@ A bigger local teacher answers staged RLT tasks once each; the RLT environment v
 answer, and verified answers become distillation rows for looped students and adapters.
 
 **Climbs** rollout_accuracy: verified correct answers divided by staged tasks, on the train split.
-Gate: up, min_delta 0.05, patience 3, max 12 moves. The eval contract is the suite digest: make the suite
-once, and keep `split` and `max_tasks` fixed across moves so accuracies compare.
+Gate: up, min_delta 0.05, patience 3, max 12 moves. The eval contract is the suite digest, the split and
+the number of staged tasks: make the suite once and keep `split` and `max_tasks` fixed, or the result is
+invalid.
 
 ## A move
 
@@ -22,7 +23,7 @@ once, and keep `split` and `max_tasks` fixed across moves so accuracies compare.
 
 - The teacher model (a bigger endpoint from `suite_status.endpoints`).
 - `max_tokens`: answers cut off at the budget are censored, not wrong, but they lower accuracy.
-- Changing `split` or `max_tasks` breaks comparability with the incumbent: leave both fixed.
+- `split` and `max_tasks` are part of the eval contract: changing either makes the result invalid.
 
 ## What the outputs are for
 

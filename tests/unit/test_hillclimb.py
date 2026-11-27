@@ -16,7 +16,7 @@ from datagoblin.hillclimb.curate import curate
 from datagoblin.hillclimb.lanes import HillclimbError, Registry, call_reason, is_loopback_url
 from datagoblin.hillclimb.ledger import Ledger, gate_verdict
 from datagoblin.hillclimb.server import handle, serve
-from datagoblin.hillclimb.service import Service
+from datagoblin.hillclimb.service import Service, extract_metric
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -165,7 +165,7 @@ def test_service_moves_through_three_lanes(service: Service) -> None:
     suite = service.call("run_recipe", {"move_id": move["move_id"], "recipe": "rlt_make_suite",
                                         "params": {"per_family": 1}})
     fit = service.call("run_recipe", {"move_id": move["move_id"], "recipe": "rlt_run", "params": {
-        "suite": suite["out"], "seeds": [7], "depths": [1], "max_wall_seconds": 60}})
+        "suite": suite["out"], "depths": [1], "max_wall_seconds": 60}})
     assert fit["status"] == "ok", fit["stderr_tail"]
     result = service.call("record_result", {"move_id": move["move_id"], "run_id": fit["run_id"]})
     assert 0.0 <= result["value"] <= 1.0 and result["split"] == "calibration"
@@ -197,6 +197,13 @@ def test_service_refusals(service: Service, tmp_path: Path) -> None:
                                                                                          "count": 10}})
     with pytest.raises(HillclimbError, match="no_metric"):
         service.call("record_result", {"move_id": move, "run_id": made["run_id"]})
+    service.ledger.append("result", {"move_id": move, "run_id": made["run_id"], "metric": "bench_accuracy",
+                                     "value": 0.1, "split": "dev", "contract": None})
+    with pytest.raises(HillclimbError, match="move_has_results"):
+        service.call("abandon_move", {"move_id": move, "reason": "hide a bad result"})
+    assert service.call("decide", {"move_id": move})["verdict"] == "baseline"
+    move = service.call("propose_move", {"lane": "self_adapter", "plan": ["bench_make"],
+                                         "hypothesis": "A move with no result may be abandoned."})["move_id"]
     assert service.call("abandon_move", {"move_id": move, "reason": "test"})["verdict"] == "invalid"
     read_only = Service(root=ROOT, state_dir=service.state_dir, read_only=True)
     assert {tool["name"] for tool in read_only.tools()} == {"suite_status", "ledger_status", "list_recipes"}
@@ -342,3 +349,12 @@ def test_mcp_framing(service: Service) -> None:
     assert replies[2]["result"]["structuredContent"]["error"] == "bad_arguments"
     assert replies[3]["error"]["code"] == -32601
     assert handle(service, {"jsonrpc": "2.0", "method": "notifications/cancelled"}) is None
+
+
+def test_rollout_contract_pins_suite_split_and_task_count(registry: Registry, tmp_path: Path) -> None:
+    spec = registry.recipes["rollout_score"].produces["rollout_accuracy"]
+    manifest = {"split": "train", "suite_manifest_sha256": "abc", "per_pass": [{"accuracy": 0.5, "tasks": 28}]}
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    got = extract_metric(spec, tmp_path)
+    assert (got["value"], got["split"], got["contract"]) == (0.5, "train", "abc|train|28")
+    assert "seeds" not in registry.recipes["rlt_run"].params

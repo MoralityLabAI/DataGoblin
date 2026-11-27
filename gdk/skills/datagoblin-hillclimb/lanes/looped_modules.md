@@ -8,8 +8,9 @@ make the suite once and reuse its run id for every move.
 ## Baseline move
 
 1. `rlt_make_suite` (`seed: 7`, `per_family: 4`). Keep its run id.
-2. `rlt_run` with `suite: "run:<suite run>"` and defaults (seeds 7 and 19, depths 1 2 4 8, fit modes
-   direct and rlt, modes direct and rlt, training_depth 4, readout carried_answer).
+2. `rlt_run` with `suite: "run:<suite run>"` and defaults (depths 1 2 4 8, fit modes direct and rlt,
+   modes direct and rlt, training_depth 4, readout carried_answer). The fit seeds are pinned to 7, 19
+   and 91 for every move, so no move can win by choosing a lucky seed.
 3. `record_result` on the rlt_run run, then `decide`.
 
 `rlt_run` writes `summary.json` (cells per family, mode, depth) and `REPORT.md`. Read the cells to see
@@ -21,8 +22,10 @@ which family or depth fails before choosing the next change.
 - `training_depth`: fit at the depth you infer at, or shallower to test extrapolation.
 - `training_modes`: `matched_damping` as the fit schedule instead of, or beside, `rlt`.
 - `readout_site`: `endpoint` against `carried_answer`.
-- `seeds`: more fit seeds for robustness; on `replicate`, rerun with new seeds.
 - `max_wall_seconds`: raise when the run reports a wall-clock cut.
+
+The fit is deterministic on the pinned seeds, so rerunning identical parameters reproduces the value:
+on `replicate`, record the rerun and decide (two equal results fall below the gate and reject).
 
 Keep `rlt` in `modes`: the metric counts only rlt cells, and a run without them is invalid. Keep `direct`
 in `modes` as the paired control.

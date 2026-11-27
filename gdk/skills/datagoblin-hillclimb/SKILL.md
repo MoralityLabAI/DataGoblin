@@ -51,10 +51,13 @@ Each lane has a card with its move menu: `load_skill(name: "datagoblin-hillclimb
    `abandon_move` with the reason.
 6. **Record.** `record_result(move_id, run_id)` on the run whose `produces_lane_metric` is true. The
    service extracts the value and previews the verdict.
-7. **Decide.** `decide(move_id)`. On `replicate`, rerun the evaluation recipe (a new seed where the
-   recipe takes one, on the same eval set), record that run, and decide again.
-8. **Report** in one short block: lane, move id, runs (ids and recipes), recorded value against the
-   incumbent, verdict, and the next move you recommend.
+7. **Decide.** `decide(move_id)`, whatever the value: a worse result is a reject, and the ledger
+   must say so. `abandon_move` is only for a move whose runs cannot produce a result at all. On
+   `replicate`, rerun the evaluation recipe (a new seed where the recipe takes one, on the same eval
+   set), record that run, and decide again.
+8. **Report and stop** in one short block: lane, move id, runs (ids and recipes), recorded value
+   against the incumbent, verdict, and the next move you recommend. One move per invocation:
+   `data-goblin climb` starts the next move in a fresh conversation.
 
 ## Gate rules
 
