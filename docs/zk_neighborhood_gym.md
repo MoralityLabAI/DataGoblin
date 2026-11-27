@@ -36,3 +36,23 @@ peak RSS is inferred. Training and full-reference work are reported separately.
 The fixed protocol is 64 evaluation tasks, six arms and three protocols
 (1152 runs excluding training and reference). No per-case Lean replay,
 live-circuit optimization or production authorization.
+
+## Hosted result
+
+[Workflow 46009068947](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46009068947)
+passed both evaluation blocks and targeted checks. Across 64 tasks:
+
+| Arm | 24 columns | 96 columns | 10 ms credited |
+|---|---:|---:|---:|
+| Indexed | 37 | 38 | 38 |
+| Row heuristic | 16 | 25 | 25 |
+| Row static | 32 | 32 | 32 |
+| Row feedback | 37 | 37 | 37 |
+| Row shuffled | 30 | 43 | 42 |
+| Row random | 29 | 46 | 46 |
+
+All 16 essential controls remained uncertified. Indexed vs random at 96
+columns used 0.287368 vs 0.343726 process CPU seconds across both blocks.
+Peak RSS was 21308/21564 KiB for the two whole campaign processes. Random
+row selection recovered 14/16 multi-hop product-chain cases vs 6/16
+indexed. This motivates explicit exploration on a shared exact basis.

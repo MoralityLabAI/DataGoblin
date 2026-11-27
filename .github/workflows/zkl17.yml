@@ -1,0 +1,47 @@
+name: ZKL-17 recurrent exploration gate
+on:
+  pull_request:
+    paths:
+      - 'src/datagoblin/zk_exploration_gym.py'
+      - 'tests/test_zk_exploration_gym.py'
+      - '.github/workflows/zkl17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/SatsHedgeZero
+          ref: 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
+          path: shz-pinned
+      - name: Pinned recurrent gate and paired CPU campaign
+        env:
+          PYTHONPATH: ${{ github.workspace }}/shz-pinned/research/zk_lean
+          ZKL13_CHECKER_ROOT: ${{ github.workspace }}/shz-pinned/research/zk_lean
+        run: |
+          test "$(git -C shz-pinned rev-parse HEAD)" = 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
+          python -m pip install -e '.[dev]'
+          ruff check src/datagoblin/zk_exploration_gym.py tests/test_zk_exploration_gym.py
+          python -m pytest tests/test_zk_exploration_gym.py -v
+          ulimit -v 524288
+          /usr/bin/time -v python -m datagoblin.zk_exploration_gym --out zkl17-first.json
+          /usr/bin/time -v python -m datagoblin.zk_exploration_gym --test-start 17201 --out zkl17-fresh.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zkl17-paired-receipts
+          path: |
+            zkl17-first.json
+            zkl17-fresh.json
