@@ -10,9 +10,13 @@ import numpy as np
 from datagoblin.research_v2.suite import LEARNERS, canon, digest
 from datagoblin.research_v2_1.controllers import (
     CONTROLLER_MODES as V21_MODES,
+)
+from datagoblin.research_v2_1.controllers import (
     ControllerDecision,
-    ResearchController as V21Controller,
     _try_parse_json_obj,
+)
+from datagoblin.research_v2_1.controllers import (
+    ResearchController as V21Controller,
 )
 
 CONTROLLER_MODES = (*V21_MODES, "schema_only", "rule_action_routing",
