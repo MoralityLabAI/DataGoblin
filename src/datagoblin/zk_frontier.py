@@ -126,7 +126,7 @@ def compile_step(plan: Plan, state: tuple[int, ...]) -> dict[str, Any]:
     return {"format": "zk-dg-frontier-r1cs-v1", "state_in": [e[0][0] for e in wires],
             "state_out": [e[0][0] for e in out],
             "constraints": [(e, const(1), ()) for e in c.linear] + c.products,
-            "witness": c.values}
+            "witness": c.values, "worker_selectors": sels, "worker_output": h}
 
 
 def schedule(plan: Plan) -> list[dict[str, Any]]:
