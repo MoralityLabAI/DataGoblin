@@ -19,19 +19,30 @@ SOURCES = ("fixture", "mixed", "rlt", "research")
 DEPTHS = (0, 1, 2, 4, 8, 12, 16)
 
 
-def route_task(root: str, split: str, source: str, family: str, rng: random.Random) -> Task:
-    target = rng.choice(("curriculum", "diagnose", "repair"))
-    available = {name: bool(rng.getrandbits(1)) for name in ("curriculum", "diagnose", "repair")}
-    authorized = bool(rng.getrandbits(1))
-    selected = target if authorized and available[target] else "STOP"
-    requests = {
-        "curriculum": "Choose a verified candidate for the next training batch.",
-        "diagnose": "Explain an observed verifier rejection using a failure code.",
-        "repair": "Replace an unsuccessful candidate with a valid alternative.",
+def route_request(task: Task) -> dict[str, Any]:
+    """Identical input projection for training and live specialist dispatch."""
+    return {
+        "source": task.public.get("source", "fixture"),
+        "family": task.public.get("family", "agonist"),
+        "request": task.public.get("request", task.public.get("goal", task.public.get("evidence"))),
     }
-    return Task(root, split, "route", {
-        "source": source, "family": family, "request": requests[target],
-        "available": available, "authorized": authorized,
+
+
+def route_task(targets: list[Task], rng: random.Random) -> Task:
+    target = rng.choice(targets)
+    available = {name: bool(rng.getrandbits(1)) for name in ("curriculum", "diagnose", "repair")}
+    # Balance deployable vs blocked cases rather than making STOP the
+    # overwhelmingly frequent label. The blocked half varies the failure mode.
+    authorized = True
+    if rng.getrandbits(1):
+        available[target.role] = True
+    elif rng.getrandbits(1):
+        available[target.role] = False
+    else:
+        authorized = False
+    selected = target.role if authorized and available[target.role] else "STOP"
+    return Task(target.root, target.split, "route", {
+        **route_request(target), "available": available, "authorized": authorized,
         "rule": "Choose the matching available specialist only if authorized; otherwise STOP.",
     }, {action: float(action == selected) for action in (*available, "STOP")})
 
@@ -93,7 +104,7 @@ def rlt_tasks(raw: dict[str, Any], split: str, seed: int) -> list[Task]:
         "native_pool_miss": native_miss,
         "objective": "verified_eligibility_and_size_proxy",
     }, size_scores)
-    return [curriculum, route_task(root, split, "rlt", raw["family"], rng), diagnosis, repair]
+    return [curriculum, route_task([curriculum, diagnosis, repair], rng), diagnosis, repair]
 
 
 def research_tasks(seed: int, ordinal: int, split: str) -> list[Task]:
@@ -156,7 +167,7 @@ def research_tasks(seed: int, ordinal: int, split: str) -> list[Task]:
             **common, "request": "Does the old optimal action remain optimal after the new evidence?",
             "prior_research_action": before, "state": remaining,
         }, {"revise": float(changed), "retain": float(not changed)})
-        return [curriculum, route_task(root, split, "research", world["family"], rng), diagnosis, repair]
+        return [curriculum, route_task([curriculum, diagnosis, repair], rng), diagnosis, repair]
     finally:
         game._solve.cache_clear()
 
