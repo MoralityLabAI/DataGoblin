@@ -2,6 +2,7 @@ import unittest
 
 from pilot import apply, metrics, similarity
 
+
 def task():
     return {"id":"p","split":"train","candidate_signatures":{
         "pair":{"floating":[["setvar","x"],["setvar","y"]],

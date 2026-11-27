@@ -108,7 +108,8 @@ def feature(x, label, value, frequency):
     return [
         float(value is not None), float(v == target), similarity(v,target), common(v,target),
         similarity(statement,target), common(statement,target), similarity(v,last),
-        similarity(statement,last), log_length(v), log_length(target), log_length(statement), log_length(stack), log_length(x["prefix"]),
+        similarity(statement,last), log_length(v), log_length(target), log_length(statement), log_length(stack),
+        log_length(x["prefix"]),
         log_length(x["suffix"]), log_length(s["floating"]), log_length(s["essential"]), log_length(s["distinct"]),
         math.log1p(frequency[label])/6, float(s["kind"]=="$a"),
         float(not x["suffix"]), float(label in x["prefix"]), float(label in x["suffix"]),
