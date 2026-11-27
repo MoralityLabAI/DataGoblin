@@ -101,8 +101,10 @@ def research_tasks(seed: int, ordinal: int, split: str) -> list[Task]:
     if split not in ("train", "dev"):
         raise ValueError("invalid research split")
     rng = random.Random(int(digest(["research", seed, split, ordinal])[:16], 16))
-    depth = DEPTHS[ordinal % len(DEPTHS)]
-    row, private = research_world.generate(depth, "train" if split == "train" else "calibration", rng, ordinal)
+    depth = DEPTHS[(seed + ordinal) % len(DEPTHS)]
+    cell = (seed + ordinal) % (len(research_world.FAMILIES) * len(research_world.DIMENSIONS)
+                              * len(research_world.HORIZONS))
+    row, private = research_world.generate(depth, "train" if split == "train" else "calibration", rng, cell)
     # Never forward or retain the sealed truth/tape in the task object.
     del private
     world = row["public"]
@@ -161,8 +163,8 @@ def research_tasks(seed: int, ordinal: int, split: str) -> list[Task]:
 
 @lru_cache(maxsize=12)
 def task_pool(seed: int, groups: int, split: str, source: str = "fixture") -> tuple[Task, ...]:
-    """Prefix-stable groups, one task per role per root; no sealed tasks exposed."""
-    if source not in SOURCES or split not in ("train", "dev") or not 1 <= groups <= 256 or seed < 0:
+    """One task per role per root; no sealed tasks exposed."""
+    if source not in SOURCES or split not in ("train", "dev") or not 1 <= groups <= 256 or not 0 <= seed < 2**63:
         raise ValueError("invalid task pool")
     if source == "fixture":
         return tuple(make_tasks(seed, groups, split))
@@ -178,7 +180,9 @@ def task_pool(seed: int, groups: int, split: str, source: str = "fixture") -> tu
         required = "train" if split == "train" else "calibration"
         by_family = {family: [r for r in raw if r["split"] == required and r["family"] == family]
                      for family in rlt.FAMILIES}
-        rlt_rows = [by_family[family][i] for i in range(per_family) for family in rlt.FAMILIES][:rlt_count]
+        offset = seed % len(rlt.FAMILIES)
+        families = (*rlt.FAMILIES[offset:], *rlt.FAMILIES[:offset])
+        rlt_rows = [by_family[family][i] for i in range(per_family) for family in families][:rlt_count]
     counts = dict.fromkeys(SOURCES, 0)
     result = []
     for kind in kinds:
