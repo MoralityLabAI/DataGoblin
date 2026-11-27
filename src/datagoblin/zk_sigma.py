@@ -223,7 +223,10 @@ def verify(job: Job, x: tuple[int, ...], y: tuple[int, ...], context: str, proof
             ap, bp, zp = (point_expr(group, points, expr) for expr in (a, b, z))
             u, v, w = zs[j]
             require(group.commit(u, v) == group.add(ts[j][0], group.mul(e, ap)), "product opening")
-            require(group.add(group.mul(u, bp), group.mul(w, group.h)) == group.add(ts[j][1], group.mul(e, zp)), "product proof")
+            require(
+                group.add(group.mul(u, bp), group.mul(w, group.h)) == group.add(ts[j][1], group.mul(e, zp)),
+                "product proof",
+            )
         return True
     except (ValueError, TypeError, KeyError, IndexError, OverflowError):
         return False
@@ -258,7 +261,9 @@ def nova_step_export(job: Job, x: tuple[int, ...], h: tuple[int, ...], counter: 
     for old, new in zip((*xs, *ctx), (*xn, *ctxn), strict=True):
         c.linear.append(old + neg(new))
     c.linear.append(cnt + const(1) + neg(cn))
-    idx = lambda exprs: [e[0][0] for e in exprs]  # wire 0 is constant one
+    def idx(exprs: list[Expr]) -> list[int]:
+        return [e[0][0] for e in exprs]  # wire 0 is constant one
+
     return {"format": "zk-dg-sparse-integer-r1cs-v1", "relation": "fixed-model-recurrent-step-v1",
             "state_in": idx([*xs, *hs, cnt, *ctx]), "state_out": idx([*xn, *ys, cn, *ctxn]),
             "constraints": [(e, const(1), ()) for e in c.linear] + c.products,
@@ -268,7 +273,7 @@ def nova_step_export(job: Job, x: tuple[int, ...], h: tuple[int, ...], counter: 
 def r1cs_satisfied(export: dict, modulus: int) -> bool:
     values = export["witness"]
     return modulus > 2**128 and values[0] == 1 and all(
-        (sum(values[i] * a for i, a in l) * sum(values[i] * a for i, a in r)
+        (sum(values[i] * a for i, a in left) * sum(values[i] * a for i, a in r)
          - sum(values[i] * a for i, a in o)) % modulus == 0
-        for l, r, o in export["constraints"]
+        for left, r, o in export["constraints"]
     )
