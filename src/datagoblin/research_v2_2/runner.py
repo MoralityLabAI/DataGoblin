@@ -351,6 +351,7 @@ def run_endpoint(
             "role": "checkpoint",
             "model_evaluated": successful_responses > 0,
             "suite_sha256": manifest["suite_sha256"],
+            "suite_split": manifest["split"],
             "comparison": comparison,
             "comparison_sha256": digest(comparison),
             "identity_sha256": digest(identity),
@@ -423,6 +424,7 @@ def compare(paths: list[Path]) -> dict[str, Any]:
                 "experiment_runtime",
                 "comparison_sha256",
                 "base_model_id",
+                "suite_split",
             )
         ):
             raise ValueError("reports require identical tasks, code, budgets, actor and role")
@@ -446,6 +448,9 @@ def compare(paths: list[Path]) -> dict[str, Any]:
                 effects, baseline.get("controller_compute", {}),
                 report.get("controller_compute", {}),
             )
+            if baseline.get("suite_split") != "heldout":
+                comparison["selective_gate"]["passes"] = False
+                comparison["selective_gate"]["full_panel_eligible"] = False
         comparisons.append(comparison)
     return {
         "schema": "research-v2.2-paired-comparison-1",
