@@ -461,6 +461,10 @@ class Service:
             if reason in ("unknown_param", "missing_param", "bad_param", "non_loopback_url") and name:
                 expected = spec.params[name].public() if name in spec.params else sorted(spec.params)
                 detail = f"{recipe}: parameter {name!r} (given {params.get(name)!r}); expected {expected}"
+                if name in spec.params and spec.params[name].type in ("path", "path_list"):
+                    earlier = [f"run:{rid} ({state.runs[rid]['recipe']})" for rid in move.runs[-4:]]
+                    detail += (f"; pass a path inside the checkout or an earlier output as run:<run_id>"
+                               f"{', for example ' + ', '.join(earlier) if earlier else ''}")
             elif reason == "tier_not_allowed":
                 detail = f"{recipe} is {spec.tier}; this session allows up to {self.max_tier}"
             raise HillclimbError(reason, detail)

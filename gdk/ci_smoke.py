@@ -4,8 +4,9 @@
 
 Run 1 (native tool calls, --approve ledger) drives one real looped_modules move through the GDK app:
 the /datagoblin-hillclimb slash command, the lane card via load_skill, suite_status, propose_move,
-rlt_make_suite and rlt_run (a real CPU fit of recurrent controls), a loopback recipe the app must deny
-at this approval level, record_result and decide. Run 2 (--tool-mode text, --approve read-only)
+rlt_make_suite, the same bad rlt_run call three times (two server refusals naming the parameter, then
+the app's repeated-failure guard), rlt_run done right (a real CPU fit of recurrent controls), a loopback
+recipe the app must deny at this approval level, record_result and decide. Run 2 (--tool-mode text, --approve read-only)
 checks the text protocol and that write tools are hidden. The script checks the receipts, the
 transcript and the hash-chained ledger.
 """
@@ -62,17 +63,20 @@ def native_script(messages: list[dict[str, Any]]) -> dict[str, Any] | str:
     move = last_with(messages, "move_id")
     if done == 3:
         return call("run_recipe", {"move_id": move, "recipe": "rlt_make_suite", "params": {"per_family": 1}})
-    if done == 4:
-        suite = last_with(messages, "run_id")
+    if done in (4, 5, 6):
+        # The same bad call three times: two server refusals, then the app's repeated-failure guard.
+        return call("run_recipe", {"move_id": move, "recipe": "rlt_run", "params": {}})
+    if done == 7:
+        suite = next(r["run_id"] for r in tool_results(messages) if isinstance(r, dict) and r.get("run_id"))
         return call("run_recipe", {"move_id": move, "recipe": "rlt_run", "params": {
             "suite": f"run:{suite}", "seeds": [7], "depths": [1, 2], "max_wall_seconds": 120}})
-    if done == 5:
+    if done == 8:
         return call("run_recipe", {"move_id": move, "recipe": "agonist_send", "params": {
             "requests": "Agonist/fixtures/tastes.jsonl", "base_url": "http://127.0.0.1:9/v1", "model": "x"}})
-    if done == 6:
+    if done == 9:
         fits = [r for r in tool_results(messages) if isinstance(r, dict) and r.get("produces_lane_metric")]
         return call("record_result", {"move_id": move, "run_id": fits[-1]["run_id"]})
-    if done == 7:
+    if done == 10:
         return call("decide", {"move_id": move})
     verdict = last_with(messages, "verdict")
     return f"Lane looped_modules, move {move}: rlt_make_suite and rlt_run ran; decide returned {verdict}."
@@ -143,17 +147,21 @@ def main() -> int:
         assert "/datagoblin-hillclimb looped_modules" in first
         assert {t["function"]["name"] for t in SEEN[0]["tools"]} >= {"load_skill", "propose_move", "run_recipe"}
         calls = receipt["toolCalls"]
-        assert [c["name"] for c in calls] == ["load_skill", "suite_status", "propose_move", "run_recipe",
-                                              "run_recipe", "run_recipe", "record_result", "decide"], calls
-        denied = calls[5]
-        assert denied["ok"] is False and "loopback recipe" in (denied["result"] or ""), denied
-        assert all(c["ok"] for i, c in enumerate(calls) if i != 5), [c for c in calls if not c["ok"]]
+        assert [c["name"] for c in calls] == ["load_skill", "suite_status", "propose_move", *["run_recipe"] * 6,
+                                              "record_result", "decide"], calls
+        refused = calls[4]["result"] or ""
+        assert "missing_param" in refused and "parameter 'suite'" in refused and "run:r0001" in refused, refused
+        assert calls[5]["ok"] is False and "missing_param" in (calls[5]["result"] or "")
+        assert "already failed 2 times" in (calls[6]["result"] or ""), calls[6]
+        assert "loopback recipe" in (calls[8]["result"] or ""), calls[8]
+        failed = {i for i, c in enumerate(calls) if not c["ok"]}
+        assert failed == {4, 5, 6, 8}, [calls[i] for i in sorted(failed)]
         assert receipt["decisions"][0]["verdict"] == "baseline", receipt["decisions"]
         assert receipt["moves"] == ["m0001"] and receipt["skillsLoaded"] == [
             "datagoblin-hillclimb/lanes/looped_modules.md"]
         assert "decide returned baseline" in receipt["answer"]
         roles = [m["role"] for m in receipt["transcript"]]
-        assert roles[0] == "system" and roles.count("tool") == 8, roles
+        assert roles[0] == "system" and roles.count("tool") == 11, roles
         ledger = [json.loads(line) for line in (state / "ledger.jsonl").read_text().splitlines()]
         assert [r["kind"] for r in ledger] == ["proposal", "run", "run", "result", "decision"], ledger
         assert ledger[-1]["body"]["verdict"] == "baseline"

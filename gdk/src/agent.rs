@@ -6,14 +6,15 @@
 //! 2. `TextToolCalls` turns `<tool_call>` text into tool requests (text-mode servers, and native
 //!    replies the server left unparsed).
 //! 3. `ToolApprovalOperation` with [`Approval`]: read-only tools and `load_skill` run; writes need
-//!    `--approve ledger` or higher; a `run_recipe` call needs a policy that covers the recipe's tier.
+//!    `--approve ledger` or higher; a `run_recipe` call needs a policy that covers the recipe's tier;
+//!    a call identical to one that already failed twice is refused with the last error.
 //! 4. `ToolOperation` dispatches approved calls to the hill-climb MCP server and the skill provider.
 //! 5. `UnhandledToolCallsOperation` answers calls nothing handled.
 //! 6. `MaxTurnsOperation` caps model turns per run.
 //! 7. `DataGoblinPrompt` contributes the app, skill index and server instructions.
 //! 8. `InferenceRunner` calls the local driver model through `goose-providers`.
 
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -255,13 +256,57 @@ impl Approval {
     }
 }
 
+/// How many times an identical call (name and arguments) may fail before the app refuses to send it.
+pub const MAX_IDENTICAL_FAILURES: usize = 2;
+
+fn call_key(name: &str, arguments: &Value) -> String {
+    format!("{name} {arguments}")
+}
+
+/// Failed calls so far in the conversation, by name and arguments: (count, last error text).
+pub fn failed_calls(conversation: &Conversation) -> HashMap<String, (usize, String)> {
+    let mut keys = HashMap::new();
+    for content in conversation.iter().flat_map(|message| message.content.iter()) {
+        if let MessageContent::ToolRequest(request) = content {
+            if let Ok(call) = &request.tool_call {
+                keys.insert(request.id.clone(), call_key(&call.name, &json!(call.arguments.clone().unwrap_or_default())));
+            }
+        }
+    }
+    let mut failures: HashMap<String, (usize, String)> = HashMap::new();
+    for content in conversation.iter().flat_map(|message| message.content.iter()) {
+        if let MessageContent::ToolResponse(response) = content {
+            let failed = !matches!(&response.tool_result, Ok(result) if result.is_error != Some(true));
+            if let (true, Some(key)) = (failed, keys.get(&response.id)) {
+                let entry = failures.entry(key.clone()).or_insert((0, String::new()));
+                entry.0 += 1;
+                entry.1 = result_text(response).chars().take(400).collect();
+            }
+        }
+    }
+    failures
+}
+
 #[async_trait]
 impl ToolApproval<Session> for Approval {
-    async fn check(&self, _session: &Session, _conversation: &Conversation, requests: &[&ToolRequest]) -> Result<Vec<ApprovalDecision>> {
+    async fn check(&self, _session: &Session, conversation: &Conversation, requests: &[&ToolRequest]) -> Result<Vec<ApprovalDecision>> {
+        let failures = failed_calls(conversation);
         Ok(requests
             .iter()
             .map(|request| match &request.tool_call {
-                Ok(call) => self.decide(&call.name, &json!(call.arguments.clone().unwrap_or_default())),
+                Ok(call) => {
+                    let arguments = json!(call.arguments.clone().unwrap_or_default());
+                    match failures.get(&call_key(&call.name, &arguments)) {
+                        Some((count, error)) if *count >= MAX_IDENTICAL_FAILURES => ApprovalDecision::Deny {
+                            reason: format!(
+                                "This exact {} call has already failed {count} times ({error}). Do not send it again: \
+                                 change the arguments the error names, run another recipe, or call abandon_move.",
+                                call.name
+                            ),
+                        },
+                        _ => self.decide(&call.name, &arguments),
+                    }
+                }
                 Err(error) => ApprovalDecision::Deny { reason: format!("unreadable tool call: {}", error.message) },
             })
             .collect())
