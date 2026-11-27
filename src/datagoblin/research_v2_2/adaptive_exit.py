@@ -55,7 +55,8 @@ def execute(initial: np.ndarray, step, head: AdaptiveExit, *, horizon: int = 24,
         current = np.asarray(step(previous.copy(), k, horizon), dtype=float)
         if not np.isfinite(current).all() or current.shape != (3,):
             raise ValueError("nonfinite or malformed recurrent output")
-        if k >= min_passes and head.probability(features(current, previous, k, horizon)) >= head.threshold:
+        if (k >= min_passes and head.threshold < 1.0
+                and head.probability(features(current, previous, k, horizon)) >= head.threshold):
             return current, k
     return current, horizon
 
