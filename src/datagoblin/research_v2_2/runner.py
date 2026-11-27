@@ -15,11 +15,11 @@ import numpy as np
 
 from datagoblin.research_v2.runner import DEFAULT_REGISTRY, registry, select_cases
 from datagoblin.research_v2.transport import request_action, validate_binding
+from datagoblin.research_v2_1.environment import LIMITS, ResearchSessionV21
+from datagoblin.research_v2_1.suite import FAMILIES, canon, digest, load_suite, reference_actions
 
 from . import VERSION, implementation_digest
 from .controllers import CONTROLLER_MODES, ResearchController
-from datagoblin.research_v2_1.environment import LIMITS, ResearchSessionV21
-from datagoblin.research_v2_1.suite import FAMILIES, canon, digest, load_suite, reference_actions
 
 COMPARISON_V22 = {
     "schema": "research-v2.2-comparison-1",
