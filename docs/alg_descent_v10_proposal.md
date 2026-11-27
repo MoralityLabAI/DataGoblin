@@ -1,0 +1,9 @@
+# ALG-DESCENT-10 proposed follow-up: bound certificates and strong nulls
+
+V9 is a spent-cohort guarded development replay. Its specificity gate fails; calibrated SVD deletion is stronger than learned rotation, and the physical sham roster fails held-out matching adequacy (6/2/0 of 16, required >=8 per seed). V9's 3-pass router improves over the exactly parameter-matched 1-pass model in predictive log loss but fails against logistic and in route work. Do not treat V9 as a confirmatory test.
+
+Before running new cohorts: wire the shared certificate_contract verifier and joint acceptance labels into the generator, offline DP teacher, calibration, route receipts and cache admission; ensure the trusted child registry is separate from the proposed concrete factors. Maintain separate product-invalid and binding-invalid counts, and charge binding comparison time. For the public-witness setting include direct exact binding as a strong baseline and distinguish the proxy from discovery without a trusted expected-factor registry. Preserve historical scripts and reports.
+
+Freeze fresh root/family splits and minimum binding-invalid exposure, with regression on equal-degree swapped factors and compensating edits. Compare bucket/logistic, one-pass and three-pass same-param controls. Measure work and time under the same exact acceptance rule. Do not use previous spent roots for prospective claims.
+
+Only proceed to decomposition specificity if the router has meaningful task headroom and recurrence adds measurable utility. Compare frozen SVD/Haar/behavioral dictionaries with equal selection budget, and prospectively specify stricter covariance/readout-sensitivity matching or report failure rather than selecting nulls on held-out outcomes. Separate physical parameter edits from adaptive per-example shams. Native BPD integration remains a distinct implementation milestone.
