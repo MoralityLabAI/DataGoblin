@@ -3,7 +3,8 @@
 import hashlib
 from pathlib import Path
 
-from datagoblin.research_v2_1.suite import digest, implementation_digest as v21_digest
+from datagoblin.research_v2_1.suite import digest
+from datagoblin.research_v2_1.suite import implementation_digest as v21_digest
 
 VERSION = "datagoblin-research-v2.2"
 
