@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from Agonist.tinker_curriculum import SOURCES, task_pool
 from Agonist.tinker_gym import (
     ROLES,
     Journal,
@@ -20,7 +21,6 @@ from Agonist.tinker_gym import (
     canonical,
     digest,
     episode,
-    make_tasks,
     parse_action,
     training_example,
 )
@@ -306,10 +306,17 @@ def choose_batch(
     else:
         selected = [t.key for t in (rng.sample(pool, count) if curator == "random" else pool[:count])]
         method = curator
-    journal.event(key, {"type": "selection", "selected": selected, "method": method,
+    journal.event(key, {"type": "selection", "selection_id": key, "selected": selected, "method": method,
                         "pool_hash": digest([t.key for t in pool])})
     by_id = {t.key: t for t in pool}
     return [by_id[x] for x in selected]
+
+
+def source_pool(journal: Journal, seed: int, groups: int, split: str, source: str) -> tuple[Task, ...]:
+    tasks = task_pool(seed, groups, split, source)
+    for root in sorted({t.root for t in tasks}):
+        journal.event("custody:" + root, {"type": "root_custody", "root": root, "split": split})
+    return tasks
 
 
 def train(
@@ -317,14 +324,21 @@ def train(
 ) -> dict[str, Any]:
     if journal.mode != "clean":
         raise ValueError("no advisory training")
+    source = getattr(args, "source", "fixture")
     key = f"candidate:{rnd}:{role}"
     journal.event(key + ":contract", {"type": "training_contract", "round": rnd, "role": role,
                   "groups": args.groups, "steps": args.steps, "batch_size": args.batch_size,
-                  "rank": args.rank, "lr": args.lr, "curator": args.curator})
+                  "rank": args.rank, "lr": args.lr, "curator": args.curator, "source": source})
     previous = journal.get_event(key)
     if previous:
         return previous
-    pool = [t for t in make_tasks(rnd, args.groups, "train") if t.role == role]
+    pool = [t for t in source_pool(journal, rnd, args.groups, "train", source) if t.role == role]
+    prior_ids = {
+        task_id for row in journal.events()
+        if row.get("type") == "selection" and not row.get("selection_id", "").startswith(f"train:{rnd}:{role}:")
+        for task_id in row["selected"]
+    }
+    pool = [t for t in pool if t.key not in prior_ids]
     if args.steps * args.batch_size > len(pool):
         raise ValueError("insufficient fresh roots; increase --groups or reduce steps")
     incumbent = active(journal, role, rnd)
@@ -355,16 +369,17 @@ def train(
 def evaluate(
     journal: Journal, provider: Tinker, args: argparse.Namespace, role: str, rnd: int,
 ) -> dict[str, Any]:
+    source = getattr(args, "source", "fixture")
     key = f"promotion:{rnd}:{role}"
     journal.event(key + ":contract", {"type": "evaluation_contract", "round": rnd, "role": role,
-                  "groups": args.eval_groups, "min_gain": args.min_gain})
+                  "groups": args.eval_groups, "min_gain": args.min_gain, "source": source})
     existing = journal.get_event(key)
     if existing:
         return existing
     candidate = journal.get_event(f"candidate:{rnd}:{role}")
     if candidate is None:
         raise ValueError("train candidate before evaluation")
-    tasks = [t for t in make_tasks(rnd, args.eval_groups, "dev") if t.role == role]
+    tasks = [t for t in source_pool(journal, rnd, args.eval_groups, "dev", source) if t.role == role]
     scores: dict[str, list[dict[str, Any]]] = {"incumbent": [], "candidate": []}
     for task in tasks:
         for arm, snapshot in (("incumbent", candidate["incumbent"]), ("candidate", candidate["sampler"])):
@@ -396,14 +411,15 @@ def rollout(
     groups = min(args.groups, args.rollout_groups)
     # Never reuse advisory roots as clean training examples.
     root_seed = rnd if journal.mode == "clean" else int(digest(["advisory", rnd])[:15], 16)
-    tasks = make_tasks(root_seed, groups, "train")
+    source = getattr(args, "source", "fixture")
+    tasks = source_pool(journal, root_seed, args.groups, "train", source)[:4 * groups]
     before = rnd if phase == "pre" else rnd + 1
     snapshots = (advisory_registry(args.registry, before) if args.registry else
                  {role: active(journal, role, before) for role in ROLES})
     run = f"rollout-{rnd}-{phase}"
     journal.event(run + ":contract", {"type": "rollout_contract", "groups": groups,
                   "snapshots": snapshots, "attempts": args.attempts, "phase": phase,
-                  "root_seed": root_seed, "dg": args.dg_model_id})
+                  "root_seed": root_seed, "dg": args.dg_model_id, "source": source})
 
     def actor(key: str, task: Task, prompt: str, history: list[dict[str, Any]]) -> dict[str, Any]:
         if dg and (not history or any("advisory_note" in h for h in history)):
@@ -476,6 +492,7 @@ def main() -> None:
     p.add_argument("--min-gain", type=float, default=0.05)
     p.add_argument("--attempts", type=int, default=3)
     p.add_argument("--role", choices=ROLES, default="curriculum")
+    p.add_argument("--source", choices=SOURCES, default="mixed")
     p.add_argument("--curator", choices=("fixed", "random", "failure_first", "dg", "inky"), default="fixed")
     args = p.parse_args()
     if (args.round < 0 or not 1 <= args.rounds <= 1000 or not 1 <= args.groups <= 256
@@ -503,6 +520,8 @@ def main() -> None:
         p.error("Fable and external registry cannot enter clean lane")
     if args.command in ("train", "evaluate", "campaign") and args.mode != "clean":
         p.error("training and promotion require clean journal")
+    if args.command in ("train", "campaign") and args.steps * args.batch_size > args.groups:
+        p.error("training requires enough fresh groups for all steps")
     if (args.out / "STOP").exists():
         p.error("operator STOP file")
     dg = LocalDG(journal, args.dg_url, args.dg_model_id) if args.dg_url else None
@@ -517,6 +536,8 @@ def main() -> None:
             print(canonical({"episodes": rollout(journal, provider, dg, advisor, args, rnd)}), flush=True)
     else:
         for rnd in range(args.round, args.round + args.rounds):
+            source_pool(journal, rnd, args.groups, "train", args.source)
+            source_pool(journal, rnd, args.eval_groups, "dev", args.source)
             rollout(journal, provider, dg, None, args, rnd, phase="pre")
             for role in ROLES:
                 train(journal, provider, dg, args, role, rnd)
