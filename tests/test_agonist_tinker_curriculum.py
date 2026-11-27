@@ -1,10 +1,9 @@
 import pytest
-
+from Agonist.tinker_gym import ROLES, Journal
+from Agonist.tinker_live import source_pool
 from datagoblin.training_gym.rlt_gym import tasks as rlt
 
 from Agonist.tinker_curriculum import rlt_tasks, route_request, task_pool
-from Agonist.tinker_gym import ROLES, Journal
-from Agonist.tinker_live import source_pool
 
 
 def test_mixed_pool_is_balanced_and_split_disjoint(tmp_path):

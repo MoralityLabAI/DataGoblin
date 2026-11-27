@@ -10,10 +10,9 @@ import random
 from functools import lru_cache
 from typing import Any
 
+from Agonist.tinker_gym import ROLES, Task, canonical, digest, make_tasks
 from datagoblin.training_gym.rlt_gym import research_world
 from datagoblin.training_gym.rlt_gym import tasks as rlt
-
-from Agonist.tinker_gym import ROLES, Task, canonical, digest, make_tasks
 
 SOURCES = ("fixture", "mixed", "rlt", "research")
 DEPTHS = (0, 1, 2, 4, 8, 12, 16)
