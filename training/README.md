@@ -8,6 +8,9 @@ This directory records the proposed **Data Goblin Aleph 1B** architecture and an
 
 - [Data landscape and 20B / 30B token plans](reports/2026-11-19_data_landscape.md). Current planning recommendation: 20B tokens with two recurrent rounds, with a conditional 30B continuation after throughput and development measurements.
 - [Data catalogs and proposed mixture](data/README.md). Public sources, owned corpus receipts, repeat limits and admission requirements.
+- [Five-repository mathematics corpus census](corpus_intake/README.md). Pinned source scanner, source-only Lean declaration inventory, duplicate audit and interim token counts.
+- [First source-level mathematics findings, 20 November](reports/2026-11-20_owned_mathematics_intake_stage0.md). Exact cross-repo duplicate counts and a direct 553-theorem/lemma Semaev core source scan.
+- [Semaev-RedTeam development gym](gyms/semaev_redteam/README.md). Six fixed mathematical-claim scope tasks with deterministic scoring, development-only.
 - [Organelle Gym Research Design (13-page PDF text)](reports/2026-11-19_organelle_gym_pdf_text.md). Source PDF SHA-256: `e921b5be770e8f6171925f571ae64ce35f62c443c48cf54a90700e8bc1a0bcf1`.
 - [Aleph 1B Research Dossier (32-page PDF text)](reports/2026-11-19_aleph_1b_dossier_pdf_text.md). Source PDF SHA-256: `5aa18ac872ef3d856cb5c898b6b6d49c6f8c4c5b799e0d4da505afb25db9ce91`.
 - [Dyadic HRM companion proposal](hrm_text_dyadic_companion.md). New design note, proposed and untested.

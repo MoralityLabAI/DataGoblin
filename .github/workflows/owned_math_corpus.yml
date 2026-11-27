@@ -1,0 +1,56 @@
+name: owned-math-corpus-intake
+on:
+  pull_request:
+    paths:
+      - 'training/corpus_intake/**'
+      - 'training/gyms/semaev_redteam/**'
+      - 'tests/unit/test_owned_math_audit.py'
+      - 'tests/unit/test_proof_roots.py'
+      - 'tests/unit/test_semaev_redteam_dev.py'
+      - '.github/workflows/owned_math_corpus.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-source-census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GIT_LFS_SKIP_SMUDGE: '1'
+      GIT_TERMINAL_PROMPT: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install source-audit token counter and test dependencies
+        run: |
+          python -m pip install 'tiktoken==0.12.0' 'pytest>=8'
+      - name: Unit tests
+        run: |
+          python -m pytest -q \
+            tests/unit/test_owned_math_audit.py \
+            tests/unit/test_proof_roots.py \
+            tests/unit/test_semaev_redteam_dev.py
+      - name: Clone exact five-source SHAs with sparse checkout
+        run: python training/corpus_intake/audit_owned_math.py --clone-pinned --root "$RUNNER_TEMP/owned-math-source"
+      - name: Count source declarations, evidence categories and interim tokens
+        run: |
+          python training/corpus_intake/audit_owned_math.py \
+            --root "$RUNNER_TEMP/owned-math-source" \
+            --out "$RUNNER_TEMP/owned-math-census" \
+            --tokenizer o200k_base
+          cat "$RUNNER_TEMP/owned-math-census/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Cluster name-free source theorem statements and detect split collisions
+        run: |
+          python training/corpus_intake/proof_roots.py \
+            --declarations "$RUNNER_TEMP/owned-math-census/lean_declarations.jsonl" \
+            --output "$RUNNER_TEMP/owned-math-census/proof_root_candidates.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: owned-math-pinned-census
+          path: ${{ runner.temp }}/owned-math-census/
+          if-no-files-found: error
+          retention-days: 14
