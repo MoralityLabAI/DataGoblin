@@ -33,3 +33,18 @@ arms, three protocols (3840 runs). Same 24/96-column and 10 ms CPU
 protocols, with 512 MiB process address-space cap and whole-process peak
 RSS. Per-case Lean replay and production authorization remain false.
 This is a minimal RNN experiment, not a full TRM/LDT/BPD architecture.
+
+## Hosted result
+
+[Workflow 46033556335](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46033556335)
+passed both blocks, targeted tests and all nine branch workflows. At 96
+columns the unweighted binary recurrent model certified 92/96, versus
+74/96 for the same-weight reset, 83/96 binary linear, 87/96 periodic,
+89/96 row random and 74/96 indexed. New-family recurrent/reset coverage
+was 48/48 vs 37/48. Signed advantage linear/recurrent/reset: 85/79/76.
+At the 10 ms deadline, recurrent credited 84 vs 86 for row random and
+85 periodic. All 32 essential controls remained uncertified. Whole-process
+peak RSS was 49024 and 49388 KiB. Teacher: 481 observed advantages,
+241 exact ties, 212 negative and 28 positive. This is fresh-root and
+limited core-identity transfer evidence, not an architecture comparison.
+ZKL-20 targets exact exploration scoring overhead using row heaps.

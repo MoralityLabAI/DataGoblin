@@ -35,10 +35,10 @@ TRAIN_BUDGET = 48
 class Hybrid:
     """Both actions use one search basis; exploration never restarts elimination."""
 
-    def __init__(self, problem, seed):
+    def __init__(self, problem, seed, *, index_factory=IndexedFrontier):
         self.state = Search(problem)
         self.supports, self.base, self.tie, self.rng = prepare(problem, seed)
-        self.index = IndexedFrontier(problem.keys, self.supports, self.base, self.tie,
+        self.index = index_factory(problem.keys, self.supports, self.base, self.tie,
                                      problem.target_support)
         self.pending = {}
         for key in problem.keys:
@@ -226,13 +226,13 @@ def train(roots):
     }
 
 
-def run(p, family, seed, arm, budget, cpu_limit, model, linear):
+def run(p, family, seed, arm, budget, cpu_limit, model, linear, *, hybrid_factory=Hybrid, record_trace=False):
     if arm in ("indexed", "row_random"):
         rec = legacy_run(p, family, seed, arm, budget, cpu_limit, {})
         return {**rec, "gate_decisions": 0, "explore_actions": rec["columns"] if arm == "row_random" else 0}
     start = time.process_time_ns()
     problem = fixture(p, family, seed)
-    policy = Hybrid(problem, seed)
+    policy = hybrid_factory(problem, seed)
     h = np.zeros(HIDDEN)
     setup_ns = time.process_time_ns()-start
 
@@ -240,6 +240,7 @@ def run(p, family, seed, arm, budget, cpu_limit, model, linear):
         return cpu_limit is not None and time.process_time_ns()-start >= cpu_limit
 
     timed_out = False
+    trace = []
     for t in range(min(budget, len(problem.keys))):
         if policy.state.solved:
             break
@@ -271,12 +272,15 @@ def run(p, family, seed, arm, budget, cpu_limit, model, linear):
         if expired():
             timed_out = True
             break
-        policy.advance(b if action else a, action, t+1 < min(budget, len(problem.keys)))
+        key = b if action else a
+        if record_trace:
+            trace.append((key, bool(action)))
+        policy.advance(key, action, t+1 < min(budget, len(problem.keys)))
     search_ns = time.process_time_ns()-start-setup_ns
     cert, verify_ns = verified_certificate(problem, policy.state)
     elapsed = time.process_time_ns()-start
     late = cpu_limit is not None and elapsed > cpu_limit
-    return {**policy.state.counts(), "column_scores": policy.index.score_evals+policy.local_scores,
+    result = {**policy.state.counts(), "column_scores": policy.index.score_evals+policy.local_scores,
             "row_scores": 0, "postings": policy.index.posting_visits,
             "index_terms": policy.index.index_entries, "gate_decisions": policy.gate_decisions,
             "explore_actions": policy.explore_actions, "setup_ns": setup_ns,
@@ -285,6 +289,11 @@ def run(p, family, seed, arm, budget, cpu_limit, model, linear):
             "certificate": cert, "exact_identity_checked": cert is not None,
             "credited": cert is not None and not late, "deadline_hit": timed_out or late,
             "lean_replayed": False, "production_accepted": False}
+    if record_trace:
+        result["trace"] = trace
+        result["row_index_metrics"] = getattr(policy.index, "row_metrics", dict)()
+        result["local_scores"] = policy.local_scores
+    return result
 
 
 def campaign(roots=8, test_start=17101, train_roots=12):
