@@ -46,15 +46,15 @@ def coordinate_minimizer(task: dict[str, Any], t: int, suffix: int, eta: list[in
             thresholds.append(u[i][j])
             continue
         prefix, exclude = 0, 0
-        include = u[i][j] + sum(max(0, u[l][j] - eta[l]) for l in range(i))
+        include = u[i][j] + sum(max(0, u[step][j] - eta[step]) for step in range(i))
         include -= lam * bits[j] * (x[i + 1] - x[0])
-        for l in range(t):
-            if l == i:
+        for step in range(t):
+            if step == i:
                 continue
-            adjusted = u[l][j] - eta[l]
-            base = prefix + adjusted - lam * bits[j] * (x[l + 1] - x[0])
+            adjusted = u[step][j] - eta[step]
+            base = prefix + adjusted - lam * bits[j] * (x[step + 1] - x[0])
             exclude = max(exclude, base)
-            if l > i:
+            if step > i:
                 include = max(include, base + u[i][j])
             prefix += max(0, adjusted)
         thresholds.append(include - exclude)
