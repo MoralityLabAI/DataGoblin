@@ -1,6 +1,6 @@
 # DG-AGN-TINKER-01
 
-A small controller on the RTX 3050 host calls the Tinker-hosted Inkling 2 Mini model. No local GPU training is required. The Aleph pretrain is outside this experiment. The initial curriculum is an independently measured AGN-02 linear-student fixture; it is not evidence of frontier reasoning or improvement of the local DG checkpoint.
+A small controller on the RTX 3050 host calls the Tinker-hosted Inkling 2 Mini model. No local GPU training is required. The Aleph pretrain is outside this experiment. The curriculum combines independently measured AGN-02 student utility with existing DataGoblin verifier-backed RLT and research-game tasks. These development generators do not establish frontier reasoning or improvement of the local DG checkpoint.
 
 ## Offline smoke test (no keys, no charges)
 
@@ -13,6 +13,18 @@ python -m Agonist.tinker_gym fixture --out runs/tinker-fixture --groups 4
 ```
 
 This constructs distinct root families for the curriculum, routing, failure diagnosis and repair adapters. Curriculum labels are measured by fitting a small student with equal optimizer steps for each possible candidate. The held-out student outcomes never appear in model inputs.
+
+## Mixed curriculum
+
+The default `--source mixed` interleaves AGN-02, existing RLT and existing research-game roots. Each root provides one task for each of the four specialists. Each round rotates the RLT families and research-game cells. `--source fixture`, `--source rlt` and `--source research` isolate the respective distributions.
+
+- AGN-02 curriculum: measured small-student marginal accuracy gain.
+- RLT: graph routes, arithmetic programs, constraint assignments, evidence retrieval, table transforms, experiment plans and finite-state plans. Candidate repair and diagnosis use the original exact verifier. If the native pool misses, an independently checked reference answer is added and the miss is retained. Curriculum selects a verified demonstration by canonical serialized size; this is an explicit cost proxy, not measured learning benefit.
+- Research games: nested subjective signals, 140/512/1024-dimensional worlds, finite horizons and depths 0–16. The existing exact expected-utility oracle scores experiment selection, publication, abstention and revisions after a hypothetical observed result. Hidden truth and sealed experiment tapes are discarded.
+
+The mixed campaign uses train and calibration namespaces only. It does not consume ordinary, OOD or sealed confirmation roots. The journal binds each root to one split, and previous training selections are excluded from new batches. All four roles use distinct adapter checkpoints. Per-task receipts and per-source scores/regrets preserve the distinction between student-uplift, eligibility and research utility objectives. Promotion still uses the aggregate development gate; inspect the source slices before any scientific claim.
+
+For more coverage on the 3050, increase `--groups` and `--rollout-groups` gradually after the first bounded pilot. Keep `--source` and the run contract stable across restarts. `--source mixed` with 21 groups covers all seven RLT families per round.
 
 ## Live clean campaign
 
