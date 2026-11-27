@@ -26,7 +26,8 @@ from Agonist.tinker_gym import (
 
 MODEL = "thinkingmachines/Inkling-2-Mini"
 EFFORT = 0.9
-CONTEXT = 12_288
+TEMPERATURE = 1.0
+CONTEXT = 24_576
 FABLE = "claude-fable-5-2"
 
 
@@ -45,7 +46,7 @@ class Tinker:
     def __init__(self, journal: Journal, cap: int, max_tokens: int):
         if not os.environ.get("TINKER_API_KEY"):
             raise RuntimeError("TINKER_API_KEY is missing")
-        if cap <= 0 or not 128 <= max_tokens <= 8192:
+        if cap <= 0 or not 128 <= max_tokens <= 16_384:
             raise ValueError("explicit positive cap and bounded generation required")
         import tinker
         from tinker_cookbook import model_info
@@ -78,7 +79,7 @@ class Tinker:
             sampled = self.samplers[identity].sample(
                 prompt=rendered, num_samples=1,
                 sampling_params=self.tinker.SamplingParams(
-                    max_tokens=self.max_tokens, temperature=0.2, stop=self.renderer.get_stop_sequences(),
+                    max_tokens=self.max_tokens, temperature=TEMPERATURE, stop=self.renderer.get_stop_sequences(),
                 ),
             ).result().sequences[0]
             message, termination = self.renderer.parse_response(sampled.tokens)
@@ -88,10 +89,10 @@ class Tinker:
                 "termination": str(termination), "stop_reason": str(sampled.stop_reason),
                 "usage": {"input_tokens": n, "output_tokens": len(sampled.tokens),
                           "estimated_usd": (0.15 * n + 0.50 * len(sampled.tokens)) / 1_000_000},
-                "renderer": self.renderer_name, "effort": EFFORT, "utc": utc(),
+                "renderer": self.renderer_name, "effort": EFFORT, "temperature": TEMPERATURE, "utc": utc(),
             }
         return self.journal.call(
-            key, "tinker", [identity, prompt, self.max_tokens, self.renderer_name, EFFORT],
+            key, "tinker", [identity, prompt, self.max_tokens, self.renderer_name, EFFORT, TEMPERATURE],
             reserve, self.cap, invoke,
         )
 
@@ -117,10 +118,14 @@ class Tinker:
         def invoke() -> dict[str, Any]:
             client = (
                 self.service.create_training_client_from_state_with_optimizer(state).result()
-                if state else self.service.create_lora_training_client(base_model=MODEL, rank=rank).result()
+                if state else self.service.create_lora_training_client(
+                    base_model=MODEL, rank=rank, seed=int(digest(key)[:8], 16)
+                ).result()
             )
-            fb = client.forward_backward(data, loss_fn="cross_entropy").result()
-            client.optim_step(self.tinker.AdamParams(learning_rate=lr)).result()
+            fb_future = client.forward_backward(data, loss_fn="cross_entropy")
+            optim_future = client.optim_step(self.tinker.AdamParams(learning_rate=lr))
+            fb = fb_future.result()
+            optim_future.result()
             # Explicit expiry bounds the accumulation of checkpoint storage.
             ttl = 45 * 24 * 3600
             full = client.save_state(name, ttl_seconds=ttl).result()
@@ -242,37 +247,59 @@ def choose_batch(
         if len(ids) != count or len(set(ids)) != count or any(x not in by_id for x in ids):
             raise ValueError("stored selection incompatible with pool")
         return [by_id[x] for x in ids]
-    # All rows are train-only. Selection sees task identities and verified public inputs,
-    # but no development labels, model-generated reward or Fable material.
+    # Only clean train outcomes are visible. Each decision uses the same
+    # single-action output schema as the curriculum specialist.
+    misses = {
+        r["task_id"] for r in journal.events()
+        if r.get("type") == "episode" and r.get("split") == "train" and not r["success"]
+    }
     if curator in ("dg", "inky"):
-        # Keep the curation prompt compact. Observe prior clean train failures only.
-        misses = {
-            r["task_id"] for r in journal.events()
-            if r.get("type") == "episode" and r.get("split") == "train" and not r["success"]
-        }
-        visible = [{"id": t.key, "role": t.role, "previous_failure": t.key in misses,
-                    "features": {"candidate_count": len(t.scores), "public_size": len(canonical(t.public)),
-                                 "task_kind": t.public.get("request", t.public.get("goal", t.role))}}
-                   for t in pool]
-        prompt = canonical({"instruction": f"Choose exactly {count} IDs from the pool for the next "
-                                          "specialist SFT batch. Return JSON with selected list.",
-                            "candidates": visible})
-        if curator == "dg":
-            if dg is None:
-                raise ValueError("DG curator requires local endpoint")
-            result = dg.sample(key + ":curator", prompt)
-        else:
-            result = provider.sample(key + ":curator", prompt, curriculum)
-        try:
-            selected = json.loads(result["text"])["selected"]
-            if (not isinstance(selected, list) or not all(isinstance(x, str) for x in selected)
-                    or len(selected) != count or len(set(selected)) != count
-                    or not set(selected) <= {t.key for t in pool}):
-                raise ValueError("invalid selection")
-            method = curator
-        except (ValueError, KeyError, TypeError):
-            selected = [t.key for t in sorted(pool, key=lambda t: t.key not in misses)[:count]]
-            method = curator + "_invalid_failure_first_fallback"
+        remaining = sorted(pool, key=lambda t: t.key not in misses)
+        selected = []
+        fallback_count = 0
+        for slot in range(count):
+            # Bound prompt size even for large pools. IDs are short and local
+            # to this request; the receipt preserves the mapping.
+            shortlist = remaining[:min(12, len(remaining))]
+            choices = {f"candidate-{i}": t for i, t in enumerate(shortlist)}
+            public = {
+                "goal": "Select one next training example for a specialist LoRA.",
+                "selection_slot": slot,
+                "candidates": [
+                    {"id": action, "role": t.role, "previous_failure": t.key in misses,
+                     "candidate_count": len(t.scores),
+                     "task_kind": t.public.get("request", t.public.get("goal", t.role))}
+                    for action, t in choices.items()
+                ],
+                "cost": "All options add one fresh root; prefer useful failure coverage.",
+            }
+            query = Task(key, "train", "curriculum", public, dict.fromkeys(choices, 0.0))
+            prompt = query.prompt()
+            request = f"{key}:curator:{slot}"
+            if curator == "dg":
+                if dg is None:
+                    raise ValueError("DG curator requires local endpoint")
+                result = dg.sample(request, prompt)
+            else:
+                result = provider.sample(request, prompt, curriculum)
+            action = parse_action(result["text"])
+            fallback = action not in choices
+            if fallback:
+                action = next(iter(choices))
+                fallback_count += 1
+            task = choices[action]
+            journal.event(request + ":decision", {
+                "type": "curator_decision", "method": curator, "slot": slot,
+                "choices": {a: t.key for a, t in choices.items()},
+                "prompt": prompt, "reply": result["text"], "selected": task.key,
+                "fallback": fallback,
+            })
+            selected.append(task.key)
+            remaining.remove(task)
+        method = curator if not fallback_count else curator + "_with_failure_first_fallback"
+    elif curator == "failure_first":
+        selected = [t.key for t in sorted(pool, key=lambda t: t.key not in misses)[:count]]
+        method = curator
     else:
         selected = [t.key for t in (rng.sample(pool, count) if curator == "random" else pool[:count])]
         method = curator
@@ -302,8 +329,8 @@ def train(
         raise ValueError("resumed optimizer requires the incumbent rank")
     state = incumbent["state"] if incumbent else None
     curriculum = active(journal, "curriculum", rnd)
-    rng = random.Random(rnd)
     for step in range(args.steps):
+        rng = random.Random(int(digest([rnd, role, step])[:16], 16))
         step_key = f"train:{rnd}:{role}:{step}"
         selected = choose_batch(
             journal, step_key + ":selection", pool, args.batch_size, args.curator, rng, dg, provider,
@@ -364,13 +391,16 @@ def rollout(
     args: argparse.Namespace, rnd: int, phase: str = "post",
 ) -> list[dict[str, Any]]:
     groups = min(args.groups, args.rollout_groups)
-    tasks = make_tasks(rnd, groups, "train")
+    # Never reuse advisory roots as clean training examples.
+    root_seed = rnd if journal.mode == "clean" else int(digest(["advisory", rnd])[:15], 16)
+    tasks = make_tasks(root_seed, groups, "train")
     before = rnd if phase == "pre" else rnd + 1
     snapshots = (advisory_registry(args.registry, before) if args.registry else
                  {role: active(journal, role, before) for role in ROLES})
     run = f"rollout-{rnd}-{phase}"
     journal.event(run + ":contract", {"type": "rollout_contract", "groups": groups,
-                  "snapshots": snapshots, "attempts": args.attempts, "phase": phase})
+                  "snapshots": snapshots, "attempts": args.attempts, "phase": phase,
+                  "root_seed": root_seed, "dg": args.dg_model_id})
 
     def actor(key: str, task: Task, prompt: str, history: list[dict[str, Any]]) -> dict[str, Any]:
         if dg and (not history or any("advisory_note" in h for h in history)):
@@ -391,7 +421,27 @@ def rollout(
             if route_action != task.role:
                 return {"actor": route_result["actor"], "text": "", "usage": route_result["usage"]}
         snapshot = snapshots[task.role]
-        return provider.sample(key + ":specialist", prompt, snapshot["sampler"] if snapshot else None)
+        suggestion = provider.sample(key + ":specialist", prompt, snapshot["sampler"] if snapshot else None)
+        if dg is None or not suggestion["text"]:
+            return suggestion
+        # The specialist is a proposal source. DG must make the final decision
+        # using public evidence. Record both actions, including disagreements.
+        revised_prompt = task.prompt([
+            *history,
+            {"specialist": task.role, "proposal": suggestion["text"][:2000],
+             "instruction": "Reconsider the evidence and choose your own action."},
+        ])
+        revision = dg.sample(key + ":revision", revised_prompt)
+        journal.event(key + ":specialist_revision", {
+            "type": "specialist_revision", "task_id": task.key,
+            "specialist_actor": suggestion["actor"], "specialist_reply": suggestion["text"],
+            "specialist_action": parse_action(suggestion["text"]),
+            "dg_actor": revision["actor"], "dg_reply": revision["text"],
+            "dg_action": parse_action(revision["text"]),
+            "specialist_grade": task.grade(parse_action(suggestion["text"])),
+            "dg_grade": task.grade(parse_action(revision["text"])),
+        })
+        return revision
     return [episode(t, journal, run, actor, args.attempts,
                     advisor.consult if advisor else None) for t in tasks]
 
@@ -407,7 +457,7 @@ def main() -> None:
     p.add_argument("--tinker-usd", type=float, default=0)
     p.add_argument("--fable-usd", type=float, default=0)
     p.add_argument("--fable-max-tokens", type=int, default=8192)
-    p.add_argument("--max-tokens", type=int, default=4096)
+    p.add_argument("--max-tokens", type=int, default=8192)
     p.add_argument("--dg-url")
     p.add_argument("--dg-model-id", default="")
     p.add_argument("--round", type=int, default=1)
@@ -423,7 +473,7 @@ def main() -> None:
     p.add_argument("--min-gain", type=float, default=0.05)
     p.add_argument("--attempts", type=int, default=3)
     p.add_argument("--role", choices=ROLES, default="curriculum")
-    p.add_argument("--curator", choices=("fixed", "random", "dg", "inky"), default="fixed")
+    p.add_argument("--curator", choices=("fixed", "random", "failure_first", "dg", "inky"), default="fixed")
     args = p.parse_args()
     if (args.round < 0 or not 1 <= args.rounds <= 1000 or not 1 <= args.groups <= 256
             or not 1 <= args.eval_groups <= 256 or not 1 <= args.rollout_groups <= 256
