@@ -1,7 +1,7 @@
 """Independent integer grader for offline SG-03 source-bound routing tasks."""
 from __future__ import annotations
 
-from itertools import combinations
+from itertools import combinations, pairwise
 from typing import Any
 
 
@@ -30,7 +30,7 @@ def validate(task: dict[str, Any]) -> tuple[int, int, list[int], list[int], list
         k = _vector(task["k"], t, 0, d)
         lam = _integer(task["lambda"], 0, 100)
         u = task["u"]
-        if not isinstance(u, list) or len(u) != t or any(a > b for a, b in zip(x, x[1:], strict=False)):
+        if not isinstance(u, list) or len(u) != t or any(a > b for a, b in pairwise(x)):
             raise TaskError("invalid utility shape or unsorted coordinates")
         return d, t, bits, x, k, [_vector(row, d, -10000, 10000) for row in u], lam
     except (KeyError, TypeError) as exc:
