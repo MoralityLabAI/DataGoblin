@@ -63,8 +63,22 @@ def test_native_distill_replay_if_available():
 
     packet = compile_research("adaptive_evidence", seed=9001, ordinal=0, difficulty="standard")
     assert canonical_digest(packet) == digest(packet)
-    # The native oracle reference shape is intentionally kept on the evaluator side.
-    assert callable(reference)
+    answers = []
+    for question in packet["questions"]:
+        if question["id"] == "case.solve":
+            fields = {f: "fixture rationale" for f in question["fields"]}
+            fields["answer"] = reference(packet["public_case"])
+            answers.append({"question_id": question["id"], "status": "answered", "fields": fields})
+        else:
+            answers.append({"question_id": question["id"], "status": "abstain",
+                            "fields": {"reason": "fixture certificate only"}})
+    response = {"schema_version": "distill.response.v2", "packet_id": packet["packet_id"],
+                "model": {"provider": "fixture", "revision": "v1", "run_id": "fixture-1"},
+                "answers": answers}
+    record = reference_record(packet, response)
+    assert record["training_admission"] is False
+    assert record["custody"] == "reference_only"
+    assert record["decision"] == reference(packet["public_case"])
     # Wrong schema must be rejected without any teacher transport.
     with pytest.raises(ValueError, match="native JSON"):
         reference_record(packet, {"schema_version": "distill.response.v1"})
