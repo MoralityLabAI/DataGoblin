@@ -1,0 +1,13 @@
+{
+ "counts": {
+  "preferences": 1270,
+  "repairs": 5471,
+  "sft": 11470
+ },
+ "files": {
+  "inky_preferences.jsonl": "676c66c0f6489a3d7de912131f9e40a06767a6f656431a9b8fed50a5b3e24766",
+  "inky_repair_traces.jsonl": "e06f4c11e5a082c5d7932c0854c7d8b65df7b9b8993f76cac01c0ac26580fa7d",
+  "inky_sft.jsonl": "3682ff07f89d55c9b048135bf142605555307032c338b0447c1216aeddf7bac4"
+ },
+ "note": "state prompts contain TRAIN-only features available before the decision; horizon outcomes are excluded"
+}
