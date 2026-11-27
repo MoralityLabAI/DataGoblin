@@ -16,7 +16,7 @@ This constructs distinct root families for the curriculum, routing, failure diag
 
 ## Live clean campaign
 
-Install the current official Tinker SDK/Cookbook on the controller. Keep credentials in the environment or an OS-managed secret store. Do not put keys in the repository or command-line arguments. Start the local llama.cpp completion server bound to loopback, with the actual Aleph checkpoint and an adequate context. The client does not assume a chat template or grant tool access.
+Install the current official Tinker SDK/Cookbook on the controller (SDK 0.38 or newer for future-returning client factories; API checked against 0.40.1). Keep credentials in the environment or an OS-managed secret store. Do not put keys in the repository or command-line arguments. Start the local llama.cpp completion server bound to loopback, with the actual Aleph checkpoint and an adequate context. The client does not assume a chat template or grant tool access.
 
 ```powershell
 python -m pip install tinker tinker-cookbook
@@ -25,11 +25,11 @@ python -m Agonist.tinker_live campaign --live --out runs/inky-clean --round 1 --
 
 Replace the placeholder model identity with the actual checkpoint digest. For the initial provider-only smoke test omit the two DG arguments and set --curator fixed. The amount is an example cumulative Tinker reservation ceiling, not a recommendation to spend or an actual provider balance.
 
-Each round starts with a rollout of the current policy, records failed decisions, curates unique training roots, fits role-specific LoRAs, saves optimizer and sampler snapshots, compares each candidate to the incumbent on a separate development namespace, and rolls out again. Promotion requires a positive development score delta, parse reliability, and zero unauthorized routing releases. These are development gates, not sealed evaluation. The curriculum adapter can be tested as curator with --curator inky. Its batch-selection interface is exploratory; invalid outputs fall back to independently identified failure-first selection with an explicit receipt. Fixed and random selectors are controls.
+Each round starts with a rollout of the current policy, records failed decisions, curates unique training roots, fits role-specific LoRAs, saves optimizer and sampler snapshots, compares each candidate to the incumbent on a separate development namespace, and rolls out again. Promotion requires a positive development score delta, parse reliability, and zero unauthorized routing releases. These are development gates, not sealed evaluation. The curriculum adapter can be tested as curator with --curator inky. The selection interface asks for one allowed action per slot and stores the full candidate mapping; invalid outputs fall back to failure-first selection with an explicit receipt. Fixed, random, and failure_first selectors are controls. The synthetic student-utility objective remains a proxy, so transfer to live LoRA selection is unproven. Clean observed failures become one independently labeled correction example per role/root; only allowlisted prior action IDs and recomputed failure codes enter its prompt. When DG is running, the specialist proposes and DG reconsiders; both grades and disagreements are retained. Sampling and SFT use effort 0.9; sampling temperature is 1.0. The default 8,192 generation tokens and 24,576 context ceiling can still truncate difficult examples. The default 5e-5 learning rate is provisional; sweep against the Cookbook model-specific get_lr starting point before scaling.
 
 ## Fable advisory study
 
-Only run if the operator has verified that the intended advisory use is permitted by provider terms. This path is an isolated inference experiment, with no training/export/admission of Fable outputs or Fable-influenced trajectories. It can read approved clean adapter checkpoint references. The clean lane cannot read the advisory journal.
+Only run if the operator has verified that the intended advisory use is permitted by provider terms. This path is an isolated inference experiment, with no training/export/admission of Fable outputs or Fable-influenced trajectories. It can read approved clean adapter checkpoint references. The clean lane cannot read the advisory journal. Advisory roots use a separate seed namespace.
 
 ```powershell
 python -m pip install anthropic
