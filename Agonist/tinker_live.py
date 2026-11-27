@@ -22,6 +22,7 @@ from Agonist.tinker_gym import (
     episode,
     make_tasks,
     parse_action,
+    training_example,
 )
 
 MODEL = "thinkingmachines/Inkling-2-Mini"
@@ -103,7 +104,8 @@ class Tinker:
             raise ValueError("advisory journal cannot train")
         if not tasks or len({t.root for t in tasks}) != len(tasks):
             raise ValueError("empty or repeated-root batch")
-        examples = [t.demonstration() for t in tasks]
+        round_id = int(key.split(":")[1])
+        examples = [training_example(t, self.journal, round_id) for t in tasks]
         data, tokens = [], 0
         for example in examples:
             model_input, weights = self.renderer.build_supervised_example(example["messages"], effort=EFFORT)
@@ -132,6 +134,7 @@ class Tinker:
             sampler = client.save_weights_for_sampler(name, ttl_seconds=ttl).result()
             return {
                 "state": full.path, "sampler": sampler.path, "task_ids": [t.key for t in tasks],
+                "correction_examples": sum(x["feedback_count"] > 0 for x in examples),
                 "rank": rank, "learning_rate": lr, "renderer": self.renderer_name,
                 "effort": EFFORT, "training_tokens": tokens,
                 "estimated_usd": 0.75 * tokens / 1_000_000,
