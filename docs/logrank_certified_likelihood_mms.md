@@ -1,0 +1,9 @@
+# Certified likelihood-tree repair for MMS
+
+Source: https://github.com/MoralityLabAI/LoopedTransformers/tree/4ba236bb3d79fd1d4ee62063998a6f501afe382c/experiments/logrank_bpd_15.
+
+15 implements exact integer subtree bounds on a shared observation trace. Compare individual-factor maxima, grouped residual factors and summation over an independent subset of residual masks. The 15B diagnostic chooses that subset using likelihood imbalance and matroid greedy. Disjoint prefix cells certify omitted posterior weight; the controller can expose a sound target interval even if local search has not converged. A confidence certificate is valid under the specified prior and noise model.
+
+At .15 noise and 4096 evaluated nodes, 24D retained mass lower bound .832 (independent), .901 (weighted); 48D .208 and .233. Weighted coverage is .414 and .229 respectively, with all covered predictions correct in this small sample. At .35 every method abstains. Most high-dimensional searches evaluate only the two warm-start leaves, despite thousands of bounded nodes. Weighted search at 48D takes .546s versus .282s for static independent selection. Node budgets are not memory or compute parity. 15B is adaptive on exposed worlds, not a prospective improvement claim.
+
+For MMS track W,L,U, frontier size, interval width per target, actual memory/RSS and CPU time. Define separate costs for expanding a prefix, evaluating a local factor, and acquiring a verifier observation. Retain uncertain states in the explicit partition; never use truncated normalization alone as a certificate. Use residual hypergraph components or bounded-width elimination to tighten omitted-weight bounds. Train a controller only after fresh development shows headroom over fixed-budget and greedy policies. Keep a uniform or abstain fallback, and do not release confirmation data. This note does not implement native DataGoblin or BPD integration.
