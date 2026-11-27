@@ -258,7 +258,7 @@ def evaluate(ds, arm, model, cap=CAP):
         k, scale = key(d) if arm != 'cold' else (None,1)
         obs = observe(hist,k,t) if economic or arm == 'checked_second' else None
         if k in cache:
-            payload, saving, val, last = cache[k]
+            payload, saving, val, _last = cache[k]
             v, p = json.loads(payload)
             v *= scale
             if replay(d,p) != v:
