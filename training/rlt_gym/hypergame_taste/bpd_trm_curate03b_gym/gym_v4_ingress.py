@@ -104,6 +104,9 @@ def run(export, out):
     rows = [json.loads(line) for line in raw.splitlines()]
     require(len(rows) == manifest['counts']['stage_rows'], 'stage count mismatch')
     require(all(r['provenance']['task'] in manifest['tasks'] for r in rows), 'unknown task')
+    require({(r['provenance']['task'], r['provenance']['root']) for r in rows}
+            == {(t, root) for t in manifest['tasks'] for root in manifest['roots']},
+            'incomplete task/root roster')
     partition, counts = audit(rows, manifest['roots'])
     out.mkdir(parents=True, exist_ok=True)
     outputs = {}
@@ -118,7 +121,8 @@ def run(export, out):
             outputs[name] = {'records': len(selected), 'sha256': hashlib.sha256(data).hexdigest()}
     result = {'schema': 'datagoblin-gym02-ingress-v4', 'source_stage_sha256': digest,
               'root_partition': partition, 'counts': counts, 'outputs': outputs,
-              'scope': 'development root-grouped dataset; only verified terminal preferences admitted to preference supervision; behavior separate'}
+              'scope': ('development root-grouped dataset; only verified terminal preferences '
+                        'admitted to preference supervision; behavior separate')}
     (out / 'ingress_receipt.json').write_bytes(canonical(result))
     return result
 
