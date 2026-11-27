@@ -74,7 +74,7 @@ class Task:
             "code": "ok" if valid and reward == best else "suboptimal" if valid else "invalid_action",
         }
 
-    def demonstration(self) -> dict[str, Any]:
+    def demonstration(self, feedback: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         if self.split != "train":
             raise ValueError("only train roots can produce SFT labels")
         return {
@@ -82,10 +82,11 @@ class Task:
             "root": self.root,
             "role": self.role,
             "messages": [
-                {"role": "user", "content": self.prompt()},
+                {"role": "user", "content": self.prompt(feedback)},
                 {"role": "assistant", "content": canonical({"action": self.gold, "note": "Verified action."})},
             ],
             "provenance": "independent_original_fixture_oracle",
+            "feedback_count": len(feedback or []),
         }
 
 
@@ -293,6 +294,37 @@ class Journal:
             ],
             "events": len(self.events()),
         }
+
+
+def training_example(task: Task, journal: Journal, round_id: int) -> dict[str, Any]:
+    """Construct a single independently labeled correction example from a clean rollout.
+
+    Only allowlisted action IDs and recomputed failure codes cross into SFT. No
+    free-form actor reply, note, advisory content or development result is copied.
+    A fresh root without an observed error uses the ordinary demonstration.
+    """
+    if journal.mode != "clean" or task.split != "train":
+        raise ValueError("SFT requires a clean train root")
+    run = f"rollout-{round_id}-pre"
+    key = f"episode:{run}:{task.key}"
+    contract = journal.get_event(key + ":contract")
+    feedback = []
+    if contract is not None:
+        if contract["advisory"] or contract["task_hash"] != digest([task.public, task.scores]):
+            raise ValueError("incompatible or advisory episode contract")
+        for i in range(min(contract["attempt_limit"], 8)):
+            record = journal.get_event(f"{key}:{i}")
+            if record is None:
+                break
+            # An arbitrary generated string is not an admissible action ID.
+            action = record["action"] if record["action"] in task.scores else None
+            grade = task.grade(action)
+            if grade["code"] != record["code"] or grade["success"] != record["success"]:
+                raise ValueError("attempt verifier receipt mismatch")
+            if grade["success"]:
+                break
+            feedback.append({"action": action, "code": grade["code"]})
+    return task.demonstration(feedback)
 
 
 def episode(
