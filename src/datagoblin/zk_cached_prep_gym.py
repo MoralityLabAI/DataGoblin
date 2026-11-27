@@ -161,8 +161,11 @@ theorem original_well_formed : wellFormed originalShape := by
     for row in shape["rows"]:
         n = sum(map(len, row))
         proof += "    · subst r\n      intro t ht\n"
-        proof += ("      simp only [List.append_cons, List.nil_append, List.mem_cons, "
-                  "List.not_mem_nil, or_false] at ht\n")
+        # Reduce the concrete append by definitional equality before membership cases.
+        terms = [t for comb in row for t in comb]
+        literal = ", ".join(f"⟨{i}, {v}⟩" for i, v in terms)
+        proof += f"      change t ∈ ([{literal}] : List Term) at ht\n"
+        proof += "      simp only [List.mem_cons, List.not_mem_nil, or_false] at ht\n"
         if n == 1:
             proof += "      subst t\n      decide\n"
         elif n > 1:
