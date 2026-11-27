@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "scope": "SYNTHETIC_FIXED_STATE_ONLY; oracle alpha is diagnostic, not an online policy",
+  "checks": {
+    "16_uniform": {
+      "hit_count": 15,
+      "alpha_oracle": 0.9754257592717624,
+      "variance_ratio": 0.7847162576034327,
+      "max_bias": 2.905661822261152e-17
+    },
+    "16_nonuniform": {
+      "hit_count": 15,
+      "alpha_oracle": 0.991224086898752,
+      "variance_ratio": 0.9359744142103956,
+      "max_bias": 2.2551405187698492e-17
+    },
+    "64_uniform": {
+      "hit_count": 63,
+      "alpha_oracle": 0.9218885476337394,
+      "variance_ratio": 0.3330843028696932,
+      "max_bias": 4.163336342344337e-17
+    },
+    "64_nonuniform": {
+      "hit_count": 63,
+      "alpha_oracle": 0.7469922142868933,
+      "variance_ratio": 0.47020729542755046,
+      "max_bias": 5.551115123125783e-17
+    },
+    "signal_dictionary": {
+      "rank": 4,
+      "alpha_oracle": 0.9526143355620659,
+      "variance_ratio": 0.2985016958093494
+    },
+    "random_dictionary": {
+      "rank": 4,
+      "alpha_oracle": 0.8271478863664992,
+      "variance_ratio": 0.8455949169122695
+    }
+  }
+}

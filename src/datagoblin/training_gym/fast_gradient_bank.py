@@ -17,6 +17,10 @@ from typing import Any
 
 import numpy as np
 
+SIGNED_HASH = "torch_signed_v1"
+UNSIGNED_HASH = "numpy_unsigned_v0"
+HASH_SCHEMES = (SIGNED_HASH, UNSIGNED_HASH)
+
 LEDGER_BUCKETS = (
     "train",
     "map",
@@ -80,21 +84,33 @@ class CostLedger:
                 p_bucket, _, _ = self._stack[-1]
                 self._stack[-1] = (p_bucket, end_w, end_c)
 
+    def _snapshot(self) -> tuple[dict[str, float], dict[str, float]]:
+        """Include accrued work in the currently active scope, without mutating the ledger."""
+        cpu, wall = dict(self.cpu), dict(self.wall)
+        if self._stack:
+            bucket, start_w, start_c = self._stack[-1]
+            wall[bucket] += max(0.0, time.perf_counter() - start_w)
+            cpu[bucket] += max(0.0, time.process_time() - start_c)
+        return cpu, wall
+
     @property
     def total_cpu_seconds(self) -> float:
-        return float(sum(self.cpu.values()))
+        cpu, _ = self._snapshot()
+        return float(sum(cpu.values()))
 
     @property
     def total_wall_seconds(self) -> float:
-        return float(sum(self.wall.values()))
+        _, wall = self._snapshot()
+        return float(sum(wall.values()))
 
     def receipt(self) -> dict[str, Any]:
+        cpu, wall = self._snapshot()
         return {
-            "cpu_seconds": {k: round(v, 6) for k, v in self.cpu.items()},
-            "wall_seconds": {k: round(v, 6) for k, v in self.wall.items()},
+            "cpu_seconds": {k: round(v, 6) for k, v in cpu.items()},
+            "wall_seconds": {k: round(v, 6) for k, v in wall.items()},
             "calls": dict(self.calls),
-            "total_cpu_seconds": round(self.total_cpu_seconds, 6),
-            "total_wall_seconds": round(self.total_wall_seconds, 6),
+            "total_cpu_seconds": round(sum(cpu.values()), 6),
+            "total_wall_seconds": round(sum(wall.values()), 6),
         }
 
 
@@ -106,7 +122,12 @@ class FastGradientBank:
     NumPy passes with zero per-page Python loops.
     """
 
-    def __init__(self, mib: float, shape: tuple[int, ...]) -> None:
+    def __init__(
+        self, mib: float, shape: tuple[int, ...], *, hash_scheme: str = SIGNED_HASH
+    ) -> None:
+        if hash_scheme not in HASH_SCHEMES:
+            raise ValueError("unknown MMS hash scheme")
+        self.hash_scheme = hash_scheme
         if not math.isfinite(mib) or mib <= 0:
             raise ValueError("positive finite MMS budget required")
         self.shape = tuple(int(d) for d in shape)
@@ -145,10 +166,16 @@ class FastGradientBank:
         k = np.asarray(keys, dtype=np.int64).reshape(-1)
         if k.size and bool((k < 0).any()):
             raise ValueError("negative MMS key")
-        # Unsigned 64-bit Knuth-style multiplicative hash modulo capacity
+        # Legacy Torch multiplies in signed int64, wrapping modulo 2**64,
+        # then applies a nonnegative remainder. Unsigned v0 is retained for
+        # explicit historical replay; it has a different collision relation.
         with np.errstate(over="ignore"):
-            prod = k.astype(np.uint64) * np.uint64(6364136223846793005)
-        slots = (prod % np.uint64(self.capacity)).astype(np.int64)
+            if self.hash_scheme == SIGNED_HASH:
+                prod = k * np.int64(6364136223846793005)
+                slots = np.remainder(prod, self.capacity)
+            else:
+                prod = k.astype(np.uint64) * np.uint64(6364136223846793005)
+                slots = (prod % np.uint64(self.capacity)).astype(np.int64)
         return k, slots
 
     def read(self, keys: np.ndarray, step: int, max_age: int) -> tuple[np.ndarray, np.ndarray]:
@@ -195,6 +222,7 @@ class FastGradientBank:
     def state_dict(self) -> dict[str, Any]:
         return {
             "shape": self.shape,
+            "hash_scheme": self.hash_scheme,
             "capacity": self.capacity,
             "budget_bytes": self.budget_bytes,
             "data": self.data.copy(),
@@ -215,17 +243,40 @@ class FastGradientBank:
             or int(state["budget_bytes"]) != self.budget_bytes
         ):
             raise ValueError("MMS checkpoint budget/shape mismatch")
-        self.data = np.array(state["data"], dtype=np.uint16, copy=True)
-        self.tags = np.array(state["tags"], dtype=np.int64, copy=True)
-        self.age = np.array(state["age"], dtype=np.int64, copy=True)
-        for field in ("hits", "queries", "writes", "collisions", "stale_misses", "same_step_skips"):
-            setattr(self, field, int(state[field]))
-        if self.allocated_bytes > self.budget_bytes:
-            raise ValueError("MMS checkpoint exceeds budget")
+        # Historical unversioned FastGradientBank states used unsigned hashing.
+        # Do not silently resume them under a different collision policy.
+        if state.get("hash_scheme", UNSIGNED_HASH) != self.hash_scheme:
+            raise ValueError("MMS checkpoint hash scheme mismatch")
+        arrays = (
+            (state["data"], np.dtype(np.uint16), (self.capacity, *self.shape)),
+            (state["tags"], np.dtype(np.int64), (self.capacity,)),
+            (state["age"], np.dtype(np.int64), (self.capacity,)),
+        )
+        for array, dtype, shape in arrays:
+            if not isinstance(array, np.ndarray) or array.dtype != dtype or array.shape != shape:
+                raise ValueError("invalid MMS checkpoint array shape or dtype")
+        data, tags, age = (a for a, _, _ in arrays)
+        occupied = tags >= 0
+        if bool((tags < -1).any()) or bool((age[~occupied] != -1).any()) or bool((age[occupied] < 0).any()):
+            raise ValueError("invalid MMS checkpoint tag/age")
+        _, slots = self._slots(tags[occupied])
+        if not np.array_equal(slots, np.flatnonzero(occupied)):
+            raise ValueError("MMS checkpoint tag does not match its hash slot")
+        fields = ("hits", "queries", "writes", "collisions", "stale_misses", "same_step_skips")
+        counters = {field: state[field] for field in fields}
+        if any(type(v) is not int or v < 0 for v in counters.values()):
+            raise ValueError("invalid MMS checkpoint counter")
+        if data.nbytes + tags.nbytes + age.nbytes > self.budget_bytes:
+            raise ValueError("MMS checkpoint exceeds payload budget")
+        # Validate before mutating live state; temporary copy memory is additional.
+        self.data, self.tags, self.age = data.copy(), tags.copy(), age.copy()
+        for field, value in counters.items():
+            setattr(self, field, value)
 
     def receipt(self) -> dict[str, Any]:
         return {
             "budget_bytes": self.budget_bytes,
+            "hash_scheme": self.hash_scheme,
             "allocated_bytes": self.allocated_bytes,
             "owned_array_bytes": self.owned_array_bytes,
             "capacity": self.capacity,
