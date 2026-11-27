@@ -248,6 +248,24 @@ frozen +0.05 comparative gate denied confirmation; all 12 capped receipts and
 the label-blind stop audit passed, and no heldout label was opened. See
 [`docs/ldt_adapter_receipt_sorter_v16.md`](docs/ldt_adapter_receipt_sorter_v16.md).
 
+## Data Goblin GDK app: the hill climb
+
+[`gdk/`](gdk/README.md) holds `data-goblin`, a Goose GDK app (goose-agent 0.1.0-alpha.14) in which a local
+model runs DataGoblin's hill climb one gated move at a time: an adapter on the driver model itself, looped
+and recurrent modules, new evals and rollouts built by bigger local models (Agonist), curation of training
+data, and other suite runs. Its skill,
+[`gdk/skills/datagoblin-hillclimb/SKILL.md`](gdk/skills/datagoblin-hillclimb/SKILL.md), structures each
+move; the hill-climb MCP server in [`src/datagoblin/hillclimb`](src/datagoblin/hillclimb) runs the
+allowlisted recipes in [`configs/hillclimb/lanes.json`](configs/hillclimb/lanes.json), reads metric
+values from run artifacts, applies each lane's frozen gate and keeps a hash-chained ledger.
+
+```bash
+cd gdk && cargo build --release
+./target/release/data-goblin climb --root .. --lane looped_modules --moves 3 \
+    --base-url http://127.0.0.1:18090/v1 --model inkling-2-mini --approve ledger
+python -m datagoblin.hillclimb --lane looped_modules   # ledger state
+```
+
 ## Optional HRM-Text cycle milestone
 
 The optional milestone asks whether recurrent update summaries rank and calibrate constitutional-verdict errors. It does

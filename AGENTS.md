@@ -10,3 +10,4 @@
 - Upstream repositories are read-only references. Do not copy unlicensed source or mutate upstream files.
 - When the human provides research taste for storyworld or videogame experimentation, use `Agonist/SKILL.md` and its offline `Agonist/gym.py` verifier before proposing a live Inkling worker.
 - For student-uplift curation experiments after AGN-01 world verification, follow `Agonist/skills/agonist02/SKILL.md` and preserve evaluation-root custody.
+- To hill-climb DataGoblin lanes (adapter on the driver model, looped modules, Agonist evals and rollouts from bigger local models, curation) from a local model, use the Data Goblin GDK app in `gdk/` and its skill `gdk/skills/datagoblin-hillclimb/SKILL.md`. Recipes, gates and the ledger live in `configs/hillclimb/lanes.json` and `src/datagoblin/hillclimb`; add a recipe there rather than a new driver script.
