@@ -26,3 +26,6 @@ hf-cache/
 sealed_steward/
 sealed_labels.jsonl
 .env
+
+# Data Goblin GDK app (Rust build output)
+gdk/target/

@@ -1,0 +1,53 @@
+name: Data Goblin GDK app
+
+on:
+  pull_request:
+    paths:
+      - "gdk/**"
+      - "src/datagoblin/hillclimb/**"
+      - "configs/hillclimb/**"
+      - "tests/unit/test_hillclimb.py"
+      - ".github/workflows/datagoblin-gdk.yml"
+  push:
+    branches: [master]
+    paths:
+      - "gdk/**"
+      - "src/datagoblin/hillclimb/**"
+      - "configs/hillclimb/**"
+      - "tests/unit/test_hillclimb.py"
+      - ".github/workflows/datagoblin-gdk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install DataGoblin
+        run: python -m pip install -e ".[dev,rlt-pilot]"
+      - name: Lint the hill-climb server and tests
+        run: ruff check src/datagoblin/hillclimb tests/unit/test_hillclimb.py gdk/ci_smoke.py
+      - name: Hill-climb server tests (gate, custody, ledger chain, recipes, Agonist worker, bench, MCP framing)
+        run: python -m pytest tests/unit/test_hillclimb.py
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: gdk
+      - name: Build data-goblin against goose-agent 0.1.0-alpha.14
+        working-directory: gdk
+        run: cargo build --release --locked || cargo build --release
+      - name: Unit tests (skills and the text tool protocol)
+        working-directory: gdk
+        run: cargo test --release --locked || cargo test --release
+      - name: GDK app against a scripted OpenAI-compatible endpoint (one real looped-modules move)
+        run: python gdk/ci_smoke.py gdk/target/release/data-goblin --python python

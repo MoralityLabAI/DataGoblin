@@ -1,0 +1,33 @@
+[package]
+name = "datagoblin-gdk"
+version = "0.1.0"
+edition = "2021"
+description = "Data Goblin, a Goose GDK app: a goose-agent state machine that runs the DataGoblin hill climb (adapters on its own model, looped modules, Agonist evals and rollouts from bigger local models, curation) through the hill-climb MCP tools and GDK skills"
+publish = false
+
+[lib]
+name = "datagoblin_gdk"
+path = "src/lib.rs"
+
+[[bin]]
+name = "data-goblin"
+path = "src/main.rs"
+
+[dependencies]
+# Goose GDK, pinned to the release the goblin GDK apps (HybridTRMLDT MCP/goose_gdk_app) and BitAgent desktop/ use.
+goose-agent = "=0.1.0-alpha.14"
+goose-providers = "=0.1.0-alpha.14"
+goose-provider-types = "=0.1.0-alpha.14"
+goose-sdk-types = { version = "=0.1.0-alpha.14", default-features = false }
+rmcp = { version = "3.11", default-features = false }
+anyhow = "1"
+async-trait = "0.1"
+# goose-provider-types calls chrono::Utc::now() without enabling chrono's clock feature itself.
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "process", "io-util", "sync", "time", "fs"] }
+tokio-util = "0.7"
+uuid = { version = "1", features = ["v4"] }
+
+[profile.release]
+strip = true
