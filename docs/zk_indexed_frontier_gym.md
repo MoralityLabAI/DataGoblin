@@ -25,3 +25,13 @@ No model calls, new training or production modification. The prior
 ZKL-12 kernel and six generated F7/BN254 certificates passed the pinned
 SatsHedgeZero workflow 46003036146. ZKL-15 per-case certificates still
 require kernel replay before any stronger claim.
+
+## Hosted result
+
+Workflow [46008666326](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46008666326)
+passed both regression tests and both 32-task blocks. All 128 paired traces,
+certificates, column counts and elimination work matched. At 24 columns,
+scan/indexed dynamic scores were 192624/28122 and process CPU seconds were
+0.425545/0.252163. At 96 columns, scores were 567600/29997 and CPU seconds
+0.877560/0.276313. The indexed arm adds 74800 postings per budget; peak heap
+was 448 entries. These are descriptive hosted measurements, not an RSS claim.
