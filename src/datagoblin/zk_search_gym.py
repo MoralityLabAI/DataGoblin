@@ -104,7 +104,7 @@ def features(problem):
 
 
 def dot(weights, values):
-    return sum(w*v for w, v in zip(weights, values))
+    return sum(w*v for w, v in zip(weights, values, strict=True))
 
 
 def heuristic(f):
@@ -154,7 +154,7 @@ def run(problem, arm, budget, weights=None, seed=0):
         if arm == "shuffled":
             vals = list(scores.values())
             rng.shuffle(vals)
-            scores = dict(zip(keys, vals))
+            scores = dict(zip(keys, vals, strict=True))
     elif arm == "peel_local":
         scores = {key: 10*int(key[0] in active and set(key[1]) <= core) - len(key[1]) for key in keys}
     else:
@@ -215,7 +215,7 @@ def train(roots):
         for f, label in batch:
             score = max(-30.0, min(30.0, dot(weights, f)))
             err = label - 1/(1+math.exp(-score))
-            weights = [w + 0.08*(err*v - 0.001*w) for w, v in zip(weights, f)]
+            weights = [w + 0.08*(err*v - 0.001*w) for w, v in zip(weights, f, strict=True)]
     return weights, {"positive_labels": len(positives), "negative_labels": len(negatives),
                      "training_reference_columns": sum(costs), "sgd_updates": 48*len(positives)}
 
