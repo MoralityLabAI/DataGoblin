@@ -133,13 +133,41 @@ def summarize(result):
     return out
 
 
-CLOSED = """
+def closed_source(shape):
+    # Each membership hypothesis reduces to a right-associated disjunction
+    # of equalities. Generate the exact number of alternatives from the shape.
+    def cases(n):
+        if n < 1:
+            raise ValueError("empty membership proof requires a separate branch")
+        return " | ".join(["h"]*n)
+
+    proof = """
 set_option maxRecDepth 4096 in
 set_option maxHeartbeats 4000000 in
 theorem original_well_formed : wellFormed originalShape := by
-  simp [wellFormed, originalShape, List.forall_mem_cons, List.forall_mem_nil]
-  all_goals decide
-
+  unfold wellFormed
+  refine ⟨by decide, by decide, ?_, by decide, ?_⟩
+  · intro i hi
+    simp only [originalShape, List.mem_cons, List.not_mem_nil, or_false] at hi
+"""
+    if len(shape["public"]) == 1:
+        proof += "    subst i\n    decide\n"
+    else:
+        proof += f"    rcases hi with {cases(len(shape['public']))} <;> subst i <;> decide\n"
+    proof += """  · intro r hr
+    simp only [originalShape, List.mem_cons, List.not_mem_nil, or_false] at hr
+"""
+    proof += f"    rcases hr with {cases(len(shape['rows']))}\n"
+    for row in shape["rows"]:
+        n = sum(map(len, row))
+        proof += "    · subst r\n      intro t ht\n"
+        proof += "      simp only [List.append_cons, List.nil_append, List.mem_cons, List.not_mem_nil, or_false] at ht\n"
+        if n == 1:
+            proof += "      subst t\n      decide\n"
+        elif n > 1:
+            proof += f"      rcases ht with {cases(n)} <;> subst t <;> decide\n"
+        # For a zero-term row, simp closes the contradictory hypothesis.
+    return proof + """
 theorem exact_poly_delete_closed (x : List Nat) :
     accepts originalShape x ↔ accepts replacementShape x :=
   exact_poly_delete original_well_formed x
@@ -171,7 +199,7 @@ def emit_replay(results, out):
             source, receipt = generate(problem.original, problem.replacement, cert, *problem.hashes)
             if not receipt["exact_identity_checked"]:
                 raise AssertionError("generator did not reverify certificate")
-            source += CLOSED
+            source += closed_source(problem.original)
             stem = f"{family}_{'f11' if p == 11 else 'bn254'}"
             path = out / f"{stem}.lean"
             path.write_text(source, encoding="utf-8")
