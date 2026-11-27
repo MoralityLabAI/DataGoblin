@@ -59,7 +59,6 @@ class SelectiveCorrector:
         top = np.sort(probs)[-2:]
         if top[1] - top[0] < self.threshold:
             self.corrected_calls += 1
-            # Reuse existing logits via one forward call when available.
             # The native corrector's predict recomputes the TRM; count that cost.
             return self.corrector.predict(feat)
         return label, probs
@@ -142,7 +141,6 @@ class ResearchController(V21Controller):
             return schema_repair(kwargs["case"], kwargs["raw_text"], kwargs["remaining"])
         if (self.v22_mode.endswith("_no_persona")
                 and kwargs["case"]["family"] == "persona_externalization"):
-            obj = _try_parse_json_obj(kwargs["raw_text"])
             state = kwargs["state"]
             if state.matched_pairs:
                 # Leave the final persona answer to the actor, keeping upstream routing.
