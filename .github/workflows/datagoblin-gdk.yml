@@ -42,7 +42,7 @@ jobs:
       - name: Hill-climb server tests without the vramorama client (recipes run uncapped)
         run: python -m pytest tests/unit/test_hillclimb.py tests/unit/test_hillclimb_resources.py
       - name: Install the vramorama Python client (pinned; standard library only)
-        run: python -m pip install "vramorama @ git+https://github.com/patrickdugan/vramorama@438323a#subdirectory=python"
+        run: python -m pip install "vramorama @ git+https://github.com/patrickdugan/vramorama@1dacbc5#subdirectory=python"
       - name: Hill-climb server tests with every recipe under its RAM cap (RLIMIT_AS on Linux)
         run: python -m pytest tests/unit/test_hillclimb.py tests/unit/test_hillclimb_resources.py
       - uses: dtolnay/rust-toolchain@stable

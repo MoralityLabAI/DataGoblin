@@ -72,3 +72,11 @@ def test_a_recipe_runs_under_its_ram_cap(tmp_path: Path, monkeypatch: pytest.Mon
     assert resources["managed"] and resources["mode"] == "ramcap" and resources["limit_mib"] == 1024
     assert resources["admitted"] is True and resources["limit_hit"] in (False, None)
     assert "vramorama.ramcap" in service.ledger.read()[-1]["body"]["argv"]
+
+
+def test_loopback_recipes_never_ask_for_gpu_memory() -> None:
+    # They only send HTTP to a server something else already holds, often from inside that server's
+    # vramorama lease (an adaptergym eval step); a vram request there would queue a nested lease.
+    registry = Registry.load()
+    loopback = {name: recipe.resources for name, recipe in registry.recipes.items() if recipe.tier == "loopback"}
+    assert loopback and not any(resources.get("vram") for resources in loopback.values()), loopback
