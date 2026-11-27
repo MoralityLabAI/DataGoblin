@@ -227,8 +227,8 @@ def train(roots):
             while todo and not state.solved:
                 remaining = set(state.remaining)
 
-                def teacher(key, rem=remaining, active=frontier, rows=visited):
-                    d = dynamic(key, supports, rem, active, rows)
+                def teacher(key, rem=remaining, active=frontier, rows=visited, sup=supports):
+                    d = dynamic(key, sup, rem, active, rows)
                     return (4*d[0] + d[1] - d[2], key)
 
                 key = max(todo, key=teacher)
