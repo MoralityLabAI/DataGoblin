@@ -1,0 +1,161 @@
+"""MM05 registered budget comparison. Oracle only for audit, train and scoring."""
+import argparse
+import hashlib
+import json
+import math
+from collections import Counter
+from pathlib import Path
+import zipfile
+import importlib.util
+import numpy as np
+
+BUDGETS = (0,1,2,4,8,16,32,128)
+POLICIES = ('serial','rr','serial_stop','rr_stop','serial_cache','rr_cache','ridge_stop')
+PIN = '9c4bcad276eab5f8b17b231a4543cfe185c19c95cfb7940780dd1de265610c12'
+
+
+def load_mm04(path):
+    spec=importlib.util.spec_from_file_location('mm04',path)
+    mod=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def load_fresh(path,m):
+    with zipfile.ZipFile(path) as z:
+        receipt=json.loads(z.read('receipt.json'))
+        m.require(receipt['schema']=='mm05-family-v1' and receipt['source_sha256']==PIN,'source')
+        m.require(receipt['window']==[601,2400],'window')
+        for name,h in receipt['artifact_sha256'].items():
+            m.require(hashlib.sha256(z.read(name)).hexdigest()==h,'hash '+name)
+        x=[json.loads(s) for s in z.read('inputs.jsonl').splitlines()]
+        y={a['id']:a for a in map(json.loads,z.read('oracle.jsonl').splitlines())}
+        manifest={a['id']:a for a in map(json.loads,z.read('family_manifest.jsonl').splitlines())}
+        prefix=z.read('expanded-prefix.mm')
+        c=json.loads(z.read('expanded-c.json'))['certificate']
+        m.require(c['verified'] and not c['contradictory_summary'] and c['sha256']==hashlib.sha256(prefix).hexdigest(),'C receipt')
+        m.require('No errors were found.' in z.read('expanded-python.log').decode(),'Python receipt')
+    m.require(len(x)==len(y) and {r['id'] for r in x}==set(y),'row coverage')
+    seen={}
+    prior={r['family'] for r in manifest.values() if r['source_index']<=600}
+    for r in x:
+        q=manifest[r['id']]; f=r['family']; s=r['split']
+        m.require(601<=r['source_index']<=2400 and f not in prior,'spent leakage')
+        m.require(q['split']==s and q['family']==f and q['source_index']==r['source_index'],'manifest')
+        m.require(seen.setdefault(f,s)==s,'family leakage')
+    m.require(dict(Counter(r['split'] for r in x))==receipt['splits'],'split counts')
+    return x,y,m.parse(prefix.decode('ascii'))
+
+
+def feat(x,stack,k,rank,bank,m):
+    top=stack[-1] if stack else []
+    n=len(x['suffix'])
+    return np.array([1.,float(top==x['target']),m.similarity(top,x['target']),
+                     math.log1p(len(stack))/6,math.log1p(len(top))/6,
+                     math.log1p(n-k)/6,k/max(1,n),rank/max(1,bank-1)])
+
+
+def fit(contexts,m):
+    A=np.eye(8); B=np.zeros((8,2)); samples=0; roots=0
+    for x,initial,trace,rank,full in contexts:
+        if x['split']!='train':
+            continue
+        rows=[]
+        for j,a in enumerate(rank):
+            h=trace[a]
+            for k,s in enumerate(h[:-1]):
+                if s is not None:
+                    rows.append((feat(x,s,k,j,len(rank),m),[float(full[a]),math.log1p(len(h)-1-k)]))
+        if not rows:
+            continue
+        roots+=1; samples+=len(rows)
+        F=np.stack([r[0] for r in rows]); Y=np.array([r[1] for r in rows]); w=1/len(rows)
+        A+=w*F.T@F; B+=w*F.T@Y
+    return np.linalg.solve(A,B),roots,samples
+
+
+def run_one(ctx,budget,policy,W,m):
+    x,initial,trace,rank,full=ctx
+    positions=dict.fromkeys(rank,0); used=hits=0; cache={}; cursor=0
+    stop=policy.endswith('_stop') or policy.endswith('_cache')
+    cached=policy.endswith('_cache')
+    rank_idx={a:i for i,a in enumerate(rank)}
+    def info(a):
+        return m.state(x,positions[a],trace[a])
+    while used<budget:
+        states={a:info(a) for a in rank}
+        if stop and any(s[3] for s in states.values()):
+            break
+        live=[a for a in rank if not states[a][2] and not states[a][3]]
+        if not live:
+            break
+        if policy=='ridge_stop':
+            def score(a):
+                k,s,_,_=states[a]
+                p,c=feat(x,s,k,rank_idx[a],len(rank),m)@W
+                return float(np.clip(p,0,1)/np.exp(np.clip(c,0,10)))
+            a=max(live,key=score)
+        elif policy.startswith('serial'):
+            a=live[0]
+        else:
+            a=next(rank[(cursor+j)%len(rank)] for j in range(len(rank)) if rank[(cursor+j)%len(rank)] in live)
+            cursor=(rank_idx[a]+1)%len(rank)
+        k,s,_,_=states[a]
+        key=(k,tuple(tuple(t) for t in s))
+        result=trace[a][k+1]
+        if cached and key in cache:
+            m.require(cache[key]==result,'cache invariant disagreement')
+            hits+=1
+        else:
+            used+=1
+            if cached:
+                cache[key]=result
+        positions[a]+=1
+    info_map={a:info(a) for a in rank}
+    survivors=[a for a in rank if not info_map[a][2]]
+    choice=next((a for a in survivors if info_map[a][3]),survivors[0] if survivors else None)
+    cert=choice is not None and info_map[choice][3]
+    return choice,cert,used,hits
+
+
+def evaluate(contexts,oracle,W,m):
+    results={}
+    for split in sorted({c[0]['split'] for c in contexts}):
+        cs=[c for c in contexts if c[0]['split']==split]
+        out={}
+        for policy in POLICIES:
+            budgets={}
+            for b in BUDGETS:
+                count=Counter()
+                for ctx in cs:
+                    x=ctx[0]
+                    choice,cert,cost,hits=run_one(ctx,b,policy,W,m)
+                    valid=choice in oracle[x['id']]['accepted_actions']
+                    m.require(not cert or valid,'false certificate')
+                    count.update(n=1,correct=int(valid),certified=int(cert),transitions=cost,cache_hits=hits,
+                                 unresolved=int(choice is not None and not cert),local_checks=len(x['candidates']))
+                budgets[str(b)]=dict(count)
+            out[policy]=budgets
+        results[split]=out
+    return results
+
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('archive',type=Path);p.add_argument('--mm04',type=Path,required=True)
+    p.add_argument('--fresh',action='store_true');p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+    m=load_mm04(a.mm04)
+    x,y,db=load_fresh(a.archive,m) if a.fresh else m.load(a.archive)
+    contexts,checks=m.prepare(x,y,db)
+    W,roots,samples=fit(contexts,m)
+    result={'schema':'mm05-schedule-v1','archive_sha256':hashlib.sha256(a.archive.read_bytes()).hexdigest(),
+            'scope':'fresh public alpha-family split' if a.fresh else 'spent public MM04 replay',
+            'candidate_checks':checks,'full_replay_disagreements':0,'fit_roots':roots,'fit_states':samples,
+            'weights':W.tolist(),'results':evaluate(contexts,y,W,m)}
+    a.out.write_text(json.dumps(result,indent=2)+'\n')
+    print(json.dumps({k:v for k,v in result.items() if k!='results'},indent=2))
+    for split,pols in result['results'].items():
+        print(split, {p:{b:pols[p][b] for b in ['4','16','128']} for p in POLICIES})
+
+
+if __name__=='__main__':
+    main()
