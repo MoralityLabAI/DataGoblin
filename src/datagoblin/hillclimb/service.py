@@ -11,7 +11,6 @@ import hashlib
 import json
 import math
 import os
-import shutil
 import subprocess
 import sys
 import time
@@ -35,6 +34,7 @@ from .lanes import (
     tier_rank,
 )
 from .ledger import Ledger, MoveState, State, gate_verdict, lane_eligible
+from .resources import EXIT_NO_ROOM, ResourceManager
 
 WRITE_TOOLS = frozenset({"propose_move", "run_recipe", "record_result", "decide", "abandon_move"})
 MAX_HYPOTHESIS = 1200
@@ -254,6 +254,7 @@ class Service:
         self.python = python or sys.executable
         self.adaptergym_python = os.environ.get("DATAGOBLIN_ADAPTERGYM_PYTHON", "python")
         self.roots = self.registry.resolve_roots(self.root)
+        self.resources = ResourceManager(self.root)
         self._handlers: dict[str, Callable[..., dict[str, Any]]] = {
             "suite_status": self.suite_status,
             "ledger_status": self.ledger_status,
@@ -373,29 +374,6 @@ class Service:
         with ThreadPoolExecutor(max_workers=min(8, len(urls))) as pool:
             return list(pool.map(self._probe, urls))
 
-    def _gpu(self) -> dict[str, Any] | None:
-        exe = shutil.which("vramorama")
-        if exe is None:
-            return None
-        try:
-            done = subprocess.run([exe, "ps", "--json"], capture_output=True, text=True, timeout=20,
-                                  stdin=subprocess.DEVNULL, check=False)
-            data = json.loads(done.stdout)
-        except (OSError, ValueError, subprocess.TimeoutExpired):
-            return {"available": False}
-        adapters = []
-        for adapter in data.get("adapters", []):
-            procs = sorted(adapter.get("procs", []), key=lambda p: -int(p.get("mib") or 0))[:8]
-            adapters.append({
-                "name": adapter.get("name"), "total_mib": adapter.get("total_mib"),
-                "used_mib": adapter.get("used_mib"),
-                "free_mib": (adapter.get("total_mib") or 0) - (adapter.get("used_mib") or 0),
-                "holders": [{"mib": p.get("mib"), "label": p.get("label") or p.get("owner") or p.get("name")}
-                            for p in procs],
-            })
-        return {"available": True, "adapters": adapters,
-                "rule": "One queued GPU job per session; launch GPU work only through vramorama leases."}
-
     def _resolve_path(self, value: str, kind: str | None, state: State) -> Path:
         if value.startswith("run:"):
             run_id, _, sub = value[4:].partition("/")
@@ -435,7 +413,7 @@ class Service:
             "lanes": [self._lane_view(lane_id, state) for lane_id in self.registry.lanes],
             "external_roots": {name: (p.as_posix() if p else None) for name, p in self.roots.items()},
             "endpoints": self._endpoints(),
-            "gpu": self._gpu(),
+            "resources": self.resources.status(),
         }
 
     def ledger_status(self, lane: str | None = None, last: int = 10) -> dict[str, Any]:
@@ -565,10 +543,13 @@ class Service:
                    "adaptergym_python": self.adaptergym_python}
         context.update({name: str(path) for name, path in self.roots.items() if path is not None})
         argv = render_argv(spec, values, context)
+        argv, resource_info = self.resources.wrap(recipe, spec.resources, argv, run_dir=run_dir,
+                                                  owner=f"datagoblin-{move_id}-{run_id}-{recipe}",
+                                                  timeout=spec.timeout_seconds)
         cwd = Path(render_text(spec.cwd, {}, context)) if spec.cwd else self.root
         env = dict(os.environ)
         sep = os.pathsep
-        env["PYTHONPATH"] = sep.join(p for p in (str(self.root / "src"), str(self.root),
+        env["PYTHONPATH"] = sep.join(p for p in (str(self.root / "src"), str(self.root), self.resources.path or "",
                                                  env.get("PYTHONPATH", "")) if p)
         env.update(spec.env)
         started = time.monotonic()
@@ -585,20 +566,23 @@ class Service:
                 status = "failed"
                 stderr.write(f"spawn failed: {exc}\n".encode())
         seconds = round(time.monotonic() - started, 3)
+        resource_info.update(self.resources.report(run_dir) or {})
+        if resource_info.get("mode") == "ramcap" and exit_code == EXIT_NO_ROOM:
+            status = "no_room"  # RAM never freed up within the wait; nothing ran
         artifacts = sorted(p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file())[:60] \
             if out.exists() else []
         body = {
             "run_id": run_id, "move_id": move_id, "recipe": recipe, "tier": spec.tier,
             "params": params, "in_plan": recipe in move.proposal["plan"], "argv": argv, "cwd": self._rel(cwd),
             "status": status, "exit_code": exit_code, "seconds": seconds, "out_dir": self._rel(out),
-            "stdout_sha256": _sha256(run_dir / "stdout.log"), "artifacts": artifacts,
+            "stdout_sha256": _sha256(run_dir / "stdout.log"), "artifacts": artifacts, "resources": resource_info,
         }
         self.ledger.append("run", body)
         metric = lane.metric.name if lane.metric else None
         return {
             "run_id": run_id, "status": status, "exit_code": exit_code, "seconds": seconds,
             "out": f"run:{run_id}", "out_dir": body["out_dir"], "artifacts": artifacts[:30],
-            "produces_lane_metric": bool(metric and metric in spec.produces),
+            "produces_lane_metric": bool(metric and metric in spec.produces), "resources": resource_info,
             "stdout_tail": _tail(run_dir / "stdout.log"), "stderr_tail": _tail(run_dir / "stderr.log"),
         }
 

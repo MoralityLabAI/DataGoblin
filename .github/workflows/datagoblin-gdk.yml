@@ -7,6 +7,7 @@ on:
       - "src/datagoblin/hillclimb/**"
       - "configs/hillclimb/**"
       - "tests/unit/test_hillclimb.py"
+      - "tests/unit/test_hillclimb_resources.py"
       - ".github/workflows/datagoblin-gdk.yml"
   push:
     branches: [master]
@@ -15,6 +16,7 @@ on:
       - "src/datagoblin/hillclimb/**"
       - "configs/hillclimb/**"
       - "tests/unit/test_hillclimb.py"
+      - "tests/unit/test_hillclimb_resources.py"
       - ".github/workflows/datagoblin-gdk.yml"
   workflow_dispatch:
 
@@ -36,9 +38,13 @@ jobs:
       - name: Install DataGoblin
         run: python -m pip install -e ".[dev,rlt-pilot]"
       - name: Lint the hill-climb server and tests
-        run: ruff check src/datagoblin/hillclimb tests/unit/test_hillclimb.py gdk/ci_smoke.py
-      - name: Hill-climb server tests (gate, custody, ledger chain, recipes, Agonist worker, bench, MCP framing)
-        run: python -m pytest tests/unit/test_hillclimb.py
+        run: ruff check src/datagoblin/hillclimb tests/unit/test_hillclimb.py tests/unit/test_hillclimb_resources.py gdk/ci_smoke.py
+      - name: Hill-climb server tests without the vramorama client (recipes run uncapped)
+        run: python -m pytest tests/unit/test_hillclimb.py tests/unit/test_hillclimb_resources.py
+      - name: Install the vramorama Python client (pinned; standard library only)
+        run: python -m pip install "vramorama @ git+https://github.com/patrickdugan/vramorama@438323a#subdirectory=python"
+      - name: Hill-climb server tests with every recipe under its RAM cap (RLIMIT_AS on Linux)
+        run: python -m pytest tests/unit/test_hillclimb.py tests/unit/test_hillclimb_resources.py
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:

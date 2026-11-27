@@ -63,6 +63,7 @@
     "bench_make": {
       "tier": "offline",
       "timeout_seconds": 120,
+      "resources": {"ram": "1G"},
       "description": "Write hill-climb bench tasks (gate verdicts, proposal legality, next lane) for one split; gold answers go to a separate file.",
       "argv": ["{python}", "-m", "datagoblin.hillclimb.bench", "make", "--split", "{split}", "--seed", "{seed}",
                "--count", "{count}", "--out", "{out}"],
@@ -75,6 +76,7 @@
     "driver_bench": {
       "tier": "loopback",
       "timeout_seconds": 7200,
+      "resources": {"ram": "1G"},
       "description": "Ask a local model (the driver, optionally with an adapter loaded) every bench task and score its answers exactly.",
       "argv": ["{python}", "-m", "datagoblin.hillclimb.bench", "run", "--tasks", "{tasks}", "--base-url", "{base_url}",
                "--model", "{model}", "--limit", "{limit}", "--max-tokens", "{max_tokens}",
@@ -95,6 +97,7 @@
     "export_driver_sft": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "1G"},
       "description": "Export train-split SFT rows for the driver adapter: exact bench answers, verified teacher answers and app transcripts whose tool calls all succeeded.",
       "argv": ["{python}", "-m", "datagoblin.hillclimb.bench", "export-sft", "--tasks", "{tasks}",
                "{answers?--answers}", "{receipts?--receipts}", "--out", "{out}"],
@@ -107,6 +110,7 @@
     "curate": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "2G"},
       "description": "Admit candidate training rows under split custody: drop non-train splits, roots seen in other splits, duplicates and rows past the per-root cap.",
       "argv": ["{python}", "-m", "datagoblin.hillclimb.curate", "--inputs", "{inputs*}",
                "--max-per-root", "{max_per_root}", "--out", "{out}"],
@@ -121,6 +125,7 @@
     "tinker_fixture": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "2G"},
       "description": "Offline DG-AGN-TINKER-01 fixture: the Inkling 2 Mini adapter curriculum, routing and repair roots with zero model calls.",
       "argv": ["{python}", "-m", "Agonist.tinker_gym", "fixture", "--out", "{out}", "--groups", "{groups}"],
       "params": {"groups": {"type": "int", "min": 1, "max": 16, "default": 4}}
@@ -128,6 +133,7 @@
     "adaptergym_status": {
       "tier": "offline",
       "timeout_seconds": 60,
+      "resources": {"ram": "1G"},
       "requires": ["adapter_bits"],
       "description": "Read the adapter-bits adaptergym plan status (which training and eval steps are done).",
       "cwd": "{adapter_bits}/experiments/adaptergym",
@@ -137,6 +143,7 @@
     "adaptergym_preflight": {
       "tier": "offline",
       "timeout_seconds": 120,
+      "resources": {"ram": "1G"},
       "requires": ["adapter_bits"],
       "description": "Run the adaptergym preflight (models, runtimes, GPU state) without starting any job.",
       "cwd": "{adapter_bits}/experiments/adaptergym",
@@ -161,6 +168,7 @@
     "rlt_make_suite": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "1G"},
       "description": "Freeze an RLT task suite with lineage-separated train, calibration and test splits.",
       "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "make-suite", "--seed", "{seed}",
                "--per-family", "{per_family}", "--out", "{out}"],
@@ -172,6 +180,7 @@
     "rlt_run": {
       "tier": "offline",
       "timeout_seconds": 1200,
+      "resources": {"ram": "3G"},
       "description": "Fit small CPU recurrent controls (direct, RLT, matched damping) on the pinned fit seeds 7, 19 and 91 and score every visit on the calibration split with the environment verifier.",
       "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "run", "--suite", "{suite}", "--seeds", "7", "19", "91",
                "--depths", "{depths*}", "--training-modes", "{training_modes*}", "--modes", "{modes*}",
@@ -201,6 +210,7 @@
     "rlt_replay": {
       "tier": "offline",
       "timeout_seconds": 1200,
+      "resources": {"ram": "3G"},
       "description": "Recompute an RLT run's trajectories and checker receipts from its suite.",
       "argv": ["{python}", "-m", "datagoblin", "rlt-gym", "replay", "--suite", "{suite}", "--run", "{run}",
                "--out", "{out}/replay.json"],
@@ -214,6 +224,7 @@
     "gym_demo": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "2G"},
       "description": "Architecture training gym mock controls (LoRA, HRM-Text, looped candidates) through the frozen evaluation firewall; never promotion evidence.",
       "argv": ["{python}", "-m", "datagoblin", "gym-demo", "--seed", "{seed}", "--out", "{out}"],
       "params": {"seed": {"type": "int", "min": 0, "max": 1000000, "default": 7}}
@@ -221,6 +232,7 @@
     "agonist_demo": {
       "tier": "offline",
       "timeout_seconds": 120,
+      "resources": {"ram": "1G"},
       "description": "AGN-01 wiring fixture: stage, synthetic replies, verify and archive with zero model calls.",
       "argv": ["{python}", "-m", "Agonist.gym", "demo", "--tastes", "{tastes}", "--out", "{out}"],
       "params": {"tastes": {"type": "path", "kind": "file", "default": "Agonist/fixtures/tastes.jsonl"}}
@@ -228,6 +240,7 @@
     "agonist_stage": {
       "tier": "offline",
       "timeout_seconds": 120,
+      "resources": {"ram": "1G"},
       "description": "Turn research-taste seeds into AGN-01 teacher requests for a local world builder (no model call).",
       "argv": ["{python}", "-m", "Agonist.gym", "stage", "--tastes", "{tastes}", "--out", "{out}",
                "--max-context-tokens", "{max_context_tokens}"],
@@ -239,6 +252,7 @@
     "agonist_send": {
       "tier": "loopback",
       "timeout_seconds": 7200,
+      "resources": {"ram": "1G"},
       "description": "Send staged AGN-01 requests to an already running bigger local model and keep its replies and provider receipts.",
       "argv": ["{python}", "-m", "datagoblin.hillclimb.agonist_worker", "--requests", "{requests}",
                "--base-url", "{base_url}", "--model", "{model}", "--max-requests", "{max_requests}",
@@ -257,6 +271,7 @@
     "agonist_audit": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "1G"},
       "description": "Verify teacher replies with the independent AGN-01 world checker and archive accepted pairs, rejections and candidates.",
       "argv": ["{python}", "-m", "Agonist.gym", "audit", "--requests", "{requests}", "--replies", "{replies}",
                "--out", "{out}"],
@@ -274,6 +289,7 @@
     "rollout_stage": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "1G"},
       "description": "Freeze one-pass teacher request batches for a bigger local model from an RLT suite split.",
       "argv": ["{python}", "-m", "datagoblin.training_gym.rlt_gym.inkling", "stage", "--suite", "{suite}",
                "--out", "{out}", "--passes", "1", "--split", "{split}", "--max-tasks", "{max_tasks}",
@@ -288,6 +304,7 @@
     "rollout_capture": {
       "tier": "loopback",
       "timeout_seconds": 7200,
+      "resources": {"ram": "1G"},
       "description": "Capture one-pass answers from an already running local llama.cpp-compatible teacher for staged RLT tasks.",
       "argv": ["{python}", "-m", "datagoblin.training_gym.rlt_gym.inkling", "capture", "--stage", "{stage}",
                "--out", "{out}/p01", "--passes", "1", "--server-loop-passes", "1", "--base-url", "{base_url}",
@@ -307,6 +324,7 @@
     "rollout_score": {
       "tier": "offline",
       "timeout_seconds": 600,
+      "resources": {"ram": "2G"},
       "description": "Reverify captured teacher answers with the RLT environment verifier and export verified SFT, repair and Aleph rows.",
       "argv": ["{python}", "-m", "datagoblin.training_gym.rlt_gym.inkling", "score", "--stage", "{stage}",
                "--captures", "{captures}", "--suite", "{suite}", "--out", "{out}"],
@@ -324,6 +342,7 @@
     "dg_demo": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "2G"},
       "description": "DataGoblin research loop demo: Scout, Alchemist, Rat, ResearchMembrane, builder tickets, verifier and ledger.",
       "argv": ["{python}", "-m", "datagoblin", "demo", "--seed", "{seed}", "--out", "{out}"],
       "params": {"seed": {"type": "int", "min": 0, "max": 1000000, "default": 7}}
@@ -331,6 +350,7 @@
     "dg_validate": {
       "tier": "offline",
       "timeout_seconds": 60,
+      "resources": {"ram": "1G"},
       "description": "Validate a DataRecipe against the constitution (split custody, solver and verifier requirements, builder permissions).",
       "argv": ["{python}", "-m", "datagoblin", "validate", "--recipe", "{recipe}"],
       "params": {"recipe": {"type": "path", "kind": "file", "default": "examples/recipe.good.yaml"}}
@@ -338,6 +358,7 @@
     "etiquette_demo": {
       "tier": "offline",
       "timeout_seconds": 300,
+      "resources": {"ram": "2G"},
       "description": "Collection-etiquette pipeline demo: reject, quarantine, discovery, verified and evaluation custody lanes.",
       "argv": ["{python}", "-m", "datagoblin", "etiquette-demo", "--seed", "{seed}", "--out", "{out}"],
       "params": {"seed": {"type": "int", "min": 0, "max": 1000000, "default": 7}}

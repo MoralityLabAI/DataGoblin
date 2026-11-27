@@ -50,6 +50,25 @@ legality and lane eligibility, answered by the same functions the server uses; a
 dev or test by its digest, so no task appears in two splits. `export_driver_sft` turns exact answers,
 verified teacher answers and this app's clean transcripts into SFT rows for the driver's adapter.
 
+## GPU queue and RAM
+
+Gym runs go through the [vramorama Python client](https://github.com/patrickdugan/vramorama/tree/main/python)
+(`pip install "vramorama @ git+https://github.com/patrickdugan/vramorama#subdirectory=python"`, or a
+sibling `vramorama` checkout, or `DATAGOBLIN_VRAMORAMA_PY`). Each recipe in `lanes.json` declares
+`resources`:
+
+- `{"ram": "3G"}` (every CPU gym): the run waits for room in the RAM reservations shared by all
+  vramorama clients on the machine, then runs under a hard cap (on Windows a Job Object memory limit
+  over the whole process tree, kill-on-close) at below-normal priority. The card is not involved, so a
+  power-capped GPU never holds a CPU gym back. A run that never got room ends `no_room`.
+- `{"vram": "6G", "ram": "8G"}`: the run queues as a `vramorama run` lease whose commit gate leaves
+  room for its RAM, and runs under the same cap inside the lease. Without the client it is refused.
+
+The run record carries the mode, the cap, the peak, seconds waited and whether the limit was hit;
+`suite_status.resources` shows the card, the lease queue, power cap, commit charge and reservations.
+`adaptergym_launch` is not wrapped: it starts detached vramorama jobs of its own, which a kill-on-close
+cap around the launcher would end. Without the client, CPU recipes run uncapped and say so.
+
 ## Build and run
 
 ```bash

@@ -13,7 +13,7 @@ import math
 import os
 import re
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -24,6 +24,7 @@ PARAM_TYPES = frozenset(
     {"int", "float", "enum", "str", "loopback_url", "path", "path_list", "int_list", "enum_list"}
 )
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
+RESOURCE_KEYS = frozenset({"ram", "vram", "priority", "wait_secs", "guard_power", "guard_idle", "restart"})
 CALL_REASONS = (
     "lane_not_open",
     "recipe_not_in_lane",
@@ -150,6 +151,7 @@ class Recipe:
     cwd: str | None = None
     requires: tuple[str, ...] = ()
     mkdir_out: bool = False
+    resources: Mapping[str, Any] = field(default_factory=dict)
 
     def public(self) -> dict[str, Any]:
         return {
@@ -159,6 +161,7 @@ class Recipe:
             "params": {name: param.public() for name, param in self.params.items()},
             "produces": sorted(self.produces),
             "requires": list(self.requires),
+            "resources": dict(self.resources),
         }
 
 
@@ -219,6 +222,9 @@ class Registry:
             for default_name, param in params.items():
                 if param.default is not None and param.check(param.default) != "ok":
                     raise HillclimbError("bad_registry", f"{name}.{default_name}: default fails its own check")
+            unknown_resources = sorted(set(spec.get("resources", {})) - RESOURCE_KEYS)
+            if unknown_resources:
+                raise HillclimbError("bad_registry", f"{name}: unknown resources {unknown_resources}")
             self.recipes[name] = Recipe(
                 name=name,
                 tier=spec["tier"],
@@ -231,6 +237,7 @@ class Registry:
                 cwd=spec.get("cwd"),
                 requires=tuple(spec.get("requires", ())),
                 mkdir_out=bool(spec.get("mkdir_out", False)),
+                resources=dict(spec.get("resources", {})),
             )
             for root in self.recipes[name].requires:
                 if root not in self.roots:

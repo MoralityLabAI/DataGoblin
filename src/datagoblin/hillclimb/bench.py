@@ -183,6 +183,7 @@ def _recipe_view(recipe: Recipe) -> dict[str, Any]:
     view.pop("description", None)
     view.pop("produces", None)
     view.pop("requires", None)
+    view.pop("resources", None)  # keeps bench tasks identical when resource declarations change
     return view
 
 

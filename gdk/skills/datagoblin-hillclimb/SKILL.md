@@ -31,7 +31,9 @@ Each lane has a card with its move menu: `load_skill(name: "datagoblin-hillclimb
 1. **Observe.** Call `suite_status`. Note `max_tier`, and for each lane its status, incumbent,
    plateau against patience, moves_used against max_moves and open_move. Note `endpoints`: the
    local model servers and their model ids (the driver, and bigger teachers for the Agonist lanes),
-   and `gpu`.
+   and `resources`: the card, the vramorama lease queue, power cap, commit charge and the RAM other
+   gyms have reserved. Each recipe declares the RAM it runs under (`list_recipes` shows it); a run
+   reports its peak, and `no_room` means RAM never freed up within the wait, so nothing ran.
 2. **Choose the lane.** If this skill was invoked with a lane, use it. Otherwise finish any open
    move first; then pick a lane with `eligible_for_new_move: true` whose next step is runnable at
    `max_tier` and whose inputs exist (see Data flow). Prefer the lane where one change is most likely
@@ -96,7 +98,8 @@ The service applies these; know them so your proposals can pass.
 - Bigger-model outputs are candidates until a verifier accepts them. Fixture replies are wiring
   checks; the service refuses them as results.
 - Keep failures. Do not rerun a rejected configuration unchanged.
-- GPU: read `suite_status.gpu` first; one queued GPU job per session; never start, stop or reuse a
+- GPU: read `suite_status.resources` first (a power-capped card admits no lease; a long queue means
+  waiting); one queued GPU job per session; never start, stop or reuse a
   model server that this session did not start, except to send requests to an endpoint listed in
   `suite_status.endpoints`.
 
