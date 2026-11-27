@@ -1,0 +1,11 @@
+# Context-dependent separator-memory allocation
+
+Source: https://github.com/MoralityLabAI/LoopedTransformers/tree/ee90c7f4c34573f62906d1a08a15f80ca304a53e/experiments/logrank_bpd_21.
+
+21 uses fixed direct unsigned demand from public query batches, not recursive miss-inflated demand. For warm cache C, D_e(C) is expanded misses at message e, R_e(C) residual subtree arithmetic. Exact warm marginal saving is D_e R_e; fixed-demand saved work is weighted coverage and monotone submodular. Incremental lazy ratio greedy maintains marginal per fixed charged byte. Recompute or invalidate exact unsigned messages after repeated-mask evidence updates; no graph changes tested.
+
+27 fresh worlds, 36 admitted structured noise conditions, 18 dense scope refusals; two regimes, four epochs, 792 trajectories, all exact against independent references. All 1728 cache plans and 18779 marginal greedy selections replayed, 326950 cache transitions audited. Current-batch demand is public; lagged forecasts use previous demand. Same conservative logical charges for all cache policies, not allocator/RSS limits.
+
+At 96D hubs, 16 KiB marginal saves 38.2%/32.1% arithmetic vs planned cold for stable/shifted regimes. Isolated timing repeat: marginal 31.66/44.13 ms vs planned cold 34.89/48.70 ms. At 64 KiB both current plans achieve zero warm forecast unsigned work; planned cold 20.52/28.91 ms vs marginal 29.49/40.12 ms. All 18 non-timing records match isolated repeat. The regimes vary popularity and update locality jointly, so their effects are not separately identified. Three independent worlds per stratum, descriptive timings only.
+
+Proposed MMS routing: use cheap direct-demand cold plan when it already eliminates all warm unsigned work; consider exact marginal packing under tight memory and large residual work. Include policy overhead in selection. Next objective should estimate actual work from resident cache and selective invalidation, charging insertion/recomputation and evictions; treat warm value as an upper bound on avoidable cold work rather than a net benefit. Compare fixed, lagged and cost-aware controllers on fresh factorial popularity/update-locality workloads. Native DataGoblin/MMS integration, CI and confirmation remain outstanding.
