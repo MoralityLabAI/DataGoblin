@@ -12,7 +12,7 @@
    "stored_as": "horizon_outcomes_v2.jsonl"
   },
   "manifest.json": {
-   "sha256": "8f11e5b468b1f2f8d381b61e76e5f1b81ca269b0c8e10fb34c697d6b4e4e3c83",
+   "sha256": "67a274fe6484f8d02af4b0e968c7e4bde8ff6bb2c0e4cc13f153d2c88c7d0dc9",
    "stored_as": "manifest.json"
   },
   "trajectories_v2.jsonl": {
@@ -21,12 +21,12 @@
    "stored_as": "trajectories_v2.jsonl.gz"
   },
   "unit_costs.json": {
-   "sha256": "000a2cc4a7045b9aa89491c20560d9ebc67f5194e70ae94cabf3653e74b82bd9",
+   "sha256": "a258ae512208887efa58187039cf2f52a38e7641cf39db405cc290155942ca35",
    "stored_as": "unit_costs.json"
   }
  },
  "path": "mechinterp/bpd/experiments/trm_curation/results/curate03b/datagoblin_export_v2",
  "pull_request": 176,
- "sha256_semantics": "SHA-256 of the uncompressed bytes; gz_sha256 is the stored gzip -n file",
+ "sha256_semantics": "SHA-256 of canonical LF uncompressed bytes (matching Git blobs at pinned commit); gz_sha256 is the stored gzip -n file",
  "source": "MoralityLabAI/BPD"
 }

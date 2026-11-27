@@ -22,13 +22,13 @@ every training root >= 98%; then minimize estimated CPU.
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 import hashlib
 import itertools
 import json
 import math
-from pathlib import Path
 import time
+from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
 
@@ -39,11 +39,11 @@ FEATURES = ('max_score', 'n_positive', 'sum_positive', 'mean_score', 'max_update
 
 
 def _bytes(p: Path) -> bytes:
-    """File bytes; a missing ``x.jsonl`` is read from its deterministic ``x.jsonl.gz``."""
+    """Canonical LF file bytes; a missing ``x.jsonl`` is read from its deterministic ``x.jsonl.gz``."""
     if p.is_file():
-        return p.read_bytes()
+        return p.read_bytes().replace(b'\r\n', b'\n')
     import gzip
-    return gzip.decompress(p.with_name(p.name + '.gz').read_bytes())
+    return gzip.decompress(p.with_name(p.name + '.gz').read_bytes()).replace(b'\r\n', b'\n')
 
 
 def _sha(p: Path) -> str:
@@ -101,7 +101,7 @@ def evaluate(ws, decide, costs: Costs) -> dict:
     t0 = time.process_time()
     decisions = [decide(w) for w in ws]
     inf = time.process_time() - t0
-    for w, (a, attempt) in zip(ws, decisions):
+    for w, (a, attempt) in zip(ws, decisions, strict=True):
         acq += a
         att += int(attempt)
         acc += int(w['committed'])
@@ -207,14 +207,15 @@ def fit_learned(train, costs, roots, *, shuffle_seed=None):
 
 
 def run(export: Path, out: Path) -> dict:
-    traj, manifest = load(export)
+    traj, _manifest = load(export)
     ws = windows_for(traj)
     roots = sorted({w['root'] for w in ws})
     # Measured unit costs from the same export (D arm): per-candidate and per-attempt CPU.
     d_rows = [t for t in traj if t['provenance']['arm'] == EVAL_ARM]
     mean_window = float(np.mean([t['cost']['window_cpu_seconds'] for t in d_rows]))
     costs = Costs(acq=mean_window * 0.6 / 16, attempt=mean_window * 0.2, base=mean_window * 0.2)
-    unit = json.loads((export / 'unit_costs.json').read_text(encoding='utf-8')) if (export / 'unit_costs.json').is_file() else None
+    unit_path = export / 'unit_costs.json'
+    unit = json.loads(unit_path.read_text(encoding='utf-8')) if unit_path.is_file() else None
     if unit:
         costs = Costs(acq=unit['per_candidate'], attempt=unit['per_attempt'], base=unit['per_window_base'])
     fixed = {'constant_ACQUIRE_16': lambda w: (16, True), 'constant_ABSTAIN_at_4': lambda w: (4, False),
@@ -248,13 +249,17 @@ def run(export: Path, out: Path) -> dict:
     base = summary['constant_ACQUIRE_16']['estimated_cpu_seconds']
     for m in summary.values():
         m['estimated_cpu_vs_always'] = m['estimated_cpu_seconds'] / base
+    scope_note = (
+        'per-window replay on recorded parents; '
+        'changed-trajectory effects of skipping are not observed'
+    )
     receipt = {'schema': 'datagoblin-bpd-curate03b-acquisition-policy-v1', 'evidence_class': 'DEVELOPMENT_ONLY',
                'export_manifest_sha256': _sha(export / 'manifest.json'), 'eval_arm': EVAL_ARM,
                'windows': len(ws), 'roots': roots,
                'unit_costs_cpu_seconds': {'per_candidate': costs.acq, 'per_attempt': costs.attempt,
                                           'per_window_base': costs.base,
                                           'source': 'unit_costs.json' if unit else 'window-mean split'},
-               'scope': 'per-window replay on recorded parents; changed-trajectory effects of skipping are not observed',
+               'scope': scope_note,
                'pooled_heldout': summary, 'folds': folds}
     out.write_text(json.dumps(receipt, indent=1, sort_keys=True, default=str) + '\n', encoding='utf-8', newline='\n')
     return receipt
@@ -305,15 +310,23 @@ def inky_traces(export: Path, out_dir: Path) -> dict:
                                           'label_kind': 'verifier_grounded_repair'}) + '\n')
                     n['repairs'] += 1
     files = {p.name: _sha(p) for p in sorted(out_dir.glob('inky_*.jsonl'))}
-    m = {'counts': dict(n), 'files': files,
-         'note': 'state prompts contain TRAIN-only features available before the decision; horizon outcomes are excluded'}
-    (out_dir / 'inky_manifest.json').write_text(json.dumps(m, indent=1, sort_keys=True) + '\n', encoding='utf-8', newline='\n')
+    note = (
+        'state prompts contain TRAIN-only features available before the decision; '
+        'horizon outcomes are excluded'
+    )
+    m = {'counts': dict(n), 'files': files, 'note': note}
+    manifest_text = json.dumps(m, indent=1, sort_keys=True) + '\n'
+    (out_dir / 'inky_manifest.json').write_text(manifest_text, encoding='utf-8', newline='\n')
     return m
 
 
 def _prompt(t) -> str:
     st = t['state']
-    stages = ', '.join(f"s{x['stage']}:max={x['max_score']:.4g},pos={x['n_positive']}" for x in (st.get('stages') or []))
+    stage_parts = [
+        f"s{x['stage']}:max={x['max_score']:.4g},pos={x['n_positive']}"
+        for x in (st.get('stages') or [])
+    ]
+    stages = ', '.join(stage_parts)
     fb = (st.get('feedback') or {}).get('loss0')
     return (f"BPD-TRM curation window {t['provenance']['window']} delay={st['delay']} "
             f"feedback_loss={fb if fb is None else round(fb, 4)} stages[{stages}] "
@@ -327,8 +340,9 @@ def main() -> int:
     ap.add_argument('--traces', type=Path, default=None)
     a = ap.parse_args()
     r = run(a.export, a.out)
-    print(json.dumps({k: {kk: r['pooled_heldout'][k][kk] for kk in ('candidates_acquired', 'retained_fraction', 'estimated_cpu_vs_always')}
-                      for k in r['pooled_heldout']}, indent=1))
+    cols = ('candidates_acquired', 'retained_fraction', 'estimated_cpu_vs_always')
+    summary = {k: {kk: r['pooled_heldout'][k][kk] for kk in cols} for k in r['pooled_heldout']}
+    print(json.dumps(summary, indent=1))
     if a.traces:
         print(json.dumps(inky_traces(a.export, a.traces)['counts']))
     return 0
