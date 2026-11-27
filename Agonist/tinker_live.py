@@ -6,6 +6,7 @@ import json
 import math
 import os
 import random
+import sqlite3
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -211,6 +212,20 @@ def active(journal: Journal, role: str, before: int) -> dict[str, Any] | None:
     return max(records, key=lambda r: r["round"])["candidate"] if records else None
 
 
+def advisory_registry(path: Path, before: int) -> dict[str, Any]:
+    """Read only approved clean registry metadata; never write back advice."""
+    with sqlite3.connect((path / "journal.sqlite").resolve().as_uri() + "?mode=ro", uri=True) as db:
+        if db.execute("SELECT value FROM metadata WHERE key='mode'").fetchone() != ("clean",):
+            raise ValueError("registry must be a clean journal")
+        records = [json.loads(r[0]) for r in db.execute("SELECT body FROM events")]
+    result = {}
+    for role in ROLES:
+        rows = [r for r in records if r.get("type") == "promotion" and r["role"] == role
+                and r["round"] < before and r["promoted"]]
+        result[role] = max(rows, key=lambda r: r["round"])["candidate"] if rows else None
+    return result
+
+
 def choose_batch(
     journal: Journal, key: str, pool: list[Task], count: int,
     curator: str, rng: random.Random, dg: LocalDG | None, provider: Tinker, curriculum: str | None,
@@ -268,6 +283,9 @@ def train(
     if journal.mode != "clean":
         raise ValueError("no advisory training")
     key = f"candidate:{rnd}:{role}"
+    journal.event(key + ":contract", {"type": "training_contract", "round": rnd, "role": role,
+                  "groups": args.groups, "steps": args.steps, "batch_size": args.batch_size,
+                  "rank": args.rank, "lr": args.lr, "curator": args.curator})
     previous = journal.get_event(key)
     if previous:
         return previous
@@ -275,6 +293,8 @@ def train(
     if args.steps * args.batch_size > len(pool):
         raise ValueError("insufficient fresh roots; increase --groups or reduce steps")
     incumbent = active(journal, role, rnd)
+    if incumbent and incumbent["rank"] != args.rank:
+        raise ValueError("resumed optimizer requires the incumbent rank")
     state = incumbent["state"] if incumbent else None
     curriculum = active(journal, "curriculum", rnd)
     rng = random.Random(rnd)
@@ -291,7 +311,7 @@ def train(
     candidate = {
         "type": "candidate", "role": role, "round": rnd, "state": result["state"],
         "sampler": result["sampler"], "incumbent": incumbent["sampler"] if incumbent else None,
-        "steps": args.steps, "batch_size": args.batch_size,
+        "steps": args.steps, "batch_size": args.batch_size, "rank": args.rank, "lr": args.lr,
     }
     journal.event(key, candidate)
     return candidate
@@ -301,6 +321,8 @@ def evaluate(
     journal: Journal, provider: Tinker, args: argparse.Namespace, role: str, rnd: int,
 ) -> dict[str, Any]:
     key = f"promotion:{rnd}:{role}"
+    journal.event(key + ":contract", {"type": "evaluation_contract", "round": rnd, "role": role,
+                  "groups": args.eval_groups, "min_gain": args.min_gain})
     existing = journal.get_event(key)
     if existing:
         return existing
@@ -334,10 +356,17 @@ def evaluate(
 
 def rollout(
     journal: Journal, provider: Tinker, dg: LocalDG | None, advisor: FableAdvisor | None,
-    args: argparse.Namespace, rnd: int,
+    args: argparse.Namespace, rnd: int, phase: str = "post",
 ) -> list[dict[str, Any]]:
-    tasks = make_tasks(rnd, args.groups, "train")
-    snapshots = {role: active(journal, role, rnd + 1) for role in ROLES}
+    groups = min(args.groups, args.rollout_groups)
+    tasks = make_tasks(rnd, groups, "train")
+    before = rnd if phase == "pre" else rnd + 1
+    snapshots = (advisory_registry(args.registry, before) if args.registry else
+                 {role: active(journal, role, before) for role in ROLES})
+    run = f"rollout-{rnd}-{phase}"
+    journal.event(run + ":contract", {"type": "rollout_contract", "groups": groups,
+                  "snapshots": snapshots, "attempts": args.attempts, "phase": phase})
+
     def actor(key: str, task: Task, prompt: str, history: list[dict[str, Any]]) -> dict[str, Any]:
         if dg and (not history or any("advisory_note" in h for h in history)):
             return dg.sample(key + ":dg", prompt)
@@ -361,7 +390,7 @@ def rollout(
                 return {"actor": route_result["actor"], "text": "", "usage": route_result["usage"]}
         snapshot = snapshots[task.role]
         return provider.sample(key + ":specialist", prompt, snapshot["sampler"] if snapshot else None)
-    return [episode(t, journal, f"rollout-{rnd}", actor, args.attempts,
+    return [episode(t, journal, run, actor, args.attempts,
                     advisor.consult if advisor else None) for t in tasks]
 
 
@@ -383,6 +412,8 @@ def main() -> None:
     p.add_argument("--rounds", type=int, default=1)
     p.add_argument("--groups", type=int, default=16)
     p.add_argument("--eval-groups", type=int, default=8)
+    p.add_argument("--rollout-groups", type=int, default=4)
+    p.add_argument("--registry", type=Path, help="read-only clean registry for advisory rollout")
     p.add_argument("--steps", type=int, default=2)
     p.add_argument("--batch-size", type=int, default=4)
     p.add_argument("--rank", type=int, default=16)
@@ -393,7 +424,8 @@ def main() -> None:
     p.add_argument("--curator", choices=("fixed", "random", "dg", "inky"), default="fixed")
     args = p.parse_args()
     if (args.round < 0 or not 1 <= args.rounds <= 1000 or not 1 <= args.groups <= 256
-            or not 1 <= args.eval_groups <= 256 or args.steps < 1 or args.batch_size < 1
+            or not 1 <= args.eval_groups <= 256 or not 1 <= args.rollout_groups <= 256
+            or args.steps < 1 or args.batch_size < 1
             or not 1 <= args.rank <= 64 or not 0 < args.lr <= 0.001 or not 0 < args.min_gain <= 1
             or not 1 <= args.attempts <= 8):
         p.error("invalid experiment limits")
@@ -402,7 +434,7 @@ def main() -> None:
         print(json.dumps(journal.summary(), indent=2))
         return
     if args.command == "trace":
-        for record in journal.events():
+        for record in [*journal.events(), *journal.receipts()]:
             print(canonical(record))
         return
     if not args.live:
@@ -412,8 +444,8 @@ def main() -> None:
         or args.attempts < 2 or args.fable_usd <= 0
     ):
         p.error("advisory requires isolated authorized rollout, local DG, and positive Fable cap")
-    if args.mode == "clean" and args.fable_usd != 0:
-        p.error("Fable calls cannot enter clean lane")
+    if args.mode == "clean" and (args.fable_usd != 0 or args.registry):
+        p.error("Fable and external registry cannot enter clean lane")
     if args.command in ("train", "evaluate", "campaign") and args.mode != "clean":
         p.error("training and promotion require clean journal")
     if (args.out / "STOP").exists():
@@ -426,9 +458,11 @@ def main() -> None:
     elif args.command == "evaluate":
         print(canonical(evaluate(journal, provider, args, args.role, args.round)))
     elif args.command == "rollout":
-        print(canonical({"episodes": rollout(journal, provider, dg, advisor, args, args.round)}))
+        for rnd in range(args.round, args.round + args.rounds):
+            print(canonical({"episodes": rollout(journal, provider, dg, advisor, args, rnd)}), flush=True)
     else:
         for rnd in range(args.round, args.round + args.rounds):
+            rollout(journal, provider, dg, None, args, rnd, phase="pre")
             for role in ROLES:
                 train(journal, provider, dg, args, role, rnd)
                 print(canonical(evaluate(journal, provider, args, role, rnd)), flush=True)
