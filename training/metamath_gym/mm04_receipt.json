@@ -1,0 +1,251 @@
+{
+  "schema": "mm04-v1",
+  "archive_sha256": "67191fb3da7b23d99de0a13209dccb2e3aa04925dd40392932ac6679c010d390",
+  "source_hashes": {
+    "inputs.jsonl": "f0efbbd745eb880b53367086dd2f277e8f72621b2cf4a7d2bfebecc947da03ab",
+    "oracle.jsonl": "3e1b4410e3fab818811549f353ae50314985e80125f101f2f52804a19b23b59b",
+    "expanded-prefix.mm": "f9ebc868a954bf042634ccebe5ac5f708695796f10624d0dacdcfca04b7489a0"
+  },
+  "candidate_checks": 6648,
+  "full_replay_disagreements": 0,
+  "results": {
+    "train": {
+      "0": {
+        "n": 186,
+        "top1": 166,
+        "baseline_hit": 166,
+        "repaired": 0,
+        "regressed": 0,
+        "suffix_transitions": 0,
+        "certified_top1": 103,
+        "unresolved": 83,
+        "local_checks": 1902
+      },
+      "1": {
+        "n": 186,
+        "top1": 172,
+        "baseline_hit": 166,
+        "repaired": 6,
+        "regressed": 0,
+        "suffix_transitions": 83,
+        "certified_top1": 151,
+        "unresolved": 35,
+        "local_checks": 1902
+      },
+      "2": {
+        "n": 186,
+        "top1": 174,
+        "baseline_hit": 166,
+        "repaired": 8,
+        "regressed": 0,
+        "suffix_transitions": 140,
+        "certified_top1": 161,
+        "unresolved": 25,
+        "local_checks": 1902
+      },
+      "4": {
+        "n": 186,
+        "top1": 181,
+        "baseline_hit": 166,
+        "repaired": 15,
+        "regressed": 0,
+        "suffix_transitions": 215,
+        "certified_top1": 175,
+        "unresolved": 11,
+        "local_checks": 1902
+      },
+      "8": {
+        "n": 186,
+        "top1": 183,
+        "baseline_hit": 166,
+        "repaired": 17,
+        "regressed": 0,
+        "suffix_transitions": 292,
+        "certified_top1": 180,
+        "unresolved": 6,
+        "local_checks": 1902
+      },
+      "16": {
+        "n": 186,
+        "top1": 183,
+        "baseline_hit": 166,
+        "repaired": 17,
+        "regressed": 0,
+        "suffix_transitions": 351,
+        "certified_top1": 181,
+        "unresolved": 5,
+        "local_checks": 1902
+      },
+      "32": {
+        "n": 186,
+        "top1": 184,
+        "baseline_hit": 166,
+        "repaired": 18,
+        "regressed": 0,
+        "suffix_transitions": 423,
+        "certified_top1": 182,
+        "unresolved": 4,
+        "local_checks": 1902
+      }
+    },
+    "dev": {
+      "0": {
+        "n": 199,
+        "top1": 165,
+        "baseline_hit": 165,
+        "repaired": 0,
+        "regressed": 0,
+        "suffix_transitions": 0,
+        "certified_top1": 94,
+        "unresolved": 105,
+        "local_checks": 2346
+      },
+      "1": {
+        "n": 199,
+        "top1": 177,
+        "baseline_hit": 165,
+        "repaired": 12,
+        "regressed": 0,
+        "suffix_transitions": 105,
+        "certified_top1": 134,
+        "unresolved": 65,
+        "local_checks": 2346
+      },
+      "2": {
+        "n": 199,
+        "top1": 183,
+        "baseline_hit": 165,
+        "repaired": 18,
+        "regressed": 0,
+        "suffix_transitions": 187,
+        "certified_top1": 152,
+        "unresolved": 47,
+        "local_checks": 2346
+      },
+      "4": {
+        "n": 199,
+        "top1": 187,
+        "baseline_hit": 165,
+        "repaired": 22,
+        "regressed": 0,
+        "suffix_transitions": 307,
+        "certified_top1": 167,
+        "unresolved": 32,
+        "local_checks": 2346
+      },
+      "8": {
+        "n": 199,
+        "top1": 190,
+        "baseline_hit": 165,
+        "repaired": 25,
+        "regressed": 0,
+        "suffix_transitions": 504,
+        "certified_top1": 171,
+        "unresolved": 28,
+        "local_checks": 2346
+      },
+      "16": {
+        "n": 199,
+        "top1": 192,
+        "baseline_hit": 165,
+        "repaired": 27,
+        "regressed": 0,
+        "suffix_transitions": 751,
+        "certified_top1": 183,
+        "unresolved": 16,
+        "local_checks": 2346
+      },
+      "32": {
+        "n": 199,
+        "top1": 195,
+        "baseline_hit": 165,
+        "repaired": 30,
+        "regressed": 0,
+        "suffix_transitions": 983,
+        "certified_top1": 190,
+        "unresolved": 9,
+        "local_checks": 2346
+      }
+    },
+    "public_challenge": {
+      "0": {
+        "n": 200,
+        "top1": 163,
+        "baseline_hit": 163,
+        "repaired": 0,
+        "regressed": 0,
+        "suffix_transitions": 0,
+        "certified_top1": 98,
+        "unresolved": 102,
+        "local_checks": 2400
+      },
+      "1": {
+        "n": 200,
+        "top1": 180,
+        "baseline_hit": 163,
+        "repaired": 17,
+        "regressed": 0,
+        "suffix_transitions": 102,
+        "certified_top1": 152,
+        "unresolved": 48,
+        "local_checks": 2400
+      },
+      "2": {
+        "n": 200,
+        "top1": 187,
+        "baseline_hit": 163,
+        "repaired": 24,
+        "regressed": 0,
+        "suffix_transitions": 176,
+        "certified_top1": 175,
+        "unresolved": 25,
+        "local_checks": 2400
+      },
+      "4": {
+        "n": 200,
+        "top1": 190,
+        "baseline_hit": 163,
+        "repaired": 27,
+        "regressed": 0,
+        "suffix_transitions": 269,
+        "certified_top1": 184,
+        "unresolved": 16,
+        "local_checks": 2400
+      },
+      "8": {
+        "n": 200,
+        "top1": 194,
+        "baseline_hit": 163,
+        "repaired": 31,
+        "regressed": 0,
+        "suffix_transitions": 423,
+        "certified_top1": 188,
+        "unresolved": 12,
+        "local_checks": 2400
+      },
+      "16": {
+        "n": 200,
+        "top1": 199,
+        "baseline_hit": 163,
+        "repaired": 36,
+        "regressed": 0,
+        "suffix_transitions": 587,
+        "certified_top1": 196,
+        "unresolved": 4,
+        "local_checks": 2400
+      },
+      "32": {
+        "n": 200,
+        "top1": 199,
+        "baseline_hit": 163,
+        "repaired": 36,
+        "regressed": 0,
+        "suffix_transitions": 677,
+        "certified_top1": 197,
+        "unresolved": 3,
+        "local_checks": 2400
+      }
+    }
+  },
+  "scope": "public development only; cached offline actual transition counts, no live external verifier invocation"
+}
