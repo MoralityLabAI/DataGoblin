@@ -7,7 +7,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from datagoblin import zk_frontier
+from datagoblin import zk_frontier, zk_journal
 from datagoblin.zk_replay import Job, Plan, execute
 from datagoblin.zk_schedule import native_bundle
 
@@ -30,12 +30,19 @@ def main() -> None:
     p.add_argument('--nodes', type=int, choices=(1,3,8,32), default=3)
     p.add_argument('--depth', type=int, choices=(1,2,4,8,16,32), default=4)
     p.add_argument('--native', type=Path)
-    p.add_argument('--frontier', action='store_true')
+    mode = p.add_mutually_exclusive_group()
+    mode.add_argument('--frontier', action='store_true')
+    mode.add_argument('--journal', action='store_true')
     p.add_argument('--timeout', type=float, default=900)
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     plan = fixture(args.nodes,args.depth)
-    if args.frontier:
+    if args.journal:
+        statement, advice = zk_journal.native_bundle(plan)
+        claim = tuple(map(int, statement['zn']))
+        assert zk_journal.claimed_outputs(plan, claim) == tuple(r['trace'][-1] for r in execute(plan))
+        assert zk_journal.authorized_statement(plan, claim) == statement
+    elif args.frontier:
         statement, advice = zk_frontier.native_bundle(plan)
         assert zk_frontier.terminal(plan, tuple(map(int, statement['zn']))) == execute(plan)[-1]['trace'][-1]
     else:
@@ -75,6 +82,32 @@ def main() -> None:
     altered[len(altered)//2] ^= 1
     corrupt.write_bytes(altered)
     run('mutated-proof',False,'verify',str(s),pin,str(corrupt))
+    if args.journal:
+        root = hashlib.sha256(b'authorized synthetic root').hexdigest()
+        outputs = zk_journal.claimed_outputs(plan, claim)
+        items = [{'job': plan.jobs[0].name, 'root': root, 'split': 'TRAIN', 'payload': outputs[0]}]
+        roots = {plan.jobs[0].name: root}
+        exe_pin = hashlib.sha256(Path(exe).read_bytes()).hexdigest()
+        receipt = zk_journal.verify_and_certify(plan, claim, raw, Path(exe), exe_pin, roots, {root}, items)
+        write(args.out / 'corpus-receipt.json', receipt)
+        print(f'journal admission accepted count={receipt["manifest"]["count"]}')
+        if args.nodes > 1:
+            idx = len(claim) - zk_journal.limb_count(plan)
+            old = claim[idx] & 255
+            new = 1 if old == 0 else 0
+            changed_claim = (*claim[:idx], claim[idx]-old+new, *claim[idx+1:])
+            changed_outputs = zk_journal.claimed_outputs(plan, changed_claim)
+            assert changed_outputs[-1] == outputs[-1] and changed_outputs[0] != outputs[0]
+            changed_items = [{**items[0], 'payload': changed_outputs[0]}]
+            try:
+                zk_journal.verify_and_certify(
+                    plan, changed_claim, raw, Path(exe), exe_pin, roots, {root}, changed_items,
+                )
+            except ValueError as exc:
+                assert str(exc) == 'native verifier rejected claim'
+                print('retired-output substitution rejected')
+            else:
+                raise AssertionError('retired-output substitution accepted')
     print('native smoke passed')
 
 
