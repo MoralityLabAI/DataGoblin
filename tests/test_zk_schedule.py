@@ -14,7 +14,9 @@ def fixture(n, w, seed):
     jobs = []
     for j in range(n):
         parents = tuple(f'j{i}' for i in range(j) if i == j-1 or rng.random() < .3)
-        vec = lambda: tuple(rng.randint(-127,127) for _ in range(w))
+        def vec():
+            return tuple(rng.randint(-127,127) for _ in range(w))
+
         jobs.append(Job(f'j{j}', parents, vec(), tuple(vec() for _ in range(w)), vec(), rng.randint(1,5)))
     return Plan('tenant', f'run-{seed}', 'policy', tuple(jobs))
 
@@ -55,7 +57,8 @@ def test_shape_and_context_pinning():
         compile_step(changed, initial(p))
     other = schedule(changed)
     assert original[0]['constraints'] != other[0]['constraints']
-    e = copy.deepcopy(original[0]); e['constraints'] = other[0]['constraints']
+    e = copy.deepcopy(original[0])
+    e['constraints'] = other[0]['constraints']
     assert not r1cs_satisfied(e,PALLAS_SCALAR)
     with pytest.raises(ValueError):
         compile_step(p,next_state(original[-1]))
