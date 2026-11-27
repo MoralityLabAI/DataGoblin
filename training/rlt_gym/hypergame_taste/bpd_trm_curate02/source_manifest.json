@@ -1,0 +1,42 @@
+{
+  "repository": "MoralityLabAI/BPD",
+  "commit": "af43e48b1ed472eef88bedd0cfa8f4f8aefb49b5",
+  "directory": "mechinterp/bpd/experiments/trm_curation/results/datagoblin_export",
+  "manifest_blob": "50d6e8741489b3a434b80a94822fff0d5e5c458c",
+  "decision_blob": "e02b864218e9aaa808eddfd57d3ef5cc5a5723d8",
+  "preference_blob": "3289d27e134cf46ec215d72f64bedf88216eefa3",
+  "manifest": {
+    "claim_boundary": "Strictly TRAIN fit-view semantic edges only; zero evaluation or development held-out outcomes included. Utility and realized gain measured on TRAIN feedback view.",
+    "evaluation_rows_exported": 0,
+    "experiment": "BPD-TRM-CURATE-02",
+    "files_sha256": {
+      "candidate_decisions.jsonl": "805220a18fd5c8f58e940e7238ff6065e5682b6006fcd01ceb85a4693484a748",
+      "curation_preferences.jsonl": "296260c749f5948925110cee303b44ff124196268235f41aeb42307f9175d742"
+    },
+    "roots_exported": [
+      "root_28101",
+      "root_28102",
+      "root_28103",
+      "root_28104",
+      "root_28105",
+      "root_28106",
+      "root_28107",
+      "root_28108"
+    ],
+    "schema_version": "datagoblin.trm_curation_export_manifest.v1",
+    "source_sha256": {
+      "root_28101": "6b46bcc038d8d7ac080cc3f2c4c17a1727aac78d011afd814d429443585ece7e",
+      "root_28102": "49f8b9628eb8fe1786a4095a21c8e93039c0fb57b1d3de3ad54ddbea21334160",
+      "root_28103": "b7c15a6be5bbe54a79a2886aee49334973a388b2564fb90e2bbde1a2ab96381e",
+      "root_28104": "15f4ca481d40345f4675506f08123fabd47d1655844b7e8f413ba674283dd3dd",
+      "root_28105": "b69822e9f7b8c1db656e1832022e1d9a7182528683250846ce6837f73ec476d8",
+      "root_28106": "62f6702946fde408270617ba04e4ce639822d8b216f912c3a5c85d58eb3ddb9a",
+      "root_28107": "1d7ddec44067386185840f2c46e668d2ba2c488304876f1621929d53146c5255",
+      "root_28108": "36fb0a527be3bee3505f35b324bf3aa80bea0048d22f7e6566d08308f34e5e37"
+    },
+    "successful_selected_decisions": 809,
+    "total_candidate_decisions": 10240,
+    "train_only": true,
+    "verified_preference_pairs": 248
+  }
+}
