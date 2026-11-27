@@ -4,6 +4,7 @@ No provider import or network access in the fixture path. All observations are
 original synthetic AGN-02 worlds. Student uplift refers to the AGN-02 linear
 student, not Aleph or a Tinker adapter.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -272,6 +273,15 @@ class Journal:
             )
         return result
 
+    def receipts(self) -> list[dict[str, Any]]:
+        return [
+            {"type": "provider_receipt", "call_id": k, "provider": p, "fingerprint": f,
+             "reserved_usd": u / 1_000_000, "state": s, "result": json.loads(r) if r else None}
+            for k, p, f, u, s, r in self.db.execute(
+                "SELECT id,provider,fingerprint,reserved,state,result FROM calls ORDER BY rowid"
+            )
+        ]
+
     def summary(self) -> dict[str, Any]:
         return {
             "mode": self.mode,
@@ -297,6 +307,9 @@ def episode(
     if consult and journal.mode != "advisory":
         raise ValueError("cannot consult from a clean episode")
     key = f"episode:{run}:{task.key}"
+    journal.event(key + ":contract", {"type": "episode_contract", "task_id": task.key,
+                  "task_hash": digest([task.public, task.scores]), "attempt_limit": attempts,
+                  "advisory": consult is not None})
     existing = journal.get_event(key)
     if existing is not None:
         return existing
@@ -309,6 +322,8 @@ def episode(
             action = parse_action(provider_result.get("text", ""))
             result = task.grade(action)
             record = {
+                "type": "attempt", "task_id": task.key, "run": run, "role": task.role,
+                "attempt": i, "prompt": task.prompt(history),
                 "action": action, "reply": provider_result.get("text", ""),
                 "actor": provider_result.get("actor", "unknown"),
                 "usage": provider_result.get("usage", {}),
@@ -326,7 +341,7 @@ def episode(
     result = {
         "type": "episode", "run": run, "task_id": task.key, "root": task.root,
         "split": task.split, "role": task.role, "mode": journal.mode,
-        "public_hash": digest(task.public),
+        "public_hash": digest(task.public), "public": task.public,
         "success": record["success"], "attempts": i + 1,
         "reward": record["reward"], "regret": record["regret"],
         "training_ready": False,
@@ -338,6 +353,7 @@ def episode(
 def fixture(directory: Path, seed: int, groups: int) -> dict[str, Any]:
     journal = Journal(directory, "clean")
     tasks = make_tasks(seed, groups, "train")
+
     def actor(key: str, task: Task, prompt: str, history: list[dict[str, Any]]) -> dict[str, Any]:
         # A deterministic plumbing fixture deliberately tries a wrong answer first.
         del key, prompt
