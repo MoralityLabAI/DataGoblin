@@ -221,7 +221,7 @@ export function campaign(seed=20261127, trainN=600, evalN=300) {
           const d=choose(e.records,policy,budget,calibration);
           const ok=d.answer===e.truth;
           correct+=Number(ok);calls+=d.calls;
-          if(d.reason!=="budget"){stops++;falseStops+=Number(!ok);}
+          if(d.calls<budget&&d.reason!=="budget"){stops++;falseStops+=Number(!ok);}
         }
         rows.push({policy,budget,n:es.length,correct,calls,stops,falseStops});
       }
