@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from Agonist.tinker_curriculum import SOURCES, task_pool
+from Agonist.tinker_curriculum import SOURCES, route_request, task_pool
 from Agonist.tinker_gym import (
     ROLES,
     Journal,
@@ -447,7 +447,7 @@ def rollout(
         if task.role != "route":
             choices = ("curriculum", "diagnose", "repair")
             route_task = Task(task.root, task.split, "route", {
-                "request": task.public.get("request", task.public.get("goal", task.public.get("evidence"))),
+                **route_request(task),
                 "available": dict.fromkeys(choices, True), "authorized": True,
                 "rule": "Choose the matching available specialist only if authorized; otherwise STOP.",
             }, dict.fromkeys((*choices, "STOP"), 0.0))
