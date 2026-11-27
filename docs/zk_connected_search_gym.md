@@ -34,3 +34,42 @@ prove essentiality; the synthetic essential cases have explicit witnesses.
 Run in a reviewed checkout with the pinned checker directory on PYTHONPATH.
 For larger local runs use the existing CPU-only RAM watchdog. No production
 optimization or per-certificate Lean replay is claimed.
+
+## Hosted results
+
+Pinned campaign commit: 93c1a4a8cd1e51c8a2f511fe0f76ff78336ad568.
+[Hosted workflow 46006683995](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46006683995)
+passed targeted Ruff, pytest, both 32-task evaluation blocks, and uploaded
+the paired JSON receipts. The actual pinned checker files were used.
+This is the authoritative result; local reproduction was not completed.
+
+Across 64 tasks, 48 have degree-at-most-two certificates and 16 have
+explicit essential-row witnesses. Each of the eight arms tries both budgets
+(1024 paired policy runs, excluding reference and training calls).
+
+| Policy | Certified at 24 | Certified at 96 | Offered columns at 24 | Process CPU seconds at 24 |
+|---|---:|---:|---:|---:|
+| Degree | 16 | 32 | 1254 | 0.0550 |
+| Random | 0 | 0 | 1536 | 0.0508 |
+| Peel | 16 | 32 | 1254 | 0.0535 |
+| Overlap | 32 | 32 | 832 | 0.1997 |
+| Frontier | 48 | 48 | 496 | 0.4258 |
+| Learned static | 32 | 32 | 832 | 0.2287 |
+| Learned feedback | 48 | 48 | 496 | 0.7476 |
+| Shuffled | 0 | 1 | 1536 | 0.2274 |
+
+No arm certified an essential row. Both dynamic policies solved every
+square-transport case on both blocks. Each used 112 offered columns for
+the 48 successful tasks (496 including essential controls). The frontier
+scored 219904 candidates vs 192624 for learned feedback; the latter had
+higher CPU cost. Both prepared symbolic supports for 74800 terms and
+lazily materialized only offered field columns. CPU time is the sum of
+process timings from the single hosted replay, not a matched-time trial.
+
+Training used 32 tasks, 64 positive support labels, 3658 reference
+columns and 4096 SGD updates per ranker, repeated deterministically
+for each evaluation block. No learned advantage over the handcrafted
+frontier was established. Next: indexed frontier selection with
+charged CPU/verification budgets and independent harder topologies,
+before training a larger recurrent architecture. No generated per-case
+Lean replay or deployed circuit change.
