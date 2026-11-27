@@ -7,6 +7,7 @@ import json
 import subprocess
 from pathlib import Path
 
+from datagoblin import zk_frontier
 from datagoblin.zk_replay import Job, Plan, execute
 from datagoblin.zk_schedule import native_bundle
 
@@ -29,12 +30,17 @@ def main() -> None:
     p.add_argument('--nodes', type=int, choices=(1,3,8,32), default=3)
     p.add_argument('--depth', type=int, choices=(1,2,4,8,16,32), default=4)
     p.add_argument('--native', type=Path)
+    p.add_argument('--frontier', action='store_true')
     p.add_argument('--timeout', type=float, default=900)
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     plan = fixture(args.nodes,args.depth)
-    statement, advice = native_bundle(plan)
-    assert [int(v) for v in statement['zn'][3:]] == [v for r in execute(plan) for v in r['trace'][-1]]
+    if args.frontier:
+        statement, advice = zk_frontier.native_bundle(plan)
+        assert zk_frontier.terminal(plan, tuple(map(int, statement['zn']))) == execute(plan)[-1]['trace'][-1]
+    else:
+        statement, advice = native_bundle(plan)
+        assert [int(v) for v in statement['zn'][3:]] == [v for r in execute(plan) for v in r['trace'][-1]]
     s, a, proof = [args.out / f for f in ('statement.json','advice.json','proof.bin')]
     pin = write(s,statement)
     write(a,advice)
