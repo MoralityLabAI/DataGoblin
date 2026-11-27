@@ -20,6 +20,7 @@ from datagoblin.research_v2_1.suite import FAMILIES, canon, digest, load_suite, 
 
 from . import VERSION, implementation_digest
 from .controllers import CONTROLLER_MODES, ResearchController
+from .paired import paired_effects, selective_gate
 
 COMPARISON_V22 = {
     "schema": "research-v2.2-comparison-1",
@@ -420,49 +421,32 @@ def compare(paths: list[Path]) -> dict[str, Any]:
                 "task_ids",
                 "role",
                 "experiment_runtime",
+                "comparison_sha256",
+                "base_model_id",
             )
         ):
-            raise ValueError("reports require identical tasks, code, split and role")
+            raise ValueError("reports require identical tasks, code, budgets, actor and role")
+        if report.get("identity", {}).get("binding") != baseline.get("identity", {}).get("binding"):
+            raise ValueError("actor binding mismatch")
     if len({r[0]["candidate_id"] for r in loaded}) != len(loaded):
         raise ValueError("duplicate candidate identity")
     comparisons = []
     for report, rows in loaded[1:]:
-        grouped_primary: dict[str, list[float]] = {f: [] for f in FAMILIES}
-        grouped_cap: dict[str, list[float]] = {f: [] for f in FAMILIES}
-        for old, new in zip(base_rows, rows, strict=True):
-            if old["root_id"] != new["root_id"] or old["family"] != new["family"]:
-                raise ValueError("paired root mismatch")
-            grouped_primary[new["family"]].append(new["primary_score"] - old["primary_score"])
-            grouped_cap[new["family"]].append(new["capability_score"] - old["capability_score"])
-        pf_primary = {f: sum(v) / len(v) for f, v in grouped_primary.items()}
-        pf_cap = {f: sum(v) / len(v) for f, v in grouped_cap.items()}
-        rng = np.random.default_rng(0)
-        boot_p = [
-            sum(float(np.mean(rng.choice(v, size=len(v), replace=True))) for v in grouped_primary.values())
-            / len(grouped_primary)
-            for _ in range(2000)
-        ]
-        boot_c = [
-            sum(float(np.mean(rng.choice(v, size=len(v), replace=True))) for v in grouped_cap.values())
-            / len(grouped_cap)
-            for _ in range(2000)
-        ]
-        comparisons.append(
-            {
-                "candidate_id": report["candidate_id"],
-                "reference_id": baseline["candidate_id"],
-                "controller_mode": report.get("controller_mode"),
-                "macro_primary_delta": sum(pf_primary.values()) / len(pf_primary),
-                "macro_capability_delta": sum(pf_cap.values()) / len(pf_cap),
-                "family_primary_deltas": pf_primary,
-                "family_capability_deltas": pf_cap,
-                "paired_primary_bootstrap_95": [float(x) for x in np.quantile(boot_p, [0.025, 0.975])],
-                "paired_capability_bootstrap_95": [float(x) for x in np.quantile(boot_c, [0.025, 0.975])],
-                "interval_status": "descriptive_only" if len(rows) < 32 else "paired_within_family",
-                "complete_denominator": len(rows),
-                "rank_eligible": report["checkpoint_rank_eligible"],
-            }
-        )
+        effects = paired_effects(base_rows, rows, families=FAMILIES)
+        comparison = {
+            "candidate_id": report["candidate_id"],
+            "reference_id": baseline["candidate_id"],
+            "controller_mode": report.get("controller_mode"),
+            **effects,
+            "rank_eligible": False,
+        }
+        if (baseline.get("controller_mode") == "rlt_state_correction"
+                and report.get("controller_mode") == "selective_rlt"):
+            comparison["selective_gate"] = selective_gate(
+                effects, baseline.get("controller_compute", {}),
+                report.get("controller_compute", {}),
+            )
+        comparisons.append(comparison)
     return {
         "schema": "research-v2.2-paired-comparison-1",
         "suite_sha256": baseline["suite_sha256"],
@@ -472,6 +456,7 @@ def compare(paths: list[Path]) -> dict[str, Any]:
                 "controller_mode": r.get("controller_mode"),
                 "summary": r["summary"],
                 "controller_accounting": r.get("controller_accounting"),
+                "controller_compute": r.get("controller_compute"),
             }
             for r, _ in loaded
         ],
