@@ -65,7 +65,8 @@ def main() -> None:
     run('trailing-bytes',False,'verify',str(s),pin,str(corrupt))
     corrupt.write_bytes(raw[:len(raw)//2])
     run('truncated',False,'verify',str(s),pin,str(corrupt))
-    altered = bytearray(raw); altered[len(altered)//2] ^= 1
+    altered = bytearray(raw)
+    altered[len(altered)//2] ^= 1
     corrupt.write_bytes(altered)
     run('mutated-proof',False,'verify',str(s),pin,str(corrupt))
     print('native smoke passed')
