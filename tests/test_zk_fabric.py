@@ -1,6 +1,5 @@
 import copy
 import hashlib
-import json
 import sys
 from dataclasses import replace
 
@@ -8,8 +7,18 @@ import pytest
 
 from datagoblin import zk_sigma as z
 from datagoblin.zk_fabric import (
-    CheckerPolicy, CircuitRegistration, Route, certify_corpus, choose_route, external_verify,
-    fit_route_cost, lean_statement, lucid_registration, merkle_root, prove_graph, verify_graph,
+    CheckerPolicy,
+    CircuitRegistration,
+    Route,
+    certify_corpus,
+    choose_route,
+    external_verify,
+    fit_route_cost,
+    lean_statement,
+    lucid_registration,
+    merkle_root,
+    prove_graph,
+    verify_graph,
 )
 from datagoblin.zk_replay import Job, Plan, step
 
