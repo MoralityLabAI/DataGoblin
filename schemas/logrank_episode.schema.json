@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LOGRANK-BPD-01 verifier communication episode",
+  "description": "Offline corpus envelope. Runtime must project public and party-local fields only; ground truth and rank metadata must never be exposed to policies. Root disjointness requires a dataset-wide audit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "root_id",
+    "generator",
+    "split",
+    "public",
+    "alice_private",
+    "bob_private",
+    "offline"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "logrank_episode_v1"
+    },
+    "root_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "source_sha256"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "split": {
+      "enum": [
+        "train",
+        "development",
+        "sealed"
+      ]
+    },
+    "public": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "schedule",
+        "bit_cap",
+        "output_convention"
+      ],
+      "properties": {
+        "family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schedule": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "A",
+              "B"
+            ]
+          }
+        },
+        "bit_cap": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_convention": {
+          "const": "bob_local"
+        }
+      }
+    },
+    "alice_private": {
+      "type": "object"
+    },
+    "bob_private": {
+      "type": "object"
+    },
+    "offline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "verifier_sha256",
+        "rank_certificate"
+      ],
+      "properties": {
+        "label": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "verifier_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "rank_certificate": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "value",
+                "artifact_sha256"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "exact_rational",
+                    "certified_lower_bound",
+                    "certified_upper_bound"
+                  ]
+                },
+                "value": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "artifact_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "unknown"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
