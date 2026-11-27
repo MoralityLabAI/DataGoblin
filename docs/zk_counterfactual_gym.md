@@ -36,3 +36,16 @@ independently. Actual elapsed CPU includes setup, scoring and verification.
 Late verified certificates receive zero credit. 512 MiB virtual-address
 cap and whole-process RSS receipt. No model calls, GPU, canonical TRM/LDT/BPD
 training, per-case Lean replay or production authorization.
+
+## Hosted result
+
+[Workflow 46032902517](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46032902517)
+passed both blocks and all eight branch workflows. Per deterministic fit:
+80 trajectories, 1074 steps, 962 fork pairs, 24672 fork columns, 937 solved
+branch verifications, 212 exploit and 28 explore labels. At 96 columns,
+indexed/periodic/random-gate/unweighted recurrent certified 40/43/42/46
+out of 48. The unweighted RNN also credited 46 under the 10 ms deadline;
+its CPU cost exceeded the simple controls. Balanced recurrent and reset
+certified 43 and 44 at 96 columns. Reset used balanced weights, so there
+is no matched memory ablation for the winning policy. The following
+ZKL-19 campaign supplies one and compares signed advantage regression.

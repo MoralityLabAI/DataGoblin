@@ -105,7 +105,7 @@ def counterfactual(policy, a, b, horizon, seed):
     return (int(delta > 0) if delta else None), receipts
 
 
-def collect(roots):
+def collect(roots, *, include_advantage=False):
     start = time.process_time_ns()
     sequences = []
     counts = {"reference_columns": 0, "trajectory_steps": 0, "teacher_solves": 0,
@@ -145,7 +145,12 @@ def collect(roots):
                     counts["explore_labels"] += int(label == 1)
                     counts["exploit_labels"] += int(label == 0)
                     counts["masked"] += int(label is None)
-                    seq.append((x, label))
+                    if include_advantage:
+                        advantage = (sum(q["explore"]["utility"]-q["exploit"]["utility"] for q in receipts)
+                                     / (len(receipts)*horizon) if receipts else None)
+                        seq.append((x, label, advantage))
+                    else:
+                        seq.append((x, label))
                     # The behavior trajectory is independent of the teacher decision.
                     action = behavior.random() < 0.5
                     policy.advance(b if action else a, action, t+1 < TRAIN_LIMIT)

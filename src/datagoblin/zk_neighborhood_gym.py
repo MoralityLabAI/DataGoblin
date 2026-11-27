@@ -61,6 +61,14 @@ def fixture(p, family, seed):
         target = [x, lc((2, k), (4, h)), lc((3, k), (5, h))]
     elif family == "essential_chain":
         rows, target = [[x, y, z], [z, u, t]], [t, lc((0, k)), []]
+    elif family == "inverse_product_transport":
+        rows, target = [[x, y, one], [y, z, u]], [x, lc((4, k)), lc((3, k))]
+    elif family == "idempotent_transport":
+        rows, target = [[x, x, x], [x, y, z]], [x, lc((3, k)), lc((3, k))]
+    elif family == "zero_pair_transport":
+        rows, target = [[x, y, z], [z, u, t], [y, u, []]], [t, lc((0, k)), []]
+    elif family == "essential_inverse_transport":
+        rows, target = [[x, y, one], [y, z, u]], [x, lc((4, k)), []]
     else:
         raise ValueError(family)
     # A different connected cycle/chord topology, with two core variables per
@@ -89,7 +97,7 @@ def fixture(p, family, seed):
     a = canonical({"format": "zkl-r1cs-v1", "modulus": str(p), "wires": 11,
                    "public": list(range(1, 11)), "rows": [row for _, row in tagged]})
     b = dict(a, rows=a["rows"][:idx] + a["rows"][idx+1:])
-    if family == "essential_chain":
+    if family in ("essential_chain", "essential_inverse_transport"):
         w = [0]*11
         for i in range(6):
             w[rename[i]] = 1
