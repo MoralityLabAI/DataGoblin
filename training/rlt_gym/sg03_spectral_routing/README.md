@@ -1,0 +1,9 @@
+# SG-03 exact finite spectral routing curriculum
+
+Companion [Compactification Theory SG-03](https://github.com/MoralityLabAI/Compactification-Theory/blob/5bd4a4b100b6c98bbb1db774b95b9f3589e98589/research/spectral_geometry_v1/sg03/README.md).
+
+Use the pure standard-library `datagoblin.training_gym.spectral_routing` module. Input task keys d, T, bits[d], x[T+1] (fixed sorted integer coordinates including producer), k[T] (per-visit read count), u[T][d] (integer additive utility), lambda (nonnegative integer cost weight). Actions are T integer masks; bit j denotes consumer j. `training_example(task)` generates exact teacher supervision only for explicitly public development tasks. `score(task,schedule)` checks legality and evaluates last-use price; `grade(task,schedule)` recomputes an exact optimum with a distinct suffix-gap DP and accepts objective ties. Resource cap: d,T <= 10 and explicit bounded transitions; a cap failure is not an optimality certificate. No model downloads, external actions, hidden seeds or generated runs. No automatic curriculum ingestion; operator must supply a public task and choose the split.
+
+Evidence: five targeted tests passed locally on the source blobs, including 64 fresh tiny exhaustive fixtures; the full DataGoblin suite and Ruff were not available in this runtime. Separate JS gap-union replay of the upstream archived SG-03 verified all 72 optimum values and 576 arm objectives, costs, budgets and regrets; that replay does not claim Python cross-replay of those 72 tasks. All source scopes are abstract additive offline planning. The upstream learned ranker loses to fixed-pool and beam-8 controls; use exact oracle solutions for teacher labels rather than the learned ranker. Do not use exposed evaluation roots as hidden confirmation.
+
+To test: `python -m pytest tests/test_spectral_routing.py`. Before integrating into any active training pipeline, run full pytest and Ruff in the actual repository checkout.
