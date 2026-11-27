@@ -82,8 +82,30 @@ python gdk/ci_smoke.py gdk/target/release/data-goblin --python python
 ```
 
 [`ci_smoke.py`](ci_smoke.py) drives the binary with a scripted OpenAI-compatible endpoint: the slash
-command and a lane card, `suite_status`, `propose_move`, a real CPU fit of RLT controls
-(`rlt_make_suite`, `rlt_run`), a loopback recipe the app must deny at `--approve ledger`,
-`record_result` and `decide`, then checks the receipt, the transcript and the ledger chain. A second run
-checks the text tool protocol with write tools hidden. CI runs all three in
-[`.github/workflows/datagoblin-gdk.yml`](../.github/workflows/datagoblin-gdk.yml).
+command and a lane card, `suite_status`, `propose_move`, `rlt_make_suite`, the same bad `rlt_run` call
+three times (two refusals that name the missing parameter and suggest `run:r0001`, then the app's guard
+against repeating a failed call), a real CPU fit of RLT controls, a loopback recipe the app must deny at
+`--approve ledger`, `record_result` and `decide`, then checks the offered tool schemas, the receipt, the
+transcript and the ledger chain. A second run checks the text tool protocol with write tools hidden. CI
+runs all three in [`.github/workflows/datagoblin-gdk.yml`](../.github/workflows/datagoblin-gdk.yml).
+
+## Live check (2026-11-28)
+
+Driver: Ternary Bonsai 2 4B PTQ1_0 on CPU (PrismML llama.cpp b12178, 6 threads, thinking off, 3-10
+prompt tokens/s on a shared, saturated CPU; the GPU was power-capped with other jobs queued), lane
+`looped_modules`, `--approve ledger`. Each conversation took 15-28 minutes.
+
+| run | app at the time | what the model did |
+|---|---|---|
+| 1 | `run_recipe` with a free-form `params` object | status, lane card, recipes, a proposal and `rlt_make_suite`, then 17 `rlt_run` calls with empty params against refusals that did not name the parameter, until the 24-turn cap |
+| 2 | refusals name the parameter; repeated-failure guard | the same empty params; the guard stopped each loop after two failures, and the model abandoned the move and switched lanes |
+| 3 | one tool per recipe | 24 calls, none failed: baseline 0.301, three moves below the gate, then a promote to 0.424 by fitting seed 19 alone |
+| 4 | seeds pinned; abandoning a move with a result refused | `climb --moves 3`: baseline 0.317, then readout `endpoint` with depth 16 (0.308), `training_depth` 2 (0.305) and a return to the baseline settings (0.317 again; the fit is deterministic), each closed by `decide` as reject; plateau 3 of 4 |
+
+Run 3's promotion came from choosing a lucky fit seed, which is why `rlt_run` now pins seeds 7, 19 and
+91; its below-gate moves were closed with `abandon_move`, which is why that tool now refuses a move that
+has a result. Across runs 3 and 4 the model kept to one lane, filled recipe parameters, chained outputs
+with `run:<run_id>`, and recorded the metric for every evaluation run. It sometimes changed two settings
+in one move and reran `rlt_make_suite` instead of reusing the suite run; the suite digest was identical,
+so the eval contract held. Its remaining refused calls were a run on an already closed move and
+`propose_move` with `parent: ""` or `"None"`, which the server now reads as no parent.

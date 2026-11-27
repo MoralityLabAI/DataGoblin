@@ -504,8 +504,10 @@ class Service:
             raise HillclimbError("recipe_not_in_lane", f"{outside} not in {lane}")
         if expected is not None and (type(expected) not in (int, float) or not math.isfinite(expected)):
             raise HillclimbError("bad_arguments", "expected must be a finite number")
+        if isinstance(parent, str) and parent.strip().lower() in ("", "none", "null"):
+            parent = None  # small models fill optional fields with placeholders
         if parent is not None and parent not in state.moves:
-            raise HillclimbError("unknown_move", parent)
+            raise HillclimbError("unknown_move", f"parent {parent!r} is not a move id; leave parent out")
         move_id = state.next_move_id()
         body = {"move_id": move_id, "lane": lane, "hypothesis": hypothesis.strip(), "plan": plan,
                 "expected": expected, "parent": parent, "lanes_sha256": self.registry.sha256,

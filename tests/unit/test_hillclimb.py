@@ -179,7 +179,7 @@ def test_service_moves_through_three_lanes(service: Service) -> None:
 
 
 def test_service_refusals(service: Service, tmp_path: Path) -> None:
-    move = service.call("propose_move", {"lane": "self_adapter", "plan": ["bench_make"],
+    move = service.call("propose_move", {"lane": "self_adapter", "plan": ["bench_make"], "parent": "None",
                                          "hypothesis": "Checks that refusals carry stable codes."})["move_id"]
     with pytest.raises(HillclimbError, match="move_already_open"):
         service.call("propose_move", {"lane": "self_adapter", "plan": ["bench_make"], "hypothesis": "a second move"})
