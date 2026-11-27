@@ -49,8 +49,9 @@ Example (fresh development suite first; use actual registered paths):
 
 A v2.1 task manifest is intentional: v2.2 compares policies on the frozen
 environment contract. New report hashes identify the v2.2 implementation.
-The runner's inherited comparison is descriptive; paired bootstrap and
-family-stratified noninferiority receipts remain to be implemented.
+The paired evaluator now uses 10,000 joint root bootstrap replicates, stratified by family,
+requires matched actor bindings and budget contracts, and emits the one-sided lower bound.
+Selective RLT requires a heldout panel with at least eight roots per family.
 
 ## RV22-B: recurrent depth allocation
 
@@ -120,9 +121,39 @@ include a deterministic template-only baseline.
 - Add native paired-bootstrap campaign receipts, inspect root membership and
   run the local CPU actor pilot before the fresh sealed endpoint campaign.
 - Train and calibrate the native adaptive head using private data; publish
-  aggregate receipts only. The included adapter is callable; a full panel
-  launcher and root-paired confidence intervals are pending.
+  aggregate receipts only. The private native two-arm launcher and root-paired confidence intervals are implemented;
+  separate trained fixed-depth controls and exit overhead comparisons are pending.
 - Audit Baby Goblin durable checkpoint and resource lease; use gate functions
   to validate verified receipts before launch. No training has been launched.
-- Map existing Distill records and independently validate their grading receipts.
+- The native Distill v0.4 bridge replays the exact grader for response.v2 certificates;
+  records remain reference-only, with prose review and training approval pending.
   No teacher calls or training have been made.
+
+## RV22-G follow-up implementation
+
+The v2.1 Jinn/Beast discrepancy is explained by the code: the displayed means average
+five seeds, whereas `s0_fresh_g` and `s0_fresh_r` contain only seed-zero predictions.
+The old bootstrap concatenates persona-level outcomes, so its confidence intervals are
+seed-zero target-level intervals. They cannot establish five-seed root-level significance.
+The new pilot averages the two targets and all five fixed seeds within each root, then
+bootstraps roots. Seed-wise effects are reported separately; intervals do not estimate
+uncertainty over newly trained seeds. The prior report and receipts are unchanged.
+
+Run the two-arm native pilot on the CPU operator host with the actual private source
+archive and the exact v2.1 600-root exclusion registry (SHA-256 checked). The fresh seed
+must be selected in advance and the output directory must be fresh and outside Git:
+
+    OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/research_v2_2/jinn_adaptive_pilot.py \
+      --source-root "$PRIVATE_SOURCE" --spent-registry "$OLD_REGISTRY" \
+      --fresh-seed "$FRESH_SEED" --out "$PRIVATE_OUTPUT"
+
+The pilot fits the native K24 corrector and exit heads before constructing the third
+panel, then runs actual adaptive and fixed-horizon inference. This is the narrow
+same-model comparison; it does not replace independently fitted K3/6/12 controls.
+
+Distill's research branch is `MoralityLabAI/Compactification-Theory:research/distill-gym-v01-20261127`.
+Its v0.4 research lane uses `distill.response.v2`, not the original v1 response contract.
+`distill_native.reference_record` invokes the upstream `grade_research` and binds the
+returned receipt to the canonical response hash. It explicitly leaves custody reference-only
+and training_admission false. Provider identity remains claimed and prose remains unreviewed.
+An optional integration test runs when the reviewed Distill checkout is on PYTHONPATH.
