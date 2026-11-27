@@ -106,9 +106,9 @@ def test_native_bundle():
 
 
 def scheduling_fixture():
-    # Three independent chains, with a common sink.
-    names = ("a", "b", "c", "aa", "bb", "cc", "sink")
-    parents = ((), (), (), ("a",), ("b",), ("c",), ("aa", "bb", "cc"))
+    # Breadth-first order wastes one register across two separate joins.
+    names = ("a", "b", "c", "d", "x", "y", "sink")
+    parents = ((), (), (), (), ("a", "b"), ("c", "d"), ("x", "y"))
     jobs = tuple(Job(name, ps, (1,), ((2,),), (0,), 1) for name, ps in zip(names, parents, strict=True))
     return Plan("tenant", "branches", "policy", jobs)
 
@@ -125,7 +125,8 @@ def test_exact_schedule_against_exhaustive_orders():
             seen.add(j.name)
         else:
             best = min(best, f.layout(replace(p, jobs=ordering)).slots)
-    assert f.layout(proposed).slots == best
+    assert f.layout(p).slots == 4
+    assert f.layout(proposed).slots == best == 3
     assert execute(proposed)[-1]["trace"][-1] == execute(p)[-1]["trace"][-1]
 
 
