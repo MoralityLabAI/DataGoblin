@@ -1,9 +1,11 @@
+import json
+import random
 from argparse import Namespace
 
 import pytest
 
-from Agonist.tinker_gym import Journal, Task, canonical, episode, fixture, make_tasks, parse_action
-from Agonist.tinker_live import active, advisory_registry, evaluate, train
+from Agonist.tinker_gym import Journal, Task, canonical, episode, fixture, make_tasks, parse_action, training_example
+from Agonist.tinker_live import active, advisory_registry, choose_batch, evaluate, train
 
 
 def test_fixture_deterministic_and_disjoint(tmp_path):
@@ -108,3 +110,39 @@ def test_parse_requires_structured_action():
     assert parse_action('{"action":"STOP"}') == "STOP"
     assert parse_action('{"action":3}') is None
     assert parse_action("not JSON") is None
+
+
+def test_clean_corrections_use_independent_labels(tmp_path):
+    task = Task("root", "train", "repair", {"state": 1}, {"hold": 0.0, "deploy": 1.0})
+    clean = Journal(tmp_path / "clean", "clean")
+    def actor(key, task, prompt, history):
+        return {"text": canonical({"action": "deploy" if history else "hold", "note": "untrusted prose"})}
+    episode(task, clean, "rollout-7-pre", actor, 2)
+    example = training_example(task, clean, 7)
+    assert example["feedback_count"] == 1
+    user = json.loads(example["messages"][0]["content"])
+    assert user["previous_attempts"] == [{"action": "hold", "code": "suboptimal"}]
+    assert "untrusted prose" not in canonical(example)
+    assert parse_action(example["messages"][1]["content"]) == "deploy"
+    with pytest.raises(ValueError):
+        training_example(task, Journal(tmp_path / "advice", "advisory"), 7)
+
+
+def test_curator_selects_single_action_and_replays(tmp_path):
+    pool = [Task(str(i), "train", "repair", {"state": i}, {"hold": 0.0, "deploy": 1.0})
+            for i in range(4)]
+    journal = Journal(tmp_path, "clean")
+    calls = []
+
+    class Curator:
+        def sample(self, key, prompt, snapshot):
+            query = json.loads(prompt)
+            calls.append(query)
+            return {"text": canonical({"action": query["allowed_actions"][-1]})}
+
+    selected = choose_batch(journal, "pick", pool, 2, "inky", random.Random(1), None, Curator(), None)
+    assert len({t.key for t in selected}) == 2
+    assert len(calls) == 2
+    assert all(q["role"] == "curriculum" for q in calls)
+    assert choose_batch(journal, "pick", pool, 2, "inky", random.Random(1), None, Curator(), None) == selected
+    assert len(calls) == 2
