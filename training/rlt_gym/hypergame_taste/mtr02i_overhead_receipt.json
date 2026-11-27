@@ -1,0 +1,1004 @@
+{
+  "schema": "MTR-02I-posthoc-overhead-control-v1",
+  "scope": "frozen public development roots; forced route with zero-weight scoring loop; no retraining",
+  "rows": [
+    {
+      "id": "20261127/mtr02i/ordinary/0",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.9935064935064934,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/0",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 15.142857142857142,
+      "chargedUtility": 10.837662337662337,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/1",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 5.711475409836066,
+      "chargedUtility": 5.711475409836066,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/1",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.937704918032788,
+      "chargedUtility": 11.550819672131148,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/2",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.1486068111455108,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/2",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.222910216718267,
+      "chargedUtility": 10.526315789473685,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/3",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 0,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 705,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/3",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.827044025157234,
+      "chargedUtility": 6.468553459119497,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/4",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 3.1384976525821595,
+      "chargedUtility": 3.1384976525821595,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/4",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.178403755868544,
+      "chargedUtility": 10.476525821596244,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/5",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 0,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 711,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/5",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.106382978723405,
+      "chargedUtility": 6.759878419452887,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/6",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.378640776699029,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/6",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.89967637540453,
+      "chargedUtility": 9.805825242718447,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/7",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 1.3578274760383386,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/7",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.578274760383387,
+      "chargedUtility": 9.568690095846645,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/8",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.9440715883668904,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/8",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.131991051454138,
+      "chargedUtility": 9.778523489932885,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/9",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.15625,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/9",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.44375,
+      "chargedUtility": 10.30625,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/10",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 0.804953560371517,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/10",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.947368421052632,
+      "chargedUtility": 9.105263157894736,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/11",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.1927710843373496,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/11",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.680722891566266,
+      "chargedUtility": 12,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/12",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.908685968819599,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/12",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.634743875278396,
+      "chargedUtility": 11.53229398663697,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/13",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.4212218649517685,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/13",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.617363344051446,
+      "chargedUtility": 10.485530546623794,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/14",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 5.759375,
+      "chargedUtility": 2.63125,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/14",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 16.009375,
+      "chargedUtility": 13.946875,
+      "routeSelectionWork": 3,
+      "chargedSelectionWork": 2076,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/15",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 0.7926829268292683,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/15",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.070121951219512,
+      "chargedUtility": 8.90548780487805,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/16",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.8980891719745223,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/16",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.148619957537155,
+      "chargedUtility": 8.681528662420382,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/17",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 0.7981366459627329,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/17",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.298136645962733,
+      "chargedUtility": 8.841614906832298,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/18",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.354354354354354,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/18",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.666666666666666,
+      "chargedUtility": 10.21021021021021,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/19",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 1.6707692307692308,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 705,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/19",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.830769230769231,
+      "chargedUtility": 9.907692307692308,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/20",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 4.495670995670996,
+      "chargedUtility": 2.272727272727273,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 716,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/20",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 13.586580086580087,
+      "chargedUtility": 11.036796536796537,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/21",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 1.5323076923076924,
+      "chargedUtility": 1.5323076923076924,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 740,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/21",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 12.843076923076923,
+      "chargedUtility": 9.538461538461538,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/22",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 2.2651757188498403,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/22",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 14.169329073482428,
+      "chargedUtility": 10.638977635782748,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/23",
+      "split": "ordinary",
+      "budget": 4096,
+      "routeUtility": 0.774294670846395,
+      "chargedUtility": 0.774294670846395,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 710,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ordinary/23",
+      "split": "ordinary",
+      "budget": 8192,
+      "routeUtility": 11.83385579937304,
+      "chargedUtility": 8.692789968652038,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/0",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 3.251716247139588,
+      "chargedUtility": 0.6681922196796338,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 841,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/0",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 10.279176201372998,
+      "chargedUtility": 8.107551487414188,
+      "routeSelectionWork": 6,
+      "chargedSelectionWork": 2462,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/1",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.293051359516616,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/1",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.081570996978853,
+      "chargedUtility": 10.265861027190333,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/2",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 6.109717868338558,
+      "chargedUtility": 6.109717868338558,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/2",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 14.5141065830721,
+      "chargedUtility": 12.858934169278998,
+      "routeSelectionWork": 3,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/3",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.565359477124183,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/3",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.408496732026144,
+      "chargedUtility": 10.173202614379084,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/4",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.0482758620689654,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 711,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/4",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 12.565517241379311,
+      "chargedUtility": 9.517241379310345,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/5",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 4.141210374639769,
+      "chargedUtility": 0.7118155619596542,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/5",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.63400576368876,
+      "chargedUtility": 11.167146974063401,
+      "routeSelectionWork": 3,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/6",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 5.3493589743589745,
+      "chargedUtility": 2.2083333333333335,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 740,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/6",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 14.336538461538462,
+      "chargedUtility": 12.080128205128204,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/7",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 0,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 917,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/7",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 12.488054607508532,
+      "chargedUtility": 7.843003412969283,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/8",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 0,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 711,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/8",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 11.412765957446808,
+      "chargedUtility": 6.759574468085106,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/9",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 1.5123456790123457,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 917,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/9",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.333333333333334,
+      "chargedUtility": 10.61111111111111,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/10",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 4.105263157894737,
+      "chargedUtility": 4.105263157894737,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/10",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.421052631578947,
+      "chargedUtility": 11.235294117647058,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/11",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 4.82051282051282,
+      "chargedUtility": 1.6794871794871795,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 710,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/11",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.451923076923077,
+      "chargedUtility": 11.368589743589743,
+      "routeSelectionWork": 3,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/12",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 3.213507625272331,
+      "chargedUtility": 0.7124183006535948,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 880,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/12",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 14.342047930283224,
+      "chargedUtility": 11.034858387799565,
+      "routeSelectionWork": 5,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/13",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.33968253968254,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/13",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 12.034920634920635,
+      "chargedUtility": 9.292063492063493,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/14",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 0.4180602006688963,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/14",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 12.608695652173912,
+      "chargedUtility": 8.578595317725753,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/15",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 8.122641509433961,
+      "chargedUtility": 5.254716981132075,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/15",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 15.30188679245283,
+      "chargedUtility": 13.437106918238994,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/16",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 4.754424778761062,
+      "chargedUtility": 2.3672566371681416,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 710,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/16",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.823008849557523,
+      "chargedUtility": 11.154867256637168,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/17",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 1.7712418300653594,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/17",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 12.281045751633988,
+      "chargedUtility": 9.72875816993464,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/18",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.298507462686567,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/18",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.892537313432836,
+      "chargedUtility": 11.385074626865672,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/19",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 0.9174917491749175,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 995,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/19",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 14.35973597359736,
+      "chargedUtility": 9.092409240924093,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/20",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 0,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 917,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/20",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 11.411494252873563,
+      "chargedUtility": 6.342528735632184,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/21",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.144475920679887,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 701,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/21",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 15.002832861189802,
+      "chargedUtility": 11.864022662889518,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/22",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 0,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 711,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/22",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 12.36111111111111,
+      "chargedUtility": 6.611111111111111,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/23",
+      "split": "ood",
+      "budget": 4096,
+      "routeUtility": 2.054711246200608,
+      "chargedUtility": 0,
+      "routeSelectionWork": 2,
+      "chargedSelectionWork": 917,
+      "matched": true
+    },
+    {
+      "id": "20261127/mtr02i/ood/23",
+      "split": "ood",
+      "budget": 8192,
+      "routeUtility": 13.285714285714286,
+      "chargedUtility": 11.604863221884498,
+      "routeSelectionWork": 4,
+      "chargedSelectionWork": 2103,
+      "matched": true
+    }
+  ],
+  "aggregate": [
+    {
+      "split": "ordinary",
+      "budget": 4096,
+      "roots": 24,
+      "matched": 24,
+      "route": 2.2707235455924892,
+      "charged": 0.6691896957624827,
+      "extraSelectionWork": 763.625
+    },
+    {
+      "split": "ordinary",
+      "budget": 8192,
+      "roots": 24,
+      "matched": 24,
+      "route": 13.241905212133998,
+      "charged": 9.98344027461731,
+      "extraSelectionWork": 2097.9166666666665
+    },
+    {
+      "split": "ood",
+      "budget": 4096,
+      "roots": 24,
+      "matched": 24,
+      "route": 2.676314861801362,
+      "charged": 0.9923833849852878,
+      "extraSelectionWork": 776.4166666666666
+    },
+    {
+      "split": "ood",
+      "budget": 8192,
+      "roots": 24,
+      "matched": 24,
+      "route": 13.192982208157849,
+      "charged": 10.088079077161398,
+      "extraSelectionWork": 2113.9583333333335
+    }
+  ]
+}
