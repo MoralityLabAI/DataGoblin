@@ -1,11 +1,11 @@
 """MM-GYM-03: scoped prefix checks, budgeted ranking, and compact repair."""
 import argparse
-from collections import Counter
 import hashlib
 import json
 import math
-from pathlib import Path
 import time
+from collections import Counter
+from pathlib import Path
 
 SOURCE = "9c4bcad276eab5f8b17b231a4543cfe185c19c95cfb7940780dd1de265610c12"
 INPUTS = "f0efbbd745eb880b53367086dd2f277e8f72621b2cf4a7d2bfebecc947da03ab"
@@ -42,13 +42,13 @@ def apply(x, label):
     if len(stack) < n:
         return None
     args, sub = stack[-n:] if n else [], {}
-    for (typ,var), v in zip(f,args):
+    for (typ,var), v in zip(f,args[:len(f)], strict=True):
         if not v or v[0] != typ:
             return None
         sub[var] = v[1:]
     def inst(stmt):
         return [v for t in stmt for v in sub.get(t,[t])]
-    for h,v in zip(e,args[len(f):]):
+    for h,v in zip(e,args[len(f):], strict=True):
         if inst(h) != v:
             return None
     variables = set(x["variables"])
@@ -101,15 +101,15 @@ def feature(x, label, value, frequency):
     statement = s["statement"]
     last = stack[-1] if stack else []
     v = value or []
-    def l(z):
+    def log_length(z):
         return math.log1p(len(z))/6
     def common(a,b):
-        return sum(1 for p,q in zip(a,b) if p==q)/max(1,len(a),len(b))
+        return sum(1 for p,q in zip(a,b, strict=False) if p==q)/max(1,len(a),len(b))
     return [
         float(value is not None), float(v == target), similarity(v,target), common(v,target),
         similarity(statement,target), common(statement,target), similarity(v,last),
-        similarity(statement,last), l(v), l(target), l(statement), l(stack), l(x["prefix"]),
-        l(x["suffix"]), l(s["floating"]), l(s["essential"]), l(s["distinct"]),
+        similarity(statement,last), log_length(v), log_length(target), log_length(statement), log_length(stack), log_length(x["prefix"]),
+        log_length(x["suffix"]), log_length(s["floating"]), log_length(s["essential"]), log_length(s["distinct"]),
         math.log1p(frequency[label])/6, float(s["kind"]=="$a"),
         float(not x["suffix"]), float(label in x["prefix"]), float(label in x["suffix"]),
     ]

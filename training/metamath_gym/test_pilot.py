@@ -1,5 +1,6 @@
 import unittest
-from pilot import apply, similarity, metrics
+
+from pilot import apply, metrics, similarity
 
 def task():
     return {"id":"p","split":"train","candidate_signatures":{
