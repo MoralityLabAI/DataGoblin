@@ -284,17 +284,24 @@ class Registry:
         return found
 
 
-def param_reason(recipe: Recipe, params: Mapping[str, Any]) -> str:
-    if any(name not in recipe.params for name in params):
-        return "unknown_param"
-    if any(param.required and name not in params for name, param in recipe.params.items()):
-        return "missing_param"
+def param_problem(recipe: Recipe, params: Mapping[str, Any]) -> tuple[str, str | None]:
+    """The first failing parameter check and the parameter it names (None when ok)."""
+    unknown = [name for name in params if name not in recipe.params]
+    if unknown:
+        return "unknown_param", unknown[0]
+    missing = [name for name, param in recipe.params.items() if param.required and name not in params]
+    if missing:
+        return "missing_param", missing[0]
     for name, param in recipe.params.items():
         if name in params:
             reason = param.check(params[name])
             if reason != "ok":
-                return reason
-    return "ok"
+                return reason, name
+    return "ok", None
+
+
+def param_reason(recipe: Recipe, params: Mapping[str, Any]) -> str:
+    return param_problem(recipe, params)[0]
 
 
 def call_reason(

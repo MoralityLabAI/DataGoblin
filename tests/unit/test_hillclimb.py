@@ -97,6 +97,10 @@ def test_bench_splits_are_disjoint_and_gold_matches_rules(registry: Registry, tm
     assert again["tasks_sha256"] == manifest["tasks_sha256"]
     sft = bench.export_sft(tmp_path / "bench", tmp_path / "sft")
     assert sft["rows"] == 40 and sft["by_evidence_class"] == {"synthetic_exact_oracle": 40}
+    rows = [json.loads(line) for line in (tmp_path / "sft" / "sft.jsonl").read_text(encoding="utf-8").splitlines()]
+    # bonsai-gym's load_examples needs an id and messages ending in one assistant turn.
+    assert all(row["id"].endswith("/exact") and row["messages"][-1]["role"] == "assistant" for row in rows)
+    assert [m["role"] for m in rows[0]["messages"]] == ["system", "user", "assistant"]
     bench.make("dev", 3, 20, tmp_path / "dev", registry)
     with pytest.raises(ValueError, match="train-split"):
         bench.export_sft(tmp_path / "dev", tmp_path / "sft-dev")
@@ -180,8 +184,10 @@ def test_service_refusals(service: Service, tmp_path: Path) -> None:
     with pytest.raises(HillclimbError, match="tier_not_allowed"):
         service.call("run_recipe", {"move_id": move, "recipe": "adaptergym_launch",
                                     "params": {"plan": "plans/bdb_compare.json", "tags": "suite"}})
-    with pytest.raises(HillclimbError, match="bad_param"):
+    with pytest.raises(HillclimbError, match="bad_param: bench_make: parameter 'split' \\(given 'test'\\)"):
         service.call("run_recipe", {"move_id": move, "recipe": "bench_make", "params": {"split": "test"}})
+    with pytest.raises(HillclimbError, match="missing_param: bench_make: parameter 'split'"):
+        service.call("run_recipe", {"move_id": move, "recipe": "bench_make", "params": {"count": 10}})
     with pytest.raises(HillclimbError, match="bad_path"):
         service.call("run_recipe", {"move_id": move, "recipe": "export_driver_sft",
                                     "params": {"tasks": str(tmp_path.parent)}})

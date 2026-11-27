@@ -389,7 +389,12 @@ def run(tasks_dir: Path, base_url: str, model: str, out: Path, *, limit: int = 1
 
 def export_sft(tasks_dir: Path, out: Path, *, answers_dir: Path | None = None,
                receipts: Path | None = None) -> dict[str, Any]:
-    """Train-split SFT rows for the driver adapter; every row has training_ready false until curated."""
+    """Train-split SFT rows for the driver adapter; every row has training_ready false until curated.
+
+    Rows carry `id` and `messages` ending in one assistant turn, the format bonsai-gym's trainer
+    (adapter-bits `experiments/bonsai-gym`, `load_examples`) reads. Trace rows keep OpenAI tool calls
+    and are for trainers that render them.
+    """
     manifest, tasks, gold = _load_bench(tasks_dir)
     if manifest["split"] != "train":
         raise ValueError("export-sft takes train-split bench tasks only")
@@ -397,7 +402,8 @@ def export_sft(tasks_dir: Path, out: Path, *, answers_dir: Path | None = None,
     for task in tasks:
         target = target_for(task["type"], gold[task["task_id"]]["gold"])
         rows.append({
-            "root": task["task_id"], "family_id": f"hillclimb-bench/{task['type']}", "split": "train",
+            "id": f"{task['task_id']}/exact", "root": task["task_id"],
+            "family_id": f"hillclimb-bench/{task['type']}", "split": "train",
             "source": "datagoblin.hillclimb.bench", "evidence_class": "synthetic_exact_oracle",
             "messages": [*messages_for(task), {"role": "assistant", "content": canonical(target)}],
             "training_ready": False,
@@ -413,7 +419,8 @@ def export_sft(tasks_dir: Path, out: Path, *, answers_dir: Path | None = None,
                 continue
             task = by_id[answer["task_id"]]
             rows.append({
-                "root": task["task_id"], "family_id": f"hillclimb-bench/{task['type']}", "split": "train",
+                "id": f"{task['task_id']}/teacher", "root": task["task_id"],
+                "family_id": f"hillclimb-bench/{task['type']}", "split": "train",
                 "source": str(answer.get("returned_model") or score.get("model_requested")),
                 "evidence_class": "verified_teacher",
                 "messages": [*messages_for(task), {"role": "assistant", "content": canonical(answer["answer"])}],
@@ -431,8 +438,9 @@ def export_sft(tasks_dir: Path, out: Path, *, answers_dir: Path | None = None,
             decided = any(call.get("name") == "decide" and call.get("ok") for call in calls)
             if receipt.get("error") or not calls or not decided or not all(call.get("ok") for call in calls):
                 continue
+            root = "trace-" + hashlib.sha256(canonical(transcript).encode()).hexdigest()[:20]
             rows.append({
-                "root": "trace-" + hashlib.sha256(canonical(transcript).encode()).hexdigest()[:20],
+                "id": root, "root": root,
                 "family_id": "hillclimb-trace", "split": "train", "source": str(receipt.get("servedModel")),
                 "evidence_class": "driver_trace_tools_ok", "messages": transcript,
                 "moves": receipt.get("moves", []), "training_ready": False,

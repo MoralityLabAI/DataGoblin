@@ -28,6 +28,7 @@ from .lanes import (
     Registry,
     call_reason,
     is_loopback_url,
+    param_problem,
     render_argv,
     render_text,
     tier_rank,
@@ -455,7 +456,14 @@ class Service:
         reason = call_reason(lane_status=state.lanes[move.lane].status, lane_recipes=lane.recipes, recipe=spec,
                              max_tier=self.max_tier, params=params)
         if reason != "ok":
-            raise HillclimbError(reason, f"{recipe} in {move.lane}")
+            detail = f"{recipe} in {move.lane}"
+            _, name = param_problem(spec, params)
+            if reason in ("unknown_param", "missing_param", "bad_param", "non_loopback_url") and name:
+                expected = spec.params[name].public() if name in spec.params else sorted(spec.params)
+                detail = f"{recipe}: parameter {name!r} (given {params.get(name)!r}); expected {expected}"
+            elif reason == "tier_not_allowed":
+                detail = f"{recipe} is {spec.tier}; this session allows up to {self.max_tier}"
+            raise HillclimbError(reason, detail)
         missing = self._recipe_available(spec)
         if missing:
             raise HillclimbError("recipe_unavailable", f"{recipe} needs {missing}; set the root's environment variable")
