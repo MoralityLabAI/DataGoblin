@@ -230,27 +230,26 @@ impl Approval {
         if name == LOAD_SKILL || self.tools.read_only.contains(name) {
             return ApprovalDecision::Allow;
         }
+        // Each recipe is its own tool; `run_recipe` (unlisted, kept for direct callers) names it in arguments.
+        let recipe = if name == "run_recipe" { arguments.get("recipe").and_then(Value::as_str).unwrap_or_default() } else { name };
+        if let Some(tier) = self.tools.recipe_tiers.get(recipe) {
+            if tier_rank(tier) > tier_rank(self.policy.max_tier()) {
+                let flag = if tier == "loopback" { "local" } else { "all" };
+                return ApprovalDecision::Deny {
+                    reason: format!(
+                        "{recipe} is a {tier} recipe; this run allows up to {} (data-goblin --approve {flag}).",
+                        self.policy.max_tier()
+                    ),
+                };
+            }
+        }
         if !self.tools.names().contains(name) {
-            return ApprovalDecision::Deny { reason: format!("{name} is not a Data Goblin tool.") };
+            return ApprovalDecision::Deny { reason: format!("{name} is not a Data Goblin tool in this session.") };
         }
         if self.policy == ApprovePolicy::ReadOnly {
             return ApprovalDecision::Deny {
                 reason: format!("{name} writes the hill-climb ledger; this run is read-only (data-goblin --approve ledger)."),
             };
-        }
-        if name == "run_recipe" {
-            let recipe = arguments.get("recipe").and_then(Value::as_str).unwrap_or_default();
-            if let Some(tier) = self.tools.recipe_tiers.get(recipe) {
-                if tier_rank(tier) > tier_rank(self.policy.max_tier()) {
-                    let flag = if tier == "loopback" { "local" } else { "all" };
-                    return ApprovalDecision::Deny {
-                        reason: format!(
-                            "{recipe} is a {tier} recipe; this run allows up to {} (data-goblin --approve {flag}).",
-                            self.policy.max_tier()
-                        ),
-                    };
-                }
-            }
         }
         ApprovalDecision::Allow
     }

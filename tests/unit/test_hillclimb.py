@@ -297,6 +297,26 @@ def test_driver_bench_run_scores_exactly(service: Service, fake_model: str, regi
     assert service.call("decide", {"move_id": move})["verdict"] == "baseline"
 
 
+def test_recipes_are_tools_with_exact_schemas(service: Service, tmp_path: Path) -> None:
+    tools = {tool["name"]: tool for tool in service.tools()}
+    assert "run_recipe" not in tools and "adaptergym_launch" not in tools  # unlisted; gpu is above loopback
+    assert {"driver_bench", "agonist_send", "rollout_capture", "rlt_run", "curate"} <= set(tools)
+    schema = tools["rlt_run"]["inputSchema"]
+    assert schema["required"] == ["move_id", "suite"] and schema["additionalProperties"] is False
+    assert schema["properties"]["depths"] == {"type": "array", "items": {"type": "integer", "enum": [1, 2, 4, 8, 16]},
+                                              "minItems": 1, "uniqueItems": True, "maxItems": 5,
+                                              "default": [1, 2, 4, 8]}
+    assert tools["bench_make"]["inputSchema"]["properties"]["split"]["enum"] == ["train", "dev"]
+    offline = Service(root=ROOT, state_dir=tmp_path / "offline", max_tier="offline")
+    assert "agonist_send" not in {tool["name"] for tool in offline.tools()}
+    move = service.call("propose_move", {"lane": "self_adapter", "plan": ["bench_make"],
+                                         "hypothesis": "A recipe runs when called by its own tool name."})["move_id"]
+    made = service.call("bench_make", {"move_id": move, "split": "dev", "count": 10})
+    assert made["status"] == "ok" and made["out"] == "run:r0001"
+    with pytest.raises(HillclimbError, match="bad_arguments: bench_make needs move_id"):
+        service.call("bench_make", {"split": "dev"})
+
+
 def test_first_json_object() -> None:
     assert first_json_object('<think>{"no": 1}</think> text {"a": {"b": "}"}} tail') == {"a": {"b": "}"}}
     assert first_json_object("nothing") is None
@@ -316,7 +336,8 @@ def test_mcp_framing(service: Service) -> None:
     replies = [json.loads(line) for line in writer.getvalue().decode().splitlines()]
     assert [r.get("id") for r in replies] == [1, 2, 3, 4, None]
     assert replies[0]["result"]["serverInfo"]["name"] == "datagoblin-hillclimb"
-    assert len(replies[1]["result"]["tools"]) == 8
+    runnable = [r for r in service.registry.recipes.values() if service.runnable(r)]
+    assert len(replies[1]["result"]["tools"]) == 7 + len(runnable)
     assert replies[2]["result"]["isError"] is True
     assert replies[2]["result"]["structuredContent"]["error"] == "bad_arguments"
     assert replies[3]["error"]["code"] == -32601

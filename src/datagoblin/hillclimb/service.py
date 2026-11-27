@@ -24,6 +24,7 @@ from typing import Any
 from .lanes import (
     TIERS,
     HillclimbError,
+    Param,
     Recipe,
     Registry,
     call_reason,
@@ -110,6 +111,45 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "readOnly": False,
     },
 ]
+
+
+_PATH_HELP = "run:<run_id> (an earlier run's output directory), run:<run_id>/sub/path, or a path in the checkout"
+
+
+def _param_schema(param: Param) -> dict[str, Any]:
+    scalar = {"int": "integer", "float": "number", "enum": "string", "str": "string", "path": "string",
+              "loopback_url": "string"}
+    item_kind = {"int_list": "int", "enum_list": "enum", "path_list": "path"}.get(param.type)
+    kind = item_kind or param.type
+    schema: dict[str, Any] = {"type": scalar[kind]}
+    if param.choices is not None:
+        schema["enum"] = list(param.choices)
+    if kind in ("int", "float"):
+        if param.min is not None:
+            schema["minimum"] = param.min
+        if param.max is not None:
+            schema["maximum"] = param.max
+    if kind == "str" and param.pattern:
+        schema["pattern"] = param.pattern
+    if kind == "path":
+        schema["description"] = _PATH_HELP + (f" ({param.kind})" if param.kind else "")
+    if param.type == "loopback_url":
+        schema["description"] = "A local OpenAI-compatible server, http://127.0.0.1:PORT/v1 (suite_status endpoints)"
+    if item_kind:
+        schema = {"type": "array", "items": schema, "minItems": 1, "uniqueItems": True}
+        if param.max_items:
+            schema["maxItems"] = param.max_items
+    if param.default is not None:
+        schema["default"] = param.default
+    return schema
+
+
+def recipe_schema(recipe: Recipe) -> dict[str, Any]:
+    """JSON schema for a recipe's own tool: move_id plus the recipe's typed parameters."""
+    properties: dict[str, Any] = {"move_id": {"type": "string", "description": "The open move this run belongs to"}}
+    properties.update({name: _param_schema(param) for name, param in recipe.params.items()})
+    required = ["move_id", *[name for name, param in recipe.params.items() if param.required]]
+    return _obj(properties, required)
 
 
 def _pointer(document: Any, pointer: str) -> Any:
@@ -222,24 +262,54 @@ class Service:
             "decide": self.decide,
             "abandon_move": self.abandon_move,
         }
+        clash = set(self._handlers) & set(self.registry.recipes)
+        if clash:
+            raise HillclimbError("bad_registry", f"recipe names shadow control tools: {sorted(clash)}")
 
     # ---- MCP surface ----
 
+    def runnable(self, recipe: Recipe) -> bool:
+        """Whether this session lists the recipe as a tool: within its tier and with its checkouts found."""
+        return (not self.read_only and tier_rank(recipe.tier) <= tier_rank(self.max_tier)
+                and not self._recipe_available(recipe))
+
     def tools(self) -> list[dict[str, Any]]:
+        """Control tools, then one tool per runnable recipe with that recipe's exact parameter schema.
+
+        `run_recipe` (recipe name plus a params object) stays callable but is not listed: models fill
+        a declared schema far more reliably than a free-form params object.
+        """
         listed = []
         for spec in TOOL_SPECS:
-            if self.read_only and not spec["readOnly"]:
+            if (self.read_only and not spec["readOnly"]) or spec["name"] == "run_recipe":
                 continue
             listed.append({
                 "name": spec["name"],
                 "description": spec["description"],
                 "inputSchema": spec["inputSchema"],
-                "annotations": {"readOnlyHint": spec["readOnly"], "destructiveHint": False,
-                                "openWorldHint": spec["name"] == "run_recipe"},
+                "annotations": {"readOnlyHint": spec["readOnly"], "destructiveHint": False, "openWorldHint": False},
             })
+        for recipe in self.registry.recipes.values():
+            if self.runnable(recipe):
+                lanes = ", ".join(self.registry.lanes_using(recipe.name))
+                listed.append({
+                    "name": recipe.name,
+                    "description": (f"Recipe ({recipe.tier} tier; lanes: {lanes}). {recipe.description} "
+                                    "Needs the move_id of an open move in one of those lanes."),
+                    "inputSchema": recipe_schema(recipe),
+                    "annotations": {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
+                })
         return listed
 
     def call(self, name: str, arguments: Mapping[str, Any] | None) -> dict[str, Any]:
+        if name in self.registry.recipes:
+            if self.read_only:
+                raise HillclimbError("read_only", f"{name} needs a session started without --read-only")
+            params = dict(arguments or {})
+            move_id = params.pop("move_id", None)
+            if move_id is None:
+                raise HillclimbError("bad_arguments", f"{name} needs move_id (open one with propose_move)")
+            return self.run_recipe(move_id, name, params)
         handler = self._handlers.get(name)
         if handler is None:
             raise HillclimbError("unknown_tool", name)

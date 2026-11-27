@@ -62,17 +62,17 @@ def native_script(messages: list[dict[str, Any]]) -> dict[str, Any] | str:
                                                    "set the lane baseline."})
     move = last_with(messages, "move_id")
     if done == 3:
-        return call("run_recipe", {"move_id": move, "recipe": "rlt_make_suite", "params": {"per_family": 1}})
+        return call("rlt_make_suite", {"move_id": move, "per_family": 1})
     if done in (4, 5, 6):
         # The same bad call three times: two server refusals, then the app's repeated-failure guard.
-        return call("run_recipe", {"move_id": move, "recipe": "rlt_run", "params": {}})
+        return call("rlt_run", {"move_id": move})
     if done == 7:
         suite = next(r["run_id"] for r in tool_results(messages) if isinstance(r, dict) and r.get("run_id"))
-        return call("run_recipe", {"move_id": move, "recipe": "rlt_run", "params": {
-            "suite": f"run:{suite}", "seeds": [7], "depths": [1, 2], "max_wall_seconds": 120}})
+        return call("rlt_run", {"move_id": move, "suite": f"run:{suite}", "seeds": [7], "depths": [1, 2],
+                                "max_wall_seconds": 120})
     if done == 8:
-        return call("run_recipe", {"move_id": move, "recipe": "agonist_send", "params": {
-            "requests": "Agonist/fixtures/tastes.jsonl", "base_url": "http://127.0.0.1:9/v1", "model": "x"}})
+        return call("agonist_send", {"move_id": move, "requests": "Agonist/fixtures/tastes.jsonl",
+                                     "base_url": "http://127.0.0.1:9/v1", "model": "x"})
     if done == 9:
         fits = [r for r in tool_results(messages) if isinstance(r, dict) and r.get("produces_lane_metric")]
         return call("record_result", {"move_id": move, "run_id": fits[-1]["run_id"]})
@@ -145,10 +145,15 @@ def main() -> int:
         first = json.dumps(SEEN[0]["messages"])
         assert "# Loaded Skill: datagoblin-hillclimb" in first, "slash command did not load the skill"
         assert "/datagoblin-hillclimb looped_modules" in first
-        assert {t["function"]["name"] for t in SEEN[0]["tools"]} >= {"load_skill", "propose_move", "run_recipe"}
+        offered = {t["function"]["name"]: t["function"] for t in SEEN[0]["tools"]}
+        assert {"load_skill", "propose_move", "rlt_make_suite", "rlt_run", "curate"} <= set(offered), sorted(offered)
+        assert "run_recipe" not in offered and "agonist_send" not in offered, "listed tools must respect the tier"
+        rlt_params = offered["rlt_run"]["parameters"]
+        assert rlt_params["required"] == ["move_id", "suite"], rlt_params
+        assert rlt_params["properties"]["depths"]["items"]["enum"] == [1, 2, 4, 8, 16], rlt_params
         calls = receipt["toolCalls"]
-        assert [c["name"] for c in calls] == ["load_skill", "suite_status", "propose_move", *["run_recipe"] * 6,
-                                              "record_result", "decide"], calls
+        assert [c["name"] for c in calls] == ["load_skill", "suite_status", "propose_move", "rlt_make_suite",
+                                              *["rlt_run"] * 4, "agonist_send", "record_result", "decide"], calls
         refused = calls[4]["result"] or ""
         assert "missing_param" in refused and "parameter 'suite'" in refused and "run:r0001" in refused, refused
         assert calls[5]["ok"] is False and "missing_param" in (calls[5]["result"] or "")

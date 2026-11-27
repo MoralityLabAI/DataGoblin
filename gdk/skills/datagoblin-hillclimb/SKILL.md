@@ -42,10 +42,13 @@ Each lane has a card with its move menu: `load_skill(name: "datagoblin-hillclimb
 4. **Propose.** `propose_move(lane, hypothesis, plan, expected)`. The hypothesis names one change,
    why it should move the metric, and the result that would refute it. `plan` lists the recipes you
    will run; `expected` is the metric value you predict.
-5. **Run.** `run_recipe(move_id, recipe, params)` for each step. Pass an earlier output as
-   `run:<run_id>` or `run:<run_id>/sub/path`; outputs of earlier moves are reusable. Read `status`
-   and `stderr_tail`. If a run fails, fix the parameters once; if it fails again, `abandon_move` with
-   the reason.
+5. **Run.** Each recipe is its own tool, named like the recipe (`rlt_make_suite`, `rlt_run`,
+   `curate`, ...). Call it with `move_id` and the recipe's parameters as top-level arguments, for
+   example `rlt_run(move_id: "m0003", suite: "run:r0007", depths: [1, 2, 4, 8, 16])`. Pass an
+   earlier output as `run:<run_id>` or `run:<run_id>/sub/path` (the `out` field of a run's result);
+   outputs of earlier moves are reusable. Read `status` and `stderr_tail`. If a call is refused, the
+   error names the parameter and what it expects: fix that argument. If a run fails twice,
+   `abandon_move` with the reason.
 6. **Record.** `record_result(move_id, run_id)` on the run whose `produces_lane_metric` is true. The
    service extracts the value and previews the verdict.
 7. **Decide.** `decide(move_id)`. On `replicate`, rerun the evaluation recipe (a new seed where the

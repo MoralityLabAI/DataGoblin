@@ -30,8 +30,11 @@ run, result and decision to a hash-chained ledger in `runs/hillclimb/ledger.json
   found with GDK `discover_skills`; `/datagoblin-hillclimb <lane>` loads the skill, and the
   `load_skill` tool loads it or a lane card (`datagoblin-hillclimb/lanes/curation.md`).
 - **Tools** ([`src/datagoblin/hillclimb/server.py`](../src/datagoblin/hillclimb/server.py)): `suite_status`,
-  `ledger_status`, `list_recipes`, `propose_move`, `run_recipe`, `record_result`, `decide`,
-  `abandon_move`, over MCP stdio (protocol 2025-06-18).
+  `ledger_status`, `list_recipes`, `propose_move`, `record_result`, `decide`, `abandon_move`, and one
+  tool per recipe the session's tier allows, with that recipe's exact parameter schema (`rlt_run(move_id,
+  suite, depths, ...)`), over MCP stdio (protocol 2025-06-18). `run_recipe` (recipe name plus a params
+  object) stays callable for scripts but is not listed: in a live run a small model sent an empty params
+  object on every call, so recipes get declared schemas instead.
 - **Approval**: `--approve read-only` hides the write tools; `ledger` (default) writes the ledger and
   runs offline recipes; `local` adds loopback recipes that call already running local model servers
   (Agonist worker, rollout capture, driver bench); `all` adds GPU recipes (adaptergym launches through

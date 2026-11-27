@@ -20,10 +20,11 @@ from .service import Service
 PROTOCOL = "2025-06-18"
 VERSION = "0.1.0"
 INSTRUCTIONS = (
-    "DataGoblin hill-climb tools. A move is: propose_move (lane, hypothesis, plan) -> run_recipe for each step "
-    "-> record_result on the run that produces the lane metric -> decide. The service reads metric values from "
-    "artifacts and applies the lane gate; never report a number or verdict a tool did not return. Recipes above "
-    "this session's tier are refused."
+    "DataGoblin hill-climb tools. A move is: propose_move (lane, hypothesis, plan) -> call each planned recipe's "
+    "own tool (named like the recipe, e.g. rlt_run) with move_id and that recipe's parameters -> record_result on "
+    "the run that produces the lane metric -> decide. Pass an earlier run's output as run:<run_id>. The service "
+    "reads metric values from artifacts and applies the lane gate; never report a number or verdict a tool did not "
+    "return. Only recipes within this session's tier are listed as tools."
 )
 
 
