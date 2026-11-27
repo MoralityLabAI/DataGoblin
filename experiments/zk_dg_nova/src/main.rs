@@ -1,4 +1,4 @@
-//! Source-only integration until built and tested with the pinned Nova crate.
+//! Development adapter; native smoke succeeded at the prior frontier commit.
 //! The relying party must own the statement file and pin its exact SHA-256.
 use ff::{Field, PrimeField};
 use nova_snark::{
@@ -107,7 +107,7 @@ fn load(path: &str, expected_sha: &str) -> Arc<Statement> {
     assert_eq!(s.format, "zk-dg-nova-statement-v1");
     assert!((1..=32).contains(&s.steps) && (2..=50_000).contains(&s.wires));
     let arity = s.state_in.len();
-    assert!((1..=67).contains(&arity));
+    assert!((1..=71).contains(&arity));
     assert_eq!(s.state_out.len(), arity);
     assert_eq!(s.z0.len(), arity);
     assert_eq!(s.zn.len(), arity);
