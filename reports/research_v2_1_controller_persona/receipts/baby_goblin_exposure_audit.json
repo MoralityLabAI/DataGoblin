@@ -1,0 +1,199 @@
+{
+  "adaptation_optimizer_lineage": {
+    "batch_size_sequences": 2,
+    "frozen_parameters": 933834752,
+    "frozen_prefix_visits": 21,
+    "grad_clip_norm": 1.0,
+    "lr": 0.0003,
+    "lr_ratio_vs_10m_pretrain_end_lr": 24.0,
+    "matched_updates": 128,
+    "max_seq_len": 384,
+    "optimizer": "Fresh torch.optim.AdamW (pretraining AdamW moments NOT inherited; checkpoint export is weights-only)",
+    "scope": "exit_shell_fp32",
+    "trainable_fraction_of_model": 0.06556,
+    "trainable_modules": [
+      "blocks[11,12].{q,kp,v,o,up,gate,down} FP32 LoRA (rank=16, alpha=32)",
+      "blocks[11,12].{n1,n2} full FP32 RMSNorm",
+      "blocks[13] full FP32 block",
+      "norm full FP32 RMSNorm",
+      "FP32HeadAdapter rank-64 residual over tied embed output projection"
+    ],
+    "trainable_parameters": 65517568,
+    "weight_decay": 0.01
+  },
+  "arm_exposure_audits": {
+    "arm0_original_10m": {
+      "continued_base_coverage": {
+        "base_chunk_draws": 0,
+        "base_coverage_frac": 0.0,
+        "base_loss_tokens": 0,
+        "base_unique_chunks_seen": 0
+      },
+      "loss_to_forward_token_ratio": 0.0,
+      "receipt_exact_replay_verified": true,
+      "specialist_pool_coverage": {
+        "combined_specialist_loss_tokens": 0,
+        "fraction_of_211906_pool_exposed": 0.0,
+        "jinn_beast_coverage_frac": 0.0,
+        "jinn_beast_draws": 0,
+        "jinn_beast_loss_tokens": 0,
+        "jinn_beast_max_repeats": 0,
+        "jinn_beast_unique_records_seen": 0,
+        "left_truncated_exposure_rate": 0.0,
+        "left_truncated_prompt_exposures": 0,
+        "public_synthetic_coverage_frac": 0.0,
+        "public_synthetic_draws": 0,
+        "public_synthetic_loss_tokens": 0,
+        "public_synthetic_max_repeats": 0,
+        "public_synthetic_unique_records_seen": 0
+      },
+      "total_forward_tokens": 0,
+      "total_supervised_loss_tokens": 0,
+      "trainable_weights_sha256": "0c3bf82c302e560b6b0891a31f52fcda7fa0f8fa098b6fee61332b95e098e414",
+      "weights_changed": false
+    },
+    "arm1_specialist_only": {
+      "continued_base_coverage": {
+        "base_chunk_draws": 0,
+        "base_coverage_frac": 0.0,
+        "base_loss_tokens": 0,
+        "base_unique_chunks_seen": 0
+      },
+      "loss_to_forward_token_ratio": 0.1483,
+      "receipt_exact_replay_verified": true,
+      "specialist_pool_coverage": {
+        "combined_specialist_loss_tokens": 13993,
+        "fraction_of_211906_pool_exposed": 0.066,
+        "jinn_beast_coverage_frac": 0.0427,
+        "jinn_beast_draws": 128,
+        "jinn_beast_loss_tokens": 9135,
+        "jinn_beast_max_repeats": 2,
+        "jinn_beast_unique_records_seen": 123,
+        "left_truncated_exposure_rate": 0.8047,
+        "left_truncated_prompt_exposures": 206,
+        "public_synthetic_coverage_frac": 0.3681,
+        "public_synthetic_draws": 128,
+        "public_synthetic_loss_tokens": 4858,
+        "public_synthetic_max_repeats": 4,
+        "public_synthetic_unique_records_seen": 106
+      },
+      "total_forward_tokens": 94357,
+      "total_supervised_loss_tokens": 13993,
+      "trainable_weights_sha256": "bdd4258846fd6cff5b55bb5fa6f162beab78a6e80368a3ba49268d779ea10b9d",
+      "weights_changed": true
+    },
+    "arm2_continued_base": {
+      "continued_base_coverage": {
+        "base_chunk_draws": 256,
+        "base_coverage_frac": 0.422,
+        "base_loss_tokens": 94638,
+        "base_unique_chunks_seen": 211
+      },
+      "loss_to_forward_token_ratio": 0.9973,
+      "receipt_exact_replay_verified": true,
+      "specialist_pool_coverage": {
+        "combined_specialist_loss_tokens": 0,
+        "fraction_of_211906_pool_exposed": 0.0,
+        "jinn_beast_coverage_frac": 0.0,
+        "jinn_beast_draws": 0,
+        "jinn_beast_loss_tokens": 0,
+        "jinn_beast_max_repeats": 0,
+        "jinn_beast_unique_records_seen": 0,
+        "left_truncated_exposure_rate": 0.0,
+        "left_truncated_prompt_exposures": 0,
+        "public_synthetic_coverage_frac": 0.0,
+        "public_synthetic_draws": 0,
+        "public_synthetic_loss_tokens": 0,
+        "public_synthetic_max_repeats": 0,
+        "public_synthetic_unique_records_seen": 0
+      },
+      "total_forward_tokens": 94894,
+      "total_supervised_loss_tokens": 94638,
+      "trainable_weights_sha256": "2732237a9ed42762a52735d9dd94737efcdc7b639e853089d1bb36f9c888d7ef",
+      "weights_changed": true
+    },
+    "arm3_base_then_specialist": {
+      "continued_base_coverage": {
+        "base_chunk_draws": 128,
+        "base_coverage_frac": 0.23,
+        "base_loss_tokens": 47085,
+        "base_unique_chunks_seen": 115
+      },
+      "loss_to_forward_token_ratio": 0.5709,
+      "receipt_exact_replay_verified": true,
+      "specialist_pool_coverage": {
+        "combined_specialist_loss_tokens": 6801,
+        "fraction_of_211906_pool_exposed": 0.0321,
+        "jinn_beast_coverage_frac": 0.0222,
+        "jinn_beast_draws": 64,
+        "jinn_beast_loss_tokens": 4523,
+        "jinn_beast_max_repeats": 1,
+        "jinn_beast_unique_records_seen": 64,
+        "left_truncated_exposure_rate": 0.4102,
+        "left_truncated_prompt_exposures": 105,
+        "public_synthetic_coverage_frac": 0.184,
+        "public_synthetic_draws": 64,
+        "public_synthetic_loss_tokens": 2278,
+        "public_synthetic_max_repeats": 3,
+        "public_synthetic_unique_records_seen": 53
+      },
+      "total_forward_tokens": 94395,
+      "total_supervised_loss_tokens": 53886,
+      "trainable_weights_sha256": "962edbc0a99c8376bdc71a35f43dba24f1d15eead0d268271b1dc59f742d3245",
+      "weights_changed": true
+    }
+  },
+  "audit_sha256": "55fc1d54ac4a1761fa079ff105ff6f2fda3b7632ab469871927e2673579566c7",
+  "audited_receipt_sha256": "63a42e12d3096674c9cbdd1f9165c4f34f46890f8aa0404884e783a44d118e6e",
+  "base_checkpoint_lineage": {
+    "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+    "native_tied_parameters": 999352320,
+    "native_weights_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+    "pretraining_corpus_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+    "pretraining_end_loss_group38": 7.0351,
+    "pretraining_group_positions": 262144,
+    "pretraining_groups": 39,
+    "pretraining_lr_at_10m": 1.25e-05,
+    "pretraining_peak_lr_at_20m": 0.00025,
+    "pretraining_positions": 10000000,
+    "pretraining_precision_recipe": "BF16 compute + FP32 master weights + FP32 AdamW moments",
+    "pretraining_supervised_labels": 4825552,
+    "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c"
+  },
+  "continued_base_corpus_manifest_sha256": "b21c9a6e08fc1d3922450879840a952bd2101a8f8dec9cb312517dd8d35388b1",
+  "key_audit_findings": [
+    "Forward-vs-loss token asymmetry: arm1_specialist_only and arm2_continued_base matched total forward tokens within 0.57% (94,357 vs 94,894), but arm2 backpropagated through 6.76x more loss-bearing tokens (94,638 vs 13,993) because prompt tokens are masked in SFT.",
+    "Specialist pool exposure was sparse: arm1 exposed 13,993 supervised tokens (6.60% of the 211,906-token pool; 106/288 unique synthetic records, 123/2,880 unique Jinn/Beast records) and arm3 exposed 6,801 specialist tokens (3.21% of pool) + 47,085 base tokens.",
+    "Prompt left-truncation at max_seq_len=384 affected 100.0% (2,880/2,880) of Jinn/Beast structured policy inputs and 63.89% (184/288) of Research v2 synthetic prompts while preserving 100% of supervised target tokens; staged 20M-200M adaptation must train at full 2,048-token context so policy specs and multi-turn compact_state stay untruncated.",
+    "Optimizer lineage discontinuity: native export is weights-only (no AdamW moments), so adaptation used fresh FP32 AdamW at lr=3e-4 (24x the 10M end-of-warmup LR 1.25e-5) on the 6.56% exit shell only while freezing the 10-block shared recurrent core."
+  ],
+  "pool_truncation_audit": {
+    "jinn_beast_train": {
+      "mean_dropped_prompt_tokens": 263.62,
+      "mean_raw_prompt_tokens": 576.3,
+      "mean_target_tokens_with_eos": 71.32,
+      "mean_trimmed_prompt_tokens": 312.68,
+      "prompts_left_truncated_count": 2880,
+      "prompts_left_truncated_rate": 1.0,
+      "records": 2880,
+      "supervised_tokens_no_eos": 202515,
+      "supervised_tokens_with_eos": 205395,
+      "targets_truncated_count": 0,
+      "unique_roots": 1440
+    },
+    "research_v2_synthetic": {
+      "mean_dropped_prompt_tokens": 159.16,
+      "mean_raw_prompt_tokens": 476.56,
+      "mean_target_tokens_with_eos": 33.61,
+      "mean_trimmed_prompt_tokens": 317.4,
+      "prompts_left_truncated_count": 184,
+      "prompts_left_truncated_rate": 0.6389,
+      "records": 288,
+      "supervised_tokens_no_eos": 9391,
+      "supervised_tokens_with_eos": 9679,
+      "targets_truncated_count": 0,
+      "unique_roots": 128
+    }
+  },
+  "schema": "research-v2.1-baby-goblin-exposure-optimizer-audit-v1"
+}

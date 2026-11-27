@@ -24,6 +24,8 @@ SCRIPTS_V21 = Path(__file__).resolve().parents[2] / "scripts" / "research_v2_1"
 if str(SCRIPTS_V21) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_V21))
 
+from baby_goblin_emergence_probe import recompute_emergence_milestones  # noqa: E402
+from jinn_beast_depth_study import verify_deep_exact_bptt_gradients  # noqa: E402
 from jinn_beast_disentangle import verify_exact_unrolled_gradient  # noqa: E402
 
 
@@ -199,3 +201,64 @@ def test_exact_unrolled_bptt_gradients_match_central_differences() -> None:
             rel = abs(num - ana) / max(1e-8, abs(num) + abs(ana))
             max_rel = max(max_rel, float(rel))
     assert max_rel < 1e-5
+
+
+def test_deep_recurrence_exact_bptt_up_to_24_passes_and_untied_controls() -> None:
+    grad_errs = verify_deep_exact_bptt_gradients()
+    for key in (
+        "tied_K=1_max_rel_err",
+        "tied_K=3_max_rel_err",
+        "tied_K=6_max_rel_err",
+        "tied_K=12_max_rel_err",
+        "tied_K=24_max_rel_err",
+        "untied_depth=6_max_rel_err",
+        "untied_depth=12_max_rel_err",
+    ):
+        assert key in grad_errs
+        assert grad_errs[key] < 1e-5
+
+
+def test_baby_goblin_emergence_ledger_and_milestone_tracker() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    ledger_path = repo_root / "configs" / "research_v2_1" / "baby_goblin_emergence_ledger.json"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    # At observed 10M stage, all emergence milestones remain strictly None
+    checked = recompute_emergence_milestones(json.loads(json.dumps(ledger)))
+    assert all(v is None for v in checked["emergence_milestones"].values())
+
+    # Simulate 50M onset & 100M reliable crossing without mutating disk ledger
+    sim = json.loads(json.dumps(ledger))
+    for st in sim["stages"]:
+        if st["stage_id"] == "50M":
+            st["status"] = "evaluated"
+            st["arms"]["spec_replay_50M"] = {
+                "valid_json_rate": 0.50,
+                "schema_valid_action_rate": 0.375,
+                "eos_stop_rate": 0.3125,
+                "action_verb_accuracy": 0.625,
+                "autonomous_mean_capability_score": 0.25,
+                "rlt_controller_mean_capability_score": 0.3125,
+                "autonomous_mean_primary_score": 0.0,
+                "rlt_controller_mean_primary_score": 0.0,
+            }
+        elif st["stage_id"] == "100M":
+            st["status"] = "evaluated"
+            st["arms"]["spec_replay_100M"] = {
+                "valid_json_rate": 0.875,
+                "schema_valid_action_rate": 0.8125,
+                "eos_stop_rate": 0.875,
+                "action_verb_accuracy": 0.75,
+                "autonomous_mean_capability_score": 0.50,
+                "rlt_controller_mean_capability_score": 0.625,
+                "autonomous_mean_primary_score": 0.0625,
+                "rlt_controller_mean_primary_score": 0.125,
+            }
+    recompute_emergence_milestones(sim)
+    ms = sim["emergence_milestones"]
+    assert ms["first_json_onset"]["stage_id"] == "50M"
+    assert ms["first_eos_onset"]["stage_id"] == "50M"
+    assert ms["first_action_selection"]["stage_id"] == "50M"
+    assert ms["first_verified_capability"]["stage_id"] == "50M"
+    assert ms["first_json_reliable"]["stage_id"] == "100M"
+    assert ms["first_eos_reliable"]["stage_id"] == "100M"
+    assert ms["first_nonzero_primary_score"]["stage_id"] == "100M"

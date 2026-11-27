@@ -302,7 +302,11 @@ def _build_disjoint_general_corpus(
     for folder in (repo_root / "docs", repo_root / "pre-trains", repo_root / "README.md"):
         candidates = [folder] if folder.is_file() else sorted(folder.rglob("*.md"))
         for p in candidates:
-            if any(part in excluded_parts for part in p.parts) or "research_verifiers_v2" in p.name:
+            if (
+                any(part in excluded_parts for part in p.parts)
+                or "research_verifiers_v2" in p.name
+                or "baby_goblin_staged_emergence" in p.name
+            ):
                 continue
             txt = p.read_text(encoding="utf-8", errors="ignore").strip()
             if len(txt) >= 300:
