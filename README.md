@@ -266,6 +266,8 @@ cd gdk && cargo build --release
 python -m datagoblin.hillclimb --lane looped_modules   # ledger state
 ```
 
+DataGoblin's orchestrator is also an MCP stdio server for any MCP client (`python -m datagoblin.mcp`): see [`docs/datagoblin_mcp.md`](docs/datagoblin_mcp.md).
+
 ## Optional HRM-Text cycle milestone
 
 The optional milestone asks whether recurrent update summaries rank and calibrate constitutional-verdict errors. It does
