@@ -32,6 +32,19 @@ jobs:
           PYTHONPATH=src python experiments/zk_dg_nova/smoke.py \
             --out "$RUNNER_TEMP/zk-dg-frontier" --nodes 3 --depth 2 --frontier \
             --native experiments/zk_dg_nova/target/release/zk-dg-nova --timeout 180
+      - name: Journal proof and retired-output substitution
+        run: |
+          PYTHONPATH=src python experiments/zk_dg_nova/smoke.py \
+            --out "$RUNNER_TEMP/zk-dg-journal" --nodes 3 --depth 2 --journal \
+            --native experiments/zk_dg_nova/target/release/zk-dg-nova --timeout 180
+      - name: Matched 32-worker dense and journal benchmark
+        run: |
+          PYTHONPATH=src python experiments/zk_dg_nova/smoke.py \
+            --out "$RUNNER_TEMP/zk-dg-dense32" --nodes 32 --depth 4 --benchmark-only \
+            --native experiments/zk_dg_nova/target/release/zk-dg-nova --timeout 180
+          PYTHONPATH=src python experiments/zk_dg_nova/smoke.py \
+            --out "$RUNNER_TEMP/zk-dg-journal32" --nodes 32 --depth 4 --journal --benchmark-only \
+            --native experiments/zk_dg_nova/target/release/zk-dg-nova --timeout 180
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -41,4 +54,12 @@ jobs:
             ${{ runner.temp }}/zk-dg-frontier/statement.json
             ${{ runner.temp }}/zk-dg-frontier/statement.sha256
             ${{ runner.temp }}/zk-dg-frontier/proof.bin
+            ${{ runner.temp }}/zk-dg-journal/statement.json
+            ${{ runner.temp }}/zk-dg-journal/statement.sha256
+            ${{ runner.temp }}/zk-dg-journal/proof.bin
+            ${{ runner.temp }}/zk-dg-journal/corpus-receipt.json
+            ${{ runner.temp }}/zk-dg-dense32/statement.json
+            ${{ runner.temp }}/zk-dg-dense32/proof.bin
+            ${{ runner.temp }}/zk-dg-journal32/statement.json
+            ${{ runner.temp }}/zk-dg-journal32/proof.bin
           if-no-files-found: warn
