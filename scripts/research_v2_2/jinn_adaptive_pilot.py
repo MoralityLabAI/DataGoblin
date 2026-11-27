@@ -25,6 +25,7 @@ from jinn_beast_depth_study import (  # noqa: E402
     _fit_and_profile_tied,
     build_fresh_confirmation_panel,
 )
+
 from datagoblin.research_v2.specialist import (  # noqa: E402
     _load_manifest,
     _policy,
