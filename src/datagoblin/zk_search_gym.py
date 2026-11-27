@@ -19,7 +19,7 @@ ARMS = ("degree", "random", "heuristic", "adaptive_heuristic", "learned", "adapt
 BUDGETS = (24, 48, 96)
 
 
-def fixture(p, family, seed):
+def fixture(p, family, seed, *, eager=True):
     rng = random.Random(seed)
     k, scale2 = (rng.randrange(1, p) for _ in range(2))
 
@@ -80,7 +80,7 @@ def fixture(p, family, seed):
             renamed[renaming[i]] = value
         w = list(map(str, renamed))
         assert check(replacement, w, w[1:]) == [] and check(original, w, w[1:]) == [idx]
-    return Problem(original, replacement, idx, (digest(original), digest(replacement)))
+    return Problem(original, replacement, idx, (digest(original), digest(replacement)), eager=eager)
 
 
 def features(problem):
@@ -187,6 +187,7 @@ def run(problem, arm, budget, weights=None, seed=0):
     if cert is not None:
         verify(problem.original, problem.replacement, cert, *problem.hashes)
     return {**state.counts(), "pool_columns": len(keys), "pool_terms": problem.pool_terms,
+            "prepared_columns": problem.prepared_columns,
             "feature_evals": len(fs), "score_evals": score_evals, "graph_row_scans": graph_scans, "certificate": cert,
             "exact_identity_checked": cert is not None, "lean_replayed": False,
             "production_accepted": False}

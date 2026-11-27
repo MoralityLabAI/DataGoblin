@@ -4,6 +4,8 @@ on:
     paths:
       - 'src/datagoblin/zk_search_gym.py'
       - 'tests/test_zk_search_gym.py'
+      - 'src/datagoblin/zk_lazy_search_gym.py'
+      - 'tests/test_zk_lazy_search_gym.py'
       - '.github/workflows/zkl13.yml'
   workflow_dispatch:
 permissions:
@@ -20,21 +22,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: patrickdugan/SatsHedgeZero
-          ref: c4a80400cc901f9528e735ac882292f973ea24da
+          ref: 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
           path: shz-pinned
       - name: Confirm checkout and run paired policies
         env:
           PYTHONPATH: ${{ github.workspace }}/shz-pinned/research/zk_lean
           ZKL13_CHECKER_ROOT: ${{ github.workspace }}/shz-pinned/research/zk_lean
         run: |
-          test "$(git -C shz-pinned rev-parse HEAD)" = c4a80400cc901f9528e735ac882292f973ea24da
+          test "$(git -C shz-pinned rev-parse HEAD)" = 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
           python -m pip install -e '.[dev]'
-          python -m pytest tests/test_zk_search_gym.py -v
+          python -m pytest tests/test_zk_search_gym.py tests/test_zk_lazy_search_gym.py -v
           python -m datagoblin.zk_search_gym --out zkl13-first.json
           python -m datagoblin.zk_search_gym --test-start 13201 --out zkl13-fresh.json
+          python -m datagoblin.zk_lazy_search_gym --out zkl14a-lazy.json
       - uses: actions/upload-artifact@v4
         with:
           name: zkl13-paired-receipts
           path: |
             zkl13-first.json
             zkl13-fresh.json
+            zkl14a-lazy.json
