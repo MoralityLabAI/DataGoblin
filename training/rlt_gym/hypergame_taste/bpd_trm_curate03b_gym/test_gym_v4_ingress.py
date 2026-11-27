@@ -3,7 +3,7 @@ import copy
 import hashlib
 import unittest
 
-from .gym_v4_ingress import SCHEMA, audit, canonical
+from training.rlt_gym.hypergame_taste.bpd_trm_curate03b_gym.gym_v4_ingress import SCHEMA, audit, canonical
 
 
 def rows():
