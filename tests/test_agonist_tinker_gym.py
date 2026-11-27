@@ -3,7 +3,7 @@ from argparse import Namespace
 import pytest
 
 from Agonist.tinker_gym import Journal, Task, canonical, episode, fixture, make_tasks, parse_action
-from Agonist.tinker_live import active, advisory_registry, choose_batch, evaluate, train
+from Agonist.tinker_live import active, advisory_registry, evaluate, train
 
 
 def test_fixture_deterministic_and_disjoint(tmp_path):
