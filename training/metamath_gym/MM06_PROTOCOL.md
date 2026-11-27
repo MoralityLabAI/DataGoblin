@@ -1,0 +1,11 @@
+# MM06: branching repair search, fixed scheduler registration
+
+Protocol frozen before inspection of MM06 corpus counts or scheduler outcomes. MathCan source commit af9182959dca4843548e8554b182a048caba77ee ([registration](https://github.com/patrickdugan/MathCan/blob/af9182959dca4843548e8554b182a048caba77ee/research/metamath_gym/mm06_protocol.md)). Local runner SHA-256 c63d5ed8995bdad897fd63ccb70d8690a8acf80989e7179767c117365adad211. Import the exact MM04 scoped parser/step engine, require fresh corpus ZIP and internal hashes, C and Python prefix receipts, scope, signature and prefix-stack equality. Full exhaustive enumeration must match all oracle tuples and transition counts. Oracle is never used in search; post-run audit checks every reported certificate.
+
+Policies at budgets 8,16,32,64,128,256,512 transitions per root:
+- hash DFS: lazy candidate iteration in frozen bank order.
+- goal DFS: eagerly execute every candidate at a hole, charge all attempts, sort legal children by target equality then multiset similarity of instantiated top formula; stable bank-order ties. Check immediate final certificate on discovery.
+- beam4: expand each retained branch in bank order, apply fixed run up to next hole, rank by same goal score, keep four; check exact final stack before pruning. Count dropped branches.
+- memo DFS: hash DFS with exhausted failed-state memo keyed by next hole position and entire immutable token stack; no merging before dead-state proof, no cross-root cache.
+
+Budget counts all attempted assertion/hypothesis transitions after the fixed prefix, including invalid actions and fixed intervening runs. Preverified prefix construction, independent exhaustive audit and heuristic/hash overhead outside budget. No external verifier calls during search; certificate exact against trusted prefix. Count first valid completion, total transition cost, budget exhaustion and beam pruning; completed and unresolved separate. No learning or BPD, no tuning after public family-test results. Report per depth and split; also count valid tuples whose marginals do not form a Cartesian product (interaction diagnostic). This is public closed-bank repair, not general proof search. No merge requested.
