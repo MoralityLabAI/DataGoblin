@@ -1,0 +1,449 @@
+{
+  "schema": "bpd-curate03b-paid-acquisition-v1",
+  "scope": "spent development trajectories; replay of skip/acquire decisions for original recorded minibatch, never relabel an alternative minibatch; acquisition counts are logical, not measured CPU",
+  "ordering": "round-robin edit slot 0..3, record ID ascending within slot; order constructed post-hoc, must be replaced by prospective stable edge key before deployment",
+  "training": "leave-one-root-out exhaustive 343 threshold triples; constrain pooled positive recorded accepted gain retention >=99.5%, every training root >=98%; minimize acquired candidates, then attempts, then lost positive gain; fixed thresholds are post-hoc comparators",
+  "controls": {
+    "always": {
+      "windows": 640,
+      "candidatesAcquired": 10240,
+      "attempts": 640,
+      "accepted": 203,
+      "acceptedMissed": 0,
+      "rejectedAvoided": 0,
+      "positiveAcceptedGain": 15.275927782058716,
+      "missedPositiveGain": 0,
+      "missedSignedGain": 0,
+      "retainedFraction": 1
+    },
+    "fullGate": {
+      "windows": 640,
+      "candidatesAcquired": 10240,
+      "attempts": 364,
+      "accepted": 203,
+      "acceptedMissed": 1,
+      "rejectedAvoided": 275,
+      "positiveAcceptedGain": 15.275927782058716,
+      "missedPositiveGain": 0.000934600830078125,
+      "missedSignedGain": 0.000934600830078125,
+      "retainedFraction": 0.999938818719006
+    },
+    "early4": {
+      "windows": 640,
+      "candidatesAcquired": 5752,
+      "attempts": 266,
+      "accepted": 203,
+      "acceptedMissed": 18,
+      "rejectedAvoided": 356,
+      "positiveAcceptedGain": 15.275927782058716,
+      "missedPositiveGain": 0.656836986541748,
+      "missedSignedGain": 0.656836986541748,
+      "retainedFraction": 0.9570018269323589
+    },
+    "early8": {
+      "windows": 640,
+      "candidatesAcquired": 7568,
+      "attempts": 306,
+      "accepted": 203,
+      "acceptedMissed": 8,
+      "rejectedAvoided": 326,
+      "positiveAcceptedGain": 15.275927782058716,
+      "missedPositiveGain": 0.44339585304260254,
+      "missedSignedGain": 0.44339585304260254,
+      "retainedFraction": 0.9709742112316502
+    },
+    "early12": {
+      "windows": 640,
+      "candidatesAcquired": 9040,
+      "attempts": 340,
+      "accepted": 203,
+      "acceptedMissed": 5,
+      "rejectedAvoided": 295,
+      "positiveAcceptedGain": 15.275927782058716,
+      "missedPositiveGain": 0.028067350387573242,
+      "missedSignedGain": 0.028067350387573242,
+      "retainedFraction": 0.9981626418514142
+    }
+  },
+  "heldoutAdaptive": {
+    "windows": 640,
+    "candidatesAcquired": 8840,
+    "attempts": 338,
+    "accepted": 203,
+    "acceptedMissed": 7,
+    "rejectedAvoided": 295,
+    "positiveAcceptedGain": 15.275927782058716,
+    "missedPositiveGain": 0.13221240043640137,
+    "missedSignedGain": 0.13221240043640137,
+    "retainedFraction": 0.991345049392569
+  },
+  "folds": [
+    {
+      "root": 28101,
+      "thresholds": [
+        null,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7852,
+        "attempts": 327,
+        "accepted": 196,
+        "acceptedMissed": 5,
+        "rejectedAvoided": 228,
+        "positiveAcceptedGain": 13.95842456817627,
+        "missedPositiveGain": 0.028067350387573242,
+        "missedSignedGain": 0.028067350387573242,
+        "retainedFraction": 0.9979892178912824
+      },
+      "eligiblePolicies": 24,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1012,
+        "attempts": 13,
+        "accepted": 7,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 67,
+        "positiveAcceptedGain": 1.3175032138824463,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 13,
+        "accepted": 7,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 67,
+        "positiveAcceptedGain": 1.3175032138824463,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    },
+    {
+      "root": 28102,
+      "thresholds": [
+        null,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7640,
+        "attempts": 274,
+        "accepted": 169,
+        "acceptedMissed": 5,
+        "rejectedAvoided": 281,
+        "positiveAcceptedGain": 12.714214086532593,
+        "missedPositiveGain": 0.028067350387573242,
+        "missedSignedGain": 0.028067350387573242,
+        "retainedFraction": 0.997792443150906
+      },
+      "eligiblePolicies": 24,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1224,
+        "attempts": 66,
+        "accepted": 34,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 14,
+        "positiveAcceptedGain": 2.561713695526123,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 67,
+        "accepted": 34,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 13,
+        "positiveAcceptedGain": 2.561713695526123,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    },
+    {
+      "root": 28103,
+      "thresholds": [
+        null,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7820,
+        "attempts": 319,
+        "accepted": 191,
+        "acceptedMissed": 5,
+        "rejectedAvoided": 236,
+        "positiveAcceptedGain": 13.641845941543579,
+        "missedPositiveGain": 0.028067350387573242,
+        "missedSignedGain": 0.028067350387573242,
+        "retainedFraction": 0.9979425548046911
+      },
+      "eligiblePolicies": 24,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1044,
+        "attempts": 21,
+        "accepted": 12,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 59,
+        "positiveAcceptedGain": 1.6340818405151367,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 23,
+        "accepted": 12,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 57,
+        "positiveAcceptedGain": 1.6340818405151367,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    },
+    {
+      "root": 28104,
+      "thresholds": [
+        null,
+        -0.05,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7760,
+        "attempts": 306,
+        "accepted": 185,
+        "acceptedMissed": 4,
+        "rejectedAvoided": 250,
+        "positiveAcceptedGain": 14.392761945724487,
+        "missedPositiveGain": 0.027132749557495117,
+        "missedSignedGain": 0.027132749557495117,
+        "retainedFraction": 0.9981148337157376
+      },
+      "eligiblePolicies": 36,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 904,
+        "attempts": 32,
+        "accepted": 18,
+        "acceptedMissed": 2,
+        "rejectedAvoided": 46,
+        "positiveAcceptedGain": 0.8831658363342285,
+        "missedPositiveGain": 0.05814218521118164,
+        "missedSignedGain": 0.05814218521118164,
+        "retainedFraction": 0.934166174891328
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 33,
+        "accepted": 18,
+        "acceptedMissed": 1,
+        "rejectedAvoided": 46,
+        "positiveAcceptedGain": 0.8831658363342285,
+        "missedPositiveGain": 0.000934600830078125,
+        "missedSignedGain": 0.000934600830078125,
+        "retainedFraction": 0.9989417606618963
+      }
+    },
+    {
+      "root": 28105,
+      "thresholds": [
+        null,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7748,
+        "attempts": 301,
+        "accepted": 176,
+        "acceptedMissed": 4,
+        "rejectedAvoided": 255,
+        "positiveAcceptedGain": 12.619007349014282,
+        "missedPositiveGain": 0.02511000633239746,
+        "missedSignedGain": 0.02511000633239746,
+        "retainedFraction": 0.9980101440915351
+      },
+      "eligiblePolicies": 24,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1116,
+        "attempts": 39,
+        "accepted": 27,
+        "acceptedMissed": 1,
+        "rejectedAvoided": 40,
+        "positiveAcceptedGain": 2.6569204330444336,
+        "missedPositiveGain": 0.0029573440551757812,
+        "missedSignedGain": 0.0029573440551757812,
+        "retainedFraction": 0.9988869278814695
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 44,
+        "accepted": 27,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 36,
+        "positiveAcceptedGain": 2.6569204330444336,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    },
+    {
+      "root": 28106,
+      "thresholds": [
+        -0.1,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7512,
+        "attempts": 288,
+        "accepted": 172,
+        "acceptedMissed": 5,
+        "rejectedAvoided": 267,
+        "positiveAcceptedGain": 12.824734687805176,
+        "missedPositiveGain": 0.028067350387573242,
+        "missedSignedGain": 0.028067350387573242,
+        "retainedFraction": 0.9978114673659283
+      },
+      "eligiblePolicies": 28,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1156,
+        "attempts": 51,
+        "accepted": 31,
+        "acceptedMissed": 1,
+        "rejectedAvoided": 28,
+        "positiveAcceptedGain": 2.45119309425354,
+        "missedPositiveGain": 0.04693746566772461,
+        "missedSignedGain": 0.04693746566772461,
+        "retainedFraction": 0.9808511757895522
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 57,
+        "accepted": 31,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 23,
+        "positiveAcceptedGain": 2.45119309425354,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    },
+    {
+      "root": 28107,
+      "thresholds": [
+        -0.1,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7464,
+        "attempts": 278,
+        "accepted": 162,
+        "acceptedMissed": 4,
+        "rejectedAvoided": 278,
+        "positiveAcceptedGain": 13.602830410003662,
+        "missedPositiveGain": 0.061251163482666016,
+        "missedSignedGain": 0.061251163482666016,
+        "retainedFraction": 0.9954971750998511
+      },
+      "eligiblePolicies": 28,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1204,
+        "attempts": 61,
+        "accepted": 41,
+        "acceptedMissed": 2,
+        "rejectedAvoided": 17,
+        "positiveAcceptedGain": 1.6730973720550537,
+        "missedPositiveGain": 0.013753652572631836,
+        "missedSignedGain": 0.013753652572631836,
+        "retainedFraction": 0.9917795265222739
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 67,
+        "accepted": 41,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 13,
+        "positiveAcceptedGain": 1.6730973720550537,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    },
+    {
+      "root": 28108,
+      "thresholds": [
+        -0.1,
+        -0.1,
+        0
+      ],
+      "training": {
+        "windows": 560,
+        "candidatesAcquired": 7488,
+        "attempts": 284,
+        "accepted": 170,
+        "acceptedMissed": 5,
+        "rejectedAvoided": 271,
+        "positiveAcceptedGain": 13.177675485610962,
+        "missedPositiveGain": 0.06458306312561035,
+        "missedSignedGain": 0.06458306312561035,
+        "retainedFraction": 0.9950990549739877
+      },
+      "eligiblePolicies": 28,
+      "test": {
+        "windows": 80,
+        "candidatesAcquired": 1180,
+        "attempts": 55,
+        "accepted": 33,
+        "acceptedMissed": 1,
+        "rejectedAvoided": 24,
+        "positiveAcceptedGain": 2.098252296447754,
+        "missedPositiveGain": 0.0104217529296875,
+        "missedSignedGain": 0.0104217529296875,
+        "retainedFraction": 0.9950331268802465
+      },
+      "fullGate": {
+        "windows": 80,
+        "candidatesAcquired": 1280,
+        "attempts": 60,
+        "accepted": 33,
+        "acceptedMissed": 0,
+        "rejectedAvoided": 20,
+        "positiveAcceptedGain": 2.098252296447754,
+        "missedPositiveGain": 0,
+        "missedSignedGain": 0,
+        "retainedFraction": 1
+      }
+    }
+  ],
+  "source": {
+    "repository": "MoralityLabAI/BPD",
+    "commit": "af43e48b1ed472eef88bedd0cfa8f4f8aefb49b5",
+    "blob": "e02b864218e9aaa808eddfd57d3ef5cc5a5723d8",
+    "expected_sha256": "805220a18fd5c8f58e940e7238ff6065e5682b6006fcd01ceb85a4693484a748"
+  },
+  "execution": "audit function executed in JS isolate directly on full pinned Git blob; Node CLI SHA check included but not executed in this run"
+}
