@@ -1,0 +1,87 @@
+{
+  "base_registry": "configs/research_v2/models_mesh_20261126.json",
+  "comparison_contract": {
+    "context_tokens": 2048,
+    "controller_modes": [
+      "autonomous",
+      "deterministic_stopping",
+      "learned_ldt_stopping",
+      "trm_action_routing",
+      "rlt_state_correction"
+    ],
+    "history": "task-plus-persistent-compact-state",
+    "max_new_tokens_per_turn": 512,
+    "max_turns_per_episode": 8,
+    "per_episode_action_budget": true,
+    "schema": "research-v2.1-comparison-1",
+    "seed": 0,
+    "temperature": 0
+  },
+  "experimental_adaptation_arms": [
+    {
+      "arm_id": "baby-goblin-10m-v2-arm0-original",
+      "base_checkpoint_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+      "matched_optimizer_updates": 0,
+      "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+      "parameters": 999352320,
+      "precision": "bf16-base-fp32-exit-shell",
+      "protocol": "raw-completion",
+      "receipt_sha256": "63a42e12d3096674c9cbdd1f9165c4f34f46890f8aa0404884e783a44d118e6e",
+      "status": "evaluated_not_feasible_for_research_0_valid_json",
+      "trainable_parameters": 65517568,
+      "trainable_weights_sha256": "0c3bf82c302e560b6b0891a31f52fcda7fa0f8fa098b6fee61332b95e098e414",
+      "training_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+      "training_positions": 10000000
+    },
+    {
+      "arm_id": "baby-goblin-10m-v2-arm1-specialist-only-128u",
+      "base_checkpoint_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+      "matched_optimizer_updates": 128,
+      "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+      "parameters": 999352320,
+      "precision": "bf16-base-fp32-exit-shell",
+      "protocol": "raw-completion",
+      "receipt_sha256": "63a42e12d3096674c9cbdd1f9165c4f34f46890f8aa0404884e783a44d118e6e",
+      "status": "evaluated_not_feasible_for_research_0_valid_json_severe_forgetting",
+      "trainable_parameters": 65517568,
+      "trainable_weights_sha256": "bdd4258846fd6cff5b55bb5fa6f162beab78a6e80368a3ba49268d779ea10b9d",
+      "training_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+      "training_positions": 10094357
+    },
+    {
+      "arm_id": "baby-goblin-10m-v2-arm2-continued-base-128u",
+      "base_checkpoint_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+      "matched_optimizer_updates": 128,
+      "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+      "parameters": 999352320,
+      "precision": "bf16-base-fp32-exit-shell",
+      "protocol": "raw-completion",
+      "receipt_sha256": "63a42e12d3096674c9cbdd1f9165c4f34f46890f8aa0404884e783a44d118e6e",
+      "status": "evaluated_improved_general_nll_0_valid_json",
+      "trainable_parameters": 65517568,
+      "trainable_weights_sha256": "2732237a9ed42762a52735d9dd94737efcdc7b639e853089d1bb36f9c888d7ef",
+      "training_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+      "training_positions": 10094894
+    },
+    {
+      "arm_id": "baby-goblin-10m-v2-arm3-base-then-specialist-128u",
+      "base_checkpoint_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+      "matched_optimizer_updates": 128,
+      "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+      "parameters": 999352320,
+      "precision": "bf16-base-fp32-exit-shell",
+      "protocol": "raw-completion",
+      "receipt_sha256": "63a42e12d3096674c9cbdd1f9165c4f34f46890f8aa0404884e783a44d118e6e",
+      "status": "evaluated_dominates_spec_only_but_not_yet_feasible_0_valid_json",
+      "trainable_parameters": 65517568,
+      "trainable_weights_sha256": "962edbc0a99c8376bdc71a35f43dba24f1d15eead0d268271b1dc59f742d3245",
+      "training_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+      "training_positions": 10094395
+    }
+  ],
+  "historical_baseline_pr93_commit": "d4aa46c3ff68f03395cc0edadd5faae05782cd84",
+  "observed_date": "2026-11-27",
+  "schema": "datagoblin-research-v2.1-registry-1",
+  "v20_implementation_sha256": "73ac4d4d57825c708f45cf73aa56a516290f825425996146131bab181891a339",
+  "v21_implementation_sha256": "149e8082d3115d657880258bb2581f02fe1483d1da62adfee25a562e02b681f3"
+}

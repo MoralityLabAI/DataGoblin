@@ -1,0 +1,84 @@
+{
+  "controls": [
+    {
+      "candidate_id": "control/reference",
+      "controller_mode": "control",
+      "report_file_sha256": "7fd808768dc55d44c93ac1f4e7bbcc059f750a10d8b127125943e422158fb0c0",
+      "report_sha256": "319a8b7709b9e0c277c11c5462171615d01f39bf0e0dceed4df5952dff2c809c"
+    },
+    {
+      "candidate_id": "control/noop",
+      "controller_mode": "control",
+      "report_file_sha256": "8720fd809e8fd02384bc204fc342837006d673c4702783abf9be71777d36902e",
+      "report_sha256": "27b2c5bb6d5c7d56c1032743e3f6f4c233f1271b4020790056a2f34e64522005"
+    }
+  ],
+  "dev": [
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@autonomous",
+      "controller_mode": "autonomous",
+      "report_file_sha256": "9bc2f2715ca6b6233be5f51d653585d6cebac5e154b06b1355d45829e03ed425",
+      "report_sha256": "c6fb07ecc8e6b508fb0d7cf2dd1154fabfd084f8a934141e7087beba90a8e023",
+      "telemetry_sha256": "bf165e36e0889ba585159249ebbb8f51169c61164610fdb62761351340beaa4d"
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@rlt_state_correction",
+      "controller_mode": "rlt_state_correction",
+      "report_file_sha256": "b80e15f59ee9734fa684af155b03ab2aed46e261bcf36d31027fa0a9e15635cf",
+      "report_sha256": "37323d7670ef0b565abaea77625fee32666c3ffc589ae923a66fc06dbeebf753",
+      "telemetry_sha256": "69999b96b3e2bd790edba4d51d52cdb6001dde8b8e379f5e42df60a581a39f0b"
+    }
+  ],
+  "prospective": [
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@autonomous",
+      "controller_mode": "autonomous",
+      "report_file_sha256": "8b7dc53f4678a50a606fb94703ceaadb677f3943f2d731a8b8dd280035791ae8",
+      "report_sha256": "9b8d0a2691e9f07c525adf203b08403b97bbf45feed4b8bcfd43602d3ea2e792",
+      "telemetry_sha256": "b9f0e99ee6bcec030a8691f83191129801d1f4f2a81ab709de011c943b6d4a8b"
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@deterministic_stopping",
+      "controller_mode": "deterministic_stopping",
+      "report_file_sha256": "7adcc595e09525ce974b08e9ee47aaaac4801787609b22b684b8366511d27fba",
+      "report_sha256": "f4c7f93804c99ae88665c8f037a43ad3cc668982bcc16eb7b5d425d6379da6cc",
+      "telemetry_sha256": "98dae0aebe9beb21b6509c9ef08d6e5f71121bbdea734bf987fa4f1e079cc1b5"
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@learned_ldt_stopping",
+      "controller_mode": "learned_ldt_stopping",
+      "report_file_sha256": "2c7a5e3b5bd675cd25202558f701fc8d527fe549aa311ea818659eb891d39e90",
+      "report_sha256": "e47b1d4d07339ab04eb638dea38d3e3d3313a6c60ed0354a8992c35cd3bc4d57",
+      "telemetry_sha256": "31e211bbcfe71c16e2c40716d013de957aa4e46b151927016d9d0057da5b731e"
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@trm_action_routing",
+      "controller_mode": "trm_action_routing",
+      "report_file_sha256": "6e80aeebe576922c4c23e3db4bf6b19e4efd3ce0c428221fc60af677ae59c817",
+      "report_sha256": "4fd50e84221150a27a0db9f17e5a55ee939b19cdb8042ab9a0632d1437ed06a1",
+      "telemetry_sha256": "73f9a2366f4026b62698615eddad87ed9f58a37409fbbce8e7b0dc411d0064dd"
+    },
+    {
+      "candidate_id": "qwen3-4b-instruct-2507-q8@rlt_state_correction",
+      "controller_mode": "rlt_state_correction",
+      "report_file_sha256": "fb81260954ba62c144b3f7927a5827e92d989b0f2a67d46f484cc8cc5d38064e",
+      "report_sha256": "5815f7ea9b751af737eb30183a255e10a0ab4bf60062cd37ba7130908181b0fc",
+      "telemetry_sha256": "6b1aa4a6870a80ff2d6d3488d624b2891cc8b9e51fe0a5e058846ed423e70b5a"
+    },
+    {
+      "candidate_id": "baby-goblin-10m-v2-q4km@autonomous",
+      "controller_mode": "autonomous",
+      "report_file_sha256": "22c6b19f2813aa5966096896596a94c69f05d2f846503356052725daf6d4704b",
+      "report_sha256": "8310deba77674ce70118bf2c64ab65e64737a39622f328f59b983edb2adedfad",
+      "telemetry_sha256": "a8a43b9d090830a9a02e5a8da7455e1ef8e28442d6ae6ec90dbed90e95b8167e"
+    },
+    {
+      "candidate_id": "baby-goblin-10m-v2-q4km@rlt_state_correction",
+      "controller_mode": "rlt_state_correction",
+      "report_file_sha256": "47919c4b78daefcbb62fcd6a16e66ba3e6068686d311b3f9c4604899b34f4130",
+      "report_sha256": "04601ff6cf37cffea4f08bdafe79dadf13642b72b0f218f93d98857048061b02",
+      "telemetry_sha256": "d34b522ba962689c1e21749805afd0c06f24ccf2aac6221bfb45f0bb90ac19ce"
+    }
+  ],
+  "schema": "datagoblin-research-v2.1-receipts-manifest-1"
+}

@@ -1,0 +1,86 @@
+{
+  "accepted_supervised_tokens_by_family": {
+    "belief_update": 1162,
+    "boolean_repair": 417,
+    "cursor_recovery": 910,
+    "evidence_custody": 962,
+    "experiment_design": 2088,
+    "ldt_filter": 1216,
+    "persona_externalization": 1348,
+    "trm_training": 1288
+  },
+  "accepted_supervised_tokens_total": 9391,
+  "accepted_tokens_by_curriculum_bucket": {
+    "externalized_persona_control": 44049,
+    "failure_directed_trm_ldt": 59632,
+    "partial_state_retention_and_stopping": 21587,
+    "stopping_and_symbolic_verification": 21373
+  },
+  "accepted_tokens_by_family": {
+    "belief_update": 6340,
+    "boolean_repair": 5987,
+    "cursor_recovery": 10893,
+    "evidence_custody": 11578,
+    "experiment_design": 8162,
+    "ldt_filter": 29254,
+    "persona_externalization": 44049,
+    "trm_training": 30378
+  },
+  "accepted_tokens_total": 146641,
+  "aleph_tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "episodes_by_family": {
+    "belief_update": 16,
+    "boolean_repair": 16,
+    "cursor_recovery": 16,
+    "evidence_custody": 16,
+    "experiment_design": 16,
+    "ldt_filter": 16,
+    "persona_externalization": 16,
+    "trm_training": 16
+  },
+  "episodes_verified": 128,
+  "files": {
+    "candidate_train.jsonl": {
+      "bytes": 808445,
+      "sha256": "e03459a3205f03b9274dc1d8e314b7ee64d1ca5e75f286ab4787c29083673bf5"
+    },
+    "exclusion_manifest.json": {
+      "bytes": 1016,
+      "sha256": "df0984a60254b993faa4696db2fa8b7991bdc815ae57e2c97b3563a72b96ab54"
+    }
+  },
+  "generator_seed": 2026112601,
+  "private_jinn_beast_intake_aleph_tokens": {
+    "records": 2880,
+    "source_id": "jinn-beast-audited-tags-v1",
+    "supervised_target_tokens": 202515,
+    "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "tokens_by_frame": {
+      "beast": 893467,
+      "jinn": 957278
+    },
+    "total_sequence_tokens": 1850745,
+    "train_jsonl_sha256": "d82d7204e745495ac60cb31ee7d53ccb96be4987412a9e0eec0811321c6e539f",
+    "unique_train_roots": 1440,
+    "visibility": "private_manifest_only"
+  },
+  "receipt_sha256": "b7e6433eb84726dcd51b22ee7c120762dc130f79002a1ec2f7b92e53cbdbfdad",
+  "records_admitted": 288,
+  "records_by_family": {
+    "belief_update": 24,
+    "boolean_repair": 24,
+    "cursor_recovery": 24,
+    "evidence_custody": 24,
+    "experiment_design": 24,
+    "ldt_filter": 56,
+    "persona_externalization": 56,
+    "trm_training": 56
+  },
+  "schema": "datagoblin-research-v2-specialist-dataset-receipt-1",
+  "source_rights": {
+    "private_jinn_beast_intake": "operator_authorized_internal_intake (kept outside Git)",
+    "synthetic_research_v2_traces": "Apache-2.0 (public and internal train-only)"
+  },
+  "split": "train_only",
+  "unique_roots_admitted": 128
+}

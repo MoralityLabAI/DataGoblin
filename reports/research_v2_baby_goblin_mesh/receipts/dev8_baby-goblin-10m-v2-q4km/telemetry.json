@@ -1,0 +1,30 @@
+{
+  "backend": "llama_server",
+  "cpu_seconds": 1142.2969,
+  "device": "cpu",
+  "dtype": "gguf",
+  "generate_errors": 4,
+  "generate_requests": 8,
+  "gpu_seconds": 0.0,
+  "latencies_seconds": [
+    22.828,
+    23.921,
+    22.687,
+    27.282
+  ],
+  "load_seconds": 1.547,
+  "parameters": 0,
+  "parity_checks": {
+    "llama_server_port": 60498,
+    "ngl": 0,
+    "threads": 8
+  },
+  "peak_ram_mib": 2302.47,
+  "peak_vram_mib": 0.0,
+  "protocol": "raw-completion",
+  "served_model": "aleph-direct-a-10m-v2-Q4_K_M",
+  "tokenize_requests": 8,
+  "total_completion_tokens": 2048,
+  "total_prompt_tokens": 1306,
+  "wall_seconds": 213.89
+}

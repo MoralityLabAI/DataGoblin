@@ -1,0 +1,35 @@
+{
+  "api_key_env": null,
+  "base_url": "http://127.0.0.1:18000/v1",
+  "cap_wrapper_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "chat_template_kwargs": {},
+  "config_sha256": "32a0abdfa3deb7bf6da7f411570cb7828dca4db569205d6ec04e52ce97fd9c9f",
+  "context_limit": 2048,
+  "model_id": "thinkingmachines/TML-d24-varloop-research",
+  "precision": "iq4_nl-gguf",
+  "prompt_role": "user",
+  "protocol": "chat-completions",
+  "recurrence": {
+    "text_config.loop_config.num_passes": 3
+  },
+  "registry_id": "inky-mini-varloop-research-pass3-iq4nl",
+  "resource_caps": {
+    "max_requests": 128,
+    "ram_mib": 28672,
+    "wall_seconds": 900
+  },
+  "revision": "91a57fe2b779bbd12c0f74d1f518cbd5b84e8d0d",
+  "sampling": {
+    "seed": 0,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "schema": "datagoblin-research-v2-binding-1",
+  "served_model": "TML-d24-varloop-research-IQ4_NL",
+  "template_sha256": "7eb18354abf329aa0fa7665af617536cdbfc4278b3767b45c70e03026de8bb96",
+  "thinking_mode": "model_default",
+  "tokenize_path": "/tokenize",
+  "tokenizer_config_sha256": "bf09342d285139fd37ce10c70878af1d52cb390e9901e10248654293a80ee636",
+  "tokenizer_sha256": "7eb18354abf329aa0fa7665af617536cdbfc4278b3767b45c70e03026de8bb96",
+  "weights_sha256": "e9f70a167e54794bebce2d456b2118730b74fa7c35e23cb1abd4378f66b17bb2"
+}

@@ -1,0 +1,37 @@
+{
+  "api_key_env": null,
+  "base_url": "http://127.0.0.1:18000/v1",
+  "cap_wrapper_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "config_sha256": "f6cb15b22847664f3a6049dc4b58fdd10f1650d112ac99a1da3d051f17c2ca19",
+  "context_limit": 2048,
+  "model_id": "Nanbeige/Nanbeige4.2-3B",
+  "precision": "bf16",
+  "prompt_role": "user",
+  "protocol": "chat-completions",
+  "recurrence": {
+    "num_loops": 2
+  },
+  "registry_id": "nanbeige42-3b-loop2",
+  "resource_caps": {
+    "max_requests": 128,
+    "ram_mib": 24576,
+    "wall_seconds": 900
+  },
+  "revision": "b82e54bd609793562a75cbf9337970a93369eab5",
+  "sampling": {
+    "seed": 0,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "schema": "datagoblin-research-v2-binding-1",
+  "served_model": "Nanbeige/Nanbeige4.2-3B",
+  "template_sha256": "ed118a3c5ddf1d24ffa43229de22bacd5b803be31acaafeb4c0fff0cefee551a",
+  "thinking_mode": "disabled",
+  "tokenize_path": "/tokenize",
+  "tokenizer_config_sha256": "3edfa64a0826a77e9412b9008f1febf3fe906a68fd616b6de4cd15897a8c8518",
+  "tokenizer_sha256": "1d858a0fc007f22af6ae18bfa1ae52d30e398aa9cd1ea06e7777176869346a3f",
+  "weights_sha256": "503dbea9295a02537fd621348731228937be7b4072550bb02de2603483e996b3"
+}

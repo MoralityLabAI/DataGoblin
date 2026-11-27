@@ -1,0 +1,145 @@
+{
+  "base_architecture": {
+    "model_id": "AlephFunk/aleph-direct-a-10m-v2",
+    "native_tied_parameters": 999352320,
+    "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "visit_schedule": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+  },
+  "emergence_gates": {
+    "action_verb_accuracy_onset": 0.5,
+    "eos_stop_rate_onset": 0.25,
+    "eos_stop_rate_reliable": 0.8,
+    "general_nll_retention_max_delta_nats": 0.25,
+    "schema_valid_action_rate_onset": 0.25,
+    "valid_json_rate_onset": 0.25,
+    "valid_json_rate_reliable": 0.8,
+    "verified_capability_score_onset": 0.25,
+    "verified_primary_score_onset": 0.0001
+  },
+  "emergence_milestones": {
+    "first_action_selection": null,
+    "first_eos_onset": null,
+    "first_eos_reliable": null,
+    "first_json_onset": null,
+    "first_json_reliable": null,
+    "first_nonzero_primary_score": null,
+    "first_verified_capability": null
+  },
+  "probe_contract": {
+    "eval_cases": 16,
+    "eval_seed": 2026112799,
+    "families": [
+      "trm_training",
+      "ldt_filter",
+      "persona_externalization",
+      "experiment_design",
+      "boolean_repair",
+      "belief_update",
+      "evidence_custody",
+      "cursor_recovery"
+    ],
+    "general_eval_tokens": 8716,
+    "prospective_panel_excluded": true
+  },
+  "schema": "datagoblin-baby-goblin-staged-emergence-ledger-1",
+  "stages": [
+    {
+      "arms": {
+        "arm0_original_10m": {
+          "action_verb_accuracy": 0.0,
+          "autonomous_mean_capability_score": 0.0,
+          "autonomous_mean_primary_score": 0.0,
+          "eos_stop_rate": 0.0,
+          "general_val_nll_nats": 8.8218,
+          "mean_teacher_forced_eos_prob": 1.3e-05,
+          "rlt_controller_mean_capability_score": 0.0,
+          "rlt_controller_mean_primary_score": 0.0,
+          "schema_valid_action_rate": 0.0,
+          "teacher_forced_target_nll_nats": 8.8126,
+          "valid_json_rate": 0.0
+        },
+        "arm1_specialist_only": {
+          "action_verb_accuracy": 0.0,
+          "autonomous_mean_capability_score": 0.0,
+          "autonomous_mean_primary_score": 0.0,
+          "eos_stop_rate": 0.0,
+          "general_val_nll_nats": 12.4215,
+          "mean_teacher_forced_eos_prob": 0.033622,
+          "rlt_controller_mean_capability_score": 0.0,
+          "rlt_controller_mean_primary_score": 0.0,
+          "schema_valid_action_rate": 0.0,
+          "teacher_forced_target_nll_nats": 4.1202,
+          "valid_json_rate": 0.0
+        },
+        "arm2_continued_base": {
+          "action_verb_accuracy": 0.0,
+          "autonomous_mean_capability_score": 0.0,
+          "autonomous_mean_primary_score": 0.0,
+          "eos_stop_rate": 0.0,
+          "general_val_nll_nats": 6.957,
+          "mean_teacher_forced_eos_prob": 0.0,
+          "rlt_controller_mean_capability_score": 0.0,
+          "rlt_controller_mean_primary_score": 0.0,
+          "schema_valid_action_rate": 0.0,
+          "teacher_forced_target_nll_nats": 10.7878,
+          "valid_json_rate": 0.0
+        },
+        "arm3_base_then_specialist": {
+          "action_verb_accuracy": 0.0,
+          "autonomous_mean_capability_score": 0.0,
+          "autonomous_mean_primary_score": 0.0,
+          "eos_stop_rate": 0.0,
+          "general_val_nll_nats": 9.5416,
+          "mean_teacher_forced_eos_prob": 0.034591,
+          "rlt_controller_mean_capability_score": 0.0,
+          "rlt_controller_mean_primary_score": 0.0,
+          "schema_valid_action_rate": 0.0,
+          "teacher_forced_target_nll_nats": 3.9823,
+          "valid_json_rate": 0.0
+        }
+      },
+      "checkpoint_sha256": "2e40e32da6a6d975fbd7dc7bd56cd440321531e2e755b9bcc215a289c64232a8",
+      "positions": 10000000,
+      "receipt_sha256": "63a42e12d3096674c9cbdd1f9165c4f34f46890f8aa0404884e783a44d118e6e",
+      "stage_id": "10M",
+      "status": "evaluated",
+      "update_groups": 39
+    },
+    {
+      "arms": {},
+      "checkpoint_sha256": null,
+      "positions": 20000000,
+      "receipt_sha256": null,
+      "stage_id": "20M",
+      "status": "scheduled_pending_pretraining",
+      "update_groups": 77
+    },
+    {
+      "arms": {},
+      "checkpoint_sha256": null,
+      "positions": 50000000,
+      "receipt_sha256": null,
+      "stage_id": "50M",
+      "status": "scheduled_pending_pretraining",
+      "update_groups": 191
+    },
+    {
+      "arms": {},
+      "checkpoint_sha256": null,
+      "positions": 100000000,
+      "receipt_sha256": null,
+      "stage_id": "100M",
+      "status": "scheduled_pending_pretraining",
+      "update_groups": 382
+    },
+    {
+      "arms": {},
+      "checkpoint_sha256": null,
+      "positions": 200000000,
+      "receipt_sha256": null,
+      "stage_id": "200M",
+      "status": "scheduled_pending_pretraining",
+      "update_groups": 763
+    }
+  ]
+}
