@@ -1,7 +1,14 @@
-from datagoblin.zk_lean_gym import (
-    DEVELOPMENT, HOLDOUT, campaign, evaluate, optimize, shape, variant,
-)
 import random
+
+from datagoblin.zk_lean_gym import (
+    DEVELOPMENT,
+    HOLDOUT,
+    campaign,
+    evaluate,
+    optimize,
+    shape,
+    variant,
+)
 
 
 def test_clean_relations_and_duplicate_optimization():
