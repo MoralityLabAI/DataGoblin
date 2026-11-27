@@ -34,6 +34,7 @@ def main() -> None:
     mode.add_argument('--frontier', action='store_true')
     mode.add_argument('--journal', action='store_true')
     p.add_argument('--timeout', type=float, default=900)
+    p.add_argument('--benchmark-only', action='store_true')
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     plan = fixture(args.nodes,args.depth)
@@ -67,6 +68,9 @@ def main() -> None:
 
     run('prove',True,'prove',str(s),pin,str(a),str(proof))
     run('verify',True,'verify',str(s),pin,str(proof))
+    if args.benchmark_only:
+        print('native benchmark completed')
+        return
     run('wrong-pin',False,'verify',str(s),'0'*64,str(proof))
     changed = dict(statement, zn=[*statement['zn'][:-1],str(int(statement['zn'][-1])+1)])
     bad = args.out / 'wrong-output.json'
