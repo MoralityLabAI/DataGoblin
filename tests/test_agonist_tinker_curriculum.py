@@ -2,7 +2,7 @@ import pytest
 
 from datagoblin.training_gym.rlt_gym import tasks as rlt
 
-from Agonist.tinker_curriculum import rlt_tasks, task_pool
+from Agonist.tinker_curriculum import rlt_tasks, route_request, task_pool
 from Agonist.tinker_gym import ROLES, Journal
 from Agonist.tinker_live import source_pool
 
@@ -55,3 +55,16 @@ def test_all_seven_existing_rlt_families():
     pool = task_pool(2, 7, "train", "rlt")
     assert {t.public["family"] for t in pool} == set(rlt.FAMILIES)
     assert len({t.root for t in pool}) == 7
+
+
+def test_dispatch_projection_matches_supervised_requests():
+    pool = task_pool(31, 7, "train", "rlt")
+    for task in pool:
+        if task.role != "route":
+            continue
+        targets = [t for t in pool if t.root == task.root and t.role != "route"]
+        match = [t for t in targets if route_request(t)["request"] == task.public["request"]]
+        assert len(match) == 1
+        target = match[0]
+        allowed = task.public["authorized"] and task.public["available"][target.role]
+        assert task.gold == (target.role if allowed else "STOP")
