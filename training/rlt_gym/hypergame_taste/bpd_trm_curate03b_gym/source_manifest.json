@@ -1,0 +1,27 @@
+{
+ "branch": "research/bpd-trm-adamw-screen-20261127",
+ "commit": "e625db94ee7e78f03c83840c8bd3f834c2b86fa9",
+ "files": {
+  "horizon_outcomes_gym_v3.jsonl": {
+   "sha256": "665b241f110036dfc52d30896b8385ba6e7dee824e8bf13f28ce2497488cd71c",
+   "stored_as": "horizon_outcomes_gym_v3.jsonl"
+  },
+  "manifest.json": {
+   "sha256": "fb0600ad048a45d53572133c0d54dbf706bd7bc6d7c6738245faf5d29f273875",
+   "stored_as": "manifest.json"
+  },
+  "trajectories_gym_v3.jsonl": {
+   "gz_sha256": "703053bd70d394278a10f1701357709efbc9e63bab6dfda54f81f70873209eb4",
+   "sha256": "2664e1d3d6c186db059d43958a621e3ee5ab3ae135e3e88f99cb6c742d5287b6",
+   "stored_as": "trajectories_gym_v3.jsonl.gz"
+  },
+  "unit_costs_gym_v3.json": {
+   "sha256": "032d60615107f5313a7affa95ca2409102e83c7e0f7ff3cb563505cac467e8bf",
+   "stored_as": "unit_costs_gym_v3.json"
+  }
+ },
+ "path": "mechinterp/bpd/experiments/trm_curation/results/curate03b/gym_campaign/datagoblin_export_v3",
+ "pull_request": 176,
+ "sha256_semantics": "SHA-256 of canonical LF uncompressed bytes (matching Git blobs at pinned commit); gz_sha256 is the stored gzip -n file",
+ "source": "MoralityLabAI/BPD"
+}
