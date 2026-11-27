@@ -31,3 +31,14 @@ process-CPU deadline. All timings include setup and exact verification.
 Training and reference costs separate. 512 MiB virtual-address cap and
 whole-process peak RSS. No per-arm RSS claim, new architecture training,
 generated per-case Lean replay or production authorization.
+
+## Hosted result
+
+[Workflow 46037116888](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46037116888)
+passed both evaluation blocks. At 96 columns scan and heap recurrent both
+certified 93/96 with identical traces. Heap reset certified 84/96. At 10 ms,
+scan recurrent credited 77 and heap recurrent credited 85. Scan/heap score
+evaluations 336858/73202; search CPU 483141093/275445099 ns; total CPU
+1265409856/1109305876 ns. Heap setup CPU 782702219 ns. Whole-process peak
+RSS 50016/50164 KiB. The next stage caches symbolic preparation and replays
+actual selected learned certificates in Lean.

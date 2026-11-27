@@ -35,9 +35,9 @@ TRAIN_BUDGET = 48
 class Hybrid:
     """Both actions use one search basis; exploration never restarts elimination."""
 
-    def __init__(self, problem, seed, *, index_factory=IndexedFrontier):
+    def __init__(self, problem, seed, *, index_factory=IndexedFrontier, prepare_factory=prepare):
         self.state = Search(problem)
-        self.supports, self.base, self.tie, self.rng = prepare(problem, seed)
+        self.supports, self.base, self.tie, self.rng = prepare_factory(problem, seed)
         self.index = index_factory(problem.keys, self.supports, self.base, self.tie,
                                      problem.target_support)
         self.pending = {}

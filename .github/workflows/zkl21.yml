@@ -1,0 +1,86 @@
+name: ZKL-21 cached preparation and learned certificate replay
+on:
+  pull_request:
+    paths:
+      - 'src/datagoblin/zk_cached_prep_gym.py'
+      - 'src/datagoblin/zk_exploration_gym.py'
+      - 'tests/test_zk_cached_prep_gym.py'
+      - '.github/workflows/zkl21.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONPATH: ${{ github.workspace }}/shz-pinned/research/zk_lean
+      ZKL13_CHECKER_ROOT: ${{ github.workspace }}/shz-pinned/research/zk_lean
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/SatsHedgeZero
+          ref: 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
+          path: shz-pinned
+      - name: Pinned cached preparation comparison
+        run: |
+          test "$(git -C shz-pinned rev-parse HEAD)" = 84c1681a99ef5897f0f6b90140a0ac9e3293f5cb
+          python -m pip install -e '.[dev]'
+          ruff check src/datagoblin/zk_cached_prep_gym.py src/datagoblin/zk_exploration_gym.py tests/test_zk_cached_prep_gym.py
+          ulimit -v 524288
+          python -m pytest tests/test_zk_cached_prep_gym.py -v
+          /usr/bin/time -v python -m datagoblin.zk_cached_prep_gym --out zkl21-first.json
+          /usr/bin/time -v python -m datagoblin.zk_cached_prep_gym --test-start 21201 --out zkl21-fresh.json
+          python -m datagoblin.zk_cached_prep_gym --replay-input zkl21-first.json zkl21-fresh.json --out zkl21-replay
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zkl21-paired-receipts
+          path: |
+            zkl21-first.json
+            zkl21-fresh.json
+            zkl21-replay
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/MathCan
+          ref: a29a46d465ddecb3a94a0367707befdc7f27ff28
+          path: mathcan
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: mathcan
+          auto-config: false
+          build: true
+          build-args: MathCan.ZKLeanPoly
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Independently replay actual learned certificates with well-formedness closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C mathcan rev-parse HEAD)" = a29a46d465ddecb3a94a0367707befdc7f27ff28
+          cd mathcan
+          shopt -s nullglob
+          files=(../zkl21-replay/*.lean)
+          test "${#files[@]}" -eq 12
+          for f in "${files[@]}"; do
+            printf 'REPLAY %s\n' "$f" | tee -a zkl21-axioms.txt
+            lake env lean "$f" | tee -a zkl21-axioms.txt
+          done
+          test "$(grep -c "'exact_poly_delete_closed' depends on axioms" zkl21-axioms.txt)" -eq 12
+          if grep -Eq 'sorryAx|ofReduceBool|Classical.choice' zkl21-axioms.txt; then
+            echo "Disallowed axiom"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zkl21-lean-replay
+          path: mathcan/zkl21-axioms.txt
