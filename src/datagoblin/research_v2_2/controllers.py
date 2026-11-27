@@ -45,6 +45,18 @@ class RuleRouter:
         return label, np.eye(5, dtype=float)[label]
 
 
+class CountedPredictor:
+    """Count inference-time predictions, excluding fit-time computation."""
+
+    def __init__(self, predictor):
+        self.predictor = predictor
+        self.calls = 0
+
+    def predict(self, feat):
+        self.calls += 1
+        return self.predictor.predict(feat)
+
+
 class SelectiveCorrector:
     """Use the already-trained v2.1 RLT only on low-margin TRM predictions."""
 
@@ -103,6 +115,9 @@ class ResearchController(V21Controller):
             raise ValueError(f"unsupported v2.2 controller: {mode}")
         self.v22_mode = mode
         self.selective = None
+        self.counted = None
+        self.counted_kind = None
+        self.counted_passes = 0
         if mode in {"rule_action_routing", "rule_no_persona"}:
             super().__init__("autonomous", seed)
             self.mode = "trm_action_routing"
@@ -118,6 +133,16 @@ class ResearchController(V21Controller):
             if mode == "selective_rlt":
                 self.selective = SelectiveCorrector(self.trm_router, self.rlt_corrector)
                 self.rlt_corrector = self.selective
+        if self.selective is None:
+            for attr, kind in (("rlt_corrector", "rlt"), ("trm_router", "trm"),
+                               ("ldt_head", "ldt")):
+                predictor = getattr(self, attr)
+                if predictor is not None:
+                    self.counted_kind = "rule" if isinstance(predictor, RuleRouter) else kind
+                    self.counted_passes = getattr(predictor, "passes", 0)
+                    self.counted = CountedPredictor(predictor)
+                    setattr(self, attr, self.counted)
+                    break
         self.training_receipt = {**self.training_receipt, "v22_mode": mode}
         if self.selective is not None:
             self.training_receipt["margin_threshold"] = self.selective.threshold
@@ -156,4 +181,11 @@ class ResearchController(V21Controller):
                 "controller_sha256": digest(self.training_receipt)}
 
     def accounting(self):
-        return self.selective.accounting() if self.selective is not None else {}
+        if self.selective is not None:
+            return self.selective.accounting()
+        n = self.counted.calls if self.counted is not None else 0
+        return {"predictions": n, "rlt_calls": n if self.counted_kind == "rlt" else 0,
+                "trm_forwards": n if self.counted_kind in {"rlt", "trm"} else 0,
+                "rlt_passes": n * self.counted_passes,
+                "rule_calls": n if self.counted_kind == "rule" else 0,
+                "ldt_calls": n if self.counted_kind == "ldt" else 0}
