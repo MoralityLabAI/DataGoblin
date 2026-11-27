@@ -1,0 +1,194 @@
+"""MM04: bounded suffix checks with exact primitive-step budgets."""
+import argparse
+from collections import Counter
+import hashlib
+import json
+import math
+from pathlib import Path
+import zipfile
+
+ZIP_SHA = '67191fb3da7b23d99de0a13209dccb2e3aa04925dd40392932ac6679c010d390'
+HASHES = {'inputs.jsonl':'f0efbbd745eb880b53367086dd2f277e8f72621b2cf4a7d2bfebecc947da03ab','oracle.jsonl':'3e1b4410e3fab818811549f353ae50314985e80125f101f2f52804a19b23b59b','expanded-prefix.mm':'f9ebc868a954bf042634ccebe5ac5f708695796f10624d0dacdcfca04b7489a0'}
+BUDGETS = (0,1,2,4,8,16,32)
+SPLITS = ('train','dev','public_challenge')
+
+
+def require(ok, message):
+    if not ok:
+        raise ValueError(message)
+
+
+def load(path):
+    require(hashlib.sha256(path.read_bytes()).hexdigest()==ZIP_SHA,'archive hash')
+    with zipfile.ZipFile(path) as z:
+        data={k:z.read(k) for k in HASHES}
+    for k,v in data.items():
+        require(hashlib.sha256(v).hexdigest()==HASHES[k],k)
+    rows=[json.loads(s) for s in data['inputs.jsonl'].splitlines()]
+    oracle={x['id']:x for x in map(json.loads,data['oracle.jsonl'].splitlines())}
+    require(len(rows)==len(oracle)==585,'root count')
+    require({r['id'] for r in rows}==set(oracle),'ID coverage')
+    return rows,oracle,parse(data['expanded-prefix.mm'].decode('ascii'))
+
+
+def parse(text):
+    """Read declarations and original scope in the already externally verified prefix.
+
+    Proof bodies are skipped; this is a scoped transition evaluator, not a database verifier.
+    """
+    tokens=iter(text.split()); frames=[([],[],set(),set())]; labels={}; scopes={}
+    def body(end='$.'):
+        result=[]
+        for t in tokens:
+            if t==end:
+                return result
+            result.append(t)
+        raise ValueError('unterminated statement')
+    for t in tokens:
+        if t=='${':
+            frames.append(([],[],set(),set()))
+        elif t=='$}':
+            require(len(frames)>1,'scope underflow'); frames.pop()
+        elif t in ('$c','$v','$d'):
+            x=body()
+            if t=='$v':
+                frames[-1][2].update(x)
+            elif t=='$d':
+                frames[-1][3].update(tuple(sorted((a,b))) for i,a in enumerate(x) for b in x[i+1:])
+        else:
+            kind=next(tokens)
+            require(kind in ('$f','$e','$a','$p') and t not in labels,'declaration')
+            stmt=body('$=' if kind=='$p' else '$.')
+            if kind in ('$f','$e'):
+                frames[-1][0 if kind=='$f' else 1].append(t)
+                labels[t]={'kind':kind,'statement':stmt,'arity':0}
+            else:
+                f=[a for frame in frames for a in frame[0]]
+                e=[a for frame in frames for a in frame[1]]
+                vs=set().union(*(frame[2] for frame in frames))
+                dv=set().union(*(frame[3] for frame in frames))
+                essential=[labels[a]['statement'] for a in e]
+                mandatory=vs.intersection(stmt+sum(essential,[]))
+                floating=[labels[a]['statement'] for a in f if labels[a]['statement'][1] in mandatory]
+                labels[t]={'kind':kind,'statement':stmt,'arity':len(floating)+len(e),'floating':floating,'essential':essential,'distinct':[list(a) for a in sorted(dv) if set(a)<=mandatory]}
+                if kind=='$p':
+                    body(); scopes[t]=(set(f+e),vs,dv,len(labels))
+    require(len(frames)==1,'unclosed scope')
+    return labels,scopes
+
+
+def step(stack, signature, variables, distinct):
+    if signature['kind'] in ('$f','$e'):
+        return stack+[signature['statement']]
+    f,e=signature['floating'],signature['essential']; n=len(f)+len(e)
+    if len(stack)<n:
+        return None
+    args=stack[-n:] if n else []; sub={}
+    for (typ,var),v in zip(f,args):
+        if not v or v[0]!=typ:
+            return None
+        sub[var]=v[1:]
+    def instantiate(expr):
+        return [v for t in expr for v in sub.get(t,[t])]
+    if any(instantiate(h)!=v for h,v in zip(e,args[len(f):])):
+        return None
+    for a,b in signature['distinct']:
+        for v in variables.intersection(sub[a]):
+            for w in variables.intersection(sub[b]):
+                if v==w or tuple(sorted((v,w))) not in distinct:
+                    return None
+    return (stack[:-n] if n else stack[:])+[instantiate(signature['statement'])]
+
+
+def similarity(a,b):
+    return 2*sum((Counter(a)&Counter(b)).values())/max(1,len(a)+len(b))
+
+
+def prepare(rows, oracle, db):
+    labels, scopes=db; ordinal={k:i+1 for i,k in enumerate(labels)}
+    contexts=[]; checks=0; disagrees=0
+    freq=Counter(oracle[x['id']]['reference_action'] for x in rows if x['split']=='train')
+    for x in rows:
+        i=x['id']; active,vs,dv,limit=scopes[i]
+        require(active==set(x['active_hypotheses']) and vs==set(x['variables']) and dv=={tuple(p) for p in x['distinct']},f'scope {i}')
+        def apply(s,a):
+            require(ordinal[a]<limit and (labels[a]['kind'] in ('$a','$p') or a in active),f'out of scope {a}')
+            return step(s,labels[a],vs,dv)
+        stack=[]
+        for a in x['prefix']:
+            stack=apply(stack,a); require(stack is not None,'invalid prefix')
+        require(stack==x['prefix_stack'],'prefix mismatch')
+        initial={}; trace={}; full={}
+        for a in x['candidates']:
+            require(labels[a]==x['candidate_signatures'][a],f'signature {a}')
+            s=apply(stack,a); checks+=1
+            if s is None:
+                continue
+            initial[a]=s; history=[s]; cost=0
+            for b in x['suffix']:
+                cost+=1; s=apply(s,b); history.append(s)
+                if s is None:
+                    break
+            trace[a]=history
+            full[a]=s==[x['target']]
+        require(set(initial)==set(oracle[i]['immediate_legal_actions']),'local legality mismatch')
+        if {a for a,ok in full.items() if ok}!=set(oracle[i]['accepted_actions']):
+            disagrees+=1
+        rank=sorted(initial,key=lambda a:(-(initial[a][-1]==x['target']),-similarity(initial[a][-1],x['target']),-freq[a],a))
+        contexts.append((x,initial,trace,rank,full))
+    require(disagrees==0,'full replay disagreement')
+    return contexts,checks
+
+
+def state(x,h,trace):
+    k=min(h,len(trace)-1); stack=trace[k]
+    complete=k==len(x['suffix']); invalid=stack is None or (complete and stack!=[x['target']])
+    valid=complete and not invalid
+    return k,stack,invalid,valid
+
+
+def evaluate(contexts,oracle):
+    results={}
+    for split in SPLITS:
+        subset=[z for z in contexts if z[0]['split']==split]
+        out={}
+        for budget in BUDGETS:
+            counts=Counter()
+            for x,initial,trace,rank,full in subset:
+                valid=set(oracle[x['id']]['accepted_actions']); base=rank[0] in valid
+                # Round robin one transition per live candidate, in fixed symbolic order.
+                used=0; positions=dict.fromkeys(rank,0)
+                while used<budget:
+                    progress=False
+                    for a in rank:
+                        k,s,bad,good=state(x,positions[a],trace[a])
+                        if bad or good or k>=len(x['suffix']):
+                            continue
+                        positions[a]+=1; used+=1; progress=True
+                        if used==budget:
+                            break
+                    if not progress:
+                        break
+                info={a:state(x,h,trace[a]) for a,h in positions.items()}
+                survivors=[a for a in rank if not info[a][2]]
+                # Prefer a completed certificate; among survivors keep prior rank.
+                choice=sorted(survivors,key=lambda a:not info[a][3])[0] if survivors else None
+                hit=choice in valid
+                counts.update({'n':1,'top1':int(hit),'baseline_hit':int(base),'repaired':int(hit and not base),'regressed':int(base and not hit),'suffix_transitions':used,'certified_top1':int(choice is not None and info[choice][3]),'unresolved':int(choice is not None and not info[choice][3]),'local_checks':len(x['candidates'])})
+            out[str(budget)]=dict(counts)
+        results[split]=out
+    return results
+
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('archive',type=Path);p.add_argument('--out',type=Path); a=p.parse_args()
+    rows,oracle,db=load(a.archive);contexts,checks=prepare(rows,oracle,db)
+    result={'schema':'mm04-v1','archive_sha256':ZIP_SHA,'source_hashes':HASHES,'candidate_checks':checks,'full_replay_disagreements':0,'results':evaluate(contexts,oracle),'scope':'public development only; cached offline actual transition counts, no live external verifier invocation'}
+    data=json.dumps(result,indent=2)+'\n'
+    if a.out:
+        a.out.write_text(data)
+    print(data)
+
+
+if __name__=='__main__':
+    main()
