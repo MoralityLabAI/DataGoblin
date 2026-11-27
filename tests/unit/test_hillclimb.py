@@ -10,7 +10,7 @@ from typing import Any, ClassVar
 
 import pytest
 
-from datagoblin.hillclimb import bench
+from datagoblin.hillclimb import bench, drive
 from datagoblin.hillclimb.agonist_worker import first_json_object
 from datagoblin.hillclimb.curate import curate
 from datagoblin.hillclimb.lanes import HillclimbError, Registry, call_reason, is_loopback_url
@@ -304,6 +304,30 @@ def test_driver_bench_run_scores_exactly(service: Service, fake_model: str, regi
     tasks, _ = bench.make_tasks("dev", 0, 30, registry)
     assert result["value"] == pytest.approx(sum(t["type"] == "gate_verdict" for t in tasks) / 30)
     assert service.call("decide", {"move_id": move})["verdict"] == "baseline"
+
+
+def test_scripted_drive_keeps_the_eval_contract(service: Service, fake_model: str,
+                                                capsys: pytest.CaptureFixture[str]) -> None:
+    first = drive.evaluate(service, base_url=fake_model, model="fake-27b", count=30, limit=30)
+    assert first["verdict"] == "baseline"
+    assert [c["tool"] for c in first["calls"]] == ["propose_move", "bench_make", "driver_bench", "record_result",
+                                                   "decide"]
+    # with an incumbent, the eval set is found by the lane's contract, whatever seed is asked for
+    second = drive.evaluate(service, base_url=fake_model, model="fake-27b", seed=5, count=30, limit=30)
+    assert (second["verdict"], second["dev_run"], second["delta"]) == ("reject", first["dev_run"], 0.0)
+    assert [c["tool"] for c in second["calls"]] == ["propose_move", "driver_bench", "record_result", "decide"]
+    # a move the driver opened and left without a result is finished, not replaced
+    opened = service.call("propose_move", {"lane": "self_adapter", "plan": ["driver_bench"],
+                                           "hypothesis": "The driver opened this move and stopped."})["move_id"]
+    code = drive.main(["--state-dir", str(service.state_dir), "--base-url", fake_model, "--model", "fake-27b",
+                       "--limit", "30"])
+    printed = json.loads(capsys.readouterr().out)
+    assert (code, printed["move_id"], printed["verdict"], printed["dev_run"]) == (0, opened, "reject", first["dev_run"])
+    records = len(service.ledger.read())
+    with pytest.raises(HillclimbError, match="no_eval_set"):  # a different limit is a different eval set
+        drive.evaluate(service, base_url=fake_model, model="fake-27b", count=30, limit=20)
+    assert len(service.ledger.read()) == records
+    assert service.ledger.state(service.registry).lanes["self_adapter"].plateau == 2
 
 
 def test_recipes_are_tools_with_exact_schemas(service: Service, tmp_path: Path) -> None:

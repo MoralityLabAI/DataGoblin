@@ -30,11 +30,13 @@ data should go first.
 
 Adapter training runs on the GPU, tier gpu (`data-goblin --approve all`):
 
-- `adaptergym_status` / `adaptergym_preflight` with the operator's plan (for example
-  `plans/bdb_compare.json`) show which training and eval steps exist and whether the card is free.
-- `adaptergym_launch` starts plan steps detached through vramorama leases. The plan's train step must
-  read the curated `admitted.jsonl`; if no plan does, stop and report the plan step that is missing.
-  You never edit plans.
+- `plans/driver_adapter.json` is this lane's plan. Tag `train-driver` trains `b25_driver_fp_r8`, a
+  rank-8 LoRA on Ternary Bonsai 2.5 27B, from the curated `admitted.jsonl` its bonsai-gym config names
+  (the operator's curated set, not a `run:` output of this ledger). Tag `eval-driver` serves the base
+  model, then the base with the adapter, and runs this lane's evaluation move through this app for each.
+  Training on other curated rows is a plan change: report it for the operator.
+- `adaptergym_status` / `adaptergym_preflight` with that plan show which steps are done and whether the
+  card is free; `adaptergym_launch` starts steps detached through vramorama leases. You never edit plans.
 - Inkling 2 Mini adapters train through Tinker (`Agonist/TINKER_GYM.md`), which needs the operator's
   credentials: report the command, do not run it. `tinker_fixture` is the offline check of that path.
 

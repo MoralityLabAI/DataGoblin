@@ -109,3 +109,24 @@ with `run:<run_id>`, and recorded the metric for every evaluation run. It someti
 in one move and reran `rlt_make_suite` instead of reusing the suite run; the suite digest was identical,
 so the eval contract held. Its remaining refused calls were a run on an already closed move and
 `propose_move` with `parent: ""` or `"None"`, which the server now reads as no parent.
+
+## Closing the self_adapter loop
+
+adapter-bits (MoralityLabAI/Compactification-Theory) `experiments/adaptergym/plans/driver_adapter.json`
+trains and measures an adapter on the driver itself:
+
+- `train-driver`: bonsai-gym config `b25_driver_fp_r8`, a rank-8 LoRA on Ternary Bonsai 2.5 27B
+  PTQ1_0, one epoch (250 steps x 8 rows) over the curated `admitted.jsonl` of
+  `bench make --split train --seed 1 --count 2000` -> `bench export-sft` -> `curate` (2000 exact-oracle
+  rows). Val: 89 rows from train seed 2, minus the 7 whose view also occurs in seed 1. Dev tasks are
+  never trained on (the splits are disjoint by view digest).
+- `eval-driver` (adaptergym step kind `hillclimb`, one 9 GB lease): for each arm, base and then base
+  plus adapter, it serves the model with llama-server (plain decoding, thinking off) and runs
+  `data-goblin run --skill datagoblin-hillclimb --args "self_adapter. ..." --approve local`, so the
+  served model drives its own evaluation move: `bench_make` (dev, seed 0, count 120), `driver_bench`
+  (limit 120), `record_result`, `decide`. If no app run reaches a decision,
+  `python -m datagoblin.hillclimb.drive` ([`drive.py`](../src/datagoblin/hillclimb/drive.py)) makes the
+  same calls: it continues an open move, reuses the dev-bench run whose task list matches the lane's eval
+  contract (and refuses before writing anything when none does), decides, and on replicate records one
+  more `driver_bench` run. Each arm's verdict, and whether the app or the script recorded it, goes to
+  `<work>/results/driver-eval-<arm>.json`.
