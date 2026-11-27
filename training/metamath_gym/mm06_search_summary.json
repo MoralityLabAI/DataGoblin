@@ -1,0 +1,239 @@
+{
+  "schema": "mm06-local-search-summary-v1",
+  "corpus_artifact": 15163819605,
+  "archive_sha256": "c424d2c2c83f6d0d57797b2a113c78f13d14e7380c6f242a810af6e6b55870b4",
+  "runner_sha256": "913c2c22bff5edca3a40eb44d374a4f82e872706efcc9c287afbb95e41d279f5",
+  "parser_sha256": "2c761d69733f3b6a538c4545088c3b2ed53d1891e2da8dc37a597de206ad849d",
+  "full_receipt_sha256": "f831b455e1073fe85c87441f8fc9f5f7eb08258359847a305a3c5eb3d621b814",
+  "root_receipts_sha256": "d58070bd4aba626ee2f057aa61a4cb2bc87c12ad561fc92489bc72cdb48e0a3f",
+  "audited_roots": 1346,
+  "exhaustive_transitions": 2450036,
+  "oracle_disagreements": 0,
+  "alternative_tuples": 31,
+  "noncartesian_valid_marginals": 0,
+  "budgets": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256,
+    512
+  ],
+  "family_test": {
+    "n": 207,
+    "columns": [
+      "solved",
+      "transitions"
+    ],
+    "hash_dfs": [
+      [
+        2,
+        1654
+      ],
+      [
+        5,
+        3289
+      ],
+      [
+        21,
+        6422
+      ],
+      [
+        41,
+        12046
+      ],
+      [
+        76,
+        21503
+      ],
+      [
+        112,
+        35862
+      ],
+      [
+        136,
+        56460
+      ]
+    ],
+    "memo_dfs": [
+      [
+        2,
+        1654
+      ],
+      [
+        5,
+        3289
+      ],
+      [
+        21,
+        6422
+      ],
+      [
+        41,
+        12046
+      ],
+      [
+        76,
+        21503
+      ],
+      [
+        112,
+        35862
+      ],
+      [
+        136,
+        56460
+      ]
+    ],
+    "goal_dfs": [
+      [
+        0,
+        1656
+      ],
+      [
+        6,
+        3303
+      ],
+      [
+        52,
+        6165
+      ],
+      [
+        89,
+        10559
+      ],
+      [
+        128,
+        16827
+      ],
+      [
+        154,
+        24922
+      ],
+      [
+        179,
+        34761
+      ]
+    ],
+    "beam4": [
+      [
+        0,
+        1656
+      ],
+      [
+        1,
+        3311
+      ],
+      [
+        10,
+        6563
+      ],
+      [
+        27,
+        12553
+      ],
+      [
+        54,
+        22770
+      ],
+      [
+        77,
+        38777
+      ],
+      [
+        95,
+        59374
+      ]
+    ]
+  },
+  "family_test_budget_512_by_depth": {
+    "2": [
+      90,
+      88,
+      83,
+      83,
+      73
+    ],
+    "3": [
+      55,
+      50,
+      34,
+      34,
+      16
+    ],
+    "4": [
+      62,
+      41,
+      19,
+      19,
+      6
+    ],
+    "columns": [
+      "n",
+      "goal_dfs",
+      "hash_dfs",
+      "memo_dfs",
+      "beam4"
+    ]
+  },
+  "budget_512_all_splits": {
+    "columns": [
+      "solved",
+      "transitions"
+    ],
+    "train": {
+      "n": 937,
+      "goal_dfs": [
+        819,
+        148890
+      ],
+      "hash_dfs": [
+        663,
+        246724
+      ],
+      "memo_dfs": [
+        663,
+        246676
+      ],
+      "beam4": [
+        435,
+        256867
+      ]
+    },
+    "dev": {
+      "n": 202,
+      "goal_dfs": [
+        170,
+        34764
+      ],
+      "hash_dfs": [
+        129,
+        57171
+      ],
+      "memo_dfs": [
+        129,
+        57171
+      ],
+      "beam4": [
+        84,
+        57181
+      ]
+    }
+  },
+  "paired_family_test_budget_512": {
+    "goal_only": 43,
+    "hash_only": 0
+  },
+  "memo_hits_budget_512": {
+    "train": 2,
+    "dev": 0,
+    "family_test": 0
+  },
+  "beam_pruned_unsolved_budget_512": {
+    "train": 283,
+    "dev": 63,
+    "family_test": 51
+  },
+  "scope": "Local reimplementation of registered policy descriptions, original registered runner bytes unavailable. Public alpha-signature split. No neural model, BPD, or independent external check of candidate solutions."
+}
