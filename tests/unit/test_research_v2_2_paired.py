@@ -50,7 +50,7 @@ def test_selective_gate_requires_full_panel_and_compute():
 
 def test_distill_canonical_unicode_and_nonfinite():
     import hashlib
-    assert canonical_digest({"x": "α"}) == hashlib.sha256(b'{"x":"\\u03b1"}').hexdigest()
+    assert canonical_digest({"x": "\u03b1"}) == hashlib.sha256(b'{"x":"\\u03b1"}').hexdigest()
     with pytest.raises(ValueError):
         canonical_digest({"x": float("nan")})
 
