@@ -1,4 +1,5 @@
 """Live DG-AGN-TINKER-01 runner. All paid actions require --live and a cap."""
+
 from __future__ import annotations
 
 import argparse
@@ -69,6 +70,7 @@ class Tinker:
             raise ValueError("rendered prompt + completion exceeds bounded context")
         identity = snapshot or MODEL
         reserve = math.ceil(1.2 * (0.15 * n + 0.50 * self.max_tokens))
+
         def invoke() -> dict[str, Any]:
             if identity not in self.samplers:
                 kwargs = {"model_path": snapshot} if snapshot else {"base_model": MODEL}
@@ -111,6 +113,7 @@ class Tinker:
         reserve = math.ceil(1.2 * 0.75 * tokens)
         identity = [MODEL, self.renderer_name, EFFORT, state, rank, lr, examples]
         name = "dg-" + digest([key, identity])[:24]
+
         def invoke() -> dict[str, Any]:
             client = (
                 self.service.create_training_client_from_state_with_optimizer(state).result()
@@ -146,6 +149,7 @@ class LocalDG:
     def sample(self, key: str, prompt: str) -> dict[str, Any]:
         # The local checkpoint is a completion model; provide an explicit text format.
         text = "DataGoblin task:\n" + prompt + "\nAnswer as JSON:\n"
+
         def invoke() -> dict[str, Any]:
             payload = {"prompt": text, "n_predict": 256, "temperature": 0.2, "stream": False,
                        "cache_prompt": False}
@@ -187,6 +191,7 @@ class FableAdvisor:
         # Account ceilings remain authoritative; no SDK automatic retries.
         n = len(prompt.encode()) + 1024
         reserve = 8 * n + 40 * self.max_tokens
+
         def invoke() -> dict[str, Any]:
             with self.client.messages.stream(
                 model=FABLE, max_tokens=self.max_tokens, output_config={"effort": "xhigh"},
@@ -266,8 +271,8 @@ def choose_batch(
                 raise ValueError("invalid selection")
             method = curator
         except (ValueError, KeyError, TypeError):
-            selected = [t.key for t in pool[:count]]
-            method = curator + "_invalid_fixed_fallback"
+            selected = [t.key for t in sorted(pool, key=lambda t: t.key not in misses)[:count]]
+            method = curator + "_invalid_failure_first_fallback"
     else:
         selected = [t.key for t in (rng.sample(pool, count) if curator == "random" else pool[:count])]
         method = curator
@@ -371,16 +376,13 @@ def rollout(
         if dg and (not history or any("advisory_note" in h for h in history)):
             return dg.sample(key + ":dg", prompt)
         if task.role != "route":
-            route_prompt = canonical({
-                "instruction": "Choose the adapter for the request. Return JSON action only.",
+            choices = ("curriculum", "diagnose", "repair")
+            route_task = Task(task.root, task.split, "route", {
                 "request": task.public.get("request", task.public.get("goal", task.public.get("evidence"))),
-                "allowed_actions": list(ROLES),
-                "adapter_descriptions": {
-                    "curriculum": "select training roots", "route": "choose a specialist",
-                    "diagnose": "identify failure prerequisite", "repair": "revise a decision",
-                },
-                "previous_attempts": history,
-            })
+                "available": dict.fromkeys(choices, True), "authorized": True,
+                "rule": "Choose the matching available specialist only if authorized; otherwise STOP.",
+            }, dict.fromkeys((*choices, "STOP"), 0.0))
+            route_prompt = route_task.prompt(history)
             router = snapshots["route"]
             route_result = provider.sample(key + ":route", route_prompt, router["sampler"] if router else None)
             route_action = parse_action(route_result["text"])
