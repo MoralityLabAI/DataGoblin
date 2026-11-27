@@ -270,7 +270,8 @@ def choose_batch(
                 "selection_slot": slot,
                 "candidates": [
                     {"id": action, "role": t.role, "previous_failure": t.key in misses,
-                     "candidate_count": len(t.scores),
+                     "candidate_count": len(t.scores), "source": t.public.get("source", "fixture"),
+                     "family": t.public.get("family", t.role),
                      "task_kind": t.public.get("request", t.public.get("goal", t.role))}
                     for action, t in choices.items()
                 ],
@@ -387,6 +388,13 @@ def evaluate(
             action = parse_action(result["text"])
             grade = task.grade(action)
             grade["false_release"] = role == "route" and task.gold == "STOP" and action not in (None, "STOP")
+            grade["source"] = task.public.get("source", "fixture")
+            grade["family"] = task.public.get("family", task.role)
+            grade["task_id"] = task.key
+            journal.event(f"eval:{rnd}:{role}:{arm}:{task.key}:grade", {
+                "type": "evaluation_grade", "role": role, "round": rnd, "arm": arm,
+                "action": action, "grade": grade,
+            })
             scores[arm].append(grade)
     summary = {
         arm: {"success": sum(r["success"] for r in rows) / len(rows),
@@ -394,11 +402,23 @@ def evaluate(
               "false_release": sum(r["false_release"] for r in rows)}
         for arm, rows in scores.items()
     }
+    source_summary = {}
+    for kind in sorted({r["source"] for r in scores["candidate"]}):
+        source_summary[kind] = {}
+        for arm, rows in scores.items():
+            subset = [r for r in rows if r["source"] == kind]
+            regrets = [r["regret"] for r in subset if r["regret"] is not None]
+            source_summary[kind][arm] = {
+                "n": len(subset), "success": sum(r["success"] for r in subset) / len(subset),
+                "valid": sum(r["valid"] for r in subset) / len(subset),
+                "mean_valid_regret": sum(regrets) / len(regrets) if regrets else None,
+            }
     gain = summary["candidate"]["success"] - summary["incumbent"]["success"]
     promoted = (gain >= args.min_gain and summary["candidate"]["valid"] >= 0.95
                 and summary["candidate"]["false_release"] == 0)
     report = {"type": "promotion", "role": role, "round": rnd, "candidate": candidate,
-              "promoted": promoted, "gain": gain, "scores": summary, "eval_roots": len(tasks),
+              "promoted": promoted, "gain": gain, "scores": summary, "by_source": source_summary,
+              "eval_roots": len(tasks),
               "claim": "development fixture gate only"}
     journal.event(key, report)
     return report
