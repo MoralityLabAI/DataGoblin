@@ -93,18 +93,18 @@ def public_relation(s):
         if len(row) != 3:
             raise ValueError("bad row arity")
         parsed = []
-        for l in row:
-            terms = [(i, int(c)) for i, c in l]
+        for combination in row:
+            terms = [(i, int(c)) for i, c in combination]
             if any(type(i) is not int or not 0 <= i < n or not 0 <= c < p for i, c in terms):
                 raise ValueError("bad coefficient or wire")
             parsed.append(terms)
         rows.append(parsed)
     accepted = {}
     for aux in itertools.product(range(p), repeat=n - 1):
-        w = (1,) + aux
+        w = (1, *aux)
 
-        def ev(l):
-            return sum(w[i] * c for i, c in l) % p
+        def ev(combination, assignment=w):
+            return sum(assignment[i] * c for i, c in combination) % p
 
         if all(ev(a) * ev(b) % p == ev(c) for a, b, c in rows):
             x = tuple(w[i] for i in public)
