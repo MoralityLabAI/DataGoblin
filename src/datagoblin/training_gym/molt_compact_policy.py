@@ -223,11 +223,7 @@ def run_root(split: str, seed: int, index: int, repeats: int) -> dict[str, Any]:
             raise RuntimeError("bank not empty")
         optimal = verified = calls = utility = 0
         for i, world in enumerate(stream):
-            policy: PublicPolicy
-            if arm == "reference":
-                policy = MeasuredReference(stats)
-            else:
-                policy = CompiledPublicPolicy(memory)
+            policy: PublicPolicy = MeasuredReference(stats) if arm == "reference" else CompiledPublicPolicy(memory)
             host = episode(world, policy)
             if arm == "reference":
                 traces.append(host.trace)
