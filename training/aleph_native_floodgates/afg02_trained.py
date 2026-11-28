@@ -8,10 +8,9 @@ import time
 from collections import Counter
 from pathlib import Path
 
+import native_cache as N
 import torch
 from torch.nn import functional as F
-
-import native_cache as N
 
 SCHEMA = "aleph.direct_a.afg02.v1"
 PREFIX = 8
