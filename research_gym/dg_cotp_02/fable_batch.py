@@ -150,6 +150,10 @@ def collect(client, out, wave):
                     write(rd / "research_print.json", {"markdown": visible,
                           "evidence": "candidate research print; independent review pending",
                           "training_eligible": False})
+                    print_path = rd / "research_print.md"
+                    if print_path.exists() and print_path.read_text(encoding="utf-8") != visible + "\n":
+                        raise ValueError("immutable research print differs")
+                    print_path.write_text(visible + "\n", encoding="utf-8")
                     entry["status"] = "candidate print"
             else:
                 entry["status"] = "incomplete or refused"
