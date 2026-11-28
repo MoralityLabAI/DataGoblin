@@ -180,9 +180,15 @@ class HostOffloadFP32AdamW:
     @torch.no_grad()
     def sync_weights_to_device(self) -> None:
         """Push authoritative cloud-host FP32 master weights onto the TPU working model."""
-        for (_, master), (_, p_dev) in zip(self.named, self.device_named, strict=True):
-            p_dev.copy_(master.to(device=p_dev.device, dtype=p_dev.dtype))
-        self.backend.sync()
+        prev_threads = torch.get_num_threads()
+        torch.set_num_threads(max(1, min(24, os.cpu_count() or 8)))
+        try:
+            for (_, master), (_, p_dev) in zip(self.named, self.device_named, strict=True):
+                w_cast = master.to(dtype=p_dev.dtype) if master.dtype != p_dev.dtype else master
+                p_dev.copy_(w_cast.to(device=p_dev.device))
+            self.backend.sync()
+        finally:
+            torch.set_num_threads(prev_threads)
 
     def zero(self) -> None:
         for _, p_dev in self.device_named:
@@ -194,12 +200,18 @@ class HostOffloadFP32AdamW:
     @torch.no_grad()
     def accumulate_microbatch_grads(self) -> None:
         """Stream current TPU microbatch gradients into host FP32 accumulator and free TPU grad HBM."""
-        for name, p_dev in self.device_named:
-            if p_dev.grad is None:
-                raise ValueError(f"missing gradient for {name} after microbatch backward")
-            self.grad_acc[name].add_(p_dev.grad.detach().to("cpu", dtype=torch.float32))
-            p_dev.grad = None
-        self._has_accumulated = True
+        prev_threads = torch.get_num_threads()
+        torch.set_num_threads(max(1, min(24, os.cpu_count() or 8)))
+        try:
+            for name, p_dev in self.device_named:
+                if p_dev.grad is None:
+                    raise ValueError(f"missing gradient for {name} after microbatch backward")
+                g_cpu = p_dev.grad.detach().to("cpu")
+                p_dev.grad = None
+                self.grad_acc[name].add_(g_cpu)
+            self._has_accumulated = True
+        finally:
+            torch.set_num_threads(prev_threads)
 
     @torch.no_grad()
     def update(self, rate: float) -> float:
