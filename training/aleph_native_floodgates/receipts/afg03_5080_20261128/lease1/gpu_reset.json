@@ -1,0 +1,5 @@
+{
+ "event": "Windows System log, provider nvlddmkm, event id 153 (GPU reset)",
+ "time": "2026-11-28T18:18:39+08:00",
+ "context": "Six seconds after vramorama's power guard stopped the FP32 cell (last watchdog sample 18:18:33) while the card was clamped to a 15 W software power limit. No other lease was admitted on the card at the time."
+}

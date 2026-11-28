@@ -1,0 +1,40 @@
+{
+ "cells": [
+  {
+   "audit": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "{\"cal_selected_policy\": \"repeat\", \"development_rollouts\": 96, \"fixture\": false, \"greedy_mismatches\": 0, \"policies\": 6, \"status\": \"audited_receipts\", \"target_reloaded\": false}"
+   },
+   "out": "D:\\aleph-afg03\\runs\\c2\\attempt-20261128T112152Z\\fp32",
+   "precision": "fp32",
+   "progress": {
+    "stage": "final_identity",
+    "status": "complete"
+   },
+   "seconds": 543.3668899536133,
+   "watchdog": {
+    "elapsed_seconds": 540.3429999999935,
+    "exit_code": 0,
+    "peaks": {
+     "gpu_dedicated_bytes": 4369391616,
+     "gpu_memory_used_mib": 4553.09765625,
+     "gpu_shared_bytes": 845152256,
+     "power_w": 138567.03,
+     "temperature_c": 82,
+     "tree_private_bytes": 10145038336,
+     "tree_rss_bytes": 4561465344
+    },
+    "power_capped_samples": 0,
+    "status": "exited",
+    "violations": []
+   },
+   "watchdog_exit": 0
+  }
+ ],
+ "cells_mode": "fp32",
+ "panel_sha256": "3da8c6f50d672c08c6ae6f3efd4bed4c520599ebd4ad8dc7c8d66a28f2eee94d",
+ "runner_wall": 3540,
+ "schema": "aleph.afg03.local_campaign.v1",
+ "wall": 3600
+}
