@@ -1,0 +1,515 @@
+{
+  "schema": "dg-research20m-intake-v1",
+  "date": "2026-11-28",
+  "status": "candidate_only",
+  "training_ready": false,
+  "target_unique_aleph_tokens": 20000000,
+  "accepted_unique_aleph_tokens": null,
+  "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "quota_definition": "One presentation of each accepted canonical content unit after root and exact/near deduplication; track loss-bearing tokens and actual processed exposures separately. Do not add to 10B endpoint; debit approved research/formal/procedural/etc lanes on later stage admission.",
+  "lanes": [
+    {
+      "id": "recurrent_mechanisms",
+      "target_unique_tokens": 4000000,
+      "purpose": "Looped Transformers, native Aleph cache, BPD intervention and optimizer-aware repair"
+    },
+    {
+      "id": "research_decision",
+      "target_unique_tokens": 4000000,
+      "purpose": "Distill, exact research-state compactification, evidence selection and MTR"
+    },
+    {
+      "id": "skill_persona",
+      "target_unique_tokens": 3000000,
+      "purpose": "TRM Skill Factory, MoLT, Jinn/Beast, adaptive stopping and SelfModels"
+    },
+    {
+      "id": "formal_mathematics",
+      "target_unique_tokens": 3000000,
+      "purpose": "Lean/Metamath proof-state transport, tensor geometry and certified finite math"
+    },
+    {
+      "id": "experiment_audit",
+      "target_unique_tokens": 2000000,
+      "purpose": "Verification, negative results, matched controls, cost and reproducibility"
+    },
+    {
+      "id": "quantum_information",
+      "target_unique_tokens": 2000000,
+      "purpose": "Restricted observation, QFT compiler, QPU calibration and transfer"
+    },
+    {
+      "id": "protocol_verification",
+      "target_unique_tokens": 2000000,
+      "purpose": "ZK circuits, collateral and reserve state, independently checked protocol transitions"
+    }
+  ],
+  "programs": [
+    {
+      "lane": "recurrent_mechanisms",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "pr": 394,
+      "commit": "c1c903b3f0664ee19838fcba45bd67e24f779aab",
+      "program": "COG-03",
+      "uri": "https://github.com/MoralityLabAI/LoopedTransformers/tree/c1c903b3f0664ee19838fcba45bd67e24f779aab",
+      "next": "TRAIN-only ledger generation; archived attempts include mixed splits, quarantine until split verified",
+      "training_ready": false
+    },
+    {
+      "lane": "recurrent_mechanisms",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "pr": 419,
+      "commit": "9c8a74d5d7b7d00fe8ab02772f272184277fd3a5",
+      "program": "INK-FP-AUDIT",
+      "uri": "https://github.com/MoralityLabAI/LoopedTransformers/tree/9c8a74d5d7b7d00fe8ab02772f272184277fd3a5",
+      "next": "source method and fresh cache parity tasks; no development rows",
+      "training_ready": false
+    },
+    {
+      "lane": "recurrent_mechanisms",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "pr": 391,
+      "commit": "a5779d93801948a521781ae609af5ddb81d79012",
+      "program": "CPR-01",
+      "uri": "https://github.com/MoralityLabAI/LoopedTransformers/tree/a5779d93801948a521781ae609af5ddb81d79012",
+      "next": "fresh routing oracle worlds with structural split",
+      "training_ready": false
+    },
+    {
+      "lane": "recurrent_mechanisms",
+      "repository": "MoralityLabAI/BPD",
+      "pr": 186,
+      "commit": "339fec45df12c4dd9d5dbc1e66de41e5042979e2",
+      "program": "FUSE-12",
+      "uri": "https://github.com/MoralityLabAI/BPD/tree/339fec45df12c4dd9d5dbc1e66de41e5042979e2",
+      "next": "cache invalidation, residual adjoints, matched CPU/GPU resource accounting; HOLD remains HOLD",
+      "training_ready": false
+    },
+    {
+      "lane": "recurrent_mechanisms",
+      "repository": "MoralityLabAI/BPD",
+      "pr": 181,
+      "commit": "f2fdaab846d51082e041fff0e8d720d81c69466a",
+      "program": "SCCG-10",
+      "uri": "https://github.com/MoralityLabAI/BPD/tree/f2fdaab846d51082e041fff0e8d720d81c69466a",
+      "next": "TRAIN-only candidate decisions and mechanism admissions; negative dev result stays outside task labels",
+      "training_ready": false
+    },
+    {
+      "lane": "recurrent_mechanisms",
+      "repository": "MoralityLabAI/BPD",
+      "pr": 176,
+      "commit": "2a8ebb19aaacb851ddea0e11279f21cf172fcf08",
+      "program": "CURATE-03A",
+      "uri": "https://github.com/MoralityLabAI/BPD/tree/2a8ebb19aaacb851ddea0e11279f21cf172fcf08",
+      "next": "fresh exact AdamW displacement and read-only controls",
+      "training_ready": false
+    },
+    {
+      "lane": "research_decision",
+      "repository": "MoralityLabAI/DataGoblin",
+      "pr": 100,
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "program": "MTR-02D–I/CURATE",
+      "uri": "https://github.com/MoralityLabAI/DataGoblin/tree/cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "next": "actual MTR training rows and BPD/TRM Inky v2/v3 train-only exports",
+      "training_ready": false
+    },
+    {
+      "lane": "research_decision",
+      "repository": "MoralityLabAI/DataGoblin",
+      "pr": 119,
+      "commit": "4f6943e026223886bf7e00c1672ce280b3dd56c7",
+      "program": "DISTILL-22",
+      "uri": "https://github.com/MoralityLabAI/DataGoblin/tree/4f6943e026223886bf7e00c1672ce280b3dd56c7",
+      "next": "fresh exclusion-lattice reuse cases, exact incumbent parity",
+      "training_ready": false
+    },
+    {
+      "lane": "research_decision",
+      "repository": "MoralityLabAI/Compactification-Theory",
+      "pr": 314,
+      "commit": "7fa19c90372b13d71676e6fef13819d2a18b9be3",
+      "program": "DISTILL-01–11",
+      "uri": "https://github.com/MoralityLabAI/Compactification-Theory/tree/7fa19c90372b13d71676e6fef13819d2a18b9be3",
+      "next": "synthetic oracle-only mechanism curriculum and fresh procedural forms; provider journals are reference-only and training_admission=false",
+      "training_ready": false
+    },
+    {
+      "lane": "research_decision",
+      "repository": "MoralityLabAI/Compactification-Theory",
+      "pr": 321,
+      "commit": "54818d53669cdc460239c4e3767ff07280e54ada",
+      "program": "DISTILL-17",
+      "uri": "https://github.com/MoralityLabAI/Compactification-Theory/tree/54818d53669cdc460239c4e3767ff07280e54ada",
+      "next": "fresh compiled-continuation and opportunity certificates; evaluation and calibration roots excluded",
+      "training_ready": false
+    },
+    {
+      "lane": "research_decision",
+      "repository": "MoralityLabAI/Compactification-Theory",
+      "pr": 322,
+      "commit": "38c2b09fa8212885ee68e43d3fc5c994379c66a1",
+      "program": "GAL-01",
+      "uri": "https://github.com/MoralityLabAI/Compactification-Theory/tree/38c2b09fa8212885ee68e43d3fc5c994379c66a1",
+      "next": "fresh finite complexity decision and oracle-bound tasks; no unsafe router predictions as positives",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/DataGoblin",
+      "pr": 113,
+      "commit": "4062d3284c2e100345dfc282ac8143928174c6cc",
+      "program": "Research Verifiers v2.2",
+      "uri": "https://github.com/MoralityLabAI/DataGoblin/tree/4062d3284c2e100345dfc282ac8143928174c6cc",
+      "next": "public methods and new TRAIN roots; private Jinn/Beast, held and prospective panels excluded",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/DataGoblin",
+      "pr": 114,
+      "commit": "fabedf4b86d482bf6dfeaf9646db2e31dc96c6ca",
+      "program": "GoblinBench",
+      "uri": "https://github.com/MoralityLabAI/DataGoblin/tree/fabedf4b86d482bf6dfeaf9646db2e31dc96c6ca",
+      "next": "native task contracts, fresh trace_train roots and costed repair",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/HybridTRMLDT",
+      "pr": 48,
+      "commit": "db5aef512bb0346e2cb60eded03984bfb7f84322",
+      "program": "GSF-01–08",
+      "uri": "https://github.com/MoralityLabAI/HybridTRMLDT/tree/db5aef512bb0346e2cb60eded03984bfb7f84322",
+      "next": "regenerate independently audited train_rollouts.jsonl with fresh namespaces; training_ready=false",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/HybridTRMLDT",
+      "pr": 49,
+      "commit": "6a50a934857bab41257acaf5741c09b97fc5f4d2",
+      "program": "GSF-10",
+      "uri": "https://github.com/MoralityLabAI/HybridTRMLDT/tree/6a50a934857bab41257acaf5741c09b97fc5f4d2",
+      "next": "paired Floodgates, rejection/crop/append/cold-cache parity; avoid fixed dev roots",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/HybridTRMLDT",
+      "pr": 51,
+      "commit": "ca6d1eb6cf95fcd961d43e4172112780ce87e6f1",
+      "program": "TRM-SKILL-GYM-02",
+      "uri": "https://github.com/MoralityLabAI/HybridTRMLDT/tree/ca6d1eb6cf95fcd961d43e4172112780ce87e6f1",
+      "next": "fresh latent intervention, expert-routing and repair controls",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/SelfModels",
+      "pr": 5,
+      "commit": "3ef23b8906d5c9ae1db978cd9fafe1eb52832bca",
+      "program": "QSM-05A",
+      "uri": "https://github.com/MoralityLabAI/SelfModels/tree/3ef23b8906d5c9ae1db978cd9fafe1eb52832bca",
+      "next": "fresh hidden-regime drift and epistemic recovery certificates; preserve negative hypotheses",
+      "training_ready": false
+    },
+    {
+      "lane": "skill_persona",
+      "repository": "MoralityLabAI/SelfModels",
+      "pr": 7,
+      "commit": "78548a9e7cfce8f20dd04acf9b8ee60534bb978b",
+      "program": "ASM-02",
+      "uri": "https://github.com/MoralityLabAI/SelfModels/tree/78548a9e7cfce8f20dd04acf9b8ee60534bb978b",
+      "next": "fresh causal online-memory partition programs and reward/certificate distinction",
+      "training_ready": false
+    },
+    {
+      "lane": "formal_mathematics",
+      "repository": "patrickdugan/MathCan",
+      "pr": 286,
+      "commit": "39d8f2d533ff034b767141b6af427261c780da18",
+      "program": "CRD-01–11",
+      "uri": "https://github.com/patrickdugan/MathCan/tree/39d8f2d533ff034b767141b6af427261c780da18",
+      "next": "fresh exact-model Bellman advantage; no factoring or empirical native claim",
+      "training_ready": false
+    },
+    {
+      "lane": "formal_mathematics",
+      "repository": "patrickdugan/MathCan",
+      "pr": 292,
+      "commit": "7ea6a23025e3fb83721f2233c4a9829df8f2b425",
+      "program": "HAD-01/02",
+      "uri": "https://github.com/patrickdugan/MathCan/tree/7ea6a23025e3fb83721f2233c4a9829df8f2b425",
+      "next": "finite path and support witnesses; Lean pending kernel check",
+      "training_ready": false
+    },
+    {
+      "lane": "formal_mathematics",
+      "repository": "patrickdugan/MathCan",
+      "pr": 294,
+      "commit": "504bc140d07fcb7ddf58550806419b9fb5af123f",
+      "program": "CF-01",
+      "uri": "https://github.com/patrickdugan/MathCan/tree/504bc140d07fcb7ddf58550806419b9fb5af123f",
+      "next": "cross-foundation translation, theorem correspondence review required",
+      "training_ready": false
+    },
+    {
+      "lane": "formal_mathematics",
+      "repository": "patrickdugan/MathCan",
+      "pr": 290,
+      "commit": "af9182959dca4843548e8554b182a048caba77ee",
+      "program": "MM-GYM-01",
+      "uri": "https://github.com/patrickdugan/MathCan/tree/af9182959dca4843548e8554b182a048caba77ee",
+      "next": "fresh structural proof reconstruction, native verifier pending",
+      "training_ready": false
+    },
+    {
+      "lane": "formal_mathematics",
+      "repository": "MoralityLabAI/EvalMath",
+      "pr": 108,
+      "commit": "74f0817b64f7312f734ecc6100bf246ccc3452e8",
+      "program": "MM-GYM-02",
+      "uri": "https://github.com/MoralityLabAI/EvalMath/tree/74f0817b64f7312f734ecc6100bf246ccc3452e8",
+      "next": "verified alternatives; no corpus admission until native verifier replay",
+      "training_ready": false
+    },
+    {
+      "lane": "experiment_audit",
+      "repository": "MoralityLabAI/EvalMath",
+      "pr": 106,
+      "commit": "606056d60f51a680512afb6603ba03c92e8d02f3",
+      "program": "COG08",
+      "uri": "https://github.com/MoralityLabAI/EvalMath/tree/606056d60f51a680512afb6603ba03c92e8d02f3",
+      "next": "denominator/cost/missing-run audit; no test decision labels",
+      "training_ready": false
+    },
+    {
+      "lane": "experiment_audit",
+      "repository": "MoralityLabAI/BPD",
+      "pr": 182,
+      "commit": "8be2f07a18a4d869afe096401507cb8de1bff80a",
+      "program": "DISTILL-04",
+      "uri": "https://github.com/MoralityLabAI/BPD/tree/8be2f07a18a4d869afe096401507cb8de1bff80a",
+      "next": "new design exams, native scorer integration pending",
+      "training_ready": false
+    },
+    {
+      "lane": "experiment_audit",
+      "repository": "MoralityLabAI/LoopedTransformers",
+      "pr": 418,
+      "commit": "1b8c87dfea22b0a6716f6185648e90c7cb43fd3f",
+      "program": "DISTILL-03",
+      "uri": "https://github.com/MoralityLabAI/LoopedTransformers/tree/1b8c87dfea22b0a6716f6185648e90c7cb43fd3f",
+      "next": "new proof/menu/continuation design exams; no protected answer export",
+      "training_ready": false
+    },
+    {
+      "lane": "quantum_information",
+      "repository": "patrickdugan/tensor-lab",
+      "pr": 33,
+      "commit": "84c2cb2054cda49bb858475cdf66e49dda9f29e6",
+      "program": "HAD-QFT",
+      "uri": "https://github.com/patrickdugan/tensor-lab/tree/84c2cb2054cda49bb858475cdf66e49dda9f29e6",
+      "next": "fresh restricted-transform/compiler reference checks; no general QFT claim",
+      "training_ready": false
+    },
+    {
+      "lane": "quantum_information",
+      "repository": "patrickdugan/tensor-lab",
+      "pr": 37,
+      "commit": "33c9b9eda3524c0af5dd2c3913e1529c2ed61f0e",
+      "program": "PGC-QPU",
+      "uri": "https://github.com/patrickdugan/tensor-lab/tree/33c9b9eda3524c0af5dd2c3913e1529c2ed61f0e",
+      "next": "source paper methods, preregistered failure and fresh simulated calibration tasks; held hardware outcomes reserved",
+      "training_ready": false
+    },
+    {
+      "lane": "protocol_verification",
+      "repository": "patrickdugan/SatsHedgeZero",
+      "pr": 36,
+      "commit": "73a613c80010cb477db9d899a5eec61f154d57a1",
+      "program": "ZKL-02/05/07/09",
+      "uri": "https://github.com/patrickdugan/SatsHedgeZero/tree/73a613c80010cb477db9d899a5eec61f154d57a1",
+      "next": "fresh finite circuit audit and public statement binding; no production security claim",
+      "training_ready": false
+    },
+    {
+      "lane": "protocol_verification",
+      "repository": "patrickdugan/TradeLayer-Rust",
+      "pr": 159,
+      "commit": "cc0789b0f609fe959ffb1986d40f7dd5b3aed341",
+      "program": "ZTB-PILOT-01",
+      "uri": "https://github.com/patrickdugan/TradeLayer-Rust/tree/cc0789b0f609fe959ffb1986d40f7dd5b3aed341",
+      "next": "fresh fictional dual-reserve state transitions, invariant and nullifier checks; no real funds",
+      "training_ready": false
+    }
+  ],
+  "exports": [
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b/inky_v2/inky_preferences.jsonl.gz",
+      "manifest": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b/inky_v2/inky_manifest.json",
+      "manifest_git_blob": "337c24ae4eabc6bba75649522e0cae14e5a0af1b",
+      "sha256": "676c66c0f6489a3d7de912131f9e40a06767a6f656431a9b8fed50a5b3e24766",
+      "hash_scope": "decompressed",
+      "reported_rows": 1270,
+      "format": "jsonl.gz",
+      "kind": "preference",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; TRAIN-only per manifest; schema/rights/root mapping not yet audited"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b/inky_v2/inky_repair_traces.jsonl.gz",
+      "manifest": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b/inky_v2/inky_manifest.json",
+      "manifest_git_blob": "337c24ae4eabc6bba75649522e0cae14e5a0af1b",
+      "sha256": "e06f4c11e5a082c5d7932c0854c7d8b65df7b9b8993f76cac01c0ac26580fa7d",
+      "hash_scope": "decompressed",
+      "reported_rows": 5471,
+      "format": "jsonl.gz",
+      "kind": "repair",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; TRAIN-only per manifest; schema/rights/root mapping not yet audited"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b/inky_v2/inky_sft.jsonl.gz",
+      "manifest": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b/inky_v2/inky_manifest.json",
+      "manifest_git_blob": "337c24ae4eabc6bba75649522e0cae14e5a0af1b",
+      "sha256": "3682ff07f89d55c9b048135bf142605555307032c338b0447c1216aeddf7bac4",
+      "hash_scope": "decompressed",
+      "reported_rows": 11470,
+      "format": "jsonl.gz",
+      "kind": "sft",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; TRAIN-only per manifest; schema/rights/root mapping not yet audited"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b_gym/inky_gym_v3/inky_gym_preferences.jsonl.gz",
+      "manifest": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b_gym/inky_gym_v3/inky_manifest.json",
+      "manifest_git_blob": "566cb4a2b8c790bd5f2591f307ecbb1d3c3b9d3f",
+      "sha256": "4f1e932f93fe5c1944620453b89020102d52297e17aa7ae5bb11acaf0f6ab79f",
+      "hash_scope": "decompressed",
+      "reported_rows": 1579,
+      "format": "jsonl.gz",
+      "kind": "preference",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; TRAIN-only per manifest; schema/rights/root mapping not yet audited"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b_gym/inky_gym_v3/inky_gym_repair_traces.jsonl.gz",
+      "manifest": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b_gym/inky_gym_v3/inky_manifest.json",
+      "manifest_git_blob": "566cb4a2b8c790bd5f2591f307ecbb1d3c3b9d3f",
+      "sha256": "59a14ae64af554b2fefbf615926704ea348a0c347b333717665583f44f297d8c",
+      "hash_scope": "decompressed",
+      "reported_rows": 1564,
+      "format": "jsonl.gz",
+      "kind": "repair",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; TRAIN-only per manifest; schema/rights/root mapping not yet audited"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b_gym/inky_gym_v3/inky_gym_sft.jsonl.gz",
+      "manifest": "training/rlt_gym/hypergame_taste/bpd_trm_curate03b_gym/inky_gym_v3/inky_manifest.json",
+      "manifest_git_blob": "566cb4a2b8c790bd5f2591f307ecbb1d3c3b9d3f",
+      "sha256": "89ad31fa889ea9524dae973d128321908f4a68128e7ca4c69e15cd9f34b477c1",
+      "hash_scope": "decompressed",
+      "reported_rows": 13329,
+      "format": "jsonl.gz",
+      "kind": "sft",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; TRAIN-only per manifest; schema/rights/root mapping not yet audited"
+    },
+    {
+      "repository": "MoralityLabAI/BPD",
+      "commit": "f2fdaab846d51082e041fff0e8d720d81c69466a",
+      "path": "mechinterp/bpd/experiments/sccg10_native_mms/results/engineering/datagoblin_export/candidate_decisions.jsonl.gz",
+      "manifest": "mechinterp/bpd/experiments/sccg10_native_mms/results/engineering/datagoblin_export/manifest.json",
+      "manifest_git_blob": "4a37a90f17d22b42643de298f6a6f806c1550878",
+      "sha256": "845a815c3c5e66944d8b79d3efbc2b551eeed3068c7ee6f92c80a4285e357d02",
+      "hash_scope": "compressed",
+      "reported_rows": 26960,
+      "format": "jsonl.gz",
+      "kind": "decision",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; manifest says train/fit and train/feedback only; verify rights and cross-campaign root aliases"
+    },
+    {
+      "repository": "MoralityLabAI/BPD",
+      "commit": "f2fdaab846d51082e041fff0e8d720d81c69466a",
+      "path": "mechinterp/bpd/experiments/sccg10_native_mms/results/engineering/datagoblin_export/mechanism_admissions.jsonl.gz",
+      "manifest": "mechinterp/bpd/experiments/sccg10_native_mms/results/engineering/datagoblin_export/manifest.json",
+      "manifest_git_blob": "4a37a90f17d22b42643de298f6a6f806c1550878",
+      "sha256": "919196e24c7186ba983ab8f6e486366a8dc5a3612b159031f09f76225047d20f",
+      "hash_scope": "compressed",
+      "reported_rows": 8952,
+      "format": "jsonl.gz",
+      "kind": "admission",
+      "namespace": "curate-trm-shared-lineage",
+      "lane": "recurrent_mechanisms",
+      "review": "candidate; manifest says train/fit and train/feedback only; verify rights and cross-campaign root aliases"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/mtr02g_training_rows.json",
+      "git_blob": "d8e067028638f675e0ab537c8324d5f194dd5594",
+      "reported_rows": 128,
+      "format": "json-array",
+      "kind": "paired_observed_outcomes",
+      "namespace": "20261127/mtr02g",
+      "lane": "research_decision",
+      "review": "TRAIN-root path observed; prior feature and measured outcome fields separate; no automatic admission"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/mtr02h_training_rows.json",
+      "git_blob": "9255ef362b5e618bc556f9d8c413b831f7bbe4d1",
+      "reported_rows": 128,
+      "format": "json-array",
+      "kind": "paired_observed_outcomes",
+      "namespace": "20261127/mtr02h",
+      "lane": "research_decision",
+      "review": "TRAIN-root path observed; prior feature and measured outcome fields separate; no automatic admission"
+    },
+    {
+      "repository": "MoralityLabAI/DataGoblin",
+      "commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+      "path": "training/rlt_gym/hypergame_taste/mtr02i_training_rows.json",
+      "git_blob": "cf2719e32493cbe43886d2f7eb513ec8887edc4e",
+      "reported_rows": 320,
+      "format": "json-array",
+      "kind": "paired_observed_outcomes",
+      "namespace": "20261127/mtr02i",
+      "lane": "research_decision",
+      "review": "TRAIN-root path observed; prior feature and measured outcome fields separate; no automatic admission"
+    }
+  ],
+  "exclusions": [
+    "all held/cal/dev/test/prospective roots and derivatives, including mixed archive and source-family aliases",
+    "reference_only teacher outputs from DISTILL, private persona journals, private/protected task packets",
+    "raw eval receipts and benchmark answers, credentials, confidential data",
+    "uncompiled Lean or unverified model claims as verified targets",
+    "duplicate renders and repeated views counted as unique"
+  ],
+  "source_review": "All source rights, scope, actual file bytes and split identity must pass before admission. A PR head pin is a discovery reference, not evidence that open work is merged or verified. No raw data or weights copied into Git."
+}
