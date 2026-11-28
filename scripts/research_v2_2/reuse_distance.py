@@ -226,7 +226,7 @@ def evaluate(ds,arm,cap,cost=(1.15,.02)):
                 need = max(0,sum(map(Arena.size,rows))+size-store.available())
                 victims = []
                 admit = size <= store.available()
-                def resident(r):
+                def resident(r, now=now):
                     value = HORIZON/max(1,r[3])*r[4]
                     if arm == 'distance_reset':
                         value *= max(0.,min(1.,2-(now-r[2])/max(1,r[3])))
