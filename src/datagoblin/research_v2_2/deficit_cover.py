@@ -259,9 +259,9 @@ def campaign(generator, reference, assess, n=24):
                     raise ValueError('unsound search certification')
                 if stats['inspected'] > cap:
                     raise ValueError('inspection budget exceeded')
-                if cap == max(LIMITS) and arm in ('cover','bound','forced','warm_forced'):
-                    if not stats['certified'] or not success:
-                        raise ValueError('exact full-budget parity')
+                if (cap == max(LIMITS) and arm in ('cover','bound','forced','warm_forced')
+                        and (not stats['certified'] or not success)):
+                    raise ValueError('exact full-budget parity')
                 plan = answer is not None and answer.get('status') == 'plan'
                 rows[str(cap)][arm].append(dict(**stats,cpu_ms=elapsed,optimal=success,
                     answered=int(answer is not None),plan=int(plan),oracle_infeasible=int(optimum is None),
