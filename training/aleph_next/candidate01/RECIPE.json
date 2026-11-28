@@ -1,0 +1,121 @@
+{
+  "schema": "datagoblin.aleph.direct-production-recipe.v1",
+  "run": "Aleph-A-10B",
+  "launch_authorized": false,
+  "challenger": null,
+  "construction": {
+    "policy": "direct",
+    "seed": 137,
+    "parameters": 999352320,
+    "width": 2048,
+    "vocab": 49152,
+    "query_heads": 16,
+    "kv_heads": 4,
+    "physical_shell_and_answer_blocks": 4,
+    "physical_shared_core_blocks": 10,
+    "core_ff": 8960,
+    "shell_and_answer_ff": 8192,
+    "core_passes": 2,
+    "answer_passes": 1,
+    "executed_blocks": 24,
+    "head": "tied",
+    "norm": "pre-RMSNorm with final RMSNorm",
+    "position": "RoPE",
+    "dropout": 0,
+    "bias": false,
+    "rope_base": 10000,
+    "target_context": 2048,
+    "source_module": "training/aleph_rlt_placement/gym.py",
+    "full_gradient_all_visits": true
+  },
+  "precision": {
+    "master_parameters": "float32",
+    "moment_estimates": "float32",
+    "dense_compute": "bfloat16",
+    "loss_reduction": "float32"
+  },
+  "tokenizer": {
+    "repo": "HuggingFaceTB/SmolLM2-135M",
+    "revision": "93efa2f097d58c2a74874c7e644dbc9b0cee75a2",
+    "file": "tokenizer.json",
+    "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "implementation": "tokenizers==0.22.2",
+    "vocab": 49152,
+    "pad": 0,
+    "literal_special_spellings": "text",
+    "add_bos": false,
+    "add_eos": false,
+    "license_declaration": "Apache-2.0 (upstream model card)"
+  },
+  "optimizer": {
+    "name": "AdamW",
+    "beta1": 0.9,
+    "beta2": 0.95,
+    "eps": 1e-08,
+    "weight_decay_matrices": 0.1,
+    "weight_decay_norms": 0,
+    "clip_global_norm": 1,
+    "peak_lr": 0.00025,
+    "ending_lr": 2.5e-05,
+    "warmup_tokens": 200000000,
+    "stable_until_tokens": 16000000000,
+    "cosine_decay_ends_tokens": 20000000000,
+    "schedule_clock": "processed non-padding positions; equal in both arms",
+    "decay_group": "ndim >= 2, including tied embedding exactly once",
+    "schedule_evaluation": "processed position after current update",
+    "gradient_reduction": "sum cross-entropy numerator across all labeled targets, divide by global label count before clipping"
+  },
+  "stream": {
+    "target": 10000000000,
+    "batch_nonpadding": 262144,
+    "context": 2048,
+    "static_max_views": 4,
+    "snapshot_repeat_policy": "exactly one pre-admitted presentation; no wraparound on exhaustion",
+    "mask": "document-isolated causal, no transitions across bands/docs, checked prompts masked",
+    "update_boundaries": "stop at next registered checkpoint, even if final update partial",
+    "checkpoints": [
+      10000000,
+      100000000,
+      500000000,
+      1000000000,
+      2000000000,
+      5000000000,
+      8000000000,
+      10000000000
+    ],
+    "round_robin": "select the most under-target lane by next-pack token deficit; tie by lane name; independently frozen ordered shard cursors per lane",
+    "lane_positions": {
+      "custom_research": 2500000000,
+      "general": 3500000000,
+      "verified": 2000000000,
+      "procedural": 1500000000,
+      "failure_directed": 500000000
+    },
+    "subtasks": {
+      "allocation": "custom_research",
+      "general": "general",
+      "state": "procedural",
+      "operator": "procedural",
+      "composition": "verified",
+      "lean": "verified",
+      "repair": "failure_directed"
+    }
+  },
+  "checkpoint": {
+    "commit": "atomically publish hash-verified completed optimizer step plus cursor, never partial accumulated gradients",
+    "state": [
+      "model",
+      "optimizer",
+      "processed-token scheduler",
+      "update index",
+      "Python RNG",
+      "NumPy RNG",
+      "torch RNG and per-rank device RNG",
+      "world size and sharding layout",
+      "per-lane packer cursors, counters and mixture deficits",
+      "source/recipe/tokenizer/manifest digests"
+    ],
+    "cross_topology_resume": false,
+    "restart_acceptance": "bitwise ordered IDs, target masks, routes, cursor and counters; CPU deterministic state exact; accelerator parity must be measured on intended topology"
+  }
+}

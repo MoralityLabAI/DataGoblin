@@ -1,0 +1,162 @@
+{
+  "artifacts_sha256": {
+    "cpu-restart/restart.json": "2a54ecbaef1dda0ac54b46eb5b246aa43cb83b2f5e8b76806ac9bd2921482bc2",
+    "custody-verified/audit.json": "b9fffb1280ff1250d53057a4855ad8b5cbb5d522c3ac2e7ba5d4d86bf4a40996",
+    "private-evaluations/manifest.json": "155b41bd7daabc875731591f4c8b873d34d7178343cc98710f2cc6ac79fa8404",
+    "prose/audit.json": "699ac1748f53348ce8760f905e825afd4b57e6caf7894ae59b4d9d6081772f7c",
+    "snapshot-final/index.json": "cb2495da7078bdb5320fb348a007744cb2473711cedca6d34341d6622a04cb1d",
+    "snapshot/index.json": "f295e585404dd62e2c04d229d0cc02de2c590cf45ec40d0b5b0d7bcd38edcbbe",
+    "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "tournament-train/admissions.json": "57d2e5eb149f4f618f84ed12979b4e0c2ff84c63f42f60d64207cccf5c3a8eed",
+    "tournament-train/manifest.json": "15d2c9432041a3bbbe129dd3572049830fe6baedd8b03439f55bf779810113d9",
+    "verified/admissions.json": "94728f557b565e7a800e8f36082e5a0c56e34f7e060734e553c9aa3c13dbd51f",
+    "verified/manifest.json": "1aff69be8a27e5a01c2711e085c5ecb92c3a98aeae10a95cc832d6bd97a15d01",
+    "verified/verified-replay.json": "d0053a7b49d575dabfdfad786a733628d01f689c13cdc714e20a23bb332f6816"
+  },
+  "complete_10b": false,
+  "exact_replay_requires": "original private draws and upstream bytes; independent redraws have new identities",
+  "index_path": "snapshot-final/index.json",
+  "lanes": {
+    "custom_research": {
+      "deficit": 2499592309,
+      "manifest_sha256": "710a6743465ec11a2013721b5a83a4e5ef65ace0f7c9a6dc43a5d85919c58367",
+      "path": "snapshot-final/custom_research/manifest.json",
+      "positions": 407691
+    },
+    "failure_directed": {
+      "deficit": 499759627,
+      "manifest_sha256": "72ad5e767e6115d4dd0a1e1b066c00f4265e19b41568b48e5b65eae375eb88e9",
+      "path": "snapshot-final/failure_directed/manifest.json",
+      "positions": 240373
+    },
+    "general": {
+      "deficit": 3497341064,
+      "manifest_sha256": "f5ecac1c41d1e651e9174131812fe410d0d094de36fef4efc7871658c9879e38",
+      "path": "prose/train/manifest.json",
+      "positions": 2658936
+    },
+    "procedural": {
+      "deficit": 1499651414,
+      "manifest_sha256": "b1662020bab94cfcfd5d1a568ef27207c5af99852fcf35e3fba99ce17d5eea5a",
+      "path": "snapshot-final/procedural/manifest.json",
+      "positions": 348586
+    },
+    "verified": {
+      "deficit": 1999440832,
+      "manifest_sha256": "6cc96d4da28a77ecba31233606df8402dbe63458ddb528c40f6e881b8928892b",
+      "path": "snapshot-final/verified/manifest.json",
+      "positions": 559168
+    }
+  },
+  "private_math": {
+    "draw_commitment": "f2693a5ac4492ace1588e8328436f605cee8f0cb90639261f0241eed6c14c934",
+    "roles": {
+      "adjudication": {
+        "families": [
+          "linear_extensions",
+          "perfect_matchings"
+        ],
+        "questions_sha256": "d27ca922c7582d1e4e58cac39e39311c429d855e86a02674314a09304840aa06",
+        "roots": 48,
+        "targets_sha256": "8e888e5e626be7051130b3f310a9e1e98937402d8264477b2aca7a0e42abcd2d"
+      },
+      "confirmation": {
+        "families": [
+          "independent_sets",
+          "subset_sum"
+        ],
+        "questions_sha256": "b5a8cb7152ece3cec3422609664038f9a53e7b714b79776b17eb33dd4b6e4a57",
+        "roots": 48,
+        "targets_sha256": "98bbf187989adff977fbd75317e09894cc6e4332e9d92c84da860a77a602e0d2"
+      },
+      "final": {
+        "families": [
+          "proper_colorings",
+          "domino_tilings"
+        ],
+        "questions_sha256": "4643102d502923a1892010271d5b265e5333c73bdc9a782f87de9392987e0692",
+        "roots": 48,
+        "targets_sha256": "3159953906d65b12fdcfe1127b3554d6ba1a20fb46cd2ea08c972ebd170e7ee0"
+      }
+    },
+    "scored_models": 0,
+    "training_rows": 0
+  },
+  "recipe_sha256": "58fd8c2805f04ed918b4547d5a177624f839648c6be98dc749426ba39cd32e87",
+  "schema": "aleph.direct-A.frozen-supply.v1",
+  "target_by_lane": {
+    "custom_research": 2500000000,
+    "failure_directed": 500000000,
+    "general": 3500000000,
+    "procedural": 1500000000,
+    "verified": 2000000000
+  },
+  "text_roles": {
+    "adjudication": {
+      "lineage_groups": 1,
+      "manifest_sha256": "1d34d559c187a982e4d724d46b3784e1bac90387f662828096d466fa4a675a3e",
+      "packs": 1949,
+      "padding": 525,
+      "positions_by_lane": {
+        "general": 3991027
+      },
+      "processed": 3991027,
+      "records": 921,
+      "started_views": 921,
+      "targets": 3988158,
+      "targets_by_lane": {
+        "general": 3988158
+      }
+    },
+    "confirmation": {
+      "lineage_groups": 1,
+      "manifest_sha256": "74d230cc3b2f7afe4cdc71fdc935cb6fe37a1c401a4795bc8122f26323764f33",
+      "packs": 40,
+      "padding": 627,
+      "positions_by_lane": {
+        "general": 81293
+      },
+      "processed": 81293,
+      "records": 49,
+      "started_views": 49,
+      "targets": 81205,
+      "targets_by_lane": {
+        "general": 81205
+      }
+    },
+    "final": {
+      "lineage_groups": 1,
+      "manifest_sha256": "d9c5b9251e9a12f15cf64503b6a4b819dd572306827b75133ee8133f92c25271",
+      "packs": 18,
+      "padding": 1877,
+      "positions_by_lane": {
+        "general": 34987
+      },
+      "processed": 34987,
+      "records": 15,
+      "started_views": 15,
+      "targets": 34955,
+      "targets_by_lane": {
+        "general": 34955
+      }
+    },
+    "train": {
+      "lineage_groups": 13,
+      "manifest_sha256": "f5ecac1c41d1e651e9174131812fe410d0d094de36fef4efc7871658c9879e38",
+      "packs": 1299,
+      "padding": 1416,
+      "positions_by_lane": {
+        "general": 2658936
+      },
+      "processed": 2658936,
+      "records": 851,
+      "started_views": 851,
+      "targets": 2656787,
+      "targets_by_lane": {
+        "general": 2656787
+      }
+    }
+  },
+  "total_deficit": 9995785246,
+  "total_train_positions": 4214754
+}

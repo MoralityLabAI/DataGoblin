@@ -1,0 +1,908 @@
+{
+  "calibration_300": {
+    "agreement_rate": 0.24,
+    "confusion_matrix": {
+      "fn": 227,
+      "fp": 1,
+      "tn": 38,
+      "tp": 34
+    },
+    "examples_reviewed": 300,
+    "f1_vs_independent": 0.2297,
+    "per_domain_calibration": {
+      "cryptography": {
+        "agree": 6,
+        "independent_accept": 11,
+        "primary_accept": 6,
+        "total": 11
+      },
+      "experiment_design": {
+        "agree": 14,
+        "independent_accept": 28,
+        "primary_accept": 13,
+        "total": 31
+      },
+      "formal_verification": {
+        "agree": 3,
+        "independent_accept": 6,
+        "primary_accept": 2,
+        "total": 7
+      },
+      "literature_synthesis": {
+        "agree": 19,
+        "independent_accept": 40,
+        "primary_accept": 17,
+        "total": 42
+      },
+      "math_discovery": {
+        "agree": 35,
+        "independent_accept": 97,
+        "primary_accept": 27,
+        "total": 105
+      },
+      "mechanistic_interpretability": {
+        "agree": 3,
+        "independent_accept": 3,
+        "primary_accept": 3,
+        "total": 3
+      },
+      "ml_architecture": {
+        "agree": 3,
+        "independent_accept": 10,
+        "primary_accept": 2,
+        "total": 13
+      },
+      "scientific_code": {
+        "agree": 27,
+        "independent_accept": 113,
+        "primary_accept": 16,
+        "total": 126
+      },
+      "statistics": {
+        "agree": 9,
+        "independent_accept": 35,
+        "primary_accept": 7,
+        "total": 37
+      },
+      "untagged": {
+        "agree": 17,
+        "independent_accept": 40,
+        "primary_accept": 1,
+        "total": 56
+      }
+    },
+    "precision_vs_independent": 0.9714,
+    "recall_vs_independent": 0.1303
+  },
+  "dg_research_20m_note": {
+    "commit": "b74b4c0d512e673f03e01b010b42394324e4460f",
+    "custody": "Reference-only Fable/Neon/Inky provider responses remain excluded; 640 fresh oracle candidates and native train-only records await dedicated DG-Research-20M intake receipt before later 2B+ milestone admission.",
+    "pr": "https://github.com/MoralityLabAI/DataGoblin/pull/121",
+    "status": "inventoried_separate_workstream_not_mixed_into_stage_100m"
+  },
+  "fable_dedup_policy": "Use full eligible Fable release (MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x) without double-counting overlapping lite releases; deduplicate mixed frontier aggregates against NVIDIA and OpenThoughts originals.",
+  "github_formal_and_bespoke_inventory": [
+    {
+      "lane": "frontier_reasoning",
+      "repo": "TeichAI/teich",
+      "role": "frontier_tooling_or_catalog"
+    },
+    {
+      "lane": "formal_lean",
+      "repo": "leanprover-community/mathlib4",
+      "role": "formal_proof_library"
+    },
+    {
+      "lane": "formal_lean",
+      "repo": "lean-dojo/LeanDojo",
+      "role": "formal_proof_extraction"
+    },
+    {
+      "lane": "formal_lean",
+      "repo": "patrickdugan/MathCan",
+      "role": "certified_recursive_descent_and_metamath"
+    },
+    {
+      "lane": "games_procedural",
+      "repo": "MoralityLabAI/LoopedTransformers",
+      "role": "inkblot_and_routing_programs"
+    },
+    {
+      "lane": "research_mechinterp",
+      "repo": "MoralityLabAI/BPD",
+      "role": "fuse_sccg_optimizer_screening"
+    },
+    {
+      "lane": "games_procedural",
+      "repo": "MoralityLabAI/EvalMath",
+      "role": "proof_progress_and_certificates"
+    },
+    {
+      "lane": "research_mechinterp",
+      "repo": "MoralityLabAI/HybridTRMLDT",
+      "role": "trm_skill_factory_and_floodgates"
+    },
+    {
+      "lane": "research_mechinterp",
+      "repo": "MoralityLabAI/DataGoblin#PR121",
+      "role": "DG-Research-20M_native_intake_separate_staging"
+    }
+  ],
+  "hf_source_inventory": [
+    {
+      "available": true,
+      "downloads": 117595,
+      "gated": false,
+      "group": "open_reasoning",
+      "lane": "open_reasoning",
+      "repo": "nvidia/OpenMathReasoning",
+      "revision": "d3d08664755704f422af97d43a7ff0ded4bd95df",
+      "rights": {
+        "declared_licenses": [
+          "cc-by-4.0"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {
+        "relevance_accepted_roots": 23,
+        "unique_roots_sampled": 200
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 3201061,
+        "split": "cot"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 288187,
+        "accepted_total": 290409,
+        "unique_total": 1601608
+      }
+    },
+    {
+      "available": true,
+      "downloads": 42559,
+      "gated": false,
+      "group": "open_reasoning",
+      "lane": "open_reasoning",
+      "repo": "nvidia/OpenScienceReasoning-2",
+      "revision": "174b02c9cdf231f220765b2a1d5ece4550921894",
+      "rights": {
+        "declared_licenses": [
+          "cc-by-4.0"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_cleared"
+      },
+      "sample_counts": {
+        "relevance_accepted_roots": 14,
+        "unique_roots_sampled": 180
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 307862,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 255661,
+        "accepted_total": 260023,
+        "unique_total": 1123738
+      }
+    },
+    {
+      "available": true,
+      "downloads": 61611,
+      "gated": false,
+      "group": "open_reasoning",
+      "lane": "open_reasoning",
+      "repo": "open-thoughts/OpenThoughts3-1.2M",
+      "revision": "61bcf9d4eb38b30295efc2021227a63cc5bb34c8",
+      "rights": {
+        "declared_licenses": [
+          "apache-2.0"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {
+        "dedup_root_overlap": 10,
+        "relevance_accepted_roots": 5,
+        "unique_roots_sampled": 190,
+        "unknown_outcome_masked_roots": 68
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 1200000,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 84447,
+        "accepted_total": 87697,
+        "unique_total": 3252475
+      }
+    },
+    {
+      "available": true,
+      "downloads": 21831,
+      "gated": false,
+      "group": "open_reasoning",
+      "lane": "open_reasoning",
+      "repo": "nvidia/OpenCodeReasoning-2",
+      "revision": "eadf535931451525f3e5621d0f960c240bc62fd9",
+      "rights": {
+        "declared_licenses": [
+          "cc-by-4.0"
+        ],
+        "mentions_restricted_terms_in_card": true,
+        "provider_attribution_provisional": true,
+        "rights_status": "restricted_review_required"
+      },
+      "sample_counts": {
+        "relevance_accepted_roots": 4,
+        "unique_roots_sampled": 160
+      },
+      "sampling_meta": {
+        "config": "train",
+        "error": null,
+        "num_rows_total": 120000,
+        "split": "python"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 56180,
+        "accepted_total": 56355,
+        "unique_total": 1867363
+      }
+    },
+    {
+      "available": true,
+      "downloads": 38223,
+      "gated": false,
+      "group": "open_reasoning",
+      "lane": "research_mechinterp",
+      "repo": "nvidia/Open-SWE-Traces",
+      "revision": "4fa4c2ae9afc6b397bc50391d43450c79993c138",
+      "rights": {
+        "declared_licenses": [
+          "cc-by-4.0"
+        ],
+        "mentions_restricted_terms_in_card": true,
+        "provider_attribution_provisional": true,
+        "rights_status": "restricted_review_required"
+      },
+      "sample_counts": {},
+      "token_yields": {
+        "accepted_loss_bearing": 0,
+        "accepted_total": 0,
+        "unique_total": 0
+      }
+    },
+    {
+      "available": true,
+      "downloads": 4719,
+      "gated": false,
+      "group": "open_reasoning",
+      "lane": "games_procedural",
+      "repo": "reasoning-core/procedural-pile",
+      "revision": "0e3216537b0cb7df8709c6cae34bfceae6450068",
+      "rights": {
+        "declared_licenses": [
+          "cc-by-4.0"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_cleared"
+      },
+      "sample_counts": {},
+      "token_yields": {
+        "accepted_loss_bearing": 0,
+        "accepted_total": 0,
+        "unique_total": 0
+      }
+    },
+    {
+      "available": true,
+      "downloads": 5728,
+      "gated": false,
+      "group": "fable_full",
+      "lane": "frontier_reasoning",
+      "repo": "MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x",
+      "revision": "4904ca0c09044f447aff16e4f66b6f2f53c9f702",
+      "rights": {
+        "declared_licenses": [
+          "apache-2.0"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {
+        "dedup_root_overlap": 82,
+        "relevance_accepted_roots": 15,
+        "unique_roots_sampled": 18,
+        "unknown_outcome_masked_roots": 1
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 5000,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 475439,
+        "accepted_total": 505320,
+        "unique_total": 570278
+      }
+    },
+    {
+      "available": true,
+      "downloads": 422,
+      "gated": false,
+      "group": "fable_coding",
+      "lane": "frontier_reasoning",
+      "repo": "greghavens/fable-5-coding-and-debugging-traces",
+      "revision": "021079066945c79b34b3ecd6d47d9f40753e9a2b",
+      "rights": {
+        "declared_licenses": [
+          "cc-by-4.0"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {},
+      "sampling_meta": {
+        "config": "default",
+        "error": "rows_api(offset=0): HTTP Error 500: Internal Server Error",
+        "num_rows_total": null,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 0,
+        "accepted_total": 0,
+        "unique_total": 0
+      }
+    },
+    {
+      "available": true,
+      "downloads": 1755,
+      "gated": false,
+      "group": "fable_aggregate",
+      "lane": "frontier_reasoning",
+      "repo": "Crownelius/Complete-FABLE.5-traces-2M",
+      "revision": "b9f20b5c2638b96311252d5894e3d010ba2a2715",
+      "rights": {
+        "declared_licenses": [
+          "unspecified"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "quarantined_unknown_rights"
+      },
+      "sample_counts": {
+        "unique_roots_sampled": 40,
+        "unknown_outcome_masked_roots": 25
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 228968,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 0,
+        "accepted_total": 0,
+        "unique_total": 103026
+      }
+    },
+    {
+      "available": true,
+      "downloads": 552,
+      "gated": false,
+      "group": "mixed_aggregate",
+      "lane": "frontier_reasoning",
+      "repo": "clzoro/Claude-Distills",
+      "revision": "20d5abdbb3549f345bbc030e7c27ffd0f9ee7de5",
+      "rights": {
+        "declared_licenses": [
+          "mit"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {},
+      "sampling_meta": {
+        "config": "default",
+        "error": "rows_api(offset=0): HTTP Error 500: Internal Server Error",
+        "num_rows_total": null,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 0,
+        "accepted_total": 0,
+        "unique_total": 0
+      }
+    },
+    {
+      "available": false,
+      "error": "HTTP 401: Unauthorized",
+      "group": "fable_unavailable",
+      "lane": "frontier_reasoning",
+      "repo": "RESMP-DEV/Fable-GPT-5.5-Distillation-Traces",
+      "rights": {
+        "declared_licenses": [],
+        "rights_status": "unavailable"
+      }
+    },
+    {
+      "available": true,
+      "downloads": 53,
+      "gated": false,
+      "group": "frontier_misc",
+      "lane": "frontier_reasoning",
+      "repo": "predictive-singularity/Accretion",
+      "revision": "6bd1540726e8d929b998a148cbed69b4e300c9dc",
+      "rights": {
+        "declared_licenses": [
+          "mit"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {
+        "dedup_root_overlap": 4,
+        "rejected_too_short": 11,
+        "relevance_accepted_roots": 13,
+        "unique_roots_sampled": 45,
+        "unknown_outcome_masked_roots": 16
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 26719,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 261943,
+        "accepted_total": 283363,
+        "unique_total": 376535
+      }
+    },
+    {
+      "available": true,
+      "downloads": 7848,
+      "gated": false,
+      "group": "gpt_codex",
+      "lane": "frontier_reasoning",
+      "repo": "AletheiaResearch/GPT-5.5-Codex",
+      "revision": "1bb0eb6388f64172ef86f298fd4f39cd5f90bede",
+      "rights": {
+        "declared_licenses": [
+          "unspecified"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "quarantined_unknown_rights"
+      },
+      "sample_counts": {
+        "rejected_pii_email": 6,
+        "relevance_accepted_roots": 1,
+        "unique_roots_sampled": 9
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 317,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 35794,
+        "accepted_total": 42545,
+        "unique_total": 7064490
+      }
+    },
+    {
+      "available": true,
+      "downloads": 18442,
+      "gated": false,
+      "group": "mixed_aggregate",
+      "lane": "frontier_reasoning",
+      "repo": "Manusagents/GPT-5.5-Gemini-3.1-Pro-Grok-4-Claude-Fable-5-Mythos-5-Qwen-3.7-Max-and-more-Distillation-Dataset",
+      "revision": "4f38f097779ab4c94f0ccf547c2cd88deed89f4b",
+      "rights": {
+        "declared_licenses": [
+          "mit"
+        ],
+        "mentions_restricted_terms_in_card": false,
+        "provider_attribution_provisional": true,
+        "rights_status": "permissive_card_license_needs_teacher_tos_review"
+      },
+      "sample_counts": {
+        "rejected_exact_duplicate": 105,
+        "unique_roots_sampled": 15,
+        "unknown_outcome_masked_roots": 15
+      },
+      "sampling_meta": {
+        "config": "default",
+        "error": null,
+        "num_rows_total": 16748976,
+        "split": "train"
+      },
+      "token_yields": {
+        "accepted_loss_bearing": 0,
+        "accepted_total": 0,
+        "unique_total": 1352
+      }
+    }
+  ],
+  "paid_teacher_calls": 0,
+  "provider_identity_policy": "All teacher/model labels are treated strictly as uploader attributions unless independently authenticated; Astra identity is never inferred.",
+  "sample_summary": {
+    "cross_source_root_overlaps_removed": {
+      "MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x -> MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x": 82,
+      "open-thoughts/OpenThoughts3-1.2M -> open-thoughts/OpenThoughts3-1.2M": 10,
+      "predictive-singularity/Accretion -> MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x": 3,
+      "predictive-singularity/Accretion -> predictive-singularity/Accretion": 1
+    },
+    "fully_admissible_open_roots": 30,
+    "fully_admissible_open_tokens": 452676,
+    "relevance_accepted_loss_tokens": 1647905,
+    "relevance_accepted_roots": 91,
+    "relevance_accepted_tokens": 1718365,
+    "target_unique_roots": 1000,
+    "total_sampled_tokens": 17521983,
+    "unique_roots_sampled": 1000,
+    "unknown_outcome_masked_roots": 141
+  },
+  "schema": "aleph.10b.research-corpus-intake-audit.v1",
+  "teichai_org_datasets": [
+    {
+      "downloads": 15507,
+      "gated": false,
+      "repo": "TeichAI/Ox-Alpha-Pi-Traces",
+      "sha": "048c345ea98af6111e3c6bd45f2608fa6d2a0090",
+      "tags": []
+    },
+    {
+      "downloads": 136,
+      "gated": false,
+      "repo": "TeichAI/claude-haiku-4.5-high-reasoning-1700x",
+      "sha": "11192ad1e2e30617e064bc982daddadaa858b04d",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 77,
+      "gated": false,
+      "repo": "TeichAI/grok-code-fast-1-1000x",
+      "sha": "bfa5c6706b9a842877afad5cc7a2db5912fa5146",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 65,
+      "gated": false,
+      "repo": "TeichAI/glm-4.6-250x",
+      "sha": "6f909a0d6526acfddc7862df493d71e2a0f9fa48",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 90,
+      "gated": false,
+      "repo": "TeichAI/gpt-5-codex-250x",
+      "sha": "2efe1edf55614bb4717c30925c1389e829b7c8d0",
+      "tags": [
+        "license:mit",
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 286,
+      "gated": false,
+      "repo": "TeichAI/claude-sonnet-4.5-high-reasoning-250x",
+      "sha": "0ab53d0c37a4f4bc6c51eca7975c682879e78182",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 53,
+      "gated": false,
+      "repo": "TeichAI/brainstorm-v3.1-grok-4-fast-200x",
+      "sha": "4d81a31c691f602e101ab5017fdd4d89657f21b7",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 103,
+      "gated": false,
+      "repo": "TeichAI/polaris-alpha-1000x",
+      "sha": "45053b0656d74d88cefeec606af2a5e733b2f3d7",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 88,
+      "gated": false,
+      "repo": "TeichAI/kimi-k2-thinking-250x",
+      "sha": "c3fc2a232a7985d8287e7324786627da4b937071",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 55,
+      "gated": false,
+      "repo": "TeichAI/gemini-2.5-flash-lite-2509-preview-1000x",
+      "sha": "52573cfa67063b037649252195c9afd688d54745",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 182,
+      "gated": false,
+      "repo": "TeichAI/kimi-k2-thinking-1000x",
+      "sha": "6c5f3349a880188ce3ef4710541568d30471168d",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 145,
+      "gated": false,
+      "repo": "TeichAI/gpt-5-codex-1000x",
+      "sha": "9698b3291db127e3185e8ee5e50e1c86d2a224b9",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 175,
+      "gated": false,
+      "repo": "TeichAI/gemini-2.5-flash-11000x",
+      "sha": "cdbe75c5d957cda09474edfb6d1e58fafb39312e",
+      "tags": [
+        "size_categories:10K<n<100K"
+      ]
+    },
+    {
+      "downloads": 37,
+      "gated": false,
+      "repo": "TeichAI/sherlock-think-alpha-1000x",
+      "sha": "2f4249a448973f440e60cd4c3b54797b9043b963",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 23,
+      "gated": false,
+      "repo": "TeichAI/sherlock-dash-alpha-1000x",
+      "sha": "870259543d1d9af2070feea68eb863d0f223df9b",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 142,
+      "gated": false,
+      "repo": "TeichAI/gemini-3-pro-preview-high-reasoning-250x",
+      "sha": "2e6139c32e6c665e78cc7f668c3bc7989123ffb3",
+      "tags": [
+        "license:apache-2.0",
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 422,
+      "gated": false,
+      "repo": "TeichAI/gpt-5.1-high-reasoning-1000x",
+      "sha": "f768b57493d2dc88edda9649a82aa3225f32aa72",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 430,
+      "gated": false,
+      "repo": "TeichAI/gemini-3-pro-preview-high-reasoning-1000x",
+      "sha": "b0fc31553598b44a0c3be2bb831439f6151a51c0",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 765,
+      "gated": false,
+      "repo": "TeichAI/claude-4.5-opus-high-reasoning-250x",
+      "sha": "742c86f88b66bf53cb5961a25e4360f5582f4a6e",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 64,
+      "gated": false,
+      "repo": "TeichAI/sherlock-thinking-alpha-11000x",
+      "sha": "975f6954c83ec8b8933fa501ff1754339d9b4d02",
+      "tags": [
+        "size_categories:10K<n<100K"
+      ]
+    },
+    {
+      "downloads": 106,
+      "gated": false,
+      "repo": "TeichAI/deepseek-v3.2-speciale-1000x",
+      "sha": "949ae31385029c6127621ab21ed89950a5ec1649",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 149,
+      "gated": false,
+      "repo": "TeichAI/deepseek-v3.2-speciale-openr1-math-3k",
+      "sha": "b04032df79781b172651b1b13615e6f6bd8ce7ad",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 115,
+      "gated": false,
+      "repo": "TeichAI/deepseek-v3.2-speciale-OpenCodeReasoning-3k",
+      "sha": "0b59bcc4042f7a4eaf772d99825f2423018b609d",
+      "tags": [
+        "size_categories:1K<n<10K"
+      ]
+    },
+    {
+      "downloads": 246,
+      "gated": false,
+      "repo": "TeichAI/gpt-5.2-high-reasoning-250x",
+      "sha": "6b08e8347b49626f0b461514f1fb4cc66b50927f",
+      "tags": [
+        "size_categories:n<1K"
+      ]
+    },
+    {
+      "downloads": 56,
+      "gated": false,
+      "repo": "TeichAI/open-moderator-v1",
+      "sha": "c17a93164c37eb281e6cb693e59b84ef77bc889a",
+      "tags": [
+        "license:apache-2.0",
+        "size_categories:10K<n<100K"
+      ]
+    }
+  ],
+  "tokenizer_library_version": "0.22.2",
+  "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "wall_seconds": 309.64,
+  "yields_by_domain": {
+    "cryptography": {
+      "relevance_accepted_roots": 9,
+      "relevance_accepted_tokens": 228653,
+      "roots": 24,
+      "total_tokens": 348334
+    },
+    "experiment_design": {
+      "relevance_accepted_roots": 32,
+      "relevance_accepted_tokens": 855996,
+      "roots": 91,
+      "total_tokens": 8000077
+    },
+    "formal_verification": {
+      "relevance_accepted_roots": 4,
+      "relevance_accepted_tokens": 89664,
+      "roots": 16,
+      "total_tokens": 6849931
+    },
+    "literature_synthesis": {
+      "relevance_accepted_roots": 46,
+      "relevance_accepted_tokens": 1043093,
+      "roots": 137,
+      "total_tokens": 2011931
+    },
+    "math_discovery": {
+      "relevance_accepted_roots": 71,
+      "relevance_accepted_tokens": 1440101,
+      "roots": 303,
+      "total_tokens": 3841627
+    },
+    "mechanistic_interpretability": {
+      "relevance_accepted_roots": 5,
+      "relevance_accepted_tokens": 184397,
+      "roots": 12,
+      "total_tokens": 304491
+    },
+    "ml_architecture": {
+      "relevance_accepted_roots": 5,
+      "relevance_accepted_tokens": 121677,
+      "roots": 45,
+      "total_tokens": 7396184
+    },
+    "scientific_code": {
+      "relevance_accepted_roots": 40,
+      "relevance_accepted_tokens": 1001100,
+      "roots": 436,
+      "total_tokens": 12962642
+    },
+    "statistics": {
+      "relevance_accepted_roots": 18,
+      "relevance_accepted_tokens": 411147,
+      "roots": 119,
+      "total_tokens": 3827688
+    },
+    "untagged": {
+      "relevance_accepted_roots": 2,
+      "relevance_accepted_tokens": 26298,
+      "roots": 186,
+      "total_tokens": 891158
+    }
+  },
+  "yields_by_lane": {
+    "frontier_reasoning": {
+      "relevance_accepted_loss_tokens": 773176,
+      "relevance_accepted_roots": 29,
+      "relevance_accepted_tokens": 831228,
+      "roots": 127,
+      "total_tokens": 8115681
+    },
+    "open_reasoning": {
+      "fully_admissible_roots": 30,
+      "fully_admissible_tokens": 452676,
+      "relevance_accepted_loss_tokens": 874729,
+      "relevance_accepted_roots": 62,
+      "relevance_accepted_tokens": 887137,
+      "roots": 873,
+      "total_tokens": 9406302
+    }
+  },
+  "yields_by_rights_status": {
+    "permissive_card_license_needs_teacher_tos_review": {
+      "relevance_accepted_loss_tokens": 1110016,
+      "relevance_accepted_roots": 56,
+      "relevance_accepted_tokens": 1166789,
+      "roots": 468,
+      "total_tokens": 5802248
+    },
+    "permissive_cleared": {
+      "fully_admissible_roots": 30,
+      "fully_admissible_tokens": 452676,
+      "relevance_accepted_loss_tokens": 445915,
+      "relevance_accepted_roots": 30,
+      "relevance_accepted_tokens": 452676,
+      "roots": 323,
+      "total_tokens": 2684856
+    },
+    "quarantined_unknown_rights": {
+      "relevance_accepted_loss_tokens": 35794,
+      "relevance_accepted_roots": 1,
+      "relevance_accepted_tokens": 42545,
+      "roots": 49,
+      "total_tokens": 7167516
+    },
+    "restricted_review_required": {
+      "relevance_accepted_loss_tokens": 56180,
+      "relevance_accepted_roots": 4,
+      "relevance_accepted_tokens": 56355,
+      "roots": 160,
+      "total_tokens": 1867363
+    }
+  }
+}

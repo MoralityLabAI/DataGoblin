@@ -1,0 +1,54 @@
+{
+  "schema": "aleph.direct-a.cpu-migration-selftest-receipt.v1",
+  "date_utc": "2026-11-28",
+  "pinned_lineage_hashes": {
+    "prior_runner_commit": "b078ab75274a2f95449b1daf99b80529049663e7",
+    "recipe": "58fd8c2805f04ed918b4547d5a177624f839648c6be98dc749426ba39cd32e87",
+    "code_colab10m_xla": "2e17982ad299a137d454f683f0d085d2362eb381e9a92edce4bb11402dcd35d2",
+    "cuda_reference_colab10m": "f621549d70b9a6a160fcab873bf87879ddad766c518a551e75b18ceeae4b3f57",
+    "native_gym": "7491dc5177aedbaf4b9b5d2b73fa5d40c3794e6329d4a7a4085a62a8bddb197b",
+    "packer": "6fae20996642ce1bf94a455ad366b7b1db3893761bdb803ed356d5d64795c465",
+    "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "prior_10m_manifest_sha256": "aca6d5c46301b6bedda375ad3f597dcff29aa4bd7fd1ed0c97677e678a9858ab",
+    "prior_10m_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0",
+    "prior_10m_receipt_sha256": "e274e031922e48ef40808c058bd20d62233648117771966633620b3a9ad133bc"
+  },
+  "fp32_cpu_selftest": {
+    "dtype": "torch.float32",
+    "reference_loss": 4.191351652145386,
+    "static_loss": 4.191351890563965,
+    "max_gradient_abs_error": 5.960464477539062e-07,
+    "gradient_relative_l2": 4.7240488585386195e-07,
+    "gradient_relative_l2_limit": 0.0001,
+    "isolated_document_gradient": true,
+    "all_masked_zero_gradient": true,
+    "unequal_label_counts": true,
+    "fixture_restart": true,
+    "schedule_checks_passed": true,
+    "handoff_and_resume_parity_passed": true
+  },
+  "bf16_cpu_selftest": {
+    "dtype": "torch.bfloat16",
+    "reference_loss": 4.191351652145386,
+    "static_loss": 4.187368392944336,
+    "max_gradient_abs_error": 0.01455014944076538,
+    "gradient_relative_l2": 0.008804798152402102,
+    "gradient_relative_l2_limit": 0.12,
+    "isolated_document_gradient": true,
+    "all_masked_zero_gradient": true,
+    "unequal_label_counts": true,
+    "fixture_restart": true,
+    "schedule_checks_passed": true,
+    "handoff_and_resume_parity_passed": true
+  },
+  "stage_90m_boundaries": {
+    "groups": 344,
+    "full_groups": 343,
+    "final_partial_group": 84608,
+    "expected_abs_step": 383,
+    "lr_at_10m": 0.0000125,
+    "lr_at_100m": 0.000125,
+    "lr_at_200m_to_16b": 0.00025,
+    "lr_at_20b": 0.000025
+  }
+}

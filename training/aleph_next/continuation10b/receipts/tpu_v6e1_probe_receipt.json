@@ -1,0 +1,33 @@
+{
+  "schema": "aleph.direct-a.tpu-v6e1-probe-receipt.v1",
+  "date_utc": "2026-11-28",
+  "probe_policy": "Single bounded Colab TPU v6e-1 allocation probe; zero retries after hang; existing unrelated CPU sessions untouched.",
+  "cli": "colab v0.8.0 (authenticated Pro+ session)",
+  "command_redacted": "colab --config <isolated_scratch_config> run --tpu V6E1 --session aleph-v6e1-probe --timeout 180 --env PJRT_DEVICE=TPU probe_tpu_v6e1.py",
+  "outcome": "BLOCKED_NO_TPU_V6E1_PROVISIONED",
+  "observed_behavior": "Session creation hung for 322s at 'Creating session aleph-v6e1-probe...' with zero TPU runtime provisioned; cleanly cancelled without retry.",
+  "gcp_cloud_tpu_local_status": "gcloud CLI absent and zero GCP ADC credentials found locally (Windows and WSL).",
+  "colab_account_audit": {
+    "balance_before_probe_cu": 973.91,
+    "balance_after_probe_cu": 973.87,
+    "probe_tpu_cu_billed": 0.0,
+    "active_assignments_before_and_after": 2,
+    "preexisting_unrelated_sessions": [
+      "shz-j1 (CPU High-RAM, untouched)",
+      "shz-j2 (CPU High-RAM, untouched)"
+    ],
+    "preexisting_burn_rate_cu_per_hour": 0.52
+  },
+  "tpu_qualification_status": "UNQUALIFIED",
+  "runner_xla_readiness": "training/aleph_next/continuation10b/runner.py supports --device xla (PJRT_DEVICE=TPU) and cross-backend verified handoff (--allow-backend-handoff) once a TPU v6e-1 runtime is provisioned via Colab or GCP/TRC.",
+  "fallback_accelerator": {
+    "hardware": "NVIDIA A100-SXM4-40GB (Colab Pro+)",
+    "historical_throughput_positions_per_second": 4520,
+    "historical_rate_cu_per_hour": 8.16,
+    "stage_100m_90m_arithmetic_hours": 5.53,
+    "stage_100m_90m_arithmetic_cu": 45.13,
+    "full_10b_arithmetic_hours_on_a100": 614.0,
+    "full_10b_arithmetic_cu_on_a100": 5010.0,
+    "note": "Current 973.87 CU easily covers Stage-100M (~45.1 CU + overhead) and Stage-500M (~201 CU), but reaching 10B within 1,000 CU requires TPU v6e-1 or additional compute authorization."
+  }
+}

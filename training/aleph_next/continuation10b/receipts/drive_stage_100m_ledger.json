@@ -1,0 +1,379 @@
+{
+  "drive_root_folder": {
+    "id": "1Q_PNU-iHQuQ42y82dsjHQ8ikfhrU57s5",
+    "name": "aleph-10b-continuation-v1",
+    "url": "https://drive.google.com/drive/folders/1Q_PNU-iHQuQ42y82dsjHQ8ikfhrU57s5"
+  },
+  "drive_stage_folder": {
+    "id": "1CWzzeKqPhqSzNdmJRPIsZYui0LJfPhrz",
+    "name": "stage_100m",
+    "url": "https://drive.google.com/drive/folders/1CWzzeKqPhqSzNdmJRPIsZYui0LJfPhrz"
+  },
+  "file_count": 40,
+  "files": [
+    {
+      "bytes": 13448,
+      "file_id": "1PDu2iKYea5WZm70Rz5BDQr_UcS_iW_Y6",
+      "name": "ADMISSION_RECEIPT.json",
+      "path": "ADMISSION_RECEIPT.json",
+      "sha256": "dd250175e55f7249b2844b1515204bdae60b1d13183c31e997191636e379520d",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1PDu2iKYea5WZm70Rz5BDQr_UcS_iW_Y6/view"
+    },
+    {
+      "bytes": 6709,
+      "file_id": "1JOjJPbNHTKBpMuLMNTEp1p2Hhf7bDfXH",
+      "name": "MEMBERS.json",
+      "path": "MEMBERS.json",
+      "sha256": "52c9e18a238520b7a78a7e44d48e3ed050dc52096360f787fa9d206e3d96b960",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1JOjJPbNHTKBpMuLMNTEp1p2Hhf7bDfXH/view"
+    },
+    {
+      "bytes": 213122,
+      "file_id": "18CUdIaJzZbsbs4ZmagzjD7DjJt3x45A3",
+      "name": "REPLAY.json",
+      "path": "REPLAY.json",
+      "sha256": "41a18f99e0287057f253fc2b1e599fe538cebb396d35ce59d4e23f4e07fba7cd",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/18CUdIaJzZbsbs4ZmagzjD7DjJt3x45A3/view"
+    },
+    {
+      "bytes": 35796987,
+      "file_id": "127q-dJO5esuFwhEaGmv6XMA6P5zGdEkK",
+      "name": "attribution.jsonl",
+      "path": "code_tests/attribution.jsonl",
+      "sha256": "8eb8010d37c799511ddce785995bc986d8db3eb6709de0b2fb4ad24be7e653e8",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/127q-dJO5esuFwhEaGmv6XMA6P5zGdEkK/view"
+    },
+    {
+      "bytes": 1410,
+      "file_id": "11pxcEukFmA5BT7NylDgA5OYyp3vPK1Tn",
+      "name": "manifest.json",
+      "path": "code_tests/manifest.json",
+      "sha256": "c022fb89cf6ca05d3b1e27a42ce91b829f1c4f402c64c8e50416e4e7bf425a75",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/11pxcEukFmA5BT7NylDgA5OYyp3vPK1Tn/view"
+    },
+    {
+      "bytes": 47284224,
+      "file_id": "119FlvM8fq86JJCPGCFC-tU0vZrp1uc4D",
+      "name": "registry.sqlite3",
+      "path": "code_tests/registry.sqlite3",
+      "sha256": "f64cddebb5f3d13bd133ab24a50f916169294d83b5e5792b61335c51a2338645",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/119FlvM8fq86JJCPGCFC-tU0vZrp1uc4D/view"
+    },
+    {
+      "bytes": 50333373,
+      "file_id": "1tKU9Fq5IOVC59i9Uanb9d1IDi312F21m",
+      "name": "shard_0000.jsonl",
+      "path": "code_tests/shard_0000.jsonl",
+      "sha256": "4a84f4895e8acf8645bedbb9fb29e82ceb39152da4f1c00795ae743f7fba9fc8",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1tKU9Fq5IOVC59i9Uanb9d1IDi312F21m/view"
+    },
+    {
+      "bytes": 50333390,
+      "file_id": "1WQ6YmHmBtPzGvHypr2ScVgtD5l5VVgqN",
+      "name": "shard_0001.jsonl",
+      "path": "code_tests/shard_0001.jsonl",
+      "sha256": "fcb28390ac423e1400552bda6ed5531e6ba94b170197589a9abadb6d2d8b6c45",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1WQ6YmHmBtPzGvHypr2ScVgtD5l5VVgqN/view"
+    },
+    {
+      "bytes": 50332048,
+      "file_id": "1-ENmfNsDsCbIOYpiTNNSqtkd8xwFMJQl",
+      "name": "shard_0002.jsonl",
+      "path": "code_tests/shard_0002.jsonl",
+      "sha256": "2a218e2a80bc5c03e9516f292c6ccc27d08e9182f5383a553f710ffa53aa8c69",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1-ENmfNsDsCbIOYpiTNNSqtkd8xwFMJQl/view"
+    },
+    {
+      "bytes": 50332051,
+      "file_id": "1kUhN-xuBxHc8kZc0NEgwp2EO12oWW9t4",
+      "name": "shard_0003.jsonl",
+      "path": "code_tests/shard_0003.jsonl",
+      "sha256": "cc7dd1eb569e84c77774350f3ca69b58e871c6875b25b6e12ae579c75c98c63e",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1kUhN-xuBxHc8kZc0NEgwp2EO12oWW9t4/view"
+    },
+    {
+      "bytes": 2679807,
+      "file_id": "11hVOsLp34nqxfdo0uAYqlSvDV2xZG3p2",
+      "name": "shard_0004.jsonl",
+      "path": "code_tests/shard_0004.jsonl",
+      "sha256": "f2035c6918a04d5a8be4102c69b07708eef03820a5f6c0066454308f7764e215",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/11hVOsLp34nqxfdo0uAYqlSvDV2xZG3p2/view"
+    },
+    {
+      "bytes": 2104556,
+      "file_id": "1tP_qCf4G21OzJ8LSIriRiFbtwxggCjq4",
+      "name": "tokenizer.json",
+      "path": "code_tests/tokenizer.json",
+      "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1tP_qCf4G21OzJ8LSIriRiFbtwxggCjq4/view"
+    },
+    {
+      "bytes": 14295988,
+      "file_id": "1XxewAebT53l6EZ_ieyiXz_pcTd1l-Puv",
+      "name": "attribution.jsonl",
+      "path": "educational_reference/attribution.jsonl",
+      "sha256": "8276396a1e4e66a51e0aeab631a4520392714e3fec945597d319dd3318509172",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1XxewAebT53l6EZ_ieyiXz_pcTd1l-Puv/view"
+    },
+    {
+      "bytes": 1937,
+      "file_id": "1ZuHojr22_D7D2fAtyOxkgoN9-DPn9yx2",
+      "name": "manifest.json",
+      "path": "educational_reference/manifest.json",
+      "sha256": "ffba3b0ad678f4f357b6de0cd58b6723812a5c31acdeb38f1f06301f2cf27d66",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1ZuHojr22_D7D2fAtyOxkgoN9-DPn9yx2/view"
+    },
+    {
+      "bytes": 8790016,
+      "file_id": "1-DrjDuSGf73I5ikx6N5b7rSTI7r_4ygV",
+      "name": "registry.sqlite3",
+      "path": "educational_reference/registry.sqlite3",
+      "sha256": "8910c48abd481d6bb33b580e309901a2dcc9d34a48edd1fc6e4bf20b230a9d29",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1-DrjDuSGf73I5ikx6N5b7rSTI7r_4ygV/view"
+    },
+    {
+      "bytes": 50373848,
+      "file_id": "1mLbnjXjN2YplGk2LWJsThScoFM71ZH1A",
+      "name": "shard_0000.jsonl",
+      "path": "educational_reference/shard_0000.jsonl",
+      "sha256": "3f110d359791e623a52c19a97bb51393bfadff1139253d8297167853d8200a7e",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1mLbnjXjN2YplGk2LWJsThScoFM71ZH1A/view"
+    },
+    {
+      "bytes": 50331779,
+      "file_id": "1T3XJvrVGsqbYszkx09j_T1gzFniBFzu3",
+      "name": "shard_0001.jsonl",
+      "path": "educational_reference/shard_0001.jsonl",
+      "sha256": "228925b3d801755ad87a4c03184fce04814f42a9e35967d31fe9f5e7c27de67b",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1T3XJvrVGsqbYszkx09j_T1gzFniBFzu3/view"
+    },
+    {
+      "bytes": 50360135,
+      "file_id": "1z29HBRGYPKijEOrZ9hpNPjai0_AFpyNu",
+      "name": "shard_0002.jsonl",
+      "path": "educational_reference/shard_0002.jsonl",
+      "sha256": "a21f7e02456939c0299f4f3fc7392fdabf6539f9bbe55cbfb7b6c509c9d6f19a",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1z29HBRGYPKijEOrZ9hpNPjai0_AFpyNu/view"
+    },
+    {
+      "bytes": 50346013,
+      "file_id": "1yGpZAb0DhaZsxNQYouX9sNTt_m9-zNbL",
+      "name": "shard_0003.jsonl",
+      "path": "educational_reference/shard_0003.jsonl",
+      "sha256": "4316e2fdde76ce900535cba98852c5660a1dc387019be2b057798d58e19cc021",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1yGpZAb0DhaZsxNQYouX9sNTt_m9-zNbL/view"
+    },
+    {
+      "bytes": 50333069,
+      "file_id": "1hcsGZ4t7nEXV1ZPmPduShJufqZ6Z0TgX",
+      "name": "shard_0004.jsonl",
+      "path": "educational_reference/shard_0004.jsonl",
+      "sha256": "67ea53f8942c7114ccb7178e19bf71ecdcf598d85be2c67dcd51947768ad3ad4",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1hcsGZ4t7nEXV1ZPmPduShJufqZ6Z0TgX/view"
+    },
+    {
+      "bytes": 50339483,
+      "file_id": "1o0S57ZWgd_QCq9-RCZVTrUDemgVvOx0Q",
+      "name": "shard_0005.jsonl",
+      "path": "educational_reference/shard_0005.jsonl",
+      "sha256": "2f4383da44c88fc3926d8d01a1db6dff68ffaa8402406a5763c46966ece687ea",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1o0S57ZWgd_QCq9-RCZVTrUDemgVvOx0Q/view"
+    },
+    {
+      "bytes": 50331825,
+      "file_id": "1_MOtktXCTvNG6nuU8tsPoNADlXA0PY4j",
+      "name": "shard_0006.jsonl",
+      "path": "educational_reference/shard_0006.jsonl",
+      "sha256": "6833e57b586e0e664f845bdc6917faa2ac0689d3adec013e9e9dd2fb807f47dc",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1_MOtktXCTvNG6nuU8tsPoNADlXA0PY4j/view"
+    },
+    {
+      "bytes": 27836036,
+      "file_id": "1wu8uXn-wfYW-W9uty1eDL45DncqQLoUM",
+      "name": "shard_0007.jsonl",
+      "path": "educational_reference/shard_0007.jsonl",
+      "sha256": "5027b8883f0822ace7081668093ee3016df659a04ed55036b006a0115575c01c",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1wu8uXn-wfYW-W9uty1eDL45DncqQLoUM/view"
+    },
+    {
+      "bytes": 2104556,
+      "file_id": "1gbHCr0oMenER3hO1NCrylJ4OiLiu5Vb-",
+      "name": "tokenizer.json",
+      "path": "educational_reference/tokenizer.json",
+      "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1gbHCr0oMenER3hO1NCrylJ4OiLiu5Vb-/view"
+    },
+    {
+      "bytes": 1736,
+      "file_id": "1HCRdsfxTGdpvZq7OXMlj143Iy7vuwAia",
+      "name": "index.json",
+      "path": "index.json",
+      "sha256": "194a8b0febce37de7497c34b9d20c8f1e10879a1065fe297a8da5d4c607ae232",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1HCRdsfxTGdpvZq7OXMlj143Iy7vuwAia/view"
+    },
+    {
+      "bytes": 5895358,
+      "file_id": "16GpmOqO_kxsMZUvbYmNkyTmx7h9cMtfP",
+      "name": "attribution.jsonl",
+      "path": "informal_math/attribution.jsonl",
+      "sha256": "0a401a10a7d5ea194d02c0d6cce3b5b28939faef6b750cc1d175c500d5850dca",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/16GpmOqO_kxsMZUvbYmNkyTmx7h9cMtfP/view"
+    },
+    {
+      "bytes": 1229,
+      "file_id": "19wzlaZWjoIknYnWvqbcIL2uXXKeGDz8j",
+      "name": "manifest.json",
+      "path": "informal_math/manifest.json",
+      "sha256": "4f86a4ab84fe0af8a951c262b92e5d696bda53b9ba43a8ea8ec9a6315467c5e4",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/19wzlaZWjoIknYnWvqbcIL2uXXKeGDz8j/view"
+    },
+    {
+      "bytes": 5988352,
+      "file_id": "1juDEVNjeP_VHd1L0D7nZRYp67UpSEQw-",
+      "name": "registry.sqlite3",
+      "path": "informal_math/registry.sqlite3",
+      "sha256": "a91c038ffdb1b34bda38d70fdbecaab8351b92b7d960e2e6d029761ff4454f08",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1juDEVNjeP_VHd1L0D7nZRYp67UpSEQw-/view"
+    },
+    {
+      "bytes": 50344188,
+      "file_id": "1c5yKgL19HNjWltQMyrknWRtQsGzeFrG9",
+      "name": "shard_0000.jsonl",
+      "path": "informal_math/shard_0000.jsonl",
+      "sha256": "3545591f1361a745d5eda7318a7f6043a8a2ae2dd0fc5a1b127e1d88d04c522a",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1c5yKgL19HNjWltQMyrknWRtQsGzeFrG9/view"
+    },
+    {
+      "bytes": 50340162,
+      "file_id": "1QHNtcNZgfMlozD5gbhSQE8Odt8lsL7cL",
+      "name": "shard_0001.jsonl",
+      "path": "informal_math/shard_0001.jsonl",
+      "sha256": "da33eaa656de8e46205f70d9b4823dc48bb4509f8cacdcfdda240dc8427f328e",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1QHNtcNZgfMlozD5gbhSQE8Odt8lsL7cL/view"
+    },
+    {
+      "bytes": 50351665,
+      "file_id": "11JKiar6OAr6QPBsjG9vzF8GiXvuneTby",
+      "name": "shard_0002.jsonl",
+      "path": "informal_math/shard_0002.jsonl",
+      "sha256": "fcc97c9f3571c51db4916fc714a28b14e6214ca2ead9536ace1535c3b5cb9e83",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/11JKiar6OAr6QPBsjG9vzF8GiXvuneTby/view"
+    },
+    {
+      "bytes": 35419714,
+      "file_id": "1-wh7DY0mOyA8o4jm25W3C8VX_YFm7KjB",
+      "name": "shard_0003.jsonl",
+      "path": "informal_math/shard_0003.jsonl",
+      "sha256": "abedbb0f1b2028b3bc2d70fe2282512eee9a16919e372073a1b1abe96c9f225a",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1-wh7DY0mOyA8o4jm25W3C8VX_YFm7KjB/view"
+    },
+    {
+      "bytes": 2104556,
+      "file_id": "1aez8yU2Oqv27WCf9DchjI9pkNu_jlV4y",
+      "name": "tokenizer.json",
+      "path": "informal_math/tokenizer.json",
+      "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1aez8yU2Oqv27WCf9DchjI9pkNu_jlV4y/view"
+    },
+    {
+      "bytes": 13772739,
+      "file_id": "16WuPD9f3XpsFhrIZLhmwKeW5AAP5uZ12",
+      "name": "attribution.jsonl",
+      "path": "scientific_papers/attribution.jsonl",
+      "sha256": "2d920bb49f36e2a70eb55d8a5b9a13a953d22773c5a7e4dd8e6210b9e2735a63",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/16WuPD9f3XpsFhrIZLhmwKeW5AAP5uZ12/view"
+    },
+    {
+      "bytes": 1053,
+      "file_id": "1xZJyGwqtEVOn1ikrtn2-Dfb0dtvv1tMv",
+      "name": "manifest.json",
+      "path": "scientific_papers/manifest.json",
+      "sha256": "4ad079d0f8b323199683d6d077caa99f2be1ea6588e939ed3c9f4862966514d4",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1xZJyGwqtEVOn1ikrtn2-Dfb0dtvv1tMv/view"
+    },
+    {
+      "bytes": 18198528,
+      "file_id": "1ma6lsXus1oNTKvGSqJAUePsCOrZfpd7i",
+      "name": "registry.sqlite3",
+      "path": "scientific_papers/registry.sqlite3",
+      "sha256": "8564bc62f5f54c9173851b7895d43cf782f4bf7dcdc6d9e7a93506d4c35c91e3",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1ma6lsXus1oNTKvGSqJAUePsCOrZfpd7i/view"
+    },
+    {
+      "bytes": 50332581,
+      "file_id": "1usAglsG72PltDH6qKHNLFJZv2JXGHJkY",
+      "name": "shard_0000.jsonl",
+      "path": "scientific_papers/shard_0000.jsonl",
+      "sha256": "73d4bf8500751bee0a891c4dd0e61421d3a2a68746db12933a854f4447c56aba",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1usAglsG72PltDH6qKHNLFJZv2JXGHJkY/view"
+    },
+    {
+      "bytes": 50331810,
+      "file_id": "19dY4sgXZ47xdAA26qZFlBeDmDa4p8W6s",
+      "name": "shard_0001.jsonl",
+      "path": "scientific_papers/shard_0001.jsonl",
+      "sha256": "27240afefebbfd7524da62bead0d2344d82349b2f923dc9d2c78eaaefa9f26d2",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/19dY4sgXZ47xdAA26qZFlBeDmDa4p8W6s/view"
+    },
+    {
+      "bytes": 2044814,
+      "file_id": "1f5srqFRF9P70Q4pciY9roH6miwi9AVwi",
+      "name": "shard_0002.jsonl",
+      "path": "scientific_papers/shard_0002.jsonl",
+      "sha256": "e7d16e2972e4e1272b1333b684bcbecbcedd63c5c3b85484445f75a18cb824c0",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/1f5srqFRF9P70Q4pciY9roH6miwi9AVwi/view"
+    },
+    {
+      "bytes": 2104556,
+      "file_id": "10onU1fqpxpXt-DekDK0N8sAmCB81MjS3",
+      "name": "tokenizer.json",
+      "path": "scientific_papers/tokenizer.json",
+      "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+      "status": "uploaded",
+      "url": "https://drive.google.com/file/d/10onU1fqpxpXt-DekDK0N8sAmCB81MjS3/view"
+    }
+  ],
+  "members_ledger_sha256": "52c9e18a238520b7a78a7e44d48e3ed050dc52096360f787fa9d206e3d96b960",
+  "schema": "aleph.stage100m.drive-ledger.v1",
+  "total_bytes": 1032108851,
+  "wall_seconds": 142.25
+}
