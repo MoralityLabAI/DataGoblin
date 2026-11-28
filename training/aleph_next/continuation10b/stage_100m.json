@@ -1,0 +1,143 @@
+{
+  "schema": "aleph-continuation-stage-contract-v1",
+  "status": "planned_pending_admission_and_migration",
+  "training_ready": false,
+  "code": {
+    "prior_runner_commit": "b078ab75274a2f95449b1daf99b80529049663e7",
+    "recipe_path": "training/aleph_next/candidate01/RECIPE.json",
+    "curriculum_path": "training/data/aleph_10b_mix.json"
+  },
+  "prior": {
+    "drive_checkpoint": "MyDrive/aleph-v2-run/group_039_7fbdb1f91cf8",
+    "absolute_positions": 10000000,
+    "optimizer_step": 39,
+    "corpus_archive_sha256": "a0579b316349cb11ede4e3833cdfcb9ec852755f0442ff68dfffef579e4ccdfe",
+    "corpus_index_sha256": "53d27abfcea62a06dccf4e2463c7b83b9b3693abfca4f796d24536e5282730c0"
+  },
+  "stage": {
+    "start": 10000000,
+    "stop": 100000000,
+    "new_positions": 90000000,
+    "update_group_positions": 262144,
+    "full_groups": 343,
+    "final_partial_group": 84608,
+    "new_updates": 344,
+    "expected_absolute_optimizer_step": 383
+  },
+  "model": {
+    "unique_parameters": 999352320,
+    "context": 2048,
+    "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "vocab": 49152,
+    "core_passes": 2,
+    "answer_passes": 1,
+    "executed_blocks": 24,
+    "precision": "BF16 compute; FP32 master and AdamW moments"
+  },
+  "lr": {
+    "peak": 0.00025,
+    "warmup_positions": 200000000,
+    "stable_until_positions": 16000000000,
+    "decay_end_positions": 20000000000,
+    "ending": 0.000025,
+    "clock": "absolute processed nonpadding positions",
+    "at_start": 0.0000125,
+    "at_stop": 0.000125
+  },
+  "lanes": [
+    {
+      "id": "educational_reference",
+      "positions": 40000000,
+      "candidates": [
+        {
+          "repo": "common-pile/libretexts_filtered",
+          "preferred_file": "libretexts-0000.json.gz",
+          "revision": "204d01e40af72b3b6d3f926e1f6148ee9ed3970a",
+          "note": "catalog-pinned candidate; verify at intake"
+        },
+        {
+          "repo": "HuggingFaceFW/fineweb-edu"
+        }
+      ]
+    },
+    {
+      "id": "scientific_papers",
+      "positions": 10000000,
+      "candidates": [
+        {
+          "repo": "allenai/peS2o"
+        },
+        {
+          "repo": "common-pile/comma_v0.1_training_dataset",
+          "note": "select paper sources only with per-document provenance"
+        }
+      ]
+    },
+    {
+      "id": "code_tests",
+      "positions": 20000000,
+      "candidates": [
+        {
+          "repo": "HuggingFaceTB/stack-edu",
+          "note": "metadata/SWH identifiers; verify permitted source bytes and access"
+        },
+        {
+          "repo": "OpenCoder-LLM/opc-annealing-corpus",
+          "note": "prefer source-linked code and tests with rights evidence"
+        }
+      ]
+    },
+    {
+      "id": "informal_math",
+      "positions": 20000000,
+      "candidates": [
+        {
+          "repo": "HuggingFaceTB/finemath",
+          "config": "finemath-4plus"
+        },
+        {
+          "repo": "IFM/MegaMath"
+        }
+      ]
+    }
+  ],
+  "source_admission": {
+    "status": "none_admitted_by_this_contract",
+    "required": [
+      "immutable dataset revision and file SHA-256",
+      "rights and attribution evidence for source content and permitted use",
+      "canonical root and family",
+      "train split custody",
+      "cross-source and prior-pilot deduplication",
+      "secret/PII screening",
+      "objective and masks",
+      "packed processed/unique/loss-bearing/padding counts"
+    ],
+    "max_presentations_per_root": 4,
+    "missing_supply": "report deficit and obtain approval for revised lane budget; never recycle pilot or silently substitute"
+  },
+  "destinations": {
+    "drive_proposed": "MyDrive/aleph-10b-continuation-v1",
+    "hf_existing_reported_model": "https://huggingface.co/AlephFunk/aleph-direct-a-10m-v2",
+    "hf_proposed_private_dataset": "https://huggingface.co/datasets/AlephFunk/aleph-10b-stage-100m-v1",
+    "hf_dataset_exists_verified": false,
+    "hf_upload": "only with source redistribution rights and explicit operator authorization; otherwise retain on Drive"
+  },
+  "budget": {
+    "historical_a100_positions_per_second": 4520,
+    "historical_units_per_hour": 8.16,
+    "estimated_new_training_hours": 5.5309734513,
+    "estimated_new_training_units": 45.13274336,
+    "excludes_overhead": true,
+    "qualification_spend_authorized": false,
+    "full_stage_spend_authorized": false
+  },
+  "checks": [
+    "sum quotas = 90000000",
+    "343*262144+84608 = 90000000",
+    "39+344 = 383",
+    "replay new release on CPU",
+    "checkpoint transition receipt",
+    "one-A100 restart parity and durable Drive write before longer execution"
+  ]
+}
