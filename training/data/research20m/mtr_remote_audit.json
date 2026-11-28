@@ -1,0 +1,50 @@
+{
+  "schema": "dg.research20m.remote-candidate-audit-v1",
+  "runtime": "V8 core normalizer executed on GitHub-fetched JSON arrays; standalone Node CLI not executed",
+  "source_commit": "cbc028c2525b148269e14b43b5f379f5c10a9b72",
+  "source_summary": [
+    {
+      "program": "MTR-02G",
+      "source_blob": "d8e067028638f675e0ab537c8324d5f194dd5594",
+      "source_rows": 128,
+      "grouped_roots": 32,
+      "options_per_root": 4,
+      "feature_widths": [
+        22
+      ],
+      "normalized_json_chars": 56192
+    },
+    {
+      "program": "MTR-02H",
+      "source_blob": "9255ef362b5e618bc556f9d8c413b831f7bbe4d1",
+      "source_rows": 128,
+      "grouped_roots": 32,
+      "options_per_root": 4,
+      "feature_widths": [
+        24
+      ],
+      "normalized_json_chars": 56965
+    },
+    {
+      "program": "MTR-02I",
+      "source_blob": "cf2719e32493cbe43886d2f7eb513ec8887edc4e",
+      "source_rows": 320,
+      "grouped_roots": 32,
+      "options_per_root": 10,
+      "feature_widths": [
+        70
+      ],
+      "normalized_json_chars": 273858
+    }
+  ],
+  "source_rows": 576,
+  "grouped_roots": 96,
+  "negative_controls_passed": 9,
+  "training_ready": false,
+  "accepted_unique_aleph_tokens": null,
+  "limitations": [
+    "No gzip payloads were read in this run; their counts come from manifest only.",
+    "No tokenizer, source-rights, cross-corpus near dedup or independently re-executed outcome check performed.",
+    "The Node command performs full pinned byte and row census on the operator's local checkouts."
+  ]
+}
