@@ -1,0 +1,14 @@
+{
+ "counts": {
+  "preferences": 1579,
+  "repairs": 1564,
+  "sft": 13329
+ },
+ "files": {
+  "inky_gym_preferences.jsonl": "4f1e932f93fe5c1944620453b89020102d52297e17aa7ae5bb11acaf0f6ab79f",
+  "inky_gym_repair_traces.jsonl": "59a14ae64af554b2fefbf615926704ea348a0c347b333717665583f44f297d8c",
+  "inky_gym_sft.jsonl": "89ad31fa889ea9524dae973d128321908f4a68128e7ca4c69e15cd9f34b477c1"
+ },
+ "note": "TRAIN-only multi-task gym prompts; horizon EVAL outcomes excluded.",
+ "schema": "datagoblin-bpd-trm-gym01-inky-v3"
+}

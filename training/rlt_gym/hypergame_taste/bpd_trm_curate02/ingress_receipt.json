@@ -1,0 +1,108 @@
+{
+  "schema": "BPD-TRM-CURATE-02-datagoblin-ingress-audit-v1",
+  "hashes": {
+    "candidate_decisions.jsonl": "805220a18fd5c8f58e940e7238ff6065e5682b6006fcd01ceb85a4693484a748",
+    "curation_preferences.jsonl": "296260c749f5948925110cee303b44ff124196268235f41aeb42307f9175d742"
+  },
+  "semantic": {
+    "trainEdges": 912,
+    "evalEdges": 312,
+    "fit": 624,
+    "feedback": 144,
+    "tune": 144
+  },
+  "rows": 10240,
+  "pairs": 248,
+  "windows": 640,
+  "acceptedWindows": 203,
+  "selected": 2560,
+  "positiveProbeRows": 2363,
+  "selectedPositiveProbeRows": 809,
+  "selectedPositiveInAcceptedWindows": 679,
+  "selectedPositiveInRejectedWindows": 130,
+  "signAccuracy": 0.912890625,
+  "maxSelectedUnorderedEdgeExposurePerRoot": 4,
+  "rootStats": [
+    {
+      "root": 28101,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 25,
+      "acceptedSelectedPositive": 23,
+      "positive": 69,
+      "acceptedWindows": 7,
+      "pairs": 8
+    },
+    {
+      "root": 28102,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 146,
+      "acceptedSelectedPositive": 112,
+      "positive": 371,
+      "acceptedWindows": 34,
+      "pairs": 52
+    },
+    {
+      "root": 28103,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 51,
+      "acceptedSelectedPositive": 47,
+      "positive": 163,
+      "acceptedWindows": 12,
+      "pairs": 12
+    },
+    {
+      "root": 28104,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 71,
+      "acceptedSelectedPositive": 59,
+      "positive": 194,
+      "acceptedWindows": 18,
+      "pairs": 25
+    },
+    {
+      "root": 28105,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 103,
+      "acceptedSelectedPositive": 96,
+      "positive": 330,
+      "acceptedWindows": 27,
+      "pairs": 26
+    },
+    {
+      "root": 28106,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 112,
+      "acceptedSelectedPositive": 99,
+      "positive": 357,
+      "acceptedWindows": 31,
+      "pairs": 32
+    },
+    {
+      "root": 28107,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 172,
+      "acceptedSelectedPositive": 136,
+      "positive": 502,
+      "acceptedWindows": 41,
+      "pairs": 56
+    },
+    {
+      "root": 28108,
+      "rows": 1280,
+      "selected": 320,
+      "selectedPositive": 129,
+      "acceptedSelectedPositive": 107,
+      "positive": 377,
+      "acceptedWindows": 33,
+      "pairs": 37
+    }
+  ],
+  "scope": "hash, fit-view, provenance, window, exposure and pair audit; individual probe outcomes are not actual committed update outcomes"
+}
