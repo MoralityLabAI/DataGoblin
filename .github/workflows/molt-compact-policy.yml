@@ -1,0 +1,29 @@
+name: DISTILL-18 native MoLT compactification
+on:
+  pull_request:
+    paths:
+      - 'src/datagoblin/training_gym/molt_compact_policy.py'
+      - 'tests/test_molt_compact_policy.py'
+      - '.github/workflows/molt-compact-policy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compact-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q tests/test_molt_compact_policy.py tests/test_molt_memory_panel.py
+      - run: ruff check src/datagoblin/training_gym/molt_compact_policy.py tests/test_molt_compact_policy.py
+      - run: python -m datagoblin.training_gym.molt_compact_policy --roots 64 --out /tmp/distill18-native-molt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distill-18-native-molt
+          path: /tmp/distill18-native-molt.json
+          if-no-files-found: error
+          retention-days: 14
