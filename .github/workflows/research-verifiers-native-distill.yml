@@ -1,0 +1,50 @@
+name: RV22-Z native Distill audit and probe
+on:
+  push:
+    branches:
+      - research/verifiers-v2.2-adaptive-research-20261128
+    paths:
+      - ".github/workflows/research-verifiers-native-distill.yml"
+      - "src/datagoblin/research_v2_2/native_probe.py"
+      - "src/datagoblin/research_v2_2/curriculum_audit.py"
+      - "src/datagoblin/research_v2_2/exact_research.py"
+      - "src/datagoblin/research_v2_2/_exact_engine.py"
+      - "tests/unit/test_research_v2_2_native_probe.py"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-public:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONHASHSEED: "0"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: MoralityLabAI/Compactification-Theory
+          ref: 7fa19c90372b13d71676e6fef13819d2a18b9be3
+          path: _distill
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e . "numpy==2.2.6" pytest
+      - run: python -m pytest tests/unit/test_research_v2_2_native_probe.py
+      - name: Native audit and public synthetic probe
+        run: python -m datagoblin.research_v2_2.native_probe --distill-checkout _distill --out "$RUNNER_TEMP/rv22z"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rv22z-aggregate-receipts
+          path: |
+            ${{ runner.temp }}/rv22z/native_audit.json
+            ${{ runner.temp }}/rv22z/receipt.json
+          if-no-files-found: warn
