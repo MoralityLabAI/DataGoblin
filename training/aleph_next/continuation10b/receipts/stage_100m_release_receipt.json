@@ -1,0 +1,336 @@
+{
+  "deferred_or_rejected_stage1_candidates": [
+    {
+      "reason": "Ships Software Heritage blob identifiers without executable source bytes",
+      "repo": "HuggingFaceTB/stack-edu",
+      "status": "deferred_metadata_only"
+    },
+    {
+      "reason": "Compressed training chunks expose only raw 'text' without per-document provenance; allenai/peS2o v2 provides explicit per-document id/source/created provenance",
+      "repo": "common-pile/comma_v0.1_training_dataset",
+      "status": "not_used_lacks_per_doc_provenance"
+    }
+  ],
+  "dev_panel_index_sha256": "131cb6c80fae1a7063c58fa72a693fdbb92dc3b4dbd5c3084cbfd3bab3bd84bf",
+  "dev_panel_total_bytes": 20583654,
+  "lanes": {
+    "code_tests": {
+      "dev": {
+        "admitted_labels": 248924,
+        "admitted_positions": 250138,
+        "attribution_sha256": "b6e191def9a2e71c72382b90a09f62739de59b4758e38fc9333c422d8d28db5e",
+        "families": 782,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "3764a0b910a6a2e0e3f53be2872dab83b5164bc05d82b8d694332aa8bfbb001e",
+        "records": 1214,
+        "registry_sha256": "9fc9624e04d097e1b3588f01599e7960b8e8abfb02d29798bc502b7bd012ccbb",
+        "shards": 1
+      },
+      "quota_positions": 20000000,
+      "sources": [
+        {
+          "admitted_dev_docs": 1214,
+          "admitted_dev_positions": 250138,
+          "admitted_train_docs": 93513,
+          "admitted_train_positions": 19253780,
+          "bytes": 68917100,
+          "license": "odc-by",
+          "path": "algorithmic_corpus/1.jsonl",
+          "rejections": {
+            "dev_cap_already_met": 3715,
+            "exact_duplicate": 1480,
+            "near_duplicate": 5,
+            "pii_email": 43,
+            "too_short": 25
+          },
+          "repo": "OpenCoder-LLM/opc-annealing-corpus",
+          "revision": "078e4bc1d39725cccc18514d2e3278a3fe191110",
+          "rows_scanned": 100000,
+          "sha256": "290c2b20775ea9faa08d6d6512b035bbd3f9d9343e6b3cb3373794e457286e51",
+          "source_id": "opc_annealing_algo_1",
+          "status": "ingested"
+        },
+        {
+          "admitted_dev_docs": 0,
+          "admitted_dev_positions": 0,
+          "admitted_train_docs": 3283,
+          "admitted_train_positions": 746297,
+          "bytes": 72437021,
+          "license": "odc-by",
+          "path": "algorithmic_corpus/10.jsonl",
+          "rejections": {
+            "dev_cap_already_met": 191,
+            "exact_duplicate": 2,
+            "pii_email": 2,
+            "too_short": 41
+          },
+          "repo": "OpenCoder-LLM/opc-annealing-corpus",
+          "revision": "078e4bc1d39725cccc18514d2e3278a3fe191110",
+          "rows_scanned": 3564,
+          "sha256": "51443acd019054fc10fcc62569a9f5b1674265f7dee40148c99eec401cb9c6e2",
+          "source_id": "opc_annealing_algo_10",
+          "status": "ingested"
+        },
+        {
+          "license": "odc-by",
+          "path": "algorithmic_corpus/11.jsonl",
+          "repo": "OpenCoder-LLM/opc-annealing-corpus",
+          "revision": "078e4bc1d39725cccc18514d2e3278a3fe191110",
+          "sha256": "f2f6c176b0ba50364f7444a10b9bb32b0dd3c5b3d91bb8800de69a6a1f9a74ad",
+          "source_id": "opc_annealing_algo_11",
+          "status": "not_needed_quota_met"
+        },
+        {
+          "license": "odc-by",
+          "path": "algorithmic_corpus/12.jsonl",
+          "repo": "OpenCoder-LLM/opc-annealing-corpus",
+          "revision": "078e4bc1d39725cccc18514d2e3278a3fe191110",
+          "sha256": "2947e6d18406581004a5678d353d839d6162550ad6a576154d1da58d69fd49b1",
+          "source_id": "opc_annealing_algo_12",
+          "status": "not_needed_quota_met"
+        },
+        {
+          "license": "odc-by",
+          "path": "algorithmic_corpus/13.jsonl",
+          "repo": "OpenCoder-LLM/opc-annealing-corpus",
+          "revision": "078e4bc1d39725cccc18514d2e3278a3fe191110",
+          "sha256": "99bb62b36ab1b85991bcee2e869235b762f0a79028458af0f76d6064a2d88ef2",
+          "source_id": "opc_annealing_algo_13",
+          "status": "not_needed_quota_met"
+        }
+      ],
+      "train": {
+        "admitted_labels": 19903281,
+        "admitted_positions": 20000077,
+        "attribution_sha256": "8eb8010d37c799511ddce785995bc986d8db3eb6709de0b2fb4ad24be7e653e8",
+        "families": 54039,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "c022fb89cf6ca05d3b1e27a42ce91b829f1c4f402c64c8e50416e4e7bf425a75",
+        "records": 96796,
+        "registry_sha256": "f64cddebb5f3d13bd133ab24a50f916169294d83b5e5792b61335c51a2338645",
+        "shards": 5
+      }
+    },
+    "educational_reference": {
+      "dev": {
+        "admitted_labels": 255320,
+        "admitted_positions": 255436,
+        "attribution_sha256": "c21a8018ba756a294ea36ffa93f461c4d6156569b329af59f732fb37f64cd6a9",
+        "families": 2,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "95900eb2f5607e8e45cab86a84936813491ffc8a270a14ba7b6f0d7c08ccc0a9",
+        "records": 116,
+        "registry_sha256": "44c25c63e72356a342978566951e4200f8b309ecd5203aa99f48a15279637bc7",
+        "shards": 1
+      },
+      "quota_positions": 40000000,
+      "sources": [
+        {
+          "admitted_dev_docs": 116,
+          "admitted_dev_positions": 255436,
+          "admitted_train_docs": 19534,
+          "admitted_train_positions": 40000932,
+          "bytes": 115037937,
+          "license": "per-document CC-BY/CC-BY-SA/CC0/PD (non-math only; math.libretexts.org excluded)",
+          "path": "libretexts-0000.json.gz",
+          "rejections": {
+            "dev_cap_already_met": 529,
+            "pii_email": 4,
+            "pilot_libretexts_math_excluded": 2887,
+            "secret_pattern": 5,
+            "too_long": 3,
+            "too_short": 5
+          },
+          "repo": "common-pile/libretexts_filtered",
+          "revision": "204d01e40af72b3b6d3f926e1f6148ee9ed3970a",
+          "rows_scanned": 20258,
+          "sha256": "71851a2b5acfccf80659729a0eccd07ab6ed737f0edc659a662aa9c1cd2194db",
+          "source_id": "libretexts_filtered",
+          "status": "ingested"
+        },
+        {
+          "license": "odc-by",
+          "path": "sample/10BT/000_00000.parquet",
+          "repo": "HuggingFaceFW/fineweb-edu",
+          "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+          "sha256": "b1ba7b2ce4cb5ea6ef42dca40263eabb85f37700d01693a68e9b30a31d78e871",
+          "source_id": "fineweb_edu_10bt",
+          "status": "not_needed_quota_met"
+        }
+      ],
+      "train": {
+        "admitted_labels": 39981398,
+        "admitted_positions": 40000932,
+        "attribution_sha256": "8276396a1e4e66a51e0aeab631a4520392714e3fec945597d319dd3318509172",
+        "families": 373,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "ffba3b0ad678f4f357b6de0cd58b6723812a5c31acdeb38f1f06301f2cf27d66",
+        "records": 19534,
+        "registry_sha256": "8910c48abd481d6bb33b580e309901a2dcc9d34a48edd1fc6e4bf20b230a9d29",
+        "shards": 8
+      }
+    },
+    "informal_math": {
+      "dev": {
+        "admitted_labels": 250250,
+        "admitted_positions": 250418,
+        "attribution_sha256": "0bda7285123ec390931f3f392208f1f7d0141c26498cde43ec7a3e52fb95c613",
+        "families": 55,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "60ec35c8d7493c74fd4245e80d274455c05c27fcacb5a2f8d1f86fd46b1497d3",
+        "records": 168,
+        "registry_sha256": "b294f268f1b737acd208ae705d3a44f9938cd35f7e03c9512b60022df807692c",
+        "shards": 1
+      },
+      "quota_positions": 20000000,
+      "sources": [
+        {
+          "admitted_dev_docs": 168,
+          "admitted_dev_positions": 250418,
+          "admitted_train_docs": 12689,
+          "admitted_train_positions": 20002190,
+          "bytes": 286267316,
+          "license": "odc-by",
+          "path": "finemath-4plus/train-00000-of-00064.parquet",
+          "rejections": {
+            "dev_cap_already_met": 961,
+            "duplicate_root": 3,
+            "pii_email": 233,
+            "pilot_libretexts_excluded": 79,
+            "too_long": 1,
+            "too_short": 53
+          },
+          "repo": "HuggingFaceTB/finemath",
+          "revision": "e92b25a616738fe95dc186b64dfb19f9c8525594",
+          "rows_scanned": 14307,
+          "sha256": "5d0b26114b4cf309c82a4ba8f6f45857480b27812e23a46b61b45e8bbed61fe5",
+          "source_id": "finemath_4plus_00000",
+          "status": "ingested"
+        },
+        {
+          "license": "odc-by",
+          "path": "finemath-4plus/train-00001-of-00064.parquet",
+          "repo": "HuggingFaceTB/finemath",
+          "revision": "e92b25a616738fe95dc186b64dfb19f9c8525594",
+          "sha256": "4f38efdb251638c1a71be4ed380119bdd9966b1d6f200f6ff637e4768cc3930c",
+          "source_id": "finemath_4plus_00001",
+          "status": "not_needed_quota_met"
+        }
+      ],
+      "train": {
+        "admitted_labels": 19989501,
+        "admitted_positions": 20002190,
+        "attribution_sha256": "0a401a10a7d5ea194d02c0d6cce3b5b28939faef6b750cc1d175c500d5850dca",
+        "families": 4282,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "4f86a4ab84fe0af8a951c262b92e5d696bda53b9ba43a8ea8ec9a6315467c5e4",
+        "records": 12689,
+        "registry_sha256": "a91c038ffdb1b34bda38d70fdbecaab8351b92b7d960e2e6d029761ff4454f08",
+        "shards": 4
+      }
+    },
+    "scientific_papers": {
+      "dev": {
+        "admitted_labels": 249185,
+        "admitted_positions": 250098,
+        "attribution_sha256": "0f1c102a00e2eeba5c0eeff9409255f091f73c6adc2087b5c9cd3fa53f156475",
+        "families": 913,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "94cf63cdd0c2e68a679d13af2a11f9d1a58916a531d83d8b9a10588a9b8f068f",
+        "records": 913,
+        "registry_sha256": "972f4f026327e34f5d5f6f86423e897a4a4bc0226ab544785622f6b349d74ee1",
+        "shards": 1
+      },
+      "quota_positions": 10000000,
+      "sources": [
+        {
+          "admitted_dev_docs": 913,
+          "admitted_dev_positions": 250098,
+          "admitted_train_docs": 36128,
+          "admitted_train_positions": 10000075,
+          "bytes": 1575272287,
+          "license": "odc-by",
+          "path": "data/v2/train-00000-of-00020.json.gz",
+          "rejections": {
+            "dev_cap_already_met": 945,
+            "non_english_or_garbled": 1,
+            "pii_email": 113,
+            "too_short": 135
+          },
+          "repo": "allenai/peS2o",
+          "revision": "636a503e44a3ca1b58e01fb61eab0825cd574de0",
+          "rows_scanned": 38178,
+          "sha256": "3d611791c7d89d7915a4089e5f70e6dfc66b0c3e85ace1e5e624e2b96f0e2a29",
+          "source_id": "pes2o_v2",
+          "status": "ingested",
+          "streaming": {
+            "stream_seconds": 145.05,
+            "streamed_compressed_bytes": 19922944,
+            "streamed_prefix_sha256": "de2e988fb52d265934006719a6c9886fa6bb38241914b68972a36bac377842b9",
+            "verified_upstream_lfs_sha256": "3d611791c7d89d7915a4089e5f70e6dfc66b0c3e85ace1e5e624e2b96f0e2a29"
+          }
+        }
+      ],
+      "train": {
+        "admitted_labels": 9963947,
+        "admitted_positions": 10000075,
+        "attribution_sha256": "2d920bb49f36e2a70eb55d8a5b9a13a953d22773c5a7e4dd8e6210b9e2735a63",
+        "families": 36125,
+        "manifest_path": "manifest.json",
+        "manifest_sha256": "4ad079d0f8b323199683d6d077caa99f2be1ea6588e939ed3c9f4862966514d4",
+        "records": 36128,
+        "registry_sha256": "8564bc62f5f54c9173851b7895d43cf782f4bf7dcdc6d9e7a93506d4c35c91e3",
+        "shards": 3
+      }
+    }
+  },
+  "max_presentations_per_root": 1,
+  "members_ledger_sha256": "52c9e18a238520b7a78a7e44d48e3ed050dc52096360f787fa9d206e3d96b960",
+  "pilot_exclusion": [
+    "Excluded 100% of math.libretexts.org and /book/math-* from common-pile/libretexts_filtered",
+    "Excluded libretexts.org domains from fineweb-edu and finemath-4plus",
+    "Zero pilot records recycled"
+  ],
+  "release_file_count": 39,
+  "release_total_bytes": 1032102142,
+  "replay_summary": {
+    "final_group_positions": 84608,
+    "full_groups": 343,
+    "index_sha256": "194a8b0febce37de7497c34b9d20c8f1e10879a1065fe297a8da5d4c607ae232",
+    "lane_labels": {
+      "code_tests": 19893477,
+      "educational_reference": 39960945,
+      "informal_math": 19977554,
+      "scientific_papers": 9959006
+    },
+    "lane_positions": {
+      "code_tests": 20000000,
+      "educational_reference": 40000000,
+      "informal_math": 20000000,
+      "scientific_papers": 10000000
+    },
+    "restart_after_group": 172,
+    "restart_parity_verified": true,
+    "saved_cursor_sha256": "7ee04b15a294d8f3d5e1b4824e662dd8070ce2609b3f75677d621bf73e1b11c3",
+    "schema": "aleph.continuation-stage-replay.v1",
+    "stage_new_positions": 90000000,
+    "stage_start_positions": 10000000,
+    "stage_stop_positions": 100000000,
+    "terminal_cursor_sha256": "f766df5c2100aec23dddfec04bedff7e44b67b3ce7ea1128902f94235efc397a",
+    "total_labels": 89790982,
+    "total_packs": 43947,
+    "total_padding": 3456,
+    "update_group_positions": 262144,
+    "update_groups": 344
+  },
+  "schema": "aleph.stage100m.admission-receipt.v1",
+  "stage_index_sha256": "194a8b0febce37de7497c34b9d20c8f1e10879a1065fe297a8da5d4c607ae232",
+  "stage_new_positions": 90000000,
+  "stage_replay_sha256": "41a18f99e0287057f253fc2b1e599fe538cebb396d35ce59d4e23f4e07fba7cd",
+  "stage_start_positions": 10000000,
+  "stage_stop_positions": 100000000,
+  "tokenizer_library_version": "0.22.2",
+  "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "wall_seconds": 1297.89,
+  "wraparound_permitted": false
+}
