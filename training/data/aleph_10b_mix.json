@@ -1,0 +1,351 @@
+{
+  "schema": "aleph-10b-curriculum-plan-v1",
+  "date": "2026-11-28",
+  "status": "active_target_pending_admission_and_runner_qualification",
+  "training_ready": false,
+  "full_run_authorized": false,
+  "target_processed_nonpadding_positions": 10000000000,
+  "legacy_processed_positions": 10000000,
+  "remaining_positions": 9990000000,
+  "tokenizer": {
+    "name": "SmolLM2",
+    "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "vocab": 49152
+  },
+  "model": {
+    "arm": "direct-A",
+    "unique_parameters": 999352320,
+    "context_initial": 2048,
+    "execution_blocks": 24,
+    "precision": "explicit BF16 compute; FP32 master and AdamW moments",
+    "checkpoint": "MyDrive/aleph-v2-run/group_039_7fbdb1f91cf8",
+    "pilot_receipt": "pre-trains/aleph-direct-a-10m-v2/README.md"
+  },
+  "lanes": [
+    {
+      "id": "legacy_pilot",
+      "description": "Legacy pilot (already processed)",
+      "target_positions": 10000000,
+      "sources": [
+        "pre-trains/aleph-direct-a-10m-v2/README.md"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": 0,
+      "source_status": "historical_pilot_only"
+    },
+    {
+      "id": "educational_reference",
+      "description": "Educational and reference",
+      "target_positions": 1990000000,
+      "sources": [
+        "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu",
+        "https://huggingface.co/datasets/HuggingFaceFW/finepdfs-edu",
+        "https://huggingface.co/datasets/common-pile/comma_v0.1_training_dataset",
+        "https://huggingface.co/datasets/SYNTH-Initiative/SYNTH"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "scientific_papers",
+      "description": "Scientific papers",
+      "target_positions": 1000000000,
+      "sources": [
+        "https://huggingface.co/datasets/allenai/peS2o",
+        "https://huggingface.co/datasets/common-pile/comma_v0.1_training_dataset"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "code_tests",
+      "description": "Code, tests and documentation",
+      "target_positions": 1700000000,
+      "sources": [
+        "https://huggingface.co/datasets/HuggingFaceTB/stack-edu",
+        "https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "informal_math",
+      "description": "Mathematical derivations",
+      "target_positions": 1300000000,
+      "sources": [
+        "https://huggingface.co/datasets/HuggingFaceTB/finemath",
+        "https://huggingface.co/datasets/IFM/MegaMath"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "open_reasoning",
+      "description": "Open reasoning",
+      "target_positions": 1900000000,
+      "sources": [
+        "https://huggingface.co/datasets/nvidia/OpenMathReasoning",
+        "https://huggingface.co/datasets/nvidia/OpenScienceReasoning-2",
+        "https://huggingface.co/datasets/open-thoughts/OpenThoughts3-1.2M",
+        "https://huggingface.co/datasets/nvidia/OpenCodeReasoning-2"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "frontier_reasoning",
+      "description": "Frontier research traces",
+      "target_positions": 1000000000,
+      "sources": [
+        "https://huggingface.co/datasets/MoreThought/Fable-5.1-Max-Reasoning-Filtered-10000x",
+        "https://huggingface.co/datasets/greghavens/fable-5-coding-and-debugging-traces",
+        "https://huggingface.co/datasets/Crownelius/Complete-FABLE.5-traces-2M",
+        "https://huggingface.co/datasets/clzoro/Claude-Distills",
+        "https://huggingface.co/datasets/RESMP-DEV/Fable-GPT-5.5-Distillation-Traces",
+        "https://huggingface.co/datasets/predictive-singularity/Accretion",
+        "https://huggingface.co/datasets/AletheiaResearch/GPT-5.5-Codex",
+        "https://huggingface.co/TeichAI/datasets",
+        "https://huggingface.co/datasets/Manusagents/GPT-5.5-Gemini-3.1-Pro-Grok-4-Claude-Fable-5-Mythos-5-Qwen-3.7-Max-and-more-Distillation-Dataset"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "formal_lean",
+      "description": "Formal Lean",
+      "target_positions": 400000000,
+      "sources": [
+        "https://github.com/leanprover-community/mathlib4",
+        "https://github.com/lean-dojo/LeanDojo",
+        "https://github.com/patrickdugan/MathCan",
+        "training/data/formal_game_catalog.json"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "games_procedural",
+      "description": "Procedural and checked games",
+      "target_positions": 500000000,
+      "sources": [
+        "https://huggingface.co/datasets/reasoning-core/procedural-pile",
+        "training/rlt_gym/README.md",
+        "https://github.com/MoralityLabAI/EvalMath",
+        "https://github.com/MoralityLabAI/LoopedTransformers"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    },
+    {
+      "id": "research_mechinterp",
+      "description": "Native research episodes",
+      "target_positions": 200000000,
+      "sources": [
+        "training/data/owned_corpus_catalog.json",
+        "training/model_atlas/README.md",
+        "MeTTa/README.md",
+        "https://huggingface.co/datasets/nvidia/Open-SWE-Traces"
+      ],
+      "accepted_unique_tokens": null,
+      "admitted_new_positions": null,
+      "source_status": "candidate_pending_review"
+    }
+  ],
+  "stages": [
+    {
+      "start_position": 0,
+      "stop_position": 10000000,
+      "status": "completed_engineering_pilot",
+      "lane_positions": {
+        "legacy_pilot": 10000000,
+        "educational_reference": 0,
+        "scientific_papers": 0,
+        "code_tests": 0,
+        "informal_math": 0,
+        "open_reasoning": 0,
+        "frontier_reasoning": 0,
+        "formal_lean": 0,
+        "games_procedural": 0,
+        "research_mechinterp": 0
+      }
+    },
+    {
+      "start_position": 10000000,
+      "stop_position": 100000000,
+      "status": "conditional",
+      "lane_positions": {
+        "legacy_pilot": 0,
+        "educational_reference": 40000000,
+        "scientific_papers": 10000000,
+        "code_tests": 20000000,
+        "informal_math": 20000000,
+        "open_reasoning": 0,
+        "frontier_reasoning": 0,
+        "formal_lean": 0,
+        "games_procedural": 0,
+        "research_mechinterp": 0
+      }
+    },
+    {
+      "start_position": 100000000,
+      "stop_position": 500000000,
+      "status": "conditional",
+      "lane_positions": {
+        "legacy_pilot": 0,
+        "educational_reference": 160000000,
+        "scientific_papers": 40000000,
+        "code_tests": 100000000,
+        "informal_math": 70000000,
+        "open_reasoning": 30000000,
+        "frontier_reasoning": 0,
+        "formal_lean": 0,
+        "games_procedural": 0,
+        "research_mechinterp": 0
+      }
+    },
+    {
+      "start_position": 500000000,
+      "stop_position": 2000000000,
+      "status": "conditional",
+      "lane_positions": {
+        "legacy_pilot": 0,
+        "educational_reference": 450000000,
+        "scientific_papers": 150000000,
+        "code_tests": 350000000,
+        "informal_math": 250000000,
+        "open_reasoning": 250000000,
+        "frontier_reasoning": 50000000,
+        "formal_lean": 0,
+        "games_procedural": 0,
+        "research_mechinterp": 0
+      }
+    },
+    {
+      "start_position": 2000000000,
+      "stop_position": 5000000000,
+      "status": "conditional",
+      "lane_positions": {
+        "legacy_pilot": 0,
+        "educational_reference": 650000000,
+        "scientific_papers": 300000000,
+        "code_tests": 500000000,
+        "informal_math": 400000000,
+        "open_reasoning": 650000000,
+        "frontier_reasoning": 300000000,
+        "formal_lean": 80000000,
+        "games_procedural": 100000000,
+        "research_mechinterp": 20000000
+      }
+    },
+    {
+      "start_position": 5000000000,
+      "stop_position": 8000000000,
+      "status": "conditional",
+      "lane_positions": {
+        "legacy_pilot": 0,
+        "educational_reference": 500000000,
+        "scientific_papers": 300000000,
+        "code_tests": 450000000,
+        "informal_math": 400000000,
+        "open_reasoning": 650000000,
+        "frontier_reasoning": 400000000,
+        "formal_lean": 120000000,
+        "games_procedural": 130000000,
+        "research_mechinterp": 50000000
+      }
+    },
+    {
+      "start_position": 8000000000,
+      "stop_position": 10000000000,
+      "status": "conditional",
+      "lane_positions": {
+        "legacy_pilot": 0,
+        "educational_reference": 190000000,
+        "scientific_papers": 200000000,
+        "code_tests": 280000000,
+        "informal_math": 160000000,
+        "open_reasoning": 320000000,
+        "frontier_reasoning": 250000000,
+        "formal_lean": 200000000,
+        "games_procedural": 270000000,
+        "research_mechinterp": 130000000
+      }
+    }
+  ],
+  "research_filter": {
+    "first_pass": "stream metadata, task intent and deduplicate session roots before reading full eligible content",
+    "domain_tags": [
+      "math_discovery",
+      "mechanistic_interpretability",
+      "ml_architecture",
+      "experiment_design",
+      "statistics",
+      "scientific_code",
+      "formal_verification",
+      "cryptography",
+      "literature_synthesis"
+    ],
+    "score_weights": {
+      "research_intent": 25,
+      "reasoning_depth": 20,
+      "evidence_based_revision": 20,
+      "independent_verifiability": 15,
+      "novelty_abstraction": 10,
+      "domain_relevance": 10
+    },
+    "initial_threshold": 70,
+    "calibration_roots": 300,
+    "initial_sample_unique_roots": 1000,
+    "teacher_identity": "uploader-attributed unless independently authenticated; Astra remains a discovery slot",
+    "admission": "rights and provider permissions, source revision, secret and PII review, root and split audit, exact and near-duplicate checks; unknown outcomes masked; no automatic authority from teacher"
+  },
+  "context_policy": {
+    "initial": 2048,
+    "proposed_later_contexts": [
+      4096,
+      8192,
+      16384,
+      32768
+    ],
+    "yarn_reference": "https://github.com/jquesnelle/yarn",
+    "status": "experimental; require separate position/causal-mask/recurrence and throughput parity plus held-out short-context retention before changing active context"
+  },
+  "fallback": {
+    "rule": "record actual deficits; defer unavailable bespoke/frontier lane to later checkpoints or publish a revised budget with equal total before switching to independently admitted replacement; no silent replay",
+    "frontier_reasoning": [
+      "open_reasoning",
+      "informal_math",
+      "scientific_papers"
+    ],
+    "formal_lean": [
+      "open_reasoning",
+      "informal_math"
+    ],
+    "games_procedural": [
+      "open_reasoning",
+      "code_tests"
+    ],
+    "research_mechinterp": [
+      "scientific_papers",
+      "code_tests"
+    ],
+    "max_presentations_per_static_root": 4,
+    "root_single_accounting_lane": true
+  },
+  "accounting": "All quotas are processed non-padding input plus target positions. Count unique accepted tokens, loss-bearing positions, repeats and padding separately. Legacy 10M is a separate lane, deducted from the prior proposed educational 2B solely to reconcile cumulative budget, not classified as education.",
+  "measured_reference": {
+    "positions_per_second": 4520,
+    "colab_units_per_hour": 8.16,
+    "last_reported_balance_units": 974.92,
+    "pricing_is_historical": true
+  },
+  "gate": "HOLD until a pinned new shard release, native checkpoint handoff, stage runner and explicit capped allocation are verified; old 39-group pilot cannot run beyond 10M"
+}
