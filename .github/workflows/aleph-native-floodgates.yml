@@ -51,3 +51,35 @@ jobs:
           name: afg01-native-source-fixture
           path: /tmp/afg01/
           retention-days: 14
+  trained-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.18'
+      - run: python -m pip install 'torch==2.15.0+cpu' --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install 'numpy==2.2.6' 'safetensors==0.7.0'
+      - run: python -m py_compile training/aleph_native_floodgates/afg02_trained.py
+      - run: python training/aleph_native_floodgates/afg02_trained.py --smoke --out /tmp/afg02-smoke
+      - run: python training/aleph_native_floodgates/afg02_trained.py --audit /tmp/afg02-smoke
+      - run: python training/aleph_native_floodgates/afg02_trained.py --out /tmp/afg02
+      - run: python training/aleph_native_floodgates/afg02_trained.py --audit /tmp/afg02 | tee /tmp/afg02/audit.json
+      - name: Summarize native target competence and decoding tariff
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/afg02/afg02_report.json'))
+          for t in r['targets']:
+              print(json.dumps(dict(seed=t['seed'],competence_gate=t['competence_gate'],quality=t['quality']),sort_keys=True))
+          for c in r['cells']:
+              for split in ('dev','shift'):
+                  m=c['panels'][split]
+                  print(json.dumps(dict(seed=c['seed'],policy=c['policy'],split=split,k=c['draft_length'],competence_gate=c['competence_gate'],tariff_per_token=m['tariff_per_token'],emitted_per_verification=m['emitted_per_verification'],target_call_reduction=m['target_call_reduction'],work=m['work'],timing=c['timing'][split]),sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: afg02-trained-native-target
+          path: /tmp/afg02/
+          retention-days: 14
