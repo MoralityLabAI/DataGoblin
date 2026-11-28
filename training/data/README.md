@@ -5,14 +5,17 @@ with independent trace replay, parameter-disjoint public splits and scaled-copy
 checks. Its generator admits finite cycle witnesses after verification and
 records no token quota credit until tokenizer and mixture admission run.
 
-The [19 November 2026 landscape report](../reports/2026-11-19_data_landscape.md) evaluates the owned corpus receipts and public sources for a proposed 20B-token run with a conditional 30B continuation.
+**Active initial endpoint: 10B cumulative positions.** Use the [10B curriculum manifest](aleph_10b_mix.json) and [Colab continuation handoff](../reports/2026-11-28_aleph_10b_colab_handoff.md). The 10M direct-A pilot counts toward this target; the first new release is 90M positions. The new plan is pending source admission and runner migration.
+
+The historical [19 November 2026 landscape report](../reports/2026-11-19_data_landscape.md) evaluates the owned corpus receipts and public sources for a proposed 20B-token run with a conditional 30B continuation.
 
 | File | Contents |
 | --- | --- |
 | [public_pretraining_catalog.json](public_pretraining_catalog.json) | 24 public pretraining and solution sources, including access, ancestry and license notes. |
 | [formal_game_catalog.json](formal_game_catalog.json) | 17 formal-math/game datasets, repositories and generator families. |
 | [owned_corpus_catalog.json](owned_corpus_catalog.json) | Owned corpus receipts, pinned Lean source inventories and the local checked Campsite repair pack. |
-| [aleph_20b_30b_mix.json](aleph_20b_30b_mix.json) | Proposed quotas, repeat limits, fallback rules, objectives and accounting requirements. |
+| [aleph_10b_mix.json](aleph_10b_mix.json) | Active 10B stage targets, source map, research filter and continuation gates. |
+| [aleph_20b_30b_mix.json](aleph_20b_30b_mix.json) | Archived 20B/30B scaling proposals. |
 | [aleph_20b_30b_estimates.json](../estimates/aleph_20b_30b_estimates.json) | Reproducible analytical compute cases for 10B, 20B and 30B tokens. |
 
 ## Meaning of the records
@@ -58,9 +61,9 @@ Astra Pro / GPT-6.2: no authenticated public corpus identified in the initial di
 | [NVIDIA Open-SWE-Traces](https://huggingface.co/datasets/nvidia/Open-SWE-Traces) | Software-repair trajectories; replay tests independently. |
 | [LeanDojo](https://github.com/lean-dojo/LeanDojo) | Formal proof states and tactic extraction; evaluate newer tooling before pinning. |
 
-### Proposed 500M-token frontier lane
+### Earlier proposed 500M-token frontier comparison lane
 
-Illustrative post-filter, post-tokenization targets in millions of loss-bearing tokens: Fable 150, Opus 75, GPT/Codex 50, verified software repair 75, open mathematical reasoning 75, native Lean/research traces 75. This is a separate proposed comparison lane, with no change to the existing 20B/30B quotas or strict-1B architecture. If incorporated into continued pretraining, debit exposures against the approved total and avoid double counting. Rights failures or insufficient unique capacity require a documented shortfall or separately approved substitution.
+Illustrative post-filter, post-tokenization targets in millions of loss-bearing tokens: Fable 150, Opus 75, GPT/Codex 50, verified software repair 75, open mathematical reasoning 75, native Lean/research traces 75. This is a historical comparison proposal. The active 10B manifest now allocates 1B processed positions to frontier traces, separately from 1.9B open reasoning; do not add the 500M proposal to those totals. If incorporated into continued pretraining, debit exposures against the approved total and avoid double counting. Rights failures or insufficient unique capacity require a documented shortfall or separately approved substitution.
 
 Compare raw response SFT, compressed subgoal supervision, and state-transition supervision at matched loss-bearing token and planned recurrent-cell budgets. The last view carries state, proposal, independently checked outcome (or unknown), and revised action. Keep tool/environment output as context, mask non-target spans, and preserve failed actions as attributed proposals. Teacher self-grades do not supply independent truth labels.
 
