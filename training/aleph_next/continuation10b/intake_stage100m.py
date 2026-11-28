@@ -31,8 +31,12 @@ from typing import Any
 import pyarrow.parquet as pq
 
 HERE = Path(__file__).resolve().parent
-ALEPH_NEXT = HERE.parent
-TRAINING_ROOT = ALEPH_NEXT.parent
+REPO_ROOT = next(
+    (parent for parent in (HERE, *HERE.parents) if (parent / "training" / "aleph_next" / "candidate01").is_dir()),
+    HERE.parent.parent,
+)
+TRAINING_ROOT = REPO_ROOT / "training"
+ALEPH_NEXT = TRAINING_ROOT / "aleph_next"
 for p in (str(HERE), str(TRAINING_ROOT / "aleph_rlt_placement"), str(ALEPH_NEXT / "candidate01")):
     if p not in sys.path:
         sys.path.insert(0, p)

@@ -57,7 +57,11 @@ from stream import (  # noqa: E402
     stage_group_boundaries,
     verify_lane_manifest,
 )
-from tpu_backend import HostOffloadFP32AdamW  # noqa: E402
+from tpu_backend import (  # noqa: E402
+    HostOffloadFP32AdamW,
+    make_tpu_loss_fn,
+    prepare_tpu_working_model,
+)
 
 
 def _write_json(path: Path, obj: dict[str, Any]) -> str:
@@ -483,7 +487,7 @@ def test_handoff_resume_equality_and_fail_closed_checks(tmp_path: Path) -> None:
 
 
 def test_host_offload_adamw_exact_parity() -> None:
-    """Verify HostOffloadFP32AdamW matches FP32AdamW bit-identically across multiple steps."""
+    """Verify HostOffloadFP32AdamW + per-microbatch grad offload matches FP32AdamW identically."""
     torch.set_num_threads(1)
     cfg = read(RECIPE)
     backend = Backend("cpu")
@@ -494,15 +498,34 @@ def test_host_offload_adamw_exact_parity() -> None:
     opt_ref = FP32AdamW(net_ref, cfg, backend)
     opt_off = HostOffloadFP32AdamW(net_off, cfg, backend)
 
+    count = sum(v != -100 for p in packs for v in p["labels_at_query"])
+    den = torch.tensor(float(count), dtype=torch.float32)
+
     for step_idx in range(3):
         rate = compute_absolute_lr(cfg, 10_000_000 + step_idx * 262_144)
         accumulate(net_ref, packs, backend, torch.float32)
-        accumulate(net_off, packs, backend, torch.float32)
         g_ref = opt_ref.update(rate)
+
+        opt_off.zero()
+        for pk in packs:
+            ids, pos, seg, y = tensors(pk, backend.device, len(pk["input_ids"]))
+            val = loss_sum(logits(net_off, ids, pos, seg, torch.float32, remat=True), y)
+            (val / den).backward()
+            opt_off.accumulate_microbatch_grads()
         g_off = opt_off.update(rate)
+
         assert math.isclose(g_ref, g_off, rel_tol=1e-6, abs_tol=1e-6)
         for (n1, p1), (n2, p2) in zip(opt_ref.named, opt_off.named, strict=True):
             assert n1 == n2
             torch.testing.assert_close(p1, p2, atol=1e-6, rtol=1e-6)
             torch.testing.assert_close(opt_ref.moments[n1][0], opt_off.moments[n2][0], atol=1e-6, rtol=1e-6)
             torch.testing.assert_close(opt_ref.moments[n1][1], opt_off.moments[n2][1], atol=1e-6, rtol=1e-6)
+
+    # Also verify BF16 TPU working model + compiled step loss parity vs colab10m_xla BF16
+    net_tpu = copy.deepcopy(net_ref)
+    prepare_tpu_working_model(net_tpu, torch.device("cpu"))
+    tpu_loss_fn = make_tpu_loss_fn(net_tpu, compile_tpu=False, remat=True)
+    ids, pos, seg, y = tensors(packs[0], torch.device("cpu"), 8)
+    l_ref = float(loss_sum(logits(net_ref, ids, pos, seg, torch.bfloat16, remat=True), y))
+    l_tpu = float(tpu_loss_fn(ids, pos, seg, y))
+    assert math.isclose(l_ref, l_tpu, rel_tol=1e-3, abs_tol=1e-3)

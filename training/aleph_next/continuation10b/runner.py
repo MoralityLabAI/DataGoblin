@@ -26,8 +26,12 @@ from typing import Any
 import torch
 
 HERE = Path(__file__).resolve().parent
-ALEPH_NEXT = HERE.parent
-TRAINING_ROOT = ALEPH_NEXT.parent
+REPO_ROOT = next(
+    (parent for parent in (HERE, *HERE.parents) if (parent / "training" / "aleph_next" / "candidate01").is_dir()),
+    HERE.parent.parent,
+)
+TRAINING_ROOT = REPO_ROOT / "training"
+ALEPH_NEXT = TRAINING_ROOT / "aleph_next"
 for p in (str(HERE), str(TRAINING_ROOT / "aleph_rlt_placement"), str(ALEPH_NEXT / "candidate01")):
     if p not in sys.path:
         sys.path.insert(0, p)
@@ -57,7 +61,12 @@ from stream import (  # noqa: E402
     collect_stage_group,
     stage_group_boundaries,
 )
-from tpu_backend import HostOffloadFP32AdamW, TorchTPUBackend  # noqa: E402
+from tpu_backend import (  # noqa: E402
+    HostOffloadFP32AdamW,
+    TorchTPUBackend,
+    make_tpu_loss_fn,
+    prepare_tpu_working_model,
+)
 
 CONTINUATION_CHECKPOINT_SCHEMA = "aleph.direct-a.continuation.v1"
 HANDOFF_RECEIPT_SCHEMA = "aleph.direct-a.handoff-receipt.v1"
@@ -199,6 +208,8 @@ def _verify_and_load_shards(
             m_dst, v_dst = opt.moments[name]
             m_dst.copy_(blob["m"].to(m_dst.device))
             v_dst.copy_(blob["v"].to(v_dst.device))
+    if hasattr(opt, "sync_weights_to_device"):
+        opt.sync_weights_to_device()
     opt.step = manifest_step
     opt.zero()
     rng_payload = state["rng"]
@@ -381,8 +392,8 @@ def build_continuation_identity(
 
 def _train_one_group(
     net: torch.nn.Module,
-    opt: FP32AdamW,
-    backend: Backend,
+    opt: Any,
+    backend: Any,
     cfg: dict[str, Any],
     stream: StageMixedStream,
     expected_step_meta: dict[str, Any],
@@ -390,6 +401,7 @@ def _train_one_group(
     *,
     remat: bool = True,
     train_deadline: float | None = None,
+    tpu_loss_fn: Any = None,
 ) -> tuple[bool, dict[str, Any] | None]:
     """Execute exactly one verified update group with global-label-normalized gradients."""
     t0 = time.monotonic()
@@ -401,26 +413,40 @@ def _train_one_group(
     )
     den = torch.tensor(float(denom), device=backend.device, dtype=torch.float32)
     opt.zero()
+    lane_loss_scalars: dict[str, float] = defaultdict(float)
     lane_loss_tensors: dict[str, list[torch.Tensor]] = defaultdict(list)
     lane_counts: dict[str, int] = defaultdict(int)
     micro_times: list[float] = []
+    use_host_grad_acc = hasattr(opt, "accumulate_microbatch_grads")
     for lane, pack, k in packs:
         if train_deadline is not None and time.monotonic() >= train_deadline:
             opt.zero()
             return False, None
         ts = time.monotonic()
         ids, pos, seg, y = tensors(pack, backend.device, stream.context)
-        numerator = loss_sum(logits(net, ids, pos, seg, dtype, remat), y)
+        if tpu_loss_fn is not None:
+            numerator = tpu_loss_fn(ids, pos, seg, y)
+        else:
+            numerator = loss_sum(logits(net, ids, pos, seg, dtype, remat), y)
         (numerator / den).backward()
-        lane_loss_tensors[lane].append(numerator.detach())
+        if use_host_grad_acc:
+            lane_loss_scalars[lane] += float(numerator.detach().cpu())
+            opt.accumulate_microbatch_grads()
+        else:
+            lane_loss_tensors[lane].append(numerator.detach())
+            backend.sync()
         lane_counts[lane] += k
-        backend.sync()
         micro_times.append(time.monotonic() - ts)
 
     abs_stop = int(meta["absolute_stop"])
     rate = compute_absolute_lr(cfg, abs_stop)
     grad_norm = opt.update(rate)
-    lane_loss_sums = {lane: float(torch.stack(vals).sum().cpu()) for lane, vals in sorted(lane_loss_tensors.items())}
+    if use_host_grad_acc:
+        lane_loss_sums = {lane: float(val) for lane, val in sorted(lane_loss_scalars.items())}
+    else:
+        lane_loss_sums = {
+            lane: float(torch.stack(vals).sum().cpu()) for lane, vals in sorted(lane_loss_tensors.items())
+        }
     total_loss = sum(lane_loss_sums.values()) / float(denom)
     if not math.isfinite(total_loss):
         raise FloatingPointError("nonfinite group training loss")
@@ -528,8 +554,14 @@ def run_continuation_stage(args: argparse.Namespace, backend: Any) -> dict[str, 
         raise ValueError("model unique parameter count differs from 999,352,320")
     if list(schedule(2, 1)) != [0, *range(1, 11), *range(1, 11), 11, 12, 13]:
         raise ValueError("Direct-A 24-visit schedule changed")
-    net = net.to(backend.device)
-    opt = HostOffloadFP32AdamW(net, cfg, backend) if backend.kind == "tpu" else FP32AdamW(net, cfg, backend)
+    if backend.kind == "tpu":
+        prepare_tpu_working_model(net, backend.device)
+        opt: Any = HostOffloadFP32AdamW(net, cfg, backend)
+        tpu_loss_fn = make_tpu_loss_fn(net, compile_tpu=True, remat=True)
+    else:
+        net = net.to(backend.device)
+        opt = FP32AdamW(net, cfg, backend)
+        tpu_loss_fn = None
 
     if args.resume:
         handoff_receipt = read(out / "HANDOFF_RECEIPT.json")
@@ -612,6 +644,7 @@ def run_continuation_stage(args: argparse.Namespace, backend: Any) -> dict[str, 
                 torch.bfloat16,
                 remat=True,
                 train_deadline=train_deadline,
+                tpu_loss_fn=tpu_loss_fn,
             )
             if not ok or rec is None:
                 break
