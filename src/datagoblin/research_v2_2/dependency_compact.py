@@ -172,7 +172,8 @@ def verify(d, proof):
     """Check a finite proof DAG; does not call Search, native oracle, or fit."""
     validate(d)
     if (type(proof) is not dict or set(proof) != {"schema", "root_id", "answer", "nodes"}
-            or proof["schema"] not in ("rv23c.cover_proof.v1", "rv23d.cover_proof.v2") or proof["root_id"] != world_id(KIND, d)):
+            or proof["schema"] not in ("rv23c.cover_proof.v1", "rv23d.cover_proof.v2")
+            or proof["root_id"] != world_id(KIND, d)):
         raise ValueError("proof binding")
     answer = proof["answer"]
     cutoff = d["budget"]+1 if answer == {"status": "infeasible"} else verify_plan(d, answer)

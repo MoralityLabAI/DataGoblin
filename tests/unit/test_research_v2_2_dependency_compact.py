@@ -39,8 +39,9 @@ def test_exact_relaxations():
                 expected = min(union_prices)
                 assert p.control(mask,left,need) <= expected
                 assert p.quotient(mask,j,need,True) == expected
+                prior_hits = p.stats["residual_hits"]
                 assert p.quotient(mask,j,need,True) == expected
-                assert p.stats["residual_hits"] == 1
+                assert p.stats["residual_hits"] == prior_hits+1
                 assert p.atlas_bound(mask,j) == expected
                 comparisons += 1
     assert comparisons > 100
