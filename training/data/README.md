@@ -1,5 +1,7 @@
 # Aleph data planning
 
+[DG-Research-20M](research20m/README.md) prepares a separately reviewed next bespoke research increment: 30 pinned programs, 11 candidate export pointers, actual MTR grouping checks and fresh finite-oracle tasks. Its 20M unique-content target is pending exact-tokenizer and source-custody review; later admission debits existing 10B lanes.
+
 [COL-DG-01](collatz_curriculum.md) supplies an offline arithmetic curriculum
 with independent trace replay, parameter-disjoint public splits and scaled-copy
 checks. Its generator admits finite cycle witnesses after verification and
