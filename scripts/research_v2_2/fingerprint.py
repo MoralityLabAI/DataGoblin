@@ -214,9 +214,9 @@ def campaign(n=6,length=48,repeats=2,seed=EVAL):
                         ref = vals
                     if ref != vals or stats['peak_accounted'] > CAP:
                         raise ValueError('exact parity or capacity')
-                    if a not in ('cold', 'trusted_lru','trusted_mass','trusted_marginal'):
-                        if stats['checks'] != stats['admissions']:
-                            raise ValueError('unchecked admission')
+                    if (a not in ('cold', 'trusted_lru','trusted_mass','trusted_marginal')
+                            and stats['checks'] != stats['admissions']):
+                        raise ValueError('unchecked admission')
                     samples[a].append(stats)
             for a,rs in samples.items():
                 rows[a].append({k:float(np.mean([r[k] for r in rs])) for k in rs[0]})
