@@ -3,10 +3,12 @@
 Launches the runner as a child process and samples, once per interval:
 process-tree working set and private bytes (psutil), system available
 memory, per-process dedicated and shared GPU memory from the Windows
-"GPU Process Memory" performance counters, and GPU memory, temperature
-and power from nvidia-smi. Any cap breach kills the process tree and is
+"GPU Process Memory" performance counters, and GPU memory, temperature,
+power, enforced power limit and clock events from NVML (nvidia-smi
+when NVML is unavailable). Any cap breach kills the process tree and is
 recorded as a violation. Before launch it records every process holding
-GPU memory and refuses to start when free VRAM is below the floor.
+GPU memory and refuses to start when free VRAM is below the floor. A
+child exit code of 75 (the runner's thermal pause) is passed through.
 
     python afg03_watchdog.py --log-dir D:/run-logs --wall-seconds 1800 -- python afg03_checkpoint.py ...
 """
@@ -25,7 +27,11 @@ from pathlib import Path
 
 import psutil
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import afg03_nvml
+
 GIB = 2**30
+PAUSE_EXIT = 75
 NVSMI = ("memory.used", "memory.free", "memory.total", "temperature.gpu", "power.draw",
          "utilization.gpu", "clocks_event_reasons.active")
 PDH_FMT_LARGE = 0x00000400
@@ -144,8 +150,10 @@ def main():
             "min_available_bytes": int(a.min_available_gib*GIB), "min_free_vram_bytes": int(a.min_free_vram_gib*GIB),
             "vram_dedicated_bytes": int(a.vram_gib*GIB), "vram_shared_bytes": int(a.shared_gib*GIB),
             "temperature_c": a.temp_c}
+    nvml = afg03_nvml.open_nvml()
     smi = nvidia_smi()
     pre = {"event": "preflight", "time": time.time(), "caps": caps, "gpu": smi, "gpu_holders": gpu_holders(),
+           "nvml": nvml.read() if nvml else None,
            "available_bytes": psutil.virtual_memory().available, "cmd": cmd}
     record(pre)
     if smi["memory.free"] is None or smi["memory.free"]*2**20 < caps["min_free_vram_bytes"]:
@@ -165,7 +173,7 @@ def main():
     peaks = {k: 0 for k in ("tree_rss_bytes", "tree_private_bytes", "gpu_dedicated_bytes", "gpu_shared_bytes",
                             "gpu_memory_used_mib", "temperature_c", "power_w")}
     min_available = psutil.virtual_memory().available
-    violations, samples, last_smi = [], 0, 0.
+    violations, samples, last_smi, capped_samples = [], 0, 0., 0
     while child.poll() is None:
         now = time.monotonic()
         procs = tree(proc)
@@ -185,7 +193,14 @@ def main():
         min_available = min(min_available, available)
         sample = {"event": "sample", "t": round(now-start, 3), "tree_rss_bytes": rss, "tree_private_bytes": private,
                   "gpu_dedicated_bytes": dedicated, "gpu_shared_bytes": shared, "available_bytes": available}
-        if now-last_smi >= 2:
+        if nvml is not None:
+            g = nvml.read()
+            smi = {"memory.used": (g["memory_used_bytes"] or 0)/2**20, "temperature.gpu": g["temperature_c"],
+                   "power.draw": g["power_w"], "utilization.gpu": g["utilization_gpu"],
+                   "enforced.power.limit": g["enforced_limit_w"], "clocks_event_reasons.active": g["clock_events"]}
+            sample["gpu"] = smi
+            capped_samples += bool(g["power_capped"])
+        elif now-last_smi >= 2:
             try:
                 smi = nvidia_smi()
                 sample["gpu"] = smi
@@ -225,14 +240,17 @@ def main():
     stderr.close()
     summary = {"event": "summary", "status": "killed" if violations else "exited", "exit_code": code,
                "elapsed_seconds": elapsed, "violations": violations, "peaks": peaks,
-               "min_available_bytes": min_available, "samples": samples, "caps": caps}
+               "min_available_bytes": min_available, "samples": samples, "power_capped_samples": capped_samples,
+               "caps": caps}
     record(summary)
     log.close()
     (a.log_dir/"watchdog_summary.json").write_text(json.dumps({**summary, "preflight": pre}, indent=2,
                                                               sort_keys=True)+"\n", encoding="utf-8")
     print(json.dumps({k: summary[k] for k in ("status", "exit_code", "elapsed_seconds", "violations", "peaks")},
                      sort_keys=True))
-    return 0 if code == 0 and not violations else 1
+    if violations:
+        return 1
+    return code if code in (0, PAUSE_EXIT) else 1
 
 
 if __name__ == "__main__":

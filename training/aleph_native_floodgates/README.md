@@ -194,10 +194,18 @@ On a full card the GPU is shared through a vramorama lease:
 ```powershell
 $py = 'C:\path\to\cuda-venv\Scripts\python.exe'
 python training/aleph_native_floodgates/afg03_panel.py --tokenizer D:\aleph\llama24\tokenizer.json --out D:\aleph\panel
-vramorama run --vram 11G --owner afg03-native-floodgates --guard-power 120 --wait 21600 -- `
+vramorama run --vram 11G --owner afg03-native-floodgates --guard-power 300 --pause-exit 75 --restart 3 --wait 21600 -- `
   $py training/aleph_native_floodgates/afg03_local.py --checkpoint D:\aleph\native\model.safetensors `
-  --panel D:\aleph\panel\afg03-panel.json --root D:\aleph\runs\c1 --python $py
+  --panel D:\aleph\panel\afg03-panel.json --root D:\aleph\runs --python $py
 ```
+
+After a recorded BF16 parity failure, add `--cells fp32` to run only the
+separately identified FP32 cell. The laptop clamps the GPU to a 15 W
+software power limit after sustained load (seen at 86 C), so the runner
+reads NVML through `afg03_nvml.py` between bounded operations and waits
+for the card to cool; a cap that persists 60 s exits with code 75, and
+the lease restarts the cell in a new `attempt-*` directory rather than
+killing it mid-kernel.
 
 The CUDA path streams each checkpoint tensor straight to the card
 (`safe_open(device="cuda:0")`), so host RAM never holds a second copy of

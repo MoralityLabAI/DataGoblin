@@ -98,6 +98,31 @@ vramorama lease; the runner deadline is 1,740 s so it stops before the
 watchdog. FP32 runs only after a BF16 exact-parity failure, in its own
 directory and watchdog, as a separately identified precision cell.
 
+## Amendment after the first lease (2026-11-28, before any FP32 result)
+
+The first BF16 cell (commit 1cc24e8) passed the two-prompt CAL
+qualification and then stopped in teacher-reference generation on an
+exact greedy mismatch (cached `,` vs cold `1`, cold top-two margin one
+BF16 ulp, 0.03125). That receipt is final for BF16. The first FP32 cell
+was stopped by the lease's power guard after the laptop clamped the GPU
+to a 15 W software power limit at 86 C; Windows logged a GPU reset six
+seconds after the stop. It produced no result.
+
+Changes for the FP32 cell, which do not touch any gate: a cooperative
+thermal gate reads NVML between bounded operations (each teacher prompt,
+each adapter fit, each calibration and development evaluation, never
+inside a timed region). At 82 C or under a power cap it waits until the
+GPU is at most 72 C and uncapped; a cap that lasts 60 s, or any wait
+over 600 s, stops the cell with a ThermalPause receipt and exit code 75
+so the lease can restart it in a fresh directory instead of killing it
+mid-kernel (the lease's own power guard is set to 300 s, so the clean
+pause comes first). Every timed sample records NVML readings before and after,
+and whether the card was capped. BF16 measured about 0.2 s per 24-visit
+forward (GPU about 13% busy: launch-bound), which puts the FP32 cell near
+1,600 s before any cooling waits, so its wall cap is raised from the
+initial 1,800 s to 3,600 s (runner deadline 3,540 s). All other bounds
+are unchanged.
+
 Save all local model-bound adapter artifacts, token-panel hash, source
 manifest, device identity, qualification, fit and evaluation receipts,
 exact decoded IDs, timing samples, and explicit incomplete/blocked

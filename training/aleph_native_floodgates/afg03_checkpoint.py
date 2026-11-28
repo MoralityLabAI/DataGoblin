@@ -12,6 +12,7 @@ import time
 from collections import Counter
 from pathlib import Path
 
+import afg03_nvml
 import native_cache as N
 import torch
 from torch.nn import functional as F
@@ -26,19 +27,75 @@ DEFAULT = dict(steps=64, max_new=8, repeats=3, threads=2, wall_seconds=1800,
                allocator_gib=10., precision="bf16", device="cuda:0")
 
 
+PAUSE_EXIT = 75
+THERMAL = dict(hot_c=82, cool_c=72, max_wait_seconds=600, cap_wait_seconds=60)
+
+
+class ThermalPause(RuntimeError):
+    """The GPU stayed hot or power-capped; stop cleanly so a supervisor can restart later."""
+
+
+class ThermalGate:
+    """Waits between bounded operations, never inside a timed region, until the GPU is cool and uncapped."""
+    def __init__(self, deadline):
+        self.nvml = afg03_nvml.open_nvml()
+        self.deadline = deadline
+        self.events = []
+        self.checks = 0
+
+    def read(self):
+        return None if self.nvml is None else self.nvml.read()
+
+    def gate(self, where):
+        if self.nvml is None:
+            return
+        self.checks += 1
+        r = first = self.read()
+        if (r["temperature_c"] or 0) < THERMAL["hot_c"] and not r["power_capped"]:
+            return
+        start = time.monotonic()
+        capped_since = start if r["power_capped"] else None
+        while (r["temperature_c"] or 0) > THERMAL["cool_c"] or r["power_capped"]:
+            self.deadline.check()
+            now = time.monotonic()
+            if now-start > THERMAL["max_wait_seconds"] or (
+                    capped_since is not None and now-capped_since > THERMAL["cap_wait_seconds"]):
+                self.events.append({"where": where, "seconds": now-start, "start": first, "end": r, "paused": True})
+                raise ThermalPause(f"GPU stayed hot or power-capped before {where}: {r}")
+            time.sleep(2)
+            r = self.read()
+            capped_since = (capped_since or time.monotonic()) if r["power_capped"] else None
+        self.events.append({"where": where, "seconds": time.monotonic()-start, "start": first, "end": r})
+
+    def receipt(self):
+        return {"thresholds": THERMAL, "nvml": self.nvml is not None, "checks": self.checks,
+                "waits": len(self.events), "wait_seconds": sum(e["seconds"] for e in self.events),
+                "events": self.events}
+
+
 class Deadline:
     def __init__(self, seconds):
         self.end = time.monotonic()+seconds
+        self.thermal = None
 
     def check(self):
         if time.monotonic() >= self.end:
             raise TimeoutError("AFG-03 wall limit at operation boundary")
+
+    def cool(self, where):
+        self.check()
+        if self.thermal is not None:
+            self.thermal.gate(where)
+
+    def reading(self):
+        return None if self.thermal is None else self.thermal.read()
 
 
 def source_manifest():
     here = Path(__file__).resolve().parent
     return {**N.SOURCE_MANIFEST,
             "afg03_checkpoint.py": N.file_sha(here/"afg03_checkpoint.py"),
+            "afg03_nvml.py": N.file_sha(here/"afg03_nvml.py"),
             "AFG03_PROTOCOL.md": N.file_sha(here/"AFG03_PROTOCOL.md")}
 
 
@@ -253,7 +310,7 @@ def teacher_references(d, by, n, deadline):
     for split in SPLITS:
         refs[split] = {}
         for w in by[split]:
-            deadline.check()
+            deadline.cool("teacher_reference")
             ids = w["ids"]
             try:
                 seq = N.serial(d, ids, n, diag)
@@ -441,14 +498,17 @@ def aggregate(rows):
 
 def evaluate(d, adapter, policy, k, rows, refs, n, deadline, *, timed=False):
     result = []
+    deadline.cool(f"{'development' if timed else 'calibration'}:{policy}:{k}")
     reset_peaks(d.device)
     sync(d.device)
+    before = deadline.reading() if timed else None
     wall, cpu = time.perf_counter(), time.process_time()
     for w in rows:
         deadline.check()
         result.append(decode(d, adapter, policy, k, w, n))
     sync(d.device)
     wall, cpu = time.perf_counter()-wall, time.process_time()-cpu
+    after = deadline.reading() if timed else None
     # Compare against independent reference outside the timed region.
     for r, w in zip(result, rows, strict=True):
         expected = refs[w["root"]][len(w["ids"]):]
@@ -464,7 +524,9 @@ def evaluate(d, adapter, policy, k, rows, refs, n, deadline, *, timed=False):
     timing = None
     if timed:
         timing = {"wall_seconds": wall, "cpu_seconds": cpu,
-                  "tokens_per_second": s["work"]["emitted_tokens"]/wall, "memory": memory(d.device)}
+                  "tokens_per_second": s["work"]["emitted_tokens"]/wall, "memory": memory(d.device),
+                  "gpu_before": before, "gpu_after": after,
+                  "power_capped": bool((before or {}).get("power_capped") or (after or {}).get("power_capped"))}
     return s, result, timing
 
 
@@ -482,13 +544,19 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
     observations = {}
     d = qualification_prompts = None
     started = time.perf_counter()
+    context = {"source_manifest": source_manifest(), "config": cfg, "data_sha256": data_sha,
+               "checkpoint_sha256": None if fixture else N.CHECKPOINT_SHA}
     try:
         vocab = 64 if fixture else 49152
         by, panel_receipt = parse_panel(data, vocab, fixture=fixture)
+        context["panel"] = panel_receipt
         atomic_json(out/"input_panel.json", data)
         stage = "device"
         device, hardware = setup_device(cfg)
         observations["hardware"] = hardware
+        if device.type == "cuda":
+            deadline.thermal = ThermalGate(deadline)
+            observations["gpu_at_start"] = deadline.reading()
         stage = "checkpoint"
         deadline.check()
         reset_peaks(device)
@@ -529,7 +597,7 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
         adapters, hashes = {}, {}
         fit_observations = {}
         for mode in N.MODES:
-            deadline.check()
+            deadline.cool(f"adapter_fit:{mode}")
             initial = make_adapter(d).eval().requires_grad_(False)
             adapters[mode+"_initial"] = initial
             hashes[mode+"_initial"] = N.tensor_hash(initial)
@@ -599,6 +667,8 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
         observations["final_memory"] = memory(device)
         observations["overall_peak_memory"] = overall_memory(observations)
         observations["elapsed_seconds"] = time.perf_counter()-started
+        if deadline.thermal is not None:
+            observations["thermal"] = deadline.thermal.receipt()
         path = out/"development_rollouts.jsonl"
         with path.open("x", encoding="utf-8") as f:
             for row in trace:
@@ -623,7 +693,10 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
         if d is not None:
             observations["overall_peak_memory"] = overall_memory(
                 {**observations, "at_failure": memory(d.device)})
-        atomic_json(out/"progress.json", {**failure, "observations": observations})
+        if deadline.thermal is not None:
+            observations["thermal"] = deadline.thermal.receipt()
+            observations["gpu_at_failure"] = deadline.reading()
+        atomic_json(out/"progress.json", {**failure, "context": context, "observations": observations})
         raise
 
 
@@ -793,7 +866,11 @@ def main():
         if sha != a.data_sha256:
             raise ValueError("operator token-panel hash mismatch")
         data = json.loads(a.data.read_text(encoding="utf-8"))
-    r = run(a.out, data, sha, cfg, checkpoint=a.checkpoint, fixture=a.fixture)
+    try:
+        r = run(a.out, data, sha, cfg, checkpoint=a.checkpoint, fixture=a.fixture)
+    except ThermalPause as error:
+        print(json.dumps({"status": "thermal_pause", "reason": str(error)[:500]}, sort_keys=True))
+        sys.exit(PAUSE_EXIT)
     print(json.dumps({"status": r["stable"]["status"], "cal_selected_policy": r["stable"]["cal_selected_policy"],
                       "decode": {p: v["median_tokens_per_second"]
                                  for p, v in r["observations"]["decode"].items()}}, sort_keys=True))
