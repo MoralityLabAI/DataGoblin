@@ -1,0 +1,261 @@
+{
+  "schema": "rv22z.native_probe.v1",
+  "upstream": "7fa19c90372b13d71676e6fef13819d2a18b9be3",
+  "audit": {
+    "schema": "datagoblin.distill_curriculum_audit.v1",
+    "reviewed_contract_commit": "7fa19c90372b13d71676e6fef13819d2a18b9be3",
+    "manifest_id": "4b4de3a735e8a0c3f2d5aab5393ce4cd50b6bc0bbcf3a9ca6f706deb7c6d0695",
+    "splits": {
+      "train": {
+        "roots": 48,
+        "actions": 408,
+        "distinct_exact_keys": 48
+      },
+      "calibration": {
+        "roots": 16,
+        "actions": 136,
+        "distinct_exact_keys": 16
+      },
+      "public_eval": {
+        "roots": 32,
+        "actions": 272,
+        "distinct_exact_keys": 32
+      }
+    },
+    "custody": "evaluator_only",
+    "training_admission": false
+  },
+  "probe": {
+    "train_roots": 128,
+    "calibration_roots": 32,
+    "train_examples": 6286,
+    "thresholds": {
+      "ff": [
+        0.1,
+        0.1,
+        0.05
+      ],
+      "trm": [
+        0.025,
+        0,
+        0.025
+      ]
+    },
+    "seeds": [
+      29,
+      31,
+      37
+    ],
+    "head_macs": {
+      "ff": 493,
+      "trm": 492
+    },
+    "panel_key_hashes": {
+      "train": "97ef2ffd6e48817d4d0c3555a3fb91d6c86dfa3114069feb6bea1350f7d784bc",
+      "cal": "f2e6f9f017418318c500ee74a480f314a60a2604a7bfd58d20061d3801cfadfe",
+      "native_eval": "72a7d4152ed90916881566a5383aaa05d052cc4094340924d5b082cc11450f35",
+      "fresh": "2c4a7066b1484d5b34577b10e7c70d8f6fd9bbfc965bf3b647caefa8381b5ed5",
+      "foundation": "c73ccebcb14eef7ac4d08ae43ad90eee3733a06dc7f4d1537d492e062ba5f670"
+    },
+    "panels": {
+      "native_eval": {
+        "roots": 32,
+        "means": {
+          "stop": {
+            "utility": 0.2370389886770935,
+            "regret": 6.358760980023304,
+            "mean_neural_candidate_calls": 0
+          },
+          "one_step": {
+            "utility": 4.818429044712157,
+            "regret": 1.77737092398824,
+            "mean_neural_candidate_calls": 0
+          },
+          "two_step": {
+            "utility": 6.371971141840377,
+            "regret": 0.22382882686001937,
+            "mean_neural_candidate_calls": 0
+          },
+          "ff": {
+            "utility": 6.10480734986273,
+            "regret": 0.4909926188376664,
+            "mean_neural_candidate_calls": 20.958333333333332
+          },
+          "trm": {
+            "utility": 6.08976166655498,
+            "regret": 0.5060383021454162,
+            "mean_neural_candidate_calls": 21.885416666666668
+          },
+          "exact": {
+            "utility": 6.595799968700396,
+            "regret": 0,
+            "mean_neural_candidate_calls": 0
+          }
+        },
+        "paired": {
+          "trm_vs_one_step": {
+            "delta": 1.271332621842824,
+            "ci95": [
+              0.555250647740505,
+              2.0904106205081825
+            ]
+          },
+          "trm_vs_two_step": {
+            "delta": -0.28220947528539686,
+            "ci95": [
+              -0.5644809221480959,
+              -0.0065249155814501485
+            ]
+          },
+          "trm_vs_ff": {
+            "delta": -0.015045683307749927,
+            "ci95": [
+              -0.14794158553244866,
+              0.10682522724749259
+            ]
+          },
+          "ff_vs_one_step": {
+            "delta": 1.2863783051505742,
+            "ci95": [
+              0.5904368428474472,
+              2.0852665638844483
+            ]
+          }
+        }
+      },
+      "fresh": {
+        "roots": 64,
+        "means": {
+          "stop": {
+            "utility": 0.3708733117030078,
+            "regret": 6.683362367228149,
+            "mean_neural_candidate_calls": 0
+          },
+          "one_step": {
+            "utility": 5.326028198593424,
+            "regret": 1.7282074803377332,
+            "mean_neural_candidate_calls": 0
+          },
+          "two_step": {
+            "utility": 6.824629495528127,
+            "regret": 0.2296061834030298,
+            "mean_neural_candidate_calls": 0
+          },
+          "ff": {
+            "utility": 6.586967137641873,
+            "regret": 0.4672685412892853,
+            "mean_neural_candidate_calls": 20.015625
+          },
+          "trm": {
+            "utility": 6.541820805263227,
+            "regret": 0.5124148736679296,
+            "mean_neural_candidate_calls": 20.994791666666668
+          },
+          "exact": {
+            "utility": 7.054235678931157,
+            "regret": 0,
+            "mean_neural_candidate_calls": 0
+          }
+        },
+        "paired": {
+          "trm_vs_one_step": {
+            "delta": 1.2157926066698037,
+            "ci95": [
+              0.7601978293391136,
+              1.7236429511158566
+            ]
+          },
+          "trm_vs_two_step": {
+            "delta": -0.2828086902648998,
+            "ci95": [
+              -0.4731277713721985,
+              -0.10291166942612871
+            ]
+          },
+          "trm_vs_ff": {
+            "delta": -0.045146332378644335,
+            "ci95": [
+              -0.1536581609568468,
+              0.05662793946928643
+            ]
+          },
+          "ff_vs_one_step": {
+            "delta": 1.260938939048448,
+            "ci95": [
+              0.8227941849488368,
+              1.7480886170089978
+            ]
+          }
+        }
+      },
+      "foundation": {
+        "roots": 64,
+        "means": {
+          "stop": {
+            "utility": 0.5696995947372849,
+            "regret": 4.471461473148124,
+            "mean_neural_candidate_calls": 0
+          },
+          "one_step": {
+            "utility": 4.594302529966889,
+            "regret": 0.44685853791852026,
+            "mean_neural_candidate_calls": 0
+          },
+          "two_step": {
+            "utility": 5.039959144808487,
+            "regret": 0.0012019230769230796,
+            "mean_neural_candidate_calls": 0
+          },
+          "ff": {
+            "utility": 4.561260198312289,
+            "regret": 0.47990086957311967,
+            "mean_neural_candidate_calls": 5.765625
+          },
+          "trm": {
+            "utility": 4.529499967158511,
+            "regret": 0.5116611007268974,
+            "mean_neural_candidate_calls": 5.859375
+          },
+          "exact": {
+            "utility": 5.041161067885409,
+            "regret": 0,
+            "mean_neural_candidate_calls": 0
+          }
+        },
+        "paired": {
+          "trm_vs_one_step": {
+            "delta": -0.06480256280837711,
+            "ci95": [
+              -0.35809784200010625,
+              0.24388633045017044
+            ]
+          },
+          "trm_vs_two_step": {
+            "delta": -0.5104591776499743,
+            "ci95": [
+              -0.800284161348674,
+              -0.2679599118432527
+            ]
+          },
+          "trm_vs_ff": {
+            "delta": -0.031760231153777706,
+            "ci95": [
+              -0.11066749764423844,
+              0.04297213110323826
+            ]
+          },
+          "ff_vs_one_step": {
+            "delta": -0.033042331654599376,
+            "ci95": [
+              -0.30072959992891457,
+              0.263081086860685
+            ]
+          }
+        }
+      }
+    }
+  },
+  "custody": "synthetic_probe_only",
+  "training_admission": false,
+  "scope": "Fresh synthetic train labels recomputed locally; reference referee never used for fitting."
+}

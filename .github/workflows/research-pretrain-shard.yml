@@ -1,0 +1,60 @@
+name: DG research pretraining shard
+on:
+  push:
+    branches:
+      - research/verifiers-v2.2-adaptive-research-20261128
+    paths:
+      - ".github/workflows/research-pretrain-shard.yml"
+      - "src/datagoblin/research_v2_2/research_pretrain.py"
+      - "tests/unit/test_research_v2_2_research_pretrain.py"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: MoralityLabAI/Compactification-Theory
+          ref: 7fa19c90372b13d71676e6fef13819d2a18b9be3
+          path: _distill
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install -e . "numpy==2.2.6" pytest "tokenizers==0.22.2"
+      - run: python -m pytest tests/unit/test_research_v2_2_research_pretrain.py
+      - name: Fetch frozen tokenizer
+        continue-on-error: true
+        run: |
+          curl --fail --location --retry 2 --max-time 45 -o "$RUNNER_TEMP/tokenizer.json" https://huggingface.co/HuggingFaceTB/SmolLM2-135M/resolve/93efa2f097d58c2a74874c7e644dbc9b0cee75a2/tokenizer.json
+          echo "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c  $RUNNER_TEMP/tokenizer.json" | sha256sum -c -
+      - name: Generate and independently grade fresh research records
+        run: |
+          args=()
+          if [ -f "$RUNNER_TEMP/tokenizer.json" ] && echo "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c  $RUNNER_TEMP/tokenizer.json" | sha256sum -c -; then
+            args+=(--tokenizer "$RUNNER_TEMP/tokenizer.json")
+          fi
+          python -m datagoblin.research_v2_2.research_pretrain --distill-checkout _distill --out "$RUNNER_TEMP/dg-research" "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-research-pretrain-v1-train
+          path: ${{ runner.temp }}/dg-research/train/
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dg-research-pretrain-v1-development-DO-NOT-TRAIN
+          path: ${{ runner.temp }}/dg-research/development/
+          if-no-files-found: error
+          retention-days: 90

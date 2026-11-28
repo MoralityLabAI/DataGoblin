@@ -1,0 +1,223 @@
+{
+  "distill_commit": "7fa19c90372b13d71676e6fef13819d2a18b9be3",
+  "known_excluded_roots": 800,
+  "manifest_id": "a752b77a18bd6b1f62079dd888308d4e170b6426b68630082bc20eefc93e8910",
+  "max_presentations_per_root": 4,
+  "max_views_per_root": 3,
+  "production_launch_authorized": false,
+  "release_scope": "candidate; independent steward and global exclusion/rights audit pending",
+  "schema": "dg-research-pretrain-v1",
+  "source_commit": "1a73ecc4db75857973f9472ca86bc435af48b433",
+  "source_kind": "fresh_project_generated_synthetic",
+  "sources": {
+    "checker": "Distill/research_oracle.py",
+    "memory": "RV22-S/U/X analytic models",
+    "native": "Distill/research_cases.py"
+  },
+  "splits": {
+    "development": {
+      "families": {
+        "adaptive_evidence": {
+          "loss_tokens": 19329,
+          "max_context": 734,
+          "positions": 89830,
+          "prompt_bytes": 160499,
+          "records": 192,
+          "roots": 64,
+          "target_bytes": 54648,
+          "transcript_bytes": 216875,
+          "views_decision": 64,
+          "views_matched_control": 64,
+          "views_repair": 64
+        },
+        "paired_causal_gate": {
+          "loss_tokens": 22544,
+          "max_context": 1085,
+          "positions": 145590,
+          "prompt_bytes": 210168,
+          "records": 192,
+          "roots": 64,
+          "target_bytes": 64714,
+          "transcript_bytes": 276610,
+          "views_decision": 64,
+          "views_matched_control": 64,
+          "views_repair": 64
+        },
+        "proof_obligations": {
+          "loss_tokens": 14090,
+          "max_context": 641,
+          "positions": 88883,
+          "prompt_bytes": 198191,
+          "records": 192,
+          "roots": 64,
+          "target_bytes": 41227,
+          "transcript_bytes": 241146,
+          "views_decision": 64,
+          "views_matched_control": 64,
+          "views_repair": 64
+        },
+        "research_memory": {
+          "loss_tokens": 11957,
+          "max_context": 191,
+          "positions": 23375,
+          "prompt_bytes": 36121,
+          "records": 192,
+          "roots": 64,
+          "target_bytes": 29371,
+          "transcript_bytes": 67220,
+          "views_decision": 64,
+          "views_matched_control": 64,
+          "views_repair": 64
+        },
+        "research_portfolio": {
+          "loss_tokens": 10655,
+          "max_context": 661,
+          "positions": 96511,
+          "prompt_bytes": 211873,
+          "records": 192,
+          "roots": 64,
+          "target_bytes": 30977,
+          "transcript_bytes": 244578,
+          "views_decision": 64,
+          "views_matched_control": 64,
+          "views_repair": 64
+        },
+        "robust_discrimination": {
+          "loss_tokens": 10410,
+          "max_context": 626,
+          "positions": 82945,
+          "prompt_bytes": 174687,
+          "records": 192,
+          "roots": 64,
+          "target_bytes": 33146,
+          "transcript_bytes": 209561,
+          "views_decision": 64,
+          "views_matched_control": 64,
+          "views_repair": 64
+        }
+      },
+      "files": {
+        "packed.jsonl": {
+          "bytes": 5861327,
+          "sha256": "1685b95b5690a64de6e401bb21a9b9122b104ada5db9fa6b54c36e12141f98f4"
+        },
+        "records.jsonl": {
+          "bytes": 2552152,
+          "sha256": "b194d09fa12f4d7b14ca292533129bba54e31b6a9fe085b89857502830bedd79"
+        },
+        "roots.json": {
+          "bytes": 26883,
+          "sha256": "1e42e5b4cd6b41473d58ace8c8413bbc09a9528ec80379a0ce2c32a4ad3a68db"
+        }
+      },
+      "records": 1152,
+      "rejected": {
+        "root_overlap": 10
+      },
+      "roots": 384
+    },
+    "train": {
+      "families": {
+        "adaptive_evidence": {
+          "loss_tokens": 160540,
+          "max_context": 768,
+          "positions": 729367,
+          "prompt_bytes": 1295357,
+          "records": 1536,
+          "roots": 512,
+          "target_bytes": 453200,
+          "transcript_bytes": 1762381,
+          "views_decision": 512,
+          "views_matched_control": 512,
+          "views_repair": 512
+        },
+        "paired_causal_gate": {
+          "loss_tokens": 179881,
+          "max_context": 1098,
+          "positions": 1167351,
+          "prompt_bytes": 1686185,
+          "records": 1536,
+          "roots": 512,
+          "target_bytes": 517791,
+          "transcript_bytes": 2217800,
+          "views_decision": 512,
+          "views_matched_control": 512,
+          "views_repair": 512
+        },
+        "proof_obligations": {
+          "loss_tokens": 110005,
+          "max_context": 650,
+          "positions": 707398,
+          "prompt_bytes": 1585235,
+          "records": 1536,
+          "roots": 512,
+          "target_bytes": 325527,
+          "transcript_bytes": 1924586,
+          "views_decision": 512,
+          "views_matched_control": 512,
+          "views_repair": 512
+        },
+        "research_memory": {
+          "loss_tokens": 94699,
+          "max_context": 194,
+          "positions": 185743,
+          "prompt_bytes": 287669,
+          "records": 1536,
+          "roots": 512,
+          "target_bytes": 233788,
+          "transcript_bytes": 535281,
+          "views_decision": 512,
+          "views_matched_control": 512,
+          "views_repair": 512
+        },
+        "research_portfolio": {
+          "loss_tokens": 83838,
+          "max_context": 671,
+          "positions": 771629,
+          "prompt_bytes": 1698736,
+          "records": 1536,
+          "roots": 512,
+          "target_bytes": 245457,
+          "transcript_bytes": 1958017,
+          "views_decision": 512,
+          "views_matched_control": 512,
+          "views_repair": 512
+        },
+        "robust_discrimination": {
+          "loss_tokens": 79707,
+          "max_context": 632,
+          "positions": 659793,
+          "prompt_bytes": 1397109,
+          "records": 1536,
+          "roots": 512,
+          "target_bytes": 257786,
+          "transcript_bytes": 1668719,
+          "views_decision": 512,
+          "views_matched_control": 512,
+          "views_repair": 512
+        }
+      },
+      "files": {
+        "packed.jsonl": {
+          "bytes": 46893583,
+          "sha256": "bd8d6f29eeecade1266e69dfa179186f33c2c74680dc2be5a82b1a6f167b83af"
+        },
+        "records.jsonl": {
+          "bytes": 20385833,
+          "sha256": "7da6485c6533da87257364c05fae4a09839a5af0f97ba8d582fc7a59dba4dfb0"
+        },
+        "roots.json": {
+          "bytes": 215043,
+          "sha256": "5f698d9c7467003673d4ebe43099ea1b298c2c3af81aac697afa7f0930c8f0d1"
+        }
+      },
+      "records": 9216,
+      "rejected": {
+        "root_overlap": 63
+      },
+      "roots": 3072
+    }
+  },
+  "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "training_ready": false
+}

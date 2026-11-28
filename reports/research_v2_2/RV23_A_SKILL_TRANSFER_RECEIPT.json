@@ -1,0 +1,407 @@
+{
+  "schema": "rv23a.family_transfer.v1",
+  "upstream": "7fa19c90372b13d71676e6fef13819d2a18b9be3",
+  "train_roots_per_family": 24,
+  "eval_roots_per_family": 32,
+  "root_ids_sha256": "ea0ff83e7322613a5624690e06e2741ad4e0bdad96b1452a20da793552d635b2",
+  "limits": [
+    64,
+    256
+  ],
+  "families": {
+    "robust_discrimination": {
+      "oracle_infeasible": 10,
+      "limits": {
+        "64": {
+          "means": {
+            "analytic": {
+              "optimal": 0.5,
+              "answered": 0.6875,
+              "regret": 0.013508458444388916,
+              "inspected": 64,
+              "exhausted": 0
+            },
+            "random": {
+              "optimal": 0.21875,
+              "answered": 0.5,
+              "regret": 0.07557006714734171,
+              "inspected": 64,
+              "exhausted": 0
+            },
+            "in_family": {
+              "optimal": 0.5,
+              "answered": 0.5,
+              "regret": 0.039888188918361336,
+              "inspected": 64,
+              "exhausted": 0
+            },
+            "transfer": {
+              "optimal": 0.09375,
+              "answered": 0.09375,
+              "regret": 0.31246896850930594,
+              "inspected": 64,
+              "exhausted": 0
+            },
+            "shuffled": {
+              "optimal": 0.03125,
+              "answered": 0.03125,
+              "regret": 0.348045891586229,
+              "inspected": 64,
+              "exhausted": 0
+            }
+          },
+          "transfer_vs": {
+            "analytic": {
+              "delta": -0.40625,
+              "ci95": [
+                -0.59375,
+                -0.21875
+              ]
+            },
+            "in_family": {
+              "delta": -0.40625,
+              "ci95": [
+                -0.5625,
+                -0.25
+              ]
+            },
+            "shuffled": {
+              "delta": 0.0625,
+              "ci95": [
+                0,
+                0.15625
+              ]
+            }
+          }
+        },
+        "256": {
+          "means": {
+            "analytic": {
+              "optimal": 0.625,
+              "answered": 0.6875,
+              "regret": 0.004872563718140932,
+              "inspected": 251.3125,
+              "exhausted": 0.09375
+            },
+            "random": {
+              "optimal": 0.625,
+              "answered": 0.65625,
+              "regret": 0.004968869731800767,
+              "inspected": 251.3125,
+              "exhausted": 0.09375
+            },
+            "in_family": {
+              "optimal": 0.53125,
+              "answered": 0.53125,
+              "regret": 0.029070881226053644,
+              "inspected": 251.3125,
+              "exhausted": 0.09375
+            },
+            "transfer": {
+              "optimal": 0.5,
+              "answered": 0.5,
+              "regret": 0.039888188918361336,
+              "inspected": 251.3125,
+              "exhausted": 0.09375
+            },
+            "shuffled": {
+              "optimal": 0.40625,
+              "answered": 0.5,
+              "regret": 0.04712076945057422,
+              "inspected": 251.3125,
+              "exhausted": 0.09375
+            }
+          },
+          "transfer_vs": {
+            "analytic": {
+              "delta": -0.125,
+              "ci95": [
+                -0.28125,
+                0
+              ]
+            },
+            "in_family": {
+              "delta": -0.03125,
+              "ci95": [
+                -0.09375,
+                0
+              ]
+            },
+            "shuffled": {
+              "delta": 0.09375,
+              "ci95": [
+                0,
+                0.21875
+              ]
+            }
+          }
+        }
+      }
+    },
+    "research_portfolio": {
+      "oracle_infeasible": 0,
+      "limits": {
+        "64": {
+          "means": {
+            "analytic": {
+              "optimal": 0.9375,
+              "answered": 1,
+              "regret": 0.009309581320450887,
+              "inspected": 61.15625,
+              "exhausted": 0.09375
+            },
+            "random": {
+              "optimal": 0.78125,
+              "answered": 1,
+              "regret": 0.028191047705314012,
+              "inspected": 61.15625,
+              "exhausted": 0.09375
+            },
+            "in_family": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 61.15625,
+              "exhausted": 0.09375
+            },
+            "transfer": {
+              "optimal": 0.90625,
+              "answered": 1,
+              "regret": 0.01451791465378422,
+              "inspected": 61.15625,
+              "exhausted": 0.09375
+            },
+            "shuffled": {
+              "optimal": 0.8125,
+              "answered": 1,
+              "regret": 0.01927981941568898,
+              "inspected": 61.15625,
+              "exhausted": 0.09375
+            }
+          },
+          "transfer_vs": {
+            "analytic": {
+              "delta": -0.03125,
+              "ci95": [
+                -0.09375,
+                0
+              ]
+            },
+            "in_family": {
+              "delta": -0.09375,
+              "ci95": [
+                -0.21875,
+                0
+              ]
+            },
+            "shuffled": {
+              "delta": 0.09375,
+              "ci95": [
+                0,
+                0.21875
+              ]
+            }
+          }
+        },
+        "256": {
+          "means": {
+            "analytic": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 165.21875,
+              "exhausted": 0.75
+            },
+            "random": {
+              "optimal": 0.96875,
+              "answered": 1,
+              "regret": 0.001116071428571428,
+              "inspected": 165.21875,
+              "exhausted": 0.75
+            },
+            "in_family": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 165.21875,
+              "exhausted": 0.75
+            },
+            "transfer": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 165.21875,
+              "exhausted": 0.75
+            },
+            "shuffled": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 165.21875,
+              "exhausted": 0.75
+            }
+          },
+          "transfer_vs": {
+            "analytic": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            },
+            "in_family": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            },
+            "shuffled": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            }
+          }
+        }
+      }
+    },
+    "proof_obligations": {
+      "oracle_infeasible": 0,
+      "limits": {
+        "64": {
+          "means": {
+            "analytic": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 59.0625,
+              "exhausted": 0.5
+            },
+            "random": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 59.0625,
+              "exhausted": 0.5
+            },
+            "in_family": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 59.0625,
+              "exhausted": 0.5
+            },
+            "transfer": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 59.0625,
+              "exhausted": 0.5
+            },
+            "shuffled": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 59.0625,
+              "exhausted": 0.5
+            }
+          },
+          "transfer_vs": {
+            "analytic": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            },
+            "in_family": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            },
+            "shuffled": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "256": {
+          "means": {
+            "analytic": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 127.125,
+              "exhausted": 1
+            },
+            "random": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 127.125,
+              "exhausted": 1
+            },
+            "in_family": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 127.125,
+              "exhausted": 1
+            },
+            "transfer": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 127.125,
+              "exhausted": 1
+            },
+            "shuffled": {
+              "optimal": 1,
+              "answered": 1,
+              "regret": 0,
+              "inspected": 127.125,
+              "exhausted": 1
+            }
+          },
+          "transfer_vs": {
+            "analytic": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            },
+            "in_family": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            },
+            "shuffled": {
+              "delta": 0,
+              "ci95": [
+                0,
+                0
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "training_admission": false,
+  "paired_causal_gate": {
+    "roots": 32,
+    "exact": 32,
+    "pooled": 0,
+    "pooled_gate_mismatches": 4
+  }
+}

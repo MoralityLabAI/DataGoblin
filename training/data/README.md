@@ -1,5 +1,9 @@
 # Aleph data planning
 
+## Research decision pretraining shard (2026-11-28)
+
+[DG research pretraining candidate v1](research_pretrain_v1/README.md) contains 9,216 independently graded views from 3,072 fresh roots: 4,221,281 frozen-Aleph token positions and 708,670 loss-bearing positions. The development shard is separate. Candidate custody remains unreleased pending the existing corpus intake gates; no change to the 10M release or production quotas.
+
 ## Jinn/Beast specialist records
 
 [Research Verifiers v2](../../docs/research_verifiers_v2.md#jinnbeast-specialist-intake)
