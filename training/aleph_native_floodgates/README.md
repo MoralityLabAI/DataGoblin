@@ -68,3 +68,16 @@ panel on a competent checkpoint, draft-only adapter fit, full greedy
 qualification, then actual serving timing at matched precision and
 context. Do not infer native acceleration from the smaller HybridTRMLDT
 results. All fixture traces are development-only and training_ready=false.
+
+## AFG-01 result
+
+[Native fixture campaign 46104294299](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46104294299) passed FP32 and BF16 cache qualification and audited all 16 adapter rollouts. FP32: 119,552 compared values, 116 exact argmax positions, max absolute difference 2.92e-6, zero greedy mismatches. First/deep cache emitted 1.778/1.600 tokens per verification. Random-weight reduced-width target only. The separate repository CI passed 660 tests (27 skips) and found nine new lint diagnostics in native_cache.py; these are corrected without changing the archived training sources.
+
+## AFG-02: trained native synthetic targets
+
+See [prospective protocol](AFG02_PROTOCOL.md). Two independently fitted native targets, disjoint target/adapter/evaluation prefixes, a declared CAL competence gate, trained and untrained first/deep adapters, and serial/repetition baselines. CAL selects a draft length for each policy; all final IDs must equal the independently checked greedy target. The audit refits both targets and adapters, replays CAL selection and compares every trace. The default campaign plans 192 dedicated trace episodes. All output is nonadmitted public development material. This does not use the actual 1B checkpoint.
+
+```sh
+python training/aleph_native_floodgates/afg02_trained.py --out /tmp/afg02
+python training/aleph_native_floodgates/afg02_trained.py --audit /tmp/afg02
+```
