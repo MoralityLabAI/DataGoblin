@@ -23,6 +23,8 @@ from .research_v2.transport import TransportError, request_action, validate_bind
 
 SCHEMA = "datagoblin-goblinbench-sf09-run-v1"
 HYBRID_REVISION = "db5aef512bb0346e2cb60eded03984bfb7f84322"
+FLOODGATES_REVISION = "8e088e91c419b805edcd2c68deedf0321c9429f5"
+FLOODGATES_SCHEMA = "datagoblin-goblinbench-fg09-run-v1"
 GYMS = tuple(f"GSF-{i:02}" for i in range(1, 9))
 MAX_TURNS = 4
 MAX_LINE = 1048576
@@ -30,6 +32,7 @@ SESSION_SECONDS = 150
 RUN_SECONDS = 1200
 MAX_NEW_TOKENS = 512
 MODULE = "research_gym.benchmarks.goblin_skill_factory.goblinbench"
+FLOODGATES_MODULE = "research_gym.benchmarks.floodgates_gym.fg09_research"
 
 
 def digest(value: Any) -> str:
@@ -61,13 +64,13 @@ def parse_action(raw: str) -> dict[str, Any] | None:
         return None
 
 
-def checked_checkout(path: Path) -> Path:
+def checked_checkout(path: Path, expected_revision: str = HYBRID_REVISION) -> Path:
     path = path.resolve()
     def git(*args: str) -> str:
         return subprocess.check_output(
             ["git", "-C", str(path), *args], timeout=15, text=True
         ).strip()
-    if git("rev-parse", "HEAD") != HYBRID_REVISION:
+    if git("rev-parse", "HEAD") != expected_revision:
         raise ValueError("HybridTRMLDT must be checked out at the pinned revision")
     if git("status", "--porcelain", "--untracked-files=all"):
         raise ValueError("HybridTRMLDT checkout must be clean")
@@ -121,6 +124,29 @@ def receive(messages: queue.Queue, deadline: float) -> dict[str, Any]:
     return value
 
 
+def verify_floodgates_artifacts(path: Path, row: dict[str, Any]) -> None:
+    result = row["result"]
+    setup = row["setup"]
+    entries = result["setup_artifacts"]
+    if set(entries) != {"target", "adapters"} or set(entries["adapters"]) != {"first", "deep"}:
+        raise ValueError("incomplete Floodgates setup inventory")
+    expected = [(entries["target"], "target.pt"), *(
+        (entries["adapters"][mode], f"{mode}-adapter.pt") for mode in ("first", "deep")
+    )]
+    for entry, name in expected:
+        if entry["artifact"] != name or hashlib.sha256((path / name).read_bytes()).hexdigest() != entry["artifact_sha256"]:
+            raise ValueError("Floodgates setup artifact digest")
+    selected = result.get("artifact")
+    if selected is not None:
+        descriptor = json.loads((path / "selected.weights").read_text(encoding="utf-8"))
+        if (digest(descriptor) != selected["weights_hash"] or descriptor["choice"] != selected["choice"]
+                or descriptor["target_hash"] != setup["target"]["weights_hash"]
+                or descriptor["adapter_hashes"] != {
+                    mode: setup["adapters"][mode]["weights_hash"] for mode in ("first", "deep")
+                }):
+            raise ValueError("Floodgates policy identity mismatch")
+
+
 def verify_episode(path: Path, gym: str, role: str, index: int) -> dict[str, Any]:
     row = json.loads((path / "episode.json").read_text(encoding="utf-8"))
     seal = row.pop("receipt_hash")
@@ -136,6 +162,10 @@ def verify_episode(path: Path, gym: str, role: str, index: int) -> dict[str, Any
         actual = hashlib.sha256((path / "selected.weights").read_bytes()).hexdigest()
         if actual != artifact["sha256"]:
             raise ValueError("selected artifact digest failed")
+    if gym == "GSF-10":
+        if row.get("fg09_schema") != "hybrid.gsf.floodgates.fg09.v1":
+            raise ValueError("unexpected Floodgates schema")
+        verify_floodgates_artifacts(path, row)
     if type(result["score"]) not in (int, float) or not 0 <= result["score"] <= 1:
         raise ValueError("invalid evaluator score")
     return {**row, "receipt_hash": seal}
@@ -154,11 +184,14 @@ def episode(hybrid: Path, entry: dict[str, Any], binding: dict[str, Any],
         credential_env = binding.get("api_key_env")
         if credential_env:
             env.pop(credential_env, None)
-        env.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", PYTHONHASHSEED="0")
+        env.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", PYTHONHASHSEED="0",
+                   OPENBLAS_NUM_THREADS="1", ATEN_CPU_CAPABILITY="default",
+                   MKL_CBWR="COMPATIBLE", ONEDNN_MAX_CPU_ISA="SSE41")
+        module = FLOODGATES_MODULE if gym == "GSF-10" else MODULE
         messages: queue.Queue = queue.Queue()
         with output.with_suffix(".stderr.log").open("xb") as stderr:
             process = subprocess.Popen(
-                [sys.executable, "-m", MODULE, "--session", gym, role, str(index),
+                [sys.executable, "-m", module, "--session", gym, role, str(index),
                  "--out", str(output.resolve())],
                 cwd=hybrid, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=stderr,
             )
@@ -221,11 +254,15 @@ def episode(hybrid: Path, entry: dict[str, Any], binding: dict[str, Any],
 
 
 def run(hybrid: Path, entry: dict[str, Any], binding: dict[str, Any], role: str,
-        per_gym: int, out: Path) -> dict[str, Any]:
+        per_gym: int, out: Path, *, suite: str = "skills") -> dict[str, Any]:
+    if suite not in ("skills", "floodgates"):
+        raise ValueError("unsupported suite")
+    gyms = ("GSF-10",) if suite == "floodgates" else GYMS
+    revision = FLOODGATES_REVISION if suite == "floodgates" else HYBRID_REVISION
     if role not in ("development", "trace_train") or not 1 <= per_gym <= 4:
         raise ValueError("unsupported public suite")
     validate_binding(entry, binding)
-    hybrid = checked_checkout(hybrid)
+    hybrid = checked_checkout(hybrid, revision)
     out = out.resolve()
     if out == hybrid or out.is_relative_to(hybrid):
         raise ValueError("evaluator output must be outside the checkout")
@@ -234,7 +271,7 @@ def run(hybrid: Path, entry: dict[str, Any], binding: dict[str, Any], role: str,
     rows = []
     with (out / "episodes.jsonl").open("x", encoding="utf-8") as f:
         for index in range(per_gym):
-            for gym in GYMS:
+            for gym in gyms:
                 row = episode(hybrid, entry, binding, gym, role, index,
                               out / f"{gym}-{index:02}", deadline)
                 rows.append(row)
@@ -242,10 +279,11 @@ def run(hybrid: Path, entry: dict[str, Any], binding: dict[str, Any], role: str,
                 f.flush()
     families = {
         gym: sum(r["score"] for r in rows if r["gym"] == gym) / per_gym
-        for gym in GYMS
+        for gym in gyms
     }
-    report = {"schema": SCHEMA, "status": "public_development_only",
-              "hybrid_revision": HYBRID_REVISION, "model_id": entry["id"],
+    report = {"schema": FLOODGATES_SCHEMA if suite == "floodgates" else SCHEMA,
+              "status": "public_development_only",
+              "hybrid_revision": revision, "model_id": entry["id"],
               "binding_sha256": digest(binding), "registry_entry_sha256": digest(entry),
               "identity_verification": "operator_attested", "role": role,
               "cases": len(rows), "completed": sum(r["status"] == "completed" for r in rows),
@@ -265,12 +303,13 @@ def main() -> None:
     p.add_argument("--model-id", required=True)
     p.add_argument("--binding", type=Path, required=True)
     p.add_argument("--role", choices=("development", "trace_train"), default="development")
+    p.add_argument("--suite", choices=("skills", "floodgates"), default="skills")
     p.add_argument("--per-gym", type=int, default=1)
     p.add_argument("--out", type=Path, required=True)
     a = p.parse_args()
     entry = registry(a.registry)[a.model_id]
     binding = json.loads(a.binding.read_text(encoding="utf-8"))
-    report = run(a.hybrid, entry, binding, a.role, a.per_gym, a.out)
+    report = run(a.hybrid, entry, binding, a.role, a.per_gym, a.out, suite=a.suite)
     print(json.dumps(report, sort_keys=True))
 
 
