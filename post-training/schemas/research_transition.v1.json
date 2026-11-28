@@ -1,0 +1,487 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:datagoblin:posttrain:research-transition:v1",
+  "title": "Research transition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "campaign_id",
+    "trajectory_id",
+    "root_id",
+    "split",
+    "step",
+    "behavior",
+    "state_before_sha256",
+    "state_after_sha256",
+    "action",
+    "outcome",
+    "cost",
+    "termination",
+    "reward"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "dg.research.transition.v1"
+    },
+    "campaign_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trajectory_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "split": {
+      "enum": [
+        "train",
+        "dev",
+        "sealed_test"
+      ]
+    },
+    "step": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "parent_transition_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "quotient_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "quotient_certificate_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "model_revision",
+        "policy_revision",
+        "prompt_sha256",
+        "source_rights_status"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "teacher",
+            "student",
+            "heuristic",
+            "human",
+            "synthetic"
+          ]
+        },
+        "model_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_rights_status": {
+          "enum": [
+            "reviewed_allowed",
+            "pending",
+            "restricted"
+          ]
+        },
+        "action_logprob": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "maximum": 0
+        }
+      }
+    },
+    "state_before_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "state_after_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "payload_sha256",
+        "hypothesis",
+        "alternatives",
+        "evidence_before"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "inspect",
+            "hypothesize",
+            "design",
+            "execute",
+            "verify",
+            "revise",
+            "retrieve",
+            "allocate_loops",
+            "stop"
+          ]
+        },
+        "payload_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "hypothesis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "public_rationale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "forecast_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_before": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "uniqueItems": true
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "action_sha256",
+              "status"
+            ],
+            "properties": {
+              "action_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "status": {
+                "enum": [
+                  "proposed",
+                  "executed",
+                  "verified"
+                ]
+              },
+              "outcome_receipt_sha256": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "verifier_revision",
+        "receipt_sha256",
+        "evidence_after"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "verified_success",
+            "verified_failure",
+            "unknown",
+            "invalid"
+          ]
+        },
+        "verifier_revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "receipt_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_after": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ru",
+        "external_api_usd",
+        "recurrent_visits",
+        "verifier_calls"
+      ],
+      "properties": {
+        "ru": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "external_api_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "recurrent_visits": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "verifier_calls": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "wall_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "termination": {
+      "enum": [
+        "continuing",
+        "terminal",
+        "truncated"
+      ]
+    },
+    "reward": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scorer_revision",
+        "vector",
+        "scalar"
+      ],
+      "properties": {
+        "scorer_revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vector": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verified_progress",
+            "information_gain",
+            "calibration",
+            "integrity_violation"
+          ],
+          "properties": {
+            "verified_progress": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "information_gain": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "calibration": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "integrity_violation": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        },
+        "scalar": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "verified_success",
+                  "verified_failure"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "properties": {
+              "receipt_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "verifier_revision": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "unknown",
+                  "invalid"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reward": {
+            "properties": {
+              "scalar": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "quotient_id"
+        ],
+        "properties": {
+          "quotient_id": {
+            "type": "string"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "quotient_certificate_sha256"
+        ],
+        "properties": {
+          "quotient_certificate_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    }
+  ]
+}
