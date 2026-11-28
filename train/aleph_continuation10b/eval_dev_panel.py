@@ -134,37 +134,56 @@ def main() -> int:
     parser.add_argument("--device", choices=("tpu", "cuda"), default="tpu")
     parser.add_argument("--run-name", type=str, default="stage_100m_tpu_v5e1")
     parser.add_argument("--workers", type=int, default=24)
+    parser.add_argument("--prior-dir", type=Path, default=None)
+    parser.add_argument("--run-dir", type=Path, default=None)
+    parser.add_argument("--dev-dir", type=Path, default=None)
+    parser.add_argument("--out-json", type=Path, default=None)
     args = parser.parse_args()
 
-    drive_prior = args.drive_root / "aleph-v2-run"
-    drive_dev = args.drive_root / "aleph-10b-continuation-v1" / "dev_panel"
-    drive_run_out = args.drive_root / "aleph-10b-continuation-v1" / "runs" / args.run_name
+    if args.prior_dir and args.run_dir and args.dev_dir:
+        local_prior = args.prior_dir.resolve()
+        local_run_out = args.run_dir.resolve()
+        local_dev = args.dev_dir.resolve()
+        out_path = (args.out_json or (local_run_out / "DEV_EVAL_10M_VS_100M.json")).resolve()
+    else:
+        drive_prior = args.drive_root / "aleph-v2-run"
+        drive_dev = args.drive_root / "aleph-10b-continuation-v1" / "dev_panel"
+        drive_run_out = args.drive_root / "aleph-10b-continuation-v1" / "runs" / args.run_name
 
-    local_dev = args.local_root / "stage_100m_dev_panel"
-    local_prior = args.local_root / "stage_prior_10m"
-    local_run_out = args.local_root / "tpu_stage100m_run"
-    sync_py = HERE / "drive_sync.py"
+        local_dev = args.local_root / "stage_100m_dev_panel"
+        local_prior = args.local_root / "stage_prior_10m"
+        local_run_out = args.local_root / "tpu_stage100m_run"
+        sync_py = HERE / "drive_sync.py"
+        out_path = (args.out_json or (drive_run_out / "DEV_EVAL_10M_VS_100M.json")).resolve()
 
-    if not (local_dev / "dev_index.json").is_file():
-        shutil.copytree(drive_dev, local_dev, dirs_exist_ok=True)
-    if not (local_prior / "LATEST.json").is_file():
-        subprocess.run(
-            [sys.executable, str(sync_py), "sync", str(drive_prior), str(local_prior), "--workers", str(args.workers)],
-            check=True,
-        )
-    if not (local_run_out / "LATEST.json").is_file():
-        subprocess.run(
-            [
-                sys.executable,
-                str(sync_py),
-                "sync",
-                str(drive_run_out),
-                str(local_run_out),
-                "--workers",
-                str(args.workers),
-            ],
-            check=True,
-        )
+        if not (local_dev / "dev_index.json").is_file():
+            shutil.copytree(drive_dev, local_dev, dirs_exist_ok=True)
+        if not (local_prior / "LATEST.json").is_file():
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(sync_py),
+                    "sync",
+                    str(drive_prior),
+                    str(local_prior),
+                    "--workers",
+                    str(args.workers),
+                ],
+                check=True,
+            )
+        if not (local_run_out / "LATEST.json").is_file():
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(sync_py),
+                    "sync",
+                    str(drive_run_out),
+                    str(local_run_out),
+                    "--workers",
+                    str(args.workers),
+                ],
+                check=True,
+            )
 
     dev_idx_sha = digest(local_dev / "dev_index.json")
     dev_index = read(local_dev / "dev_index.json")
@@ -204,7 +223,7 @@ def main() -> int:
         "overall_nll_delta_nats": delta_nll,
         "per_lane_nll_delta_nats": per_lane_delta,
     }
-    out_path = drive_run_out / "DEV_EVAL_10M_VS_100M.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print("=== DEV_EVAL_10M_VS_100M ===", flush=True)
     print(json.dumps(report, indent=2), flush=True)
