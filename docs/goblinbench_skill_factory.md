@@ -59,7 +59,7 @@ reviewed. Keep final evaluator targets outside the teacher's input.
 ## GSF-10: Floodgates architecture researcher task
 
 The optional `--suite floodgates` route evaluates a separate pinned HybridTRMLDT revision:
-`8e088e91c419b805edcd2c68deedf0321c9429f5` ([PR #49](https://github.com/MoralityLabAI/HybridTRMLDT/pull/49)).
+`6a50a934857bab41257acaf5741c09b97fc5f4d2` ([PR #49](https://github.com/MoralityLabAI/HybridTRMLDT/pull/49)).
 The new evaluator pin is pending its own CI at registration. The default `--suite skills` retains the verified eight-gym pin and original report schema. Check out the appropriate exact revision before running each suite.
 
 For the GSF-10 task, the agent must run the fixed first-loop four-token drafter, then may try two alternative strategies from the public menu. A learned choice triggers actual controller fitting using independent training-root dynamic-program labels. Each experiment exposes measured calibration tariff and structural work; final normal/shift panels remain evaluator-only. Quality is a bounded transform of cost per emitted token, not measured throughput. The setup target and adapters are frozen, and the runner verifies the selected descriptor and all three setup artifact hashes. Four turns, 2,048 context tokens, 512 generated tokens per action, and the existing deadlines remain in effect.
