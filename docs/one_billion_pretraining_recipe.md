@@ -1,5 +1,7 @@
 # DataGoblin 1B pretraining recipe
 
+**Active continuation (2026-11-28):** [10B curriculum](../training/data/aleph_10b_mix.json) and [Colab handoff](../training/reports/2026-11-28_aleph_10b_colab_handoff.md). Use the completed native direct-A 10M checkpoint at the qualified 2,048-token context; larger contexts and altered corpus/runner identities require qualification. The planning layout and earlier mixed-pilot evidence below remain historical design evidence.
+
 Start the 1B staging comparison with direct feedback at both boundaries
 and the constant mixed curriculum. Use exact traversal on the rule
 benchmark and a direct learned ranker after native Lean stalls. Keep RLT
