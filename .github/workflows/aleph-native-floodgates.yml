@@ -96,6 +96,8 @@ jobs:
       - run: python -m py_compile training/aleph_native_floodgates/afg03_checkpoint.py
       - run: python training/aleph_native_floodgates/afg03_checkpoint.py --fixture --out /tmp/afg03
       - run: python training/aleph_native_floodgates/afg03_checkpoint.py --audit-fixture /tmp/afg03 | tee /tmp/afg03/audit.json
+      - run: python training/aleph_native_floodgates/afg03_checkpoint.py --audit-report /tmp/afg03 | tee /tmp/afg03/audit_report.json
+      - run: python -m py_compile training/aleph_native_floodgates/afg03_panel.py training/aleph_native_floodgates/afg03_watchdog.py training/aleph_native_floodgates/afg03_local.py
       - uses: actions/upload-artifact@v4
         with:
           name: afg03-checkpoint-runner-fixture

@@ -141,12 +141,37 @@ def reset_peaks(device):
         torch.cuda.reset_peak_memory_stats(device)
 
 
+def windows_peak_memory():
+    """Process-lifetime peak working set and private commit from psapi."""
+    import ctypes
+    from ctypes import wintypes
+
+    class Counters(ctypes.Structure):
+        _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD),
+                    *((name, ctypes.c_size_t) for name in (
+                        "PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage",
+                        "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage", "QuotaNonPagedPoolUsage",
+                        "PagefileUsage", "PeakPagefileUsage"))]
+
+    c = Counters()
+    c.cb = ctypes.sizeof(c)
+    kernel = ctypes.WinDLL("kernel32")
+    kernel.GetCurrentProcess.restype = wintypes.HANDLE
+    kernel.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+    if not kernel.K32GetProcessMemoryInfo(kernel.GetCurrentProcess(), ctypes.byref(c), c.cb):
+        return {}
+    return {"peak_host_rss_bytes": int(c.PeakWorkingSetSize), "peak_host_private_bytes": int(c.PeakPagefileUsage)}
+
+
 def memory(device):
     result = {}
     if device.type == "cuda":
         sync(device)
         result.update(peak_allocated_bytes=torch.cuda.max_memory_allocated(device),
                       peak_reserved_bytes=torch.cuda.max_memory_reserved(device))
+    if sys.platform == "win32":
+        result.update(windows_peak_memory())
+        return result
     try:
         import resource
         raw = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -157,6 +182,51 @@ def memory(device):
     except ImportError:
         pass
     return result
+
+
+def overall_memory(observations):
+    """Maximum of every per-phase memory record kept in the observations."""
+    peaks = Counter()
+
+    def visit(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k.startswith("peak_") and k.endswith("_bytes") and isinstance(v, int):
+                    peaks[k] = max(peaks[k], v)
+                else:
+                    visit(v)
+        elif isinstance(x, list):
+            for v in x:
+                visit(v)
+    visit(observations)
+    return dict(peaks)
+
+
+def first_divergence(a, b):
+    return next((i for i, (x, y) in enumerate(zip(a, b, strict=False)) if x != y), min(len(a), len(b)))
+
+
+@torch.no_grad()
+def parity_probe(d, prompts, n):
+    """Diagnostic after a parity failure: cached vs cold logits along the cold greedy path."""
+    diag = N.Diagnostics(d.dtype)
+    rows = []
+    for ids in prompts:
+        tokens = list(ids)
+        _, cache = d.append(tokens[:-1])
+        for step in range(n):
+            z, cache = d.append([tokens[-1]], cache)
+            a, b = z[0, -1].float(), d.cold(tokens)[0, -1].float()
+            top = torch.topk(b, 2).values
+            rows.append({"root": N.digest([PANEL_SCHEMA, list(ids)]), "step": step,
+                         "cached_argmax": int(a.argmax()), "cold_argmax": int(b.argmax()),
+                         "cold_top2_margin": float(top[0]-top[1]),
+                         "max_abs_logit_difference": float((a-b).abs().max()),
+                         "within_tolerance": bool(torch.allclose(a, b, atol=diag.atol, rtol=diag.rtol))})
+            tokens.append(int(b.argmax()))
+    return {"precision": str(d.dtype), "tolerances": [diag.atol, diag.rtol], "steps": rows,
+            "argmax_disagreements": sum(r["cached_argmax"] != r["cold_argmax"] for r in rows),
+            "tolerance_failures": sum(not r["within_tolerance"] for r in rows)}
 
 
 def atomic_json(path, obj):
@@ -185,7 +255,11 @@ def teacher_references(d, by, n, deadline):
         for w in by[split]:
             deadline.check()
             ids = w["ids"]
-            seq = N.serial(d, ids, n, diag)
+            try:
+                seq = N.serial(d, ids, n, diag)
+            except AssertionError as error:
+                error.failed_prompt = {"split": split, "root": w["root"], "ids": ids}
+                raise
             refs[split][w["root"]] = seq
             ledger["reference_roots"] += 1
             ledger["reference_prefill_token_block_visits"] += (len(ids)-1)*len(N.TARGET_WORD)
@@ -199,6 +273,7 @@ def teacher_references(d, by, n, deadline):
 def teacher_bank(d, rows, refs, deadline):
     bank = []
     work = Counter()
+    transfer = 0.
     expected = sum((len(refs[w["root"]])-1)*sum(
         2*d.model.blocks[i].kv*d.model.blocks[i].k for i in N.TARGET_WORD)
         * torch.empty((), dtype=d.dtype).element_size() for w in rows)
@@ -208,8 +283,11 @@ def teacher_bank(d, rows, refs, deadline):
         deadline.check()
         seq = refs[w["root"]]
         _, cache = d.append(seq[:-1])
+        sync(d.device)
+        started = time.perf_counter()
         kv = tuple(N.VisitKV(v.visit, v.physical, v.key.detach().to("cpu"),
                              v.value.detach().to("cpu")) for v in cache.visits)
+        transfer += time.perf_counter()-started
         size = sum(t.numel()*t.element_size() for v in kv for t in (v.key, v.value))
         if size != cache.bytes:
             raise AssertionError("teacher bank byte conservation")
@@ -221,15 +299,20 @@ def teacher_bank(d, rows, refs, deadline):
         del cache
     if work["host_kv_bytes"] != expected:
         raise AssertionError("teacher cache estimate differs")
-    return bank, dict(work)
+    return bank, dict(work), {"device_to_host_seconds": transfer}
 
 
-def prefix_cache(d, entry, cut):
+def prefix_cache(d, entry, cut, timer=None):
     n = cut-1
     if not entry["prompt_length"] <= cut <= len(entry["seq"])-N.BLOCK:
         raise ValueError("invalid adapter cut")
+    sync(d.device)
+    started = time.perf_counter()
     kv = tuple(N.VisitKV(v.visit, v.physical, v.key[:, :, :n].contiguous().to(d.device),
                          v.value[:, :, :n].contiguous().to(d.device)) for v in entry["kv"])
+    sync(d.device)
+    if timer is not None:
+        timer["host_to_device_seconds"] += time.perf_counter()-started
     cache = N.Cache(d.owner, tuple(entry["seq"][:n]), kv)
     d.validate_cache(cache, entry["seq"][:n])
     return cache
@@ -247,6 +330,8 @@ def fit_adapter(d, mode, bank, cfg, deadline):
     rng = random.Random(438)
     draws = []
     work = Counter()
+    timer = Counter()
+    losses = []
     reset_peaks(d.device)
     start = time.monotonic()
     for _ in range(cfg["steps"]):
@@ -254,7 +339,7 @@ def fit_adapter(d, mode, bank, cfg, deadline):
         i = rng.randrange(len(bank))
         e = bank[i]
         cut = rng.randrange(e["prompt_length"], len(e["seq"])-N.BLOCK+1)
-        cache = prefix_cache(d, e, cut)
+        cache = prefix_cache(d, e, cut, timer)
         z = d.draft(e["seq"][cut-1], e["seq"][:cut-1], cache, a, N.BLOCK, mode)
         y = torch.tensor(e["seq"][cut:cut+N.BLOCK], device=d.device, dtype=torch.long)
         loss = F.cross_entropy(z.reshape(-1, d.vocab), y)
@@ -265,6 +350,7 @@ def fit_adapter(d, mode, bank, cfg, deadline):
         torch.nn.utils.clip_grad_norm_(a.parameters(), 1., error_if_nonfinite=True)
         opt.step()
         d.frozen()
+        losses.append(float(loss.detach()))
         draws.append([i, cut])
         work["draft_train_token_block_visits"] += (N.BLOCK+1)*len(N.DRAFT_WORD)
         work["supervised_labels"] += N.BLOCK
@@ -280,7 +366,9 @@ def fit_adapter(d, mode, bank, cfg, deadline):
     return a, {"mode": mode, "initial_hash": before, "weights_hash": after,
                "parameters": sum(p.numel() for p in a.parameters()), "updates": cfg["steps"],
                "draws_sha256": N.digest(draws), "last_loss": float(loss.detach()), "work": dict(work)}, {
-               "seconds": elapsed, "memory": memory(d.device)}
+               "seconds": elapsed, "host_to_device_seconds": timer["host_to_device_seconds"],
+               "loss_first8_mean": statistics.fmean(losses[:8]), "loss_last8_mean": statistics.fmean(losses[-8:]),
+               "memory": memory(d.device)}
 
 
 @torch.no_grad()
@@ -363,8 +451,13 @@ def evaluate(d, adapter, policy, k, rows, refs, n, deadline, *, timed=False):
     wall, cpu = time.perf_counter()-wall, time.process_time()-cpu
     # Compare against independent reference outside the timed region.
     for r, w in zip(result, rows, strict=True):
-        if r["root"] != w["root"] or r["output"] != refs[w["root"]][len(w["ids"]):]:
-            raise AssertionError(f"exact greedy mismatch: {policy}, {r['root']}")
+        expected = refs[w["root"]][len(w["ids"]):]
+        if r["root"] != w["root"] or r["output"] != expected:
+            error = AssertionError(f"exact greedy mismatch: {policy}, {r['root']}")
+            error.receipt = {"policy": policy, "draft_length": k, "root": w["root"], "output": r["output"],
+                             "reference": expected, "first_divergence": first_divergence(r["output"], expected),
+                             "steps": r["steps"]}
+            raise error
         r["greedy_parity"] = True
     d.frozen()
     s = aggregate(result)
@@ -387,6 +480,8 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
     out.mkdir(parents=True, exist_ok=False)
     stage = "input"
     observations = {}
+    d = qualification_prompts = None
+    started = time.perf_counter()
     try:
         vocab = 64 if fixture else 49152
         by, panel_receipt = parse_panel(data, vocab, fixture=fixture)
@@ -397,17 +492,31 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
         stage = "checkpoint"
         deadline.check()
         reset_peaks(device)
-        model = N.mini_model() if fixture else N.load_native_checkpoint(checkpoint)
+        t = time.perf_counter()
+        model = N.mini_model() if fixture else N.load_native_checkpoint(checkpoint, device)
         model = model.to(device).eval().requires_grad_(False)
         d = N.Decoder(model, torch.bfloat16 if cfg["precision"] == "bf16" else torch.float32)
         target_hash = N.tensor_hash(model)
+        observations["load_seconds"] = time.perf_counter()-t
         observations["load_memory"] = memory(device)
         stage = "parity"
         deadline.check()
-        qualification = N.qualify(d, [w["ids"] for w in by["cal"][:2]], n=cfg["max_new"])
+        reset_peaks(device)
+        t = time.perf_counter()
+        qualification_prompts = [w["ids"] for w in by["cal"][:2]]
+        qualification = N.qualify(d, qualification_prompts, n=cfg["max_new"])
+        observations["qualification"] = {"seconds": time.perf_counter()-t, "parity": qualification["parity"],
+                                         "memory": memory(device)}
         stage = "teacher"
+        reset_peaks(device)
+        t = time.perf_counter()
         refs, reference_receipt = teacher_references(d, by, cfg["max_new"], deadline)
-        bank, bank_work = teacher_bank(d, by["train"], refs["train"], deadline)
+        reference_seconds = time.perf_counter()-t
+        t = time.perf_counter()
+        bank, bank_work, bank_timing = teacher_bank(d, by["train"], refs["train"], deadline)
+        observations["teacher"] = {"reference_seconds": reference_seconds, "parity": reference_receipt["parity"],
+                                   "bank_seconds": time.perf_counter()-t, **bank_timing,
+                                   "memory": memory(device)}
         stable = {"schema": SCHEMA, "status": "fixture_only" if fixture else "native_checkpoint_complete",
                   "fixture": fixture, "checkpoint_sha256": None if fixture else N.CHECKPOINT_SHA,
                   "target_weights_hash": target_hash, "source_manifest": source_manifest(),
@@ -488,6 +597,8 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
             observations["decode"][p]["speedup_over_serial"] = (
                 observations["decode"][p]["median_tokens_per_second"]/baseline)
         observations["final_memory"] = memory(device)
+        observations["overall_peak_memory"] = overall_memory(observations)
+        observations["elapsed_seconds"] = time.perf_counter()-started
         path = out/"development_rollouts.jsonl"
         with path.open("x", encoding="utf-8") as f:
             for row in trace:
@@ -498,9 +609,21 @@ def run(out, data, data_sha, cfg, *, checkpoint=None, fixture=False):
         atomic_json(out/"progress.json", {"status": "complete", "stage": stage})
         return result
     except Exception as error:
-        atomic_json(out/"progress.json", {"status": "blocked", "stage": stage,
-                                         "error_type": type(error).__name__, "reason": str(error)[:2000],
-                                         "observations": observations})
+        failure = {"status": "blocked", "stage": stage, "error_type": type(error).__name__,
+                   "reason": str(error)[:2000], "elapsed_seconds": time.perf_counter()-started,
+                   "receipt": getattr(error, "receipt", None),
+                   "failed_prompt": getattr(error, "failed_prompt", None)}
+        if isinstance(error, AssertionError) and d is not None and stage in ("parity", "teacher"):
+            probe_prompts = ([failure["failed_prompt"]["ids"]] if failure["failed_prompt"]
+                             else qualification_prompts)
+            try:
+                failure["parity_probe"] = parity_probe(d, probe_prompts, cfg["max_new"])
+            except Exception as probe_error:  # the probe is diagnostic only
+                failure["parity_probe"] = {"error": f"{type(probe_error).__name__}: {str(probe_error)[:500]}"}
+        if d is not None:
+            observations["overall_peak_memory"] = overall_memory(
+                {**observations, "at_failure": memory(d.device)})
+        atomic_json(out/"progress.json", {**failure, "observations": observations})
         raise
 
 
@@ -556,6 +679,80 @@ def audit_fixture(out):
             "development_rollouts": len(rows), "greedy_mismatches": 0, "full_checkpoint_loaded": False}
 
 
+def audit_report(out):
+    """Weight-free integrity audit of a completed run (real checkpoint or fixture).
+
+    Checks digests, trace receipts, aggregates, CAL selection and timing
+    summaries against the saved receipts. It does not reload the target,
+    so it cannot replay decoding; that needs the checkpoint and device.
+    """
+    report = json.loads((out/"report.json").read_text(encoding="utf-8"))
+    progress = json.loads((out/"progress.json").read_text(encoding="utf-8"))
+    s, obs = report["stable"], report["observations"]
+    if progress["status"] != "complete" or s["source_manifest"] != source_manifest():
+        raise ValueError("incomplete run or source mismatch")
+    data = json.loads((out/"input_panel.json").read_text(encoding="utf-8"))
+    if N.digest(data) != s["panel"]["panel_hash"]:
+        raise ValueError("panel hash")
+    by, panel = parse_panel(data, 64 if s["fixture"] else 49152, fixture=s["fixture"])
+    if panel != s["panel"]:
+        raise ValueError("panel receipt")
+    with torch.device("meta"):
+        target = N.mini_model() if s["fixture"] else N.full_model()
+    for a in s["adapters"]:
+        path = out/a["artifact"]
+        if N.file_sha(path) != a["artifact_sha256"]:
+            raise ValueError("adapter file digest")
+        with torch.device("cpu"):
+            model = N.DraftAdapter(target, 4)
+        model.load_state_dict(torch.load(path, map_location="cpu", weights_only=True), strict=True)
+        if N.tensor_hash(model) != a["weights_hash"] or a["updates"] != s["config"]["steps"]:
+            raise ValueError("adapter tensor digest or update count")
+    path = out/"development_rollouts.jsonl"
+    if N.file_sha(path) != s["trace_sha256"]:
+        raise ValueError("trace digest")
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    dev_roots = [w["root"] for w in by["dev"]]
+    for cell in s["cells"]:
+        mine = [r for r in rows if r["policy"] == cell["policy"]]
+        if [r["root"] for r in mine] != dev_roots:
+            raise ValueError("trace coverage")
+        for r in mine:
+            obj = dict(r)
+            bound = obj.pop("receipt_hash")
+            if (N.digest(obj) != bound or r["training_ready"] is not False or not r["greedy_parity"]
+                    or r["draft_length"] != cell["selected_length"] or r["target_hash"] != s["target_weights_hash"]
+                    or r["adapter_hash"] != cell["adapter_hash"]):
+                raise ValueError("trace receipt")
+        strip = ("schema", "split", "target_hash", "adapter_hash", "training_ready", "receipt_hash", "greedy_parity")
+        if aggregate([{k: v for k, v in r.items() if k not in strip} for r in mine]) != cell["development"]:
+            raise ValueError("development aggregate")
+        lengths = [int(k) for k in cell["calibration"]]
+        if cell["selected_length"] != min(lengths, key=lambda k: (cell["calibration"][str(k)]["tariff"], k)):
+            raise ValueError("CAL length selection")
+    best = min(s["cells"], key=lambda c: (c["calibration"][str(c["selected_length"])]["tariff"],
+                                          POLICIES.index(c["policy"])))
+    if best["policy"] != s["cal_selected_policy"]:
+        raise ValueError("CAL policy selection")
+    references = {}
+    for r in rows:
+        if references.setdefault(r["root"], r["output"]) != r["output"]:
+            raise ValueError("policies disagree on greedy output")
+    for policy, o in obs["decode"].items():
+        samples = o["samples"]
+        if len(samples) != s["config"]["repeats"] or any(
+                not math.isfinite(t["tokens_per_second"]) or t["tokens_per_second"] <= 0 for t in samples):
+            raise ValueError("timing coverage")
+        if statistics.median(t["tokens_per_second"] for t in samples) != o["median_tokens_per_second"]:
+            raise ValueError("timing summary")
+        ratio = o["median_tokens_per_second"]/obs["decode"]["serial"]["median_tokens_per_second"]
+        if not math.isclose(ratio, o["speedup_over_serial"], rel_tol=1e-12) or policy not in POLICIES:
+            raise ValueError("speedup summary")
+    return {"status": "audited_receipts", "fixture": s["fixture"], "policies": len(s["cells"]),
+            "development_rollouts": len(rows), "greedy_mismatches": 0,
+            "cal_selected_policy": s["cal_selected_policy"], "target_reloaded": False}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--checkpoint", type=Path)
@@ -565,6 +762,7 @@ def main():
     p.add_argument("--execute", action="store_true")
     p.add_argument("--fixture", action="store_true")
     p.add_argument("--audit-fixture", type=Path)
+    p.add_argument("--audit-report", type=Path)
     p.add_argument("--device", choices=("cpu", "cuda:0"), default=DEFAULT["device"])
     p.add_argument("--precision", choices=("fp32", "bf16"), default=DEFAULT["precision"])
     for k in ("steps", "max_new", "repeats", "threads", "wall_seconds"):
@@ -573,6 +771,9 @@ def main():
     a = p.parse_args()
     if a.audit_fixture:
         print(json.dumps(audit_fixture(a.audit_fixture), sort_keys=True))
+        return
+    if a.audit_report:
+        print(json.dumps(audit_report(a.audit_report), sort_keys=True))
         return
     if not a.out:
         p.error("--out is required")

@@ -164,3 +164,44 @@ python training/aleph_native_floodgates/afg03_checkpoint.py --audit-fixture /tmp
 The fixture refits and replays the local runner; a real GPU run requires
 the operator's checkpoint and prompt panel. No GPU speed claim before
 that qualification.
+
+### Local RTX 5080 procedure
+
+Four helpers sit beside the runner:
+
+- `afg03_panel.py` builds the hash-bound token panel with the pinned
+  SmolLM2 `tokenizer.json`: 32 source documents (eight each of general
+  prose, Python standard-library code, worked mathematics and public
+  protocol text from this repository), two line-aligned windows of
+  12–32 tokens per document, documents 1–4/5–6/7–8 of each category in
+  train/CAL/dev, giving 32/16/16 rows with no cross-split groups. It
+  writes the panel and a hash-only inventory to a local directory.
+- `afg03_watchdog.py` runs a command as a child and samples process-tree
+  working set and private bytes, system available memory, the child's
+  dedicated and shared (WDDM) GPU memory from the Windows GPU Process
+  Memory counters, and GPU memory, temperature and power from nvidia-smi.
+  It refuses to launch below 10.5 GiB free VRAM and kills the tree on a
+  wall, RAM, VRAM, shared-memory or temperature breach.
+- `afg03_local.py` runs the BF16 cell under the watchdog and, only if it
+  stops on an exact-parity assertion, a separately identified FP32 cell
+  in a fresh directory; completed cells get `--audit-report`.
+- `afg03_checkpoint.py --audit-report DIR` checks a finished run without
+  the weights: adapter, trace and panel digests, receipt hashes,
+  development aggregates, CAL selection and timing summaries.
+
+On a full card the GPU is shared through a vramorama lease:
+
+```powershell
+$py = 'C:\path\to\cuda-venv\Scripts\python.exe'
+python training/aleph_native_floodgates/afg03_panel.py --tokenizer D:\aleph\llama24\tokenizer.json --out D:\aleph\panel
+vramorama run --vram 11G --owner afg03-native-floodgates --guard-power 120 --wait 21600 -- `
+  $py training/aleph_native_floodgates/afg03_local.py --checkpoint D:\aleph\native\model.safetensors `
+  --panel D:\aleph\panel\afg03-panel.json --root D:\aleph\runs\c1 --python $py
+```
+
+The CUDA path streams each checkpoint tensor straight to the card
+(`safe_open(device="cuda:0")`), so host RAM never holds a second copy of
+the 4 GB model. On Windows the runner reports the process peak working
+set and peak private commit. A parity failure writes `progress.json` with
+the failing prompt or decode receipt and a cached-versus-cold probe
+(argmax, top-two margin and largest logit difference per step).

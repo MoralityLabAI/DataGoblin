@@ -115,7 +115,8 @@ def geometry():
             "bf16_kv_bytes_per_token": 24*2*4*128*2}
 
 
-def load_native_checkpoint(path):
+def load_native_checkpoint(path, device="cpu"):
+    """Strict load; a CUDA device streams each tensor to the card without a host copy of the model."""
     from safetensors import safe_open
 
     path = Path(path).resolve()
@@ -125,7 +126,7 @@ def load_native_checkpoint(path):
     with torch.device("meta"):
         model = full_model()
     expected = {k: tuple(v.shape) for k, v in model.state_dict().items()}
-    with safe_open(str(path), framework="pt", device="cpu") as f:
+    with safe_open(str(path), framework="pt", device=str(device)) as f:
         if set(f.keys()) != set(expected):
             raise ValueError("native state_dict key mismatch; no alias conversion")
         state = {}

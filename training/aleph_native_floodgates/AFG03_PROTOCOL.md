@@ -79,6 +79,25 @@ Compare both time and serialized/parallel work, acceptance survival,
 peak provisional KV, and controller/host costs. No EOS early stop:
 bounded fixed-token engineering benchmark only.
 
+## Amendment before the first RTX 5080 run (2026-11-28)
+
+Recorded before any actual-checkpoint execution; gates are unchanged.
+Panel: 32 train, 16 CAL, 16 development rows from 32 source documents
+(eight each of general prose, Python code, worked mathematics and
+structured protocol text), both windows of a document in one split.
+The CUDA path loads each checkpoint tensor directly to the device; the
+strict key, shape, dtype, size and SHA checks are the same. Windows runs
+report peak working set and peak private commit. A parity or greedy
+failure keeps its receipt (failing prompt or decode trace, plus a
+cached-versus-cold probe of argmax, top-two margin and logit difference
+per step); the probe is diagnostic and never relaxes a gate. Execution
+runs under an external watchdog (1,800 s wall, 12 GiB process-tree RAM,
+1 GiB system-available floor, 10.5 GiB free VRAM at start, 11.5 GiB
+per-process dedicated and 1 GiB shared GPU memory, 95 C) inside an 11 GiB
+vramorama lease; the runner deadline is 1,740 s so it stops before the
+watchdog. FP32 runs only after a BF16 exact-parity failure, in its own
+directory and watchdog, as a separately identified precision cell.
+
 Save all local model-bound adapter artifacts, token-panel hash, source
 manifest, device identity, qualification, fit and evaluation receipts,
 exact decoded IDs, timing samples, and explicit incomplete/blocked
