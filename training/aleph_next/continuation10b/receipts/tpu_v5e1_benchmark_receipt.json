@@ -1,0 +1,44 @@
+{
+  "schema": "aleph.direct-a.tpu-v5e1-hardware-benchmark.v1",
+  "date": "2026-11-28",
+  "hardware": "Google Cloud TPU v5e-1 (Colab Pro+, 15.75 GiB reservable HBM, 49.3 GB host RAM, 24 vCPU)",
+  "runtime": "PyTorch 2.14.1 + Google native TorchTPU (device='tpu', per-block torch.compile backend='tpu')",
+  "price_cu_per_hour": 3.26,
+  "model_unique_parameters": 999352320,
+  "hardware_fixture": {
+    "passed": true,
+    "gradient_relative_l2": 0.00935,
+    "gradient_relative_l2_limit": 0.12,
+    "isolated_document_gradient": true,
+    "all_masked_zero_gradient": true,
+    "unequal_label_counts": true,
+    "fixture_restart": true
+  },
+  "throughput_engineering": {
+    "eager_fp32_on_tpu_pos_per_s": 1806.0,
+    "eager_fp32_on_tpu_90m_cu": 45.13,
+    "monolithic_compile_reserved_hbm_bytes": 9052700672,
+    "per_block_compile_warmup_seconds": 13.04,
+    "per_block_compile_reserved_hbm_bytes": 601309184,
+    "per_block_compile_allocated_hbm_bytes": 6838737408,
+    "per_block_compile_free_hbm_headroom_gb": 10.07,
+    "grad_norm_parity_per_block_vs_monolithic": {
+      "per_block_fp32_acc": 2.0601,
+      "monolithic_fp32_acc": 2.0601
+    },
+    "steady_microbatch_mean_seconds": 0.5412,
+    "steady_microbatch_median_seconds": 0.5415,
+    "group_d2h_seconds": 5.906,
+    "group_cpu_adamw_seconds": 1.773,
+    "group_h2d_seconds": 3.08,
+    "projected_group_seconds": 80.03,
+    "projected_positions_per_second": 3275.4,
+    "projected_90m_hours_1x_v5e1": 7.63,
+    "projected_90m_cu_1x_v5e1": 24.88,
+    "a100_reference_pos_per_s": 4520.0,
+    "a100_reference_90m_hours": 5.53,
+    "a100_reference_90m_cu": 45.13,
+    "cu_savings_vs_a100_percent": 44.9
+  },
+  "tpu_v6e1_status": "UNQUALIFIED_SERVER_SIDE_DEADLOCK (both Colab CLI assign and Colab Web UI CreateAssignment stalled indefinitely)"
+}
