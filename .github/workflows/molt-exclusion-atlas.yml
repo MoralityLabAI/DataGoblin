@@ -1,0 +1,30 @@
+name: DISTILL-20 exact MoLT exclusion atlas
+on:
+  pull_request:
+    paths:
+      - 'src/datagoblin/training_gym/molt_exclusion_atlas.py'
+      - 'src/datagoblin/training_gym/molt_packed_policy.py'
+      - 'tests/test_molt_exclusion_atlas.py'
+      - '.github/workflows/molt-exclusion-atlas.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exclusion-atlas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q tests/test_molt_exclusion_atlas.py tests/test_molt_packed_policy.py tests/test_molt_compact_policy.py tests/test_molt_memory_panel.py
+      - run: ruff check src/datagoblin/training_gym/molt_exclusion_atlas.py tests/test_molt_exclusion_atlas.py
+      - run: python -m datagoblin.training_gym.molt_exclusion_atlas --native-roots 12 --array-roots 12 --out /tmp/distill20-atlas.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distill-20-exclusion-atlas
+          path: /tmp/distill20-atlas.json
+          if-no-files-found: error
+          retention-days: 14
