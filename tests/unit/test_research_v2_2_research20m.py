@@ -1,5 +1,8 @@
 """Independent cache ledger and budget allocation regression."""
+from random import Random
+
 from datagoblin.research_v2_2 import research20m as m
+from datagoblin.research_v2_2.exact_research import ExactResearch
 
 
 def test_quota_and_memory_replay():
@@ -9,7 +12,7 @@ def test_quota_and_memory_replay():
     for i in range(32):
         for profile in ("offline_cache","probe_alias"):
             d = m.world(None,"research_memory",profile,199,i)
-            after,change = m.revised("research_memory",d,__import__("random").Random(i))
+            after,change = m.revised("research_memory",d,Random(i))
             rows = m.memory_rows(d,after,change)
             assert len(rows)==4
             if profile=="offline_cache":
@@ -19,11 +22,9 @@ def test_quota_and_memory_replay():
 
 
 def test_parity_revisions():
-    from datagoblin.research_v2_2.exact_research import ExactResearch
-    import random
     for i in range(12):
         d = m.world(None,"adaptive_evidence","parity_synergy",199,i)
-        after,_ = m.revised("adaptive_evidence",d,random.Random(i))
+        after,_ = m.revised("adaptive_evidence",d,Random(i))
         a,b = ExactResearch().solve(d),ExactResearch().solve(after)
         assert a["training_admission"] is False and b["training_admission"] is False
         assert len(d["tests"])<=4

@@ -338,7 +338,7 @@ def quota_plan(target):
 
 def build(out,gen,assess,tok,manifest,target=TARGET,pilot=False,prior=(),dev_per_profile=16,
           max_roots_per_profile=6000):
-    if tok is None or not 12<=target<=TARGET or not 1<=max_roots_per_profile<=12000:
+    if tok is None or not 12_000<=target<=TARGET or not 1<=max_roots_per_profile<=12000:
         raise ValueError("frozen tokenizer and bounded budget required")
     forbidden = prior_roots(gen,manifest)
     forbidden.update(prior)
@@ -384,7 +384,8 @@ def build(out,gen,assess,tok,manifest,target=TARGET,pilot=False,prior=(),dev_per
                         text_sha = hashlib.sha256((prompt+v1.DELIMITER+target_text+"\n").encode("ascii")).hexdigest()
                         record = dict(split=split,skill="custom_research",lane="custom_research",
                                       family=kind,profile=profile,semantic_key=lineage,view=name,
-                                      record_id=v1.digest([lineage,name]),world_ids=[a,b],prompt=prompt,target=target_text,
+                                      record_id=v1.digest([lineage,name]),world_ids=[a,b],
+                                      prompt=prompt,target=target_text,
                                       delimiter=v1.DELIMITER,objective="checked_response",record_sha256=text_sha,
                                       origin=dict(seed=seed,ordinal=i,upstream=v1.UPSTREAM,source=SOURCE),
                                       witness=witness,training_admission=False,custody="candidate")

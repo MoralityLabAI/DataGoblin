@@ -57,3 +57,56 @@ inventories, exact grades and token masks. Preserve independent
 stewardship, source rights/consent, deletion, global split exclusion,
 structural deduplication, approved mixture and checkpoint gates.
 Full candidate generation intentionally requires a separate invocation.
+
+
+## Observed pilot
+
+Hosted run [46143785281](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46143785281),
+job 140975273271, executed baefba8879dbd1298e35adb72d8191e1da253f4b. Both unit tests and the native
+gym generation step passed. Frozen tokenizer hash matched. The v1
+train and development member inventories replayed to their recorded
+SHA-256 values. 4,256 known world identities were excluded, including
+all 3,456 v1 roots and the earlier 800-root historical inventory.
+
+| Split | Lineages | World identities | Views | Nonpadding positions | Loss-bearing positions |
+|---|---:|---:|---:|---:|---:|
+| Pilot train candidate | 96 | 192 | 384 | 222,814 | 33,917 |
+| Pilot development, do not train | 24 | 48 | 96 | 54,598 | 7,833 |
+
+All twelve profiles supplied every planned pilot view. Longest observed
+train context 1,379 tokens. The pilot is spent development material
+for the subsequent full build and its member IDs must be excluded.
+The full run has not been launched. Extrapolation from eight train
+lineages per profile suggests roughly 7,601
+fresh lineages and 2,546,964 loss-bearing positions
+for the additional 15,778,719-token candidate quota; actual counts
+depend on acceptance, structure and transcript lengths.
+
+| Profile | Target positions | Pilot positions | Estimated lineages |
+|---|---:|---:|---:|
+| bundled_controls | 1500000 | 16831 | 713 |
+| confounded_budget | 1250000 | 28660 | 349 |
+| dependent_tests | 1500000 | 19244 | 624 |
+| offline_cache | 989359 | 8925 | 887 |
+| parity_synergy | 1500000 | 16950 | 708 |
+| probe_alias | 989360 | 9089 | 871 |
+| refutation_barrier | 1250000 | 16670 | 600 |
+| resource_bottleneck | 1400000 | 17869 | 627 |
+| scenario_conflict | 1400000 | 17798 | 630 |
+| shared_controls | 1500000 | 16040 | 749 |
+| unequal_repeats | 1250000 | 37300 | 269 |
+| unlock_chain | 1250000 | 17438 | 574 |
+
+Artifacts:
+- [Pilot train candidate](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46143785281/artifacts/15262599112)
+- [Pilot development (do not train)](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46143785281/artifacts/15262184846)
+- [Pilot manifest](pilot_manifest.json)
+
+The pilot has one CPU measurement environment and no training efficacy
+result. Token budgets count entire checked transcripts, not just
+answer targets. Generator recipes are synthetic and repeatable; global
+structural diversity, independent steward admission, full-corpus rights
+and heldout checks remain mandatory. The receipt commit wraps a source
+line, organizes test imports, and rejects nonsensically tiny full
+quotas (<12000 positions). It also inherits the previous v1 SIM102 lint
+correction. Latest general CI must be checked separately.
