@@ -81,3 +81,86 @@ See [prospective protocol](AFG02_PROTOCOL.md). Two independently fitted native t
 python training/aleph_native_floodgates/afg02_trained.py --out /tmp/afg02
 python training/aleph_native_floodgates/afg02_trained.py --audit /tmp/afg02
 ```
+
+## AFG-02 results
+
+[Both native jobs passed](https://github.com/MoralityLabAI/DataGoblin/actions/runs/46104930110).
+Two competent targets, four adapters and 192 audited traces, zero greedy
+mismatches. Development free-running accuracy was 93.75% and 96.875%.
+Shift accuracy was 27.34375% and 31.25%. Mean development structural
+tariff/token: repeat 77.53125, serial 120, first trained 159.421875,
+deep trained 173.671875, first initial 214.640625, deep initial 189.703125.
+Both trained drafters improved relative to their untrained controls,
+but neither repaid the 14-visit draft cost. The cheap task-specific
+repeater was roughly 2.34x faster than serial in the diagnostic decode
+timing (mean of two paired seed ratios; excludes prefill). No native
+1B speed claim. One remaining repository lint diagnostic (import order
+in afg02_trained.py) was corrected.
+
+## AFG-03: actual checkpoint on the 5080
+
+[Prospective protocol](AFG03_PROTOCOL.md). The new runner first requires
+the exact native 10M checkpoint SHA and a separately hash-bound local
+token panel. It uses real checkpoint weights and exact teacher-generated
+continuations; the frozen target remains FP32, dense compute defaults
+to BF16, TF32 disabled. Each train prefix has a CPU-resident unexpanded
+KV bank; only the selected slice is transferred for one adapter update.
+Host bank tensor budget 256 MiB; PyTorch CUDA allocator default 10 GiB.
+The latter does not cap all WDDM/driver/process memory. Set an external
+RAM and wall watchdog, and leave GPU headroom.
+
+Token panel JSON (illustrative single row only; supply the full roster
+of 8–32 train, 4–16 cal, 4–16 dev rows):
+
+```json
+{
+  "schema": "aleph.afg03.token_panel.v1",
+  "tokenizer_sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "rows": [
+    {"split": "train", "group": "source-1", "ids": [1,2,3,4,5,6,7,8]}
+  ]
+}
+```
+
+Use already-tokenized raw completion prompts with the pinned tokenizer.
+Keep all derivatives of each source document in the same split. No
+answer labels, chat templating or cross-split exact prefix containment.
+Do not pass proprietary prompt IDs to a remote service. On Windows
+PowerShell from the clean checkout:
+
+```powershell
+$panel = 'D:\\aleph\\afg03-panel.json'
+$ckpt = 'D:\\aleph\\export\\native\\model.safetensors'
+$sha = (Get-FileHash -Algorithm SHA256 $panel).Hash.ToLower()
+python training/aleph_native_floodgates/afg03_checkpoint.py --execute `
+  --checkpoint $ckpt --data $panel --data-sha256 $sha `
+  --device cuda:0 --precision bf16 --allocator-gib 10 --steps 64 `
+  --max-new 8 --repeats 3 --threads 2 --wall-seconds 1800 `
+  --out 'D:\\aleph\\afg03-5080-bf16'
+```
+
+The paths are examples; point them to your actual files. Use a CUDA
+PyTorch build qualified for the RTX 5080, plus NumPy and safetensors.
+If parity fails, inspect progress.json and stop. An explicitly separate
+FP32 run can be made with a fresh output directory; it is a different
+precision cell, not an automatic retry. No GPU run or model retrieval
+is triggered by repository CI.
+
+Compare all six policies at their CAL-selected lengths, including
+ordinary serial and repetition fallback. Measurements include prefill,
+decoder calls, cache rollback and host accounting, and synchronize CUDA.
+Three repeats per policy must agree in emitted token IDs and work.
+The report preserves phase memory/fit timings, teacher work, policy
+receipts, weights and the calibration-selected policy. The 10M
+checkpoint is not a competent language-model benchmark.
+
+CI exercises the same code on a reduced-width CPU fixture:
+
+```sh
+python training/aleph_native_floodgates/afg03_checkpoint.py --fixture --out /tmp/afg03
+python training/aleph_native_floodgates/afg03_checkpoint.py --audit-fixture /tmp/afg03
+```
+
+The fixture refits and replays the local runner; a real GPU run requires
+the operator's checkpoint and prompt panel. No GPU speed claim before
+that qualification.
