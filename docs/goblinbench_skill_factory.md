@@ -3,7 +3,7 @@
 The eight HybridTRMLDT gyms now share a bounded research interface. The bridge
 uses the existing Research Verifiers v2 endpoint binding and exact token
 preflight, without modifying that suite's frozen implementation digest.
-HybridTRMLDT source pin: `3d2db3856c3cade1d32cda335d464e666f7a25a2`
+HybridTRMLDT source pin: `db5aef512bb0346e2cb60eded03984bfb7f84322`
 ([PR #48](https://github.com/MoralityLabAI/HybridTRMLDT/pull/48)).
 Use a clean checkout at that commit, with CPU PyTorch and DataGoblin installed
 in the same Python environment. All output must be outside the Hybrid checkout.
