@@ -57,6 +57,7 @@ from stream import (  # noqa: E402
     stage_group_boundaries,
     verify_lane_manifest,
 )
+from tpu_backend import HostOffloadFP32AdamW  # noqa: E402
 
 
 def _write_json(path: Path, obj: dict[str, Any]) -> str:
@@ -479,3 +480,29 @@ def test_handoff_resume_equality_and_fail_closed_checks(tmp_path: Path) -> None:
     shard0.write_bytes(shard0.read_bytes() + b"corrupt")
     with pytest.raises(ValueError, match="corrupt"):
         load_continuation_checkpoint(bad_drive, ident, mini_model(), FP32AdamW(mini_model(), cfg, backend), backend)
+
+
+def test_host_offload_adamw_exact_parity() -> None:
+    """Verify HostOffloadFP32AdamW matches FP32AdamW bit-identically across multiple steps."""
+    torch.set_num_threads(1)
+    cfg = read(RECIPE)
+    backend = Backend("cpu")
+    packs = static_fixture()
+    backend.seed(99)
+    net_ref = mini_model()
+    net_off = copy.deepcopy(net_ref)
+    opt_ref = FP32AdamW(net_ref, cfg, backend)
+    opt_off = HostOffloadFP32AdamW(net_off, cfg, backend)
+
+    for step_idx in range(3):
+        rate = compute_absolute_lr(cfg, 10_000_000 + step_idx * 262_144)
+        accumulate(net_ref, packs, backend, torch.float32)
+        accumulate(net_off, packs, backend, torch.float32)
+        g_ref = opt_ref.update(rate)
+        g_off = opt_off.update(rate)
+        assert math.isclose(g_ref, g_off, rel_tol=1e-6, abs_tol=1e-6)
+        for (n1, p1), (n2, p2) in zip(opt_ref.named, opt_off.named, strict=True):
+            assert n1 == n2
+            torch.testing.assert_close(p1, p2, atol=1e-6, rtol=1e-6)
+            torch.testing.assert_close(opt_ref.moments[n1][0], opt_off.moments[n2][0], atol=1e-6, rtol=1e-6)
+            torch.testing.assert_close(opt_ref.moments[n1][1], opt_off.moments[n2][1], atol=1e-6, rtol=1e-6)

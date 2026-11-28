@@ -57,6 +57,7 @@ from stream import (  # noqa: E402
     collect_stage_group,
     stage_group_boundaries,
 )
+from tpu_backend import HostOffloadFP32AdamW, TorchTPUBackend  # noqa: E402
 
 CONTINUATION_CHECKPOINT_SCHEMA = "aleph.direct-a.continuation.v1"
 HANDOFF_RECEIPT_SCHEMA = "aleph.direct-a.handoff-receipt.v1"
@@ -194,9 +195,10 @@ def _verify_and_load_shards(
                 and torch.isfinite(blob["v"]).all()
             ):
                 raise ValueError(f"nonfinite weight or moment tensor in {item['file']}")
-            param.copy_(blob["weight"].to(backend.device))
-            opt.moments[name][0].copy_(blob["m"].to(backend.device))
-            opt.moments[name][1].copy_(blob["v"].to(backend.device))
+            param.copy_(blob["weight"].to(param.device))
+            m_dst, v_dst = opt.moments[name]
+            m_dst.copy_(blob["m"].to(m_dst.device))
+            v_dst.copy_(blob["v"].to(v_dst.device))
     opt.step = manifest_step
     opt.zero()
     rng_payload = state["rng"]
@@ -365,6 +367,7 @@ def build_continuation_identity(
         "prior_manifest": prior_manifest_sha256,
         "runner": digest(Path(__file__)),
         "stream": digest(HERE / "stream.py"),
+        "tpu_backend": digest(HERE / "tpu_backend.py"),
         "native": digest(TRAINING_ROOT / "aleph_rlt_placement" / "gym.py"),
         "packer": digest(TRAINING_ROOT / "aleph_rlt_placement" / "packing.py"),
         "xla_core": digest(ALEPH_NEXT / "candidate01" / "colab10m_xla.py"),
@@ -450,14 +453,19 @@ def _train_one_group(
     return True, record
 
 
-def run_continuation_stage(args: argparse.Namespace, backend: Backend) -> dict[str, Any]:
+def run_continuation_stage(args: argparse.Namespace, backend: Any) -> dict[str, Any]:
     """Execute bounded continuation updates from a verified handoff or continuation checkpoint."""
     started = time.monotonic()
-    if backend.kind not in ("xla", "cuda"):
-        raise RuntimeError("full-size continuation requires --device cuda or --device xla")
-    min_mem = 28_000_000_000 if backend.kind == "xla" else 38_000_000_000
+    if backend.kind not in ("xla", "cuda", "tpu"):
+        raise RuntimeError("full-size continuation requires --device cuda, --device xla, or --device tpu")
+    if backend.kind == "tpu":
+        min_mem = 15_000_000_000  # TPU v5e-1 (15.75 GiB HBM) with cloud-host FP32 AdamW offload
+    elif backend.kind == "xla":
+        min_mem = 28_000_000_000  # TPU v6e-1 (32 GB HBM)
+    else:
+        min_mem = 38_000_000_000  # A100/H100 (40+ GB HBM)
     if backend.identity["memory_limit"] < min_mem:
-        raise RuntimeError("need a 32 GB HBM TPU (v6e-1) or a 40 GB class CUDA accelerator (A100)")
+        raise RuntimeError("insufficient accelerator HBM for selected continuation backend")
     if backend.kind == "cuda":
         free, _ = torch.cuda.mem_get_info(backend.device)
         if free < 30 * 2**30:
@@ -521,7 +529,7 @@ def run_continuation_stage(args: argparse.Namespace, backend: Backend) -> dict[s
     if list(schedule(2, 1)) != [0, *range(1, 11), *range(1, 11), 11, 12, 13]:
         raise ValueError("Direct-A 24-visit schedule changed")
     net = net.to(backend.device)
-    opt = FP32AdamW(net, cfg, backend)
+    opt = HostOffloadFP32AdamW(net, cfg, backend) if backend.kind == "tpu" else FP32AdamW(net, cfg, backend)
 
     if args.resume:
         handoff_receipt = read(out / "HANDOFF_RECEIPT.json")
@@ -824,7 +832,7 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--bf16", action="store_true")
     parser.add_argument("--execute", action="store_true")
-    parser.add_argument("--device", choices=("cpu", "cuda", "xla", "xla-cpu"), default="cpu")
+    parser.add_argument("--device", choices=("cpu", "cuda", "xla", "xla-cpu", "tpu"), default="cpu")
     parser.add_argument("--stage-contract", type=Path, default=HERE / "stage_100m.json")
     parser.add_argument("--release-dir", type=Path)
     parser.add_argument("--handoff-from", type=Path)
@@ -843,6 +851,9 @@ def main() -> int:
     if args.self_test:
         if args.device == "cpu":
             run_cpu_migration_self_test(use_bf16=args.bf16)
+        elif args.device == "tpu":
+            b = TorchTPUBackend()
+            legacy_self_test(b, torch.bfloat16)
         else:
             b = Backend(args.device)
             legacy_self_test(b, torch.bfloat16)
@@ -850,14 +861,15 @@ def main() -> int:
 
     if not (
         args.execute
-        and args.device in ("cuda", "xla")
+        and args.device in ("cuda", "xla", "tpu")
         and args.release_dir
         and args.out
         and 1 <= args.max_new_groups <= 38_148
         and 0 <= args.checkpoint_reserve_seconds < args.wall_seconds <= 43_200
     ):
-        parser.error("explicit bounded --execute --device cuda|xla --release-dir --out --wall-seconds required")
-    run_continuation_stage(args, Backend(args.device))
+        parser.error("explicit bounded --execute --device cuda|xla|tpu --release-dir --out --wall-seconds required")
+    backend_obj = TorchTPUBackend() if args.device == "tpu" else Backend(args.device)
+    run_continuation_stage(args, backend_obj)
     return 0
 
 
