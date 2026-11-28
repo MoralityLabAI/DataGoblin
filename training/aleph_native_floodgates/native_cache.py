@@ -346,7 +346,7 @@ class Decoder:
         accepted = 0
         while accepted<len(draft) and draft[accepted]==predictions[accepted]:
             accepted+=1
-        emitted = (list(draft[:accepted])+[predictions[accepted]])[:remaining]
+        emitted = [*draft[:accepted], predictions[accepted]][:remaining]
         newtokens = list(tokens)+emitted
         keep = len(newtokens)-1
         committed = self.crop(provisional, keep)
@@ -460,12 +460,13 @@ def qualify(decoder,prefixes,n=8):
         check_cache(decoder,kv,out[:-1],diag)
         wrong=list(prefix)
         wrong[0]=(wrong[0]+1)%decoder.vocab
-        expect_reject(lambda:decoder.verify(wrong,cache,[0],1))
+        expect_reject(lambda wrong=wrong, cache=cache: decoder.verify(wrong, cache, [0], 1))
         foreign=Decoder(decoder.model,decoder.dtype)
-        expect_reject(lambda:foreign.append([0],cache))
+        expect_reject(lambda foreign=foreign, cache=cache: foreign.append([0], cache))
         bad=Cache(cache.owner,cache.tokens,(cache.visits[1],cache.visits[0],*cache.visits[2:]))
-        expect_reject(lambda:decoder.append([0],bad))
-        expect_reject(lambda:decoder.verify(prefix,decoder.crop(cache,len(cache.tokens)-1),[0],1))
+        expect_reject(lambda bad=bad: decoder.append([0], bad))
+        expect_reject(lambda prefix=prefix, cache=cache: decoder.verify(
+            prefix, decoder.crop(cache, len(cache.tokens)-1), [0], 1))
         cases.append({"prefix":list(prefix),"reference_output":ref[len(prefix):],"forced_trials":trials,
                       "cap_trial":r,"prefix_kv_bytes":cache.bytes})
     return {"precision":str(decoder.dtype),"cases":cases,"parity":diag.receipt(),
