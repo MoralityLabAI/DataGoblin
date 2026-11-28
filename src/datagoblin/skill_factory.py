@@ -10,12 +10,12 @@ import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
 import queue
 import subprocess
 import sys
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from .research_v2.runner import DEFAULT_REGISTRY, registry
