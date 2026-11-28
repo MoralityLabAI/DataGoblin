@@ -28,10 +28,13 @@ SEEDS = {"train": 2026851000, "development": 2026861000}
 DIFFICULTIES = ("foundation", "standard", "frontier")
 INSTRUCTIONS = {
     "adaptive_evidence": "Maximize expected net reward. Tests reveal a deterministic bit, cost budget and utility.",
-    "robust_discrimination": "Minimize experiment cost. Require dependencies and distance at least 2e+1 for every pair.",
-    "research_portfolio": "Maximize minimum total scenario gain with CPU, RAM, permission, group and dependency limits.",
+    "robust_discrimination": ("Minimize experiment cost. Require dependencies "
+                              "and distance at least 2e+1 for every pair."),
+    "research_portfolio": ("Maximize minimum total scenario gain with CPU, RAM, "
+                           "permission, group and dependency limits."),
     "proof_obligations": "Maximize conditional checked-claim value within audit budget; respect claim prerequisites.",
-    "paired_causal_gate": "Compute equal-root active-minus-sham mean, positive roots and visit/dose matching for each arm.",
+    "paired_causal_gate": ("Compute equal-root active-minus-sham mean, positive roots "
+                           "and visit/dose matching for each arm."),
     "research_memory": "Compare checked-cache policies in the stipulated constant-cost cyclic model.",
 }
 
@@ -280,7 +283,8 @@ def memory_views(d):
         ("decision",prompt+"\nCompute cold, eager LRU, delayed LRU and freeze hit/check/solve and cost ledgers.",
          values,witness),
         ("repair",prompt+"\nAudit the claim that delaying LRU admission always prevents repeated verification.",
-         dict(verdict="reject",delayed=values["second"],reason="A complete cycle evicts the earlier key before its next use."),
+         dict(verdict="reject",delayed=values["second"],
+              reason="A complete cycle evicts the earlier key before its next use."),
          witness),
         ("matched_control",prompt+"\nDerive freeze's net saving versus cold and decide whether verification pays back.",
          dict(saving=saving,profitable=saving>0,break_even="(R-2)*(s-h)>v",
