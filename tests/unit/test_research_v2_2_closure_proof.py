@@ -1,5 +1,7 @@
 """Independent certificate regression and deliberate proof corruption."""
 import copy
+import json
+from pathlib import Path
 from random import Random
 
 import pytest
@@ -68,3 +70,12 @@ def test_dependency_union_and_tampering():
     p["nodes"].pop()
     with pytest.raises(ValueError):
         m.verify(d,p)
+
+
+def test_published_proof_examples():
+    path = Path(__file__).resolve().parents[2] / "reports" / "research_v2_2" / "RV23_C_EXAMPLE_PROOFS.json"
+    for entry in json.loads(path.read_text())["examples"]:
+        d, proof = entry["world"], entry["proof"]
+        assert m.verify(d, proof)["verified"]
+        _, _, actual = m.solve(d, "closure_all", 16)
+        assert actual == proof

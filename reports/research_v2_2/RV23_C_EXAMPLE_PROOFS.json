@@ -1,0 +1,151 @@
+{
+  "schema": "rv23c.proof_examples.v1",
+  "examples": [
+    {
+      "world": {
+        "mechanisms": [
+          "a",
+          "b"
+        ],
+        "error_bits": 1,
+        "budget": 8,
+        "experiments": [
+          {
+            "id": "c",
+            "cost": 3,
+            "requires": [],
+            "predictions": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "e0",
+            "cost": 2,
+            "requires": [
+              "c"
+            ],
+            "predictions": [
+              0,
+              1
+            ]
+          },
+          {
+            "id": "e1",
+            "cost": 2,
+            "requires": [
+              "c"
+            ],
+            "predictions": [
+              0,
+              1
+            ]
+          },
+          {
+            "id": "e2",
+            "cost": 2,
+            "requires": [
+              "c"
+            ],
+            "predictions": [
+              0,
+              1
+            ]
+          }
+        ]
+      },
+      "proof": {
+        "schema": "rv23c.cover_proof.v1",
+        "root_id": "9216b5735e7415db31088d3555bbaac8e3f09a42832095d9ad5c18fd905b4ca9",
+        "answer": {
+          "status": "infeasible"
+        },
+        "nodes": [
+          [
+            0,
+            "closure",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "world": {
+        "mechanisms": [
+          "a",
+          "b"
+        ],
+        "error_bits": 1,
+        "budget": 9,
+        "experiments": [
+          {
+            "id": "c",
+            "cost": 3,
+            "requires": [],
+            "predictions": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "e0",
+            "cost": 2,
+            "requires": [
+              "c"
+            ],
+            "predictions": [
+              0,
+              1
+            ]
+          },
+          {
+            "id": "e1",
+            "cost": 2,
+            "requires": [
+              "c"
+            ],
+            "predictions": [
+              0,
+              1
+            ]
+          },
+          {
+            "id": "e2",
+            "cost": 2,
+            "requires": [
+              "c"
+            ],
+            "predictions": [
+              0,
+              1
+            ]
+          }
+        ]
+      },
+      "proof": {
+        "schema": "rv23c.cover_proof.v1",
+        "root_id": "26447565d66074b19ea169afb9e1a87bad030f20b533f3a9480e0f5af606916f",
+        "answer": {
+          "status": "plan",
+          "experiments": [
+            "c",
+            "e0",
+            "e1",
+            "e2"
+          ],
+          "cost": 9
+        },
+        "nodes": [
+          [
+            0,
+            "force"
+          ],
+          [
+            15,
+            "cost"
+          ]
+        ]
+      }
+    }
+  ]
+}

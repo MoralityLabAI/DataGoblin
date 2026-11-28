@@ -1,0 +1,1314 @@
+{
+  "schema": "rv23c.closure_proofs.v1",
+  "upstream": "7fa19c90372b13d71676e6fef13819d2a18b9be3",
+  "prior_excluded": 128,
+  "limits": [
+    64,
+    512,
+    65536
+  ],
+  "closure_term_cap": 20000,
+  "cohorts": {
+    "native_frontier": {
+      "roots": 24,
+      "infeasible": 12,
+      "inventory_sha256": "8d0c43dfaa376cb00373dacbc51ba428e9a725688cb68c7533454a496eb728cd",
+      "limits": {
+        "64": {
+          "means": {
+            "cover": {
+              "inspected": 23.333333333333332,
+              "expanded": 14.333333333333334,
+              "pruned": 1.1666666666666667,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 543.5833333333334,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 32.541666666666664,
+              "certified": 0.875,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 0.7723419166666666,
+              "check_ms": 0.3547846666666667,
+              "combined_ms": 1.1271265833333335,
+              "proof_bytes": 404.875,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 10.583333333333334,
+              "expanded": 5.375,
+              "pruned": 3.9166666666666665,
+              "forced_steps": 0.5,
+              "bound_calls": 9,
+              "pair_terms": 300.5833333333333,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 12.833333333333334,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 0.9846983333333333,
+              "check_ms": 0.3153223333333333,
+              "combined_ms": 1.3000206666666667,
+              "proof_bytes": 355.2083333333333,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 10.375,
+              "expanded": 5.291666666666667,
+              "pruned": 3.8333333333333335,
+              "forced_steps": 0.5,
+              "bound_calls": 8.833333333333334,
+              "pair_terms": 299,
+              "closure_terms": 22.375,
+              "closure_skips": 0,
+              "generated": 12.625,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.055711,
+              "check_ms": 0.31110020833333335,
+              "combined_ms": 1.3668112083333337,
+              "proof_bytes": 351.9166666666667,
+              "check_closure_terms": 0.125
+            },
+            "closure_all": {
+              "inspected": 10.291666666666666,
+              "expanded": 5.25,
+              "pruned": 3.7916666666666665,
+              "forced_steps": 0.5,
+              "bound_calls": 8.75,
+              "pair_terms": 297.0833333333333,
+              "closure_terms": 390.5833333333333,
+              "closure_skips": 0,
+              "generated": 12.541666666666666,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.0169941666666666,
+              "check_ms": 0.31814175000000006,
+              "combined_ms": 2.3351359166666668,
+              "proof_bytes": 350.9166666666667,
+              "check_closure_terms": 0.625
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -0.20833333333333334,
+                "ci95": [
+                  -0.625,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 0.07101266666666667,
+                "ci95": [
+                  0.01782220312500001,
+                  0.12712565416666663
+                ]
+              },
+              "combined_ms": {
+                "delta": 0.06679054166666663,
+                "ci95": [
+                  0.0071236833333333015,
+                  0.1294021593749999
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -0.2916666666666667,
+                "ci95": [
+                  -0.7916666666666666,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 1.0322958333333332,
+                "ci95": [
+                  0.5427956062499999,
+                  1.612193665625
+                ]
+              },
+              "combined_ms": {
+                "delta": 1.0351152499999998,
+                "ci95": [
+                  0.5439149354166667,
+                  1.6188191635416664
+                ]
+              }
+            }
+          }
+        },
+        "512": {
+          "means": {
+            "cover": {
+              "inspected": 25.833333333333332,
+              "expanded": 15.541666666666666,
+              "pruned": 1.875,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 546.0833333333334,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 36.416666666666664,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 0.8157242083333333,
+              "check_ms": 0.5365296666666666,
+              "combined_ms": 1.352253875,
+              "proof_bytes": 597.2916666666666,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 10.583333333333334,
+              "expanded": 5.375,
+              "pruned": 3.9166666666666665,
+              "forced_steps": 0.5,
+              "bound_calls": 9,
+              "pair_terms": 300.5833333333333,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 12.833333333333334,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 0.986649875,
+              "check_ms": 0.3132584166666667,
+              "combined_ms": 1.2999082916666669,
+              "proof_bytes": 355.2083333333333,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 10.375,
+              "expanded": 5.291666666666667,
+              "pruned": 3.8333333333333335,
+              "forced_steps": 0.5,
+              "bound_calls": 8.833333333333334,
+              "pair_terms": 299,
+              "closure_terms": 22.375,
+              "closure_skips": 0,
+              "generated": 12.625,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.0475780000000001,
+              "check_ms": 0.30956758333333334,
+              "combined_ms": 1.3571455833333335,
+              "proof_bytes": 351.9166666666667,
+              "check_closure_terms": 0.125
+            },
+            "closure_all": {
+              "inspected": 10.291666666666666,
+              "expanded": 5.25,
+              "pruned": 3.7916666666666665,
+              "forced_steps": 0.5,
+              "bound_calls": 8.75,
+              "pair_terms": 297.0833333333333,
+              "closure_terms": 390.5833333333333,
+              "closure_skips": 0,
+              "generated": 12.541666666666666,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.0468447916666666,
+              "check_ms": 0.3168305,
+              "combined_ms": 2.3636752916666666,
+              "proof_bytes": 350.9166666666667,
+              "check_closure_terms": 0.625
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -0.20833333333333334,
+                "ci95": [
+                  -0.625,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 0.06092812499999998,
+                "ci95": [
+                  0.016343888541666664,
+                  0.1078982322916666
+                ]
+              },
+              "combined_ms": {
+                "delta": 0.057237291666666655,
+                "ci95": [
+                  0.010068271875000008,
+                  0.1053275760416666
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -0.2916666666666667,
+                "ci95": [
+                  -0.7916666666666666,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 1.0601949166666667,
+                "ci95": [
+                  0.5589076895833334,
+                  1.6489042062499994
+                ]
+              },
+              "combined_ms": {
+                "delta": 1.0637670000000001,
+                "ci95": [
+                  0.5604688625,
+                  1.6552559479166664
+                ]
+              }
+            }
+          }
+        },
+        "65536": {
+          "means": {
+            "cover": {
+              "inspected": 25.833333333333332,
+              "expanded": 15.541666666666666,
+              "pruned": 1.875,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 546.0833333333334,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 36.416666666666664,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 0.80884275,
+              "check_ms": 0.5329231666666666,
+              "combined_ms": 1.3417659166666667,
+              "proof_bytes": 597.2916666666666,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 10.583333333333334,
+              "expanded": 5.375,
+              "pruned": 3.9166666666666665,
+              "forced_steps": 0.5,
+              "bound_calls": 9,
+              "pair_terms": 300.5833333333333,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 12.833333333333334,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 0.9752156666666666,
+              "check_ms": 0.31053775,
+              "combined_ms": 1.2857534166666666,
+              "proof_bytes": 355.2083333333333,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 10.375,
+              "expanded": 5.291666666666667,
+              "pruned": 3.8333333333333335,
+              "forced_steps": 0.5,
+              "bound_calls": 8.833333333333334,
+              "pair_terms": 299,
+              "closure_terms": 22.375,
+              "closure_skips": 0,
+              "generated": 12.625,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.0506264166666668,
+              "check_ms": 0.30723770833333336,
+              "combined_ms": 1.3578641249999999,
+              "proof_bytes": 351.9166666666667,
+              "check_closure_terms": 0.125
+            },
+            "closure_all": {
+              "inspected": 10.291666666666666,
+              "expanded": 5.25,
+              "pruned": 3.7916666666666665,
+              "forced_steps": 0.5,
+              "bound_calls": 8.75,
+              "pair_terms": 297.0833333333333,
+              "closure_terms": 390.5833333333333,
+              "closure_skips": 0,
+              "generated": 12.541666666666666,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.0145780416666668,
+              "check_ms": 0.31256616666666664,
+              "combined_ms": 2.3271442083333334,
+              "proof_bytes": 350.9166666666667,
+              "check_closure_terms": 0.625
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -0.20833333333333334,
+                "ci95": [
+                  -0.625,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 0.07541074999999998,
+                "ci95": [
+                  0.03063254999999999,
+                  0.12200813229166663
+                ]
+              },
+              "combined_ms": {
+                "delta": 0.07211070833333331,
+                "ci95": [
+                  0.023490842708333317,
+                  0.12191138437499989
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -0.2916666666666667,
+                "ci95": [
+                  -0.7916666666666666,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 1.039362375,
+                "ci95": [
+                  0.5442456114583334,
+                  1.629132365625
+                ]
+              },
+              "combined_ms": {
+                "delta": 1.0413907916666667,
+                "ci95": [
+                  0.544626834375,
+                  1.6320881156249998
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "shared_controls": {
+      "roots": 12,
+      "infeasible": 8,
+      "inventory_sha256": "2b112e5dde976765c13e213a9382159544d86e3c2bbe6617502078fcc48ad665",
+      "limits": {
+        "64": {
+          "means": {
+            "cover": {
+              "inspected": 27.416666666666668,
+              "expanded": 16.166666666666668,
+              "pruned": 0.4166666666666667,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 1211.4166666666667,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 40.916666666666664,
+              "certified": 0.75,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.19956325,
+              "check_ms": 0.32728233333333334,
+              "combined_ms": 1.5268455833333332,
+              "proof_bytes": 316.9166666666667,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 17,
+              "expanded": 8.416666666666666,
+              "pruned": 5.5,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 13.666666666666666,
+              "pair_terms": 899.3333333333334,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 22.916666666666668,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.01318425,
+              "check_ms": 0.4889191666666666,
+              "combined_ms": 2.502103416666667,
+              "proof_bytes": 468.4166666666667,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 15.833333333333334,
+              "expanded": 7.916666666666667,
+              "pruned": 6.083333333333333,
+              "forced_steps": 0.25,
+              "bound_calls": 13.75,
+              "pair_terms": 900.75,
+              "closure_terms": 41,
+              "closure_skips": 0,
+              "generated": 21.5,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.1378159999999995,
+              "check_ms": 0.48326033333333335,
+              "combined_ms": 2.6210763333333333,
+              "proof_bytes": 453.3333333333333,
+              "check_closure_terms": 3.9166666666666665
+            },
+            "closure_all": {
+              "inspected": 13.583333333333334,
+              "expanded": 6.25,
+              "pruned": 6,
+              "forced_steps": 0.25,
+              "bound_calls": 12,
+              "pair_terms": 796.75,
+              "closure_terms": 1588.1666666666667,
+              "closure_skips": 0,
+              "generated": 17.25,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 6.35299225,
+              "check_ms": 0.5701148333333333,
+              "combined_ms": 6.923107083333334,
+              "proof_bytes": 419,
+              "check_closure_terms": 37.5
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -1.1666666666666667,
+                "ci95": [
+                  -3.0833333333333335,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 0.12463174999999992,
+                "ci95": [
+                  0.032980762499999976,
+                  0.23437293958333316
+                ]
+              },
+              "combined_ms": {
+                "delta": 0.11897291666666655,
+                "ci95": [
+                  0.025698293749999875,
+                  0.23362997291666648
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -3.4166666666666665,
+                "ci95": [
+                  -7.25,
+                  -0.4166666666666667
+                ]
+              },
+              "search_ms": {
+                "delta": 4.339808,
+                "ci95": [
+                  1.7716062437500006,
+                  7.457404583333333
+                ]
+              },
+              "combined_ms": {
+                "delta": 4.421003666666667,
+                "ci95": [
+                  1.7862517229166672,
+                  7.67298294375
+                ]
+              }
+            }
+          }
+        },
+        "512": {
+          "means": {
+            "cover": {
+              "inspected": 28.916666666666668,
+              "expanded": 16.75,
+              "pruned": 3,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 1211.4166666666667,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 42.916666666666664,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.2334221666666667,
+              "check_ms": 0.6806454166666667,
+              "combined_ms": 1.9140675833333336,
+              "proof_bytes": 668.6666666666666,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 17,
+              "expanded": 8.416666666666666,
+              "pruned": 5.5,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 13.666666666666666,
+              "pair_terms": 899.3333333333334,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 22.916666666666668,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.02273375,
+              "check_ms": 0.49385758333333335,
+              "combined_ms": 2.5165913333333334,
+              "proof_bytes": 468.4166666666667,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 15.833333333333334,
+              "expanded": 7.916666666666667,
+              "pruned": 6.083333333333333,
+              "forced_steps": 0.25,
+              "bound_calls": 13.75,
+              "pair_terms": 900.75,
+              "closure_terms": 41,
+              "closure_skips": 0,
+              "generated": 21.5,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.1660412499999997,
+              "check_ms": 0.4978219166666667,
+              "combined_ms": 2.663863166666667,
+              "proof_bytes": 453.3333333333333,
+              "check_closure_terms": 3.9166666666666665
+            },
+            "closure_all": {
+              "inspected": 13.583333333333334,
+              "expanded": 6.25,
+              "pruned": 6,
+              "forced_steps": 0.25,
+              "bound_calls": 12,
+              "pair_terms": 796.75,
+              "closure_terms": 1588.1666666666667,
+              "closure_skips": 0,
+              "generated": 17.25,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 6.3233517500000005,
+              "check_ms": 0.5509433333333332,
+              "combined_ms": 6.874295083333333,
+              "proof_bytes": 419,
+              "check_closure_terms": 37.5
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -1.1666666666666667,
+                "ci95": [
+                  -3.0833333333333335,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 0.1433074999999999,
+                "ci95": [
+                  0.05294222083333331,
+                  0.24847633541666647
+                ]
+              },
+              "combined_ms": {
+                "delta": 0.14727183333333319,
+                "ci95": [
+                  0.05458352499999997,
+                  0.2588040749999997
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -3.4166666666666665,
+                "ci95": [
+                  -7.25,
+                  -0.4166666666666667
+                ]
+              },
+              "search_ms": {
+                "delta": 4.300618,
+                "ci95": [
+                  1.7489743395833335,
+                  7.391688906249999
+                ]
+              },
+              "combined_ms": {
+                "delta": 4.35770375,
+                "ci95": [
+                  1.74616956875,
+                  7.575705797916665
+                ]
+              }
+            }
+          }
+        },
+        "65536": {
+          "means": {
+            "cover": {
+              "inspected": 28.916666666666668,
+              "expanded": 16.75,
+              "pruned": 3,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 1211.4166666666667,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 42.916666666666664,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.2213205833333334,
+              "check_ms": 0.6784380833333333,
+              "combined_ms": 1.8997586666666668,
+              "proof_bytes": 668.6666666666666,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 17,
+              "expanded": 8.416666666666666,
+              "pruned": 5.5,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 13.666666666666666,
+              "pair_terms": 899.3333333333334,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 22.916666666666668,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.018727416666667,
+              "check_ms": 0.50067625,
+              "combined_ms": 2.519403666666667,
+              "proof_bytes": 468.4166666666667,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 15.833333333333334,
+              "expanded": 7.916666666666667,
+              "pruned": 6.083333333333333,
+              "forced_steps": 0.25,
+              "bound_calls": 13.75,
+              "pair_terms": 900.75,
+              "closure_terms": 41,
+              "closure_skips": 0,
+              "generated": 21.5,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 2.1590340833333332,
+              "check_ms": 0.48730275,
+              "combined_ms": 2.6463368333333332,
+              "proof_bytes": 453.3333333333333,
+              "check_closure_terms": 3.9166666666666665
+            },
+            "closure_all": {
+              "inspected": 13.583333333333334,
+              "expanded": 6.25,
+              "pruned": 6,
+              "forced_steps": 0.25,
+              "bound_calls": 12,
+              "pair_terms": 796.75,
+              "closure_terms": 1588.1666666666667,
+              "closure_skips": 0,
+              "generated": 17.25,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 6.328862916666666,
+              "check_ms": 0.5427889166666667,
+              "combined_ms": 6.871651833333332,
+              "proof_bytes": 419,
+              "check_closure_terms": 37.5
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -1.1666666666666667,
+                "ci95": [
+                  -3.0833333333333335,
+                  0
+                ]
+              },
+              "search_ms": {
+                "delta": 0.14030666666666666,
+                "ci95": [
+                  0.031079520833333325,
+                  0.2590075812499999
+                ]
+              },
+              "combined_ms": {
+                "delta": 0.12693316666666674,
+                "ci95": [
+                  0.0023223895833334373,
+                  0.2578504458333333
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -3.4166666666666665,
+                "ci95": [
+                  -7.25,
+                  -0.4166666666666667
+                ]
+              },
+              "search_ms": {
+                "delta": 4.3101354999999995,
+                "ci95": [
+                  1.740807908333333,
+                  7.414250462499999
+                ]
+              },
+              "combined_ms": {
+                "delta": 4.3522481666666675,
+                "ci95": [
+                  1.7213449979166664,
+                  7.5836016145833325
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "transitive_controls": {
+      "roots": 12,
+      "infeasible": 7,
+      "inventory_sha256": "2fcc67f04850d2da92b10497db6e1b23efa9c8ff74acff5fd62b232b2a680f26",
+      "limits": {
+        "64": {
+          "means": {
+            "cover": {
+              "inspected": 24.083333333333332,
+              "expanded": 14,
+              "pruned": 1.8333333333333333,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 804.4166666666666,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 35.25,
+              "certified": 0.9166666666666666,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.0661558333333334,
+              "check_ms": 0.5085424166666668,
+              "combined_ms": 1.57469825,
+              "proof_bytes": 481.3333333333333,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 13.833333333333334,
+              "expanded": 7,
+              "pruned": 4.333333333333333,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 11.083333333333334,
+              "pair_terms": 563.4166666666666,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 18,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.6189725,
+              "check_ms": 0.48896025000000004,
+              "combined_ms": 2.1079327500000002,
+              "proof_bytes": 425.6666666666667,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 12.166666666666666,
+              "expanded": 6.333333333333333,
+              "pruned": 4.25,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 10.333333333333334,
+              "pair_terms": 517.9166666666666,
+              "closure_terms": 27.416666666666668,
+              "closure_skips": 0,
+              "generated": 15.916666666666666,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.59316775,
+              "check_ms": 0.4691749166666666,
+              "combined_ms": 2.0623426666666664,
+              "proof_bytes": 399.5833333333333,
+              "check_closure_terms": 2.8333333333333335
+            },
+            "closure_all": {
+              "inspected": 10.833333333333334,
+              "expanded": 5.583333333333333,
+              "pruned": 3.9166666666666665,
+              "forced_steps": 0.25,
+              "bound_calls": 9.25,
+              "pair_terms": 484.5833333333333,
+              "closure_terms": 841.5833333333334,
+              "closure_skips": 0,
+              "generated": 14.25,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 3.9103212500000004,
+              "check_ms": 0.4482442499999999,
+              "combined_ms": 4.3585655,
+              "proof_bytes": 377.5,
+              "check_closure_terms": 7.166666666666667
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -1.6666666666666667,
+                "ci95": [
+                  -3.4166666666666665,
+                  -0.25
+                ]
+              },
+              "search_ms": {
+                "delta": -0.025804749999999974,
+                "ci95": [
+                  -0.2170943083333333,
+                  0.11920785208333327
+                ]
+              },
+              "combined_ms": {
+                "delta": -0.045590083333333364,
+                "ci95": [
+                  -0.2488815645833334,
+                  0.10940630000000003
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -3,
+                "ci95": [
+                  -5.5,
+                  -1
+                ]
+              },
+              "search_ms": {
+                "delta": 2.2913487499999996,
+                "ci95": [
+                  1.113135566666667,
+                  3.5443309541666657
+                ]
+              },
+              "combined_ms": {
+                "delta": 2.25063275,
+                "ci95": [
+                  1.0896950104166667,
+                  3.4819485166666664
+                ]
+              }
+            }
+          }
+        },
+        "512": {
+          "means": {
+            "cover": {
+              "inspected": 24.25,
+              "expanded": 14.166666666666666,
+              "pruned": 1.8333333333333333,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 804.4166666666666,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 35.583333333333336,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.1066106666666666,
+              "check_ms": 0.63670175,
+              "combined_ms": 1.7433124166666663,
+              "proof_bytes": 594.1666666666666,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 13.833333333333334,
+              "expanded": 7,
+              "pruned": 4.333333333333333,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 11.083333333333334,
+              "pair_terms": 563.4166666666666,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 18,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.6043818333333333,
+              "check_ms": 0.48707649999999997,
+              "combined_ms": 2.091458333333333,
+              "proof_bytes": 425.6666666666667,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 12.166666666666666,
+              "expanded": 6.333333333333333,
+              "pruned": 4.25,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 10.333333333333334,
+              "pair_terms": 517.9166666666666,
+              "closure_terms": 27.416666666666668,
+              "closure_skips": 0,
+              "generated": 15.916666666666666,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.5836984166666668,
+              "check_ms": 0.4816274166666667,
+              "combined_ms": 2.0653258333333335,
+              "proof_bytes": 399.5833333333333,
+              "check_closure_terms": 2.8333333333333335
+            },
+            "closure_all": {
+              "inspected": 10.833333333333334,
+              "expanded": 5.583333333333333,
+              "pruned": 3.9166666666666665,
+              "forced_steps": 0.25,
+              "bound_calls": 9.25,
+              "pair_terms": 484.5833333333333,
+              "closure_terms": 841.5833333333334,
+              "closure_skips": 0,
+              "generated": 14.25,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 3.8418215833333336,
+              "check_ms": 0.45555125,
+              "combined_ms": 4.297372833333333,
+              "proof_bytes": 377.5,
+              "check_closure_terms": 7.166666666666667
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -1.6666666666666667,
+                "ci95": [
+                  -3.4166666666666665,
+                  -0.25
+                ]
+              },
+              "search_ms": {
+                "delta": -0.02068341666666662,
+                "ci95": [
+                  -0.1983635375,
+                  0.10242838125
+                ]
+              },
+              "combined_ms": {
+                "delta": -0.026132500000000003,
+                "ci95": [
+                  -0.21471010416666664,
+                  0.09555123125
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -3,
+                "ci95": [
+                  -5.5,
+                  -1
+                ]
+              },
+              "search_ms": {
+                "delta": 2.2374397500000005,
+                "ci95": [
+                  1.089279075,
+                  3.447506054166666
+                ]
+              },
+              "combined_ms": {
+                "delta": 2.2059145,
+                "ci95": [
+                  1.06778625,
+                  3.39416305625
+                ]
+              }
+            }
+          }
+        },
+        "65536": {
+          "means": {
+            "cover": {
+              "inspected": 24.25,
+              "expanded": 14.166666666666666,
+              "pruned": 1.8333333333333333,
+              "forced_steps": 0,
+              "bound_calls": 0,
+              "pair_terms": 804.4166666666666,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 35.583333333333336,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.0831048333333333,
+              "check_ms": 0.6314995833333333,
+              "combined_ms": 1.7146044166666667,
+              "proof_bytes": 594.1666666666666,
+              "check_closure_terms": 0
+            },
+            "forced": {
+              "inspected": 13.833333333333334,
+              "expanded": 7,
+              "pruned": 4.333333333333333,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 11.083333333333334,
+              "pair_terms": 563.4166666666666,
+              "closure_terms": 0,
+              "closure_skips": 0,
+              "generated": 18,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.6170993333333332,
+              "check_ms": 0.48515474999999997,
+              "combined_ms": 2.1022540833333334,
+              "proof_bytes": 425.6666666666667,
+              "check_closure_terms": 0
+            },
+            "closure_one": {
+              "inspected": 12.166666666666666,
+              "expanded": 6.333333333333333,
+              "pruned": 4.25,
+              "forced_steps": 0.3333333333333333,
+              "bound_calls": 10.333333333333334,
+              "pair_terms": 517.9166666666666,
+              "closure_terms": 27.416666666666668,
+              "closure_skips": 0,
+              "generated": 15.916666666666666,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 1.5940576666666668,
+              "check_ms": 0.46415958333333335,
+              "combined_ms": 2.05821725,
+              "proof_bytes": 399.5833333333333,
+              "check_closure_terms": 2.8333333333333335
+            },
+            "closure_all": {
+              "inspected": 10.833333333333334,
+              "expanded": 5.583333333333333,
+              "pruned": 3.9166666666666665,
+              "forced_steps": 0.25,
+              "bound_calls": 9.25,
+              "pair_terms": 484.5833333333333,
+              "closure_terms": 841.5833333333334,
+              "closure_skips": 0,
+              "generated": 14.25,
+              "certified": 1,
+              "optimal": 1,
+              "answered": 1,
+              "search_ms": 3.865359,
+              "check_ms": 0.4763765833333333,
+              "combined_ms": 4.341735583333333,
+              "proof_bytes": 377.5,
+              "check_closure_terms": 7.166666666666667
+            }
+          },
+          "closure_vs_forced": {
+            "closure_one": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -1.6666666666666667,
+                "ci95": [
+                  -3.4166666666666665,
+                  -0.25
+                ]
+              },
+              "search_ms": {
+                "delta": -0.023041666666666613,
+                "ci95": [
+                  -0.19030639999999996,
+                  0.09526182083333344
+                ]
+              },
+              "combined_ms": {
+                "delta": -0.044036833333333227,
+                "ci95": [
+                  -0.21275872083333325,
+                  0.0768665208333335
+                ]
+              }
+            },
+            "closure_all": {
+              "optimal": {
+                "delta": 0,
+                "ci95": [
+                  0,
+                  0
+                ]
+              },
+              "inspected": {
+                "delta": -3,
+                "ci95": [
+                  -5.5,
+                  -1
+                ]
+              },
+              "search_ms": {
+                "delta": 2.2482596666666663,
+                "ci95": [
+                  1.1039901062500002,
+                  3.4497324708333323
+                ]
+              },
+              "combined_ms": {
+                "delta": 2.2394815,
+                "ci95": [
+                  1.1193939458333333,
+                  3.418420306249999
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "training_admission": false,
+  "searches": 576
+}
