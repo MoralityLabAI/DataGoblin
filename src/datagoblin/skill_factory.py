@@ -23,7 +23,7 @@ from .research_v2.transport import TransportError, request_action, validate_bind
 
 SCHEMA = "datagoblin-goblinbench-sf09-run-v1"
 HYBRID_REVISION = "db5aef512bb0346e2cb60eded03984bfb7f84322"
-FLOODGATES_REVISION = "8e088e91c419b805edcd2c68deedf0321c9429f5"
+FLOODGATES_REVISION = "6a50a934857bab41257acaf5741c09b97fc5f4d2"
 FLOODGATES_SCHEMA = "datagoblin-goblinbench-fg09-run-v1"
 GYMS = tuple(f"GSF-{i:02}" for i in range(1, 9))
 MAX_TURNS = 4
@@ -134,7 +134,8 @@ def verify_floodgates_artifacts(path: Path, row: dict[str, Any]) -> None:
         (entries["adapters"][mode], f"{mode}-adapter.pt") for mode in ("first", "deep")
     )]
     for entry, name in expected:
-        if entry["artifact"] != name or hashlib.sha256((path / name).read_bytes()).hexdigest() != entry["artifact_sha256"]:
+        actual = hashlib.sha256((path / name).read_bytes()).hexdigest()
+        if entry["artifact"] != name or actual != entry["artifact_sha256"]:
             raise ValueError("Floodgates setup artifact digest")
     selected = result.get("artifact")
     if selected is not None:
