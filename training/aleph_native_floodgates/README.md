@@ -213,3 +213,19 @@ the 4 GB model. On Windows the runner reports the process peak working
 set and peak private commit. A parity failure writes `progress.json` with
 the failing prompt or decode receipt and a cached-versus-cold probe
 (argmax, top-two margin and largest logit difference per step).
+
+## AFG-03 result (RTX 5080, 2026-11-28)
+
+[Report and receipts](receipts/afg03_5080_20261128/REPORT.md). BF16 dense
+compute failed exact greedy parity during teacher generation (a one-ulp
+near tie on a development prompt); that receipt is kept. The separately
+identified FP32 cell passed every parity check and completed in 540 s:
+zero greedy mismatches over 96 development rollouts, target weights
+unchanged. Development speed relative to serial (11.17 tok/s): suffix
+repetition 2.08x (CAL-selected), untrained first-pass drafter 1.11x,
+untrained deep drafter 0.99x, trained first/deep drafters 0.66x/0.63x.
+Both 64-update adapter fits diverged at lr 0.01 (loss rose), so training
+lowered acceptance below the untrained controls. A post-hoc call-cost fit
+puts a 14-visit draft call at 83% of a 24-visit verifier call. The 10M
+checkpoint's greedy output is a single repeated token, so none of this
+measures language drafting. Follow-up: [AFG-04](AFG04_PROTOCOL.md).

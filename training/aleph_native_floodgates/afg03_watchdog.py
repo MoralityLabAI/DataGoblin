@@ -195,6 +195,10 @@ def main():
                   "gpu_dedicated_bytes": dedicated, "gpu_shared_bytes": shared, "available_bytes": available}
         if nvml is not None:
             g = nvml.read()
+            if g["power_w"] is not None and g["power_w"] > 1000:
+                # One AFG-03 sample read 138,567 W; drop readings no laptop GPU can draw.
+                sample["gpu_power_glitch_w"] = g["power_w"]
+                g["power_w"] = None
             smi = {"memory.used": (g["memory_used_bytes"] or 0)/2**20, "temperature.gpu": g["temperature_c"],
                    "power.draw": g["power_w"], "utilization.gpu": g["utilization_gpu"],
                    "enforced.power.limit": g["enforced_limit_w"], "clocks_event_reasons.active": g["clock_events"]}

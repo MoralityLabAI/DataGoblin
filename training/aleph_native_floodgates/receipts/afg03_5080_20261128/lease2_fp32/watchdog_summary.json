@@ -1,0 +1,99 @@
+{
+ "caps": {
+  "min_available_bytes": 1073741824,
+  "min_free_vram_bytes": 11274289152,
+  "ram_tree_bytes": 12884901888,
+  "temperature_c": 95,
+  "vram_dedicated_bytes": 12348030976,
+  "vram_shared_bytes": 1073741824,
+  "wall_seconds": 3600.0
+ },
+ "elapsed_seconds": 540.3429999999935,
+ "event": "summary",
+ "exit_code": 0,
+ "min_available_bytes": 10739818496,
+ "peaks": {
+  "gpu_dedicated_bytes": 4369391616,
+  "gpu_memory_used_mib": 4553.09765625,
+  "gpu_shared_bytes": 845152256,
+  "power_w": 138567.03,
+  "temperature_c": 82,
+  "tree_private_bytes": 10145038336,
+  "tree_rss_bytes": 4561465344
+ },
+ "power_capped_samples": 0,
+ "preflight": {
+  "available_bytes": 15419748352,
+  "caps": {
+   "min_available_bytes": 1073741824,
+   "min_free_vram_bytes": 11274289152,
+   "ram_tree_bytes": 12884901888,
+   "temperature_c": 95,
+   "vram_dedicated_bytes": 12348030976,
+   "vram_shared_bytes": 1073741824,
+   "wall_seconds": 3600.0
+  },
+  "cmd": [
+   "C:\\Users\\patri\\.venvs\\dg-rv2-torch\\Scripts\\python.exe",
+   "C:\\Users\\patri\\OneDrive\\Documents\\GitHub\\DataGoblin-afg03\\training\\aleph_native_floodgates\\afg03_checkpoint.py",
+   "--execute",
+   "--checkpoint",
+   "D:\\aleph-afg03\\export\\native\\model.safetensors",
+   "--data",
+   "D:\\aleph-afg03\\panel\\afg03-panel.json",
+   "--data-sha256",
+   "3da8c6f50d672c08c6ae6f3efd4bed4c520599ebd4ad8dc7c8d66a28f2eee94d",
+   "--device",
+   "cuda:0",
+   "--precision",
+   "fp32",
+   "--allocator-gib",
+   "10",
+   "--steps",
+   "64",
+   "--max-new",
+   "8",
+   "--repeats",
+   "3",
+   "--threads",
+   "2",
+   "--wall-seconds",
+   "3540",
+   "--out",
+   "D:\\aleph-afg03\\runs\\c2\\attempt-20261128T112152Z\\fp32"
+  ],
+  "event": "preflight",
+  "gpu": {
+   "clocks_event_reasons.active": "0x0000000000000004",
+   "memory.free": 15915.0,
+   "memory.total": 16303.0,
+   "memory.used": 0.0,
+   "power.draw": 20.93,
+   "temperature.gpu": 64.0,
+   "utilization.gpu": 0.0
+  },
+  "gpu_holders": [
+   {
+    "dedicated": 107491328,
+    "name": "dwm.exe",
+    "pid": 2676,
+    "shared": 19897159680
+   }
+  ],
+  "nvml": {
+   "clock_events": "0x4",
+   "default_limit_w": 80.0,
+   "enforced_limit_w": 80.0,
+   "memory_free_bytes": 16688087040,
+   "memory_used_bytes": 406847488,
+   "power_capped": false,
+   "power_w": 23.592,
+   "temperature_c": 64,
+   "utilization_gpu": 0
+  },
+  "time": 1795864914.3237464
+ },
+ "samples": 540,
+ "status": "exited",
+ "violations": []
+}

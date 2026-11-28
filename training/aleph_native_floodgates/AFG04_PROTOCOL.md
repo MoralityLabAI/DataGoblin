@@ -77,6 +77,34 @@ repetition. The 10M checkpoint is close to unigram noise; repeat the
 comparison on a later, more competent native checkpoint before drawing
 conclusions about language drafting.
 
+## Amendment after the AFG-03 result (before any AFG-04 run)
+
+AFG-03 on the 5080 ([report](receipts/afg03_5080_20261128/REPORT.md)):
+BF16 failed exact parity, FP32 passed; both rank-four fits diverged at
+lr 0.01 (mean loss of the first eight vs last eight updates rose 4.69 →
+9.56 and 5.64 → 7.21); trained drafters ran at 0.66x and 0.63x serial
+while their untrained controls ran at 1.11x and 0.99x and suffix
+repetition at 2.08x. A post-hoc fit put a 14-visit draft call at 65.1 ms
+against 78.6 ms for a 24-visit verifier call (break-even 0.83 accepted
+tokens per round). Changes to the comparison above:
+
+- Precision: FP32 cells. BF16 only as a separate, separately reported cell.
+- Optimizer: AdamW lr 1e-3 for every arm (the AFG-03 lr 0.01 kept as one
+  replication arm on D14), per-update loss recorded. An arm whose mean
+  loss over its last eight updates is not below its first eight is
+  reported as a failed fit and still evaluated.
+- Every schedule and readout arm gets its own untrained (zero-B) control.
+- Draft-call cost is measured directly for each schedule: 64 draft calls
+  on CAL prefixes, synchronized, outside decode timing, with the implied
+  break-even acceptance per round. The post-hoc AFG-03 fit is not reused.
+- Target: the native 10M checkpoint is the engineering target; its greedy
+  output is a single repeated token. The same arms are repeated on the
+  next native checkpoint with a lower training loss before any statement
+  about language drafting.
+- Run as up to three FP32 cells (schedules and readouts; initializations;
+  objectives), each under the AFG-03 thermal gate, watchdog and a 3,600 s
+  cap; AFG-03's FP32 cell took 540 s for two trained arms.
+
 ## Bounds
 
 RTX 5080 only, no paid compute: 10 GiB PyTorch allocator cap, at least

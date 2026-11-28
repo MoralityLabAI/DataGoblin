@@ -3,3 +3,5 @@
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 MeTTa/training_data/raw/** -text -eol
+# Byte-exact AFG-03 trace; its SHA-256 is bound in the run report (written with CRLF on Windows).
+training/aleph_native_floodgates/receipts/**/development_rollouts.jsonl -text

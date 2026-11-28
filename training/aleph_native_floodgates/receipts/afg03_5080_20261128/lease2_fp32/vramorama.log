@@ -1,0 +1,7 @@
+vramorama: lease 5bad14a3 admitted after 40m; starting C:\Users\patri\.venvs\dg-rv2-torch\Scripts\python.exe C:\Users\patri\OneDrive\Documents\GitHub\DataGoblin-afg03\training\aleph_native_floodgates\afg03_local.py --cells fp32 --wall 3600 --runner-wall 3540 --checkpoint D:\aleph-afg03\export\native\model.safetensors --panel D:\aleph-afg03\panel\afg03-panel.json --root D:\aleph-afg03\runs\c2 --python C:\Users\patri\.venvs\dg-rv2-torch\Scripts\python.exe
+vramorama: holding the machine awake with the screen on while the job runs (no setting changes; --no-keep-awake opts out)
+{"elapsed_seconds": 540.3429999999935, "exit_code": 0, "peaks": {"gpu_dedicated_bytes": 4369391616, "gpu_memory_used_mib": 4553.09765625, "gpu_shared_bytes": 845152256, "power_w": 138567.03, "temperature_c": 82, "tree_private_bytes": 10145038336, "tree_rss_bytes": 4561465344}, "status": "exited", "violations": []}
+[{"precision": "fp32", "stage": "final_identity", "status": "complete", "watchdog_exit": 0}]
+vramorama_exit=0
+
+[exited with code 0]
