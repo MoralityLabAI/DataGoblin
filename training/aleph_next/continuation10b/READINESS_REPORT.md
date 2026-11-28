@@ -10,23 +10,23 @@
 | Stage | Cumulative Positions | New Positions | Corpus Status | Runner / Tests | Compute Gate | Verdict |
 |---|---:|---:|---|---|---|---|
 | Pilot (completed) | 10M | 10M | Frozen | Qualified A100 | Completed | **DONE (Immutable)** |
-| **Stage 1 (`stage_100m`)** | **100M** | **90M** | **Admitted, replayed (344 groups), staged on Drive** | **CPU + live TPU `v5e-1` fixture & benchmark PASS (`3,275 pos/s`, `24.88 CU`)** | **Authorized on 1× `TPU v5e-1` (`3.26 CU/hr`); ready to launch upon Drive OAuth consent** | **TPU-QUALIFIED / READY TO RUN** |
-| Stage 2 (`500M`) | 500M | 400M | Sources audited; intake pending Stage-1 checkpoint | Ready (`train/aleph_continuation10b/runner.py` scales to 10B) | ~110.6 CU on 1× TPU `v5e-1` (~201 CU on A100) | **HOLD** |
-| Stages 3–6 (`2B / 5B / 8B / 10B`) | 10B | 9.5B | Open & frontier reasoning audited (`1,000` roots / `300` calibration); rights review ongoing | Ready; YaRN longer contexts require separate qualification | ~2,626 CU on TPU `v5e-1` (~5,010 CU on A100) | **HOLD** |
+| **Stage 1 (`stage_100m`)** | **100M** | **90M** | **Admitted, replayed (344 groups), staged on Drive** | **CPU + live TPU `v5e-1` fixture & SDPA benchmark PASS (`6,233 pos/s`, `13.07 CU`)** | **Authorized on 1× `TPU v5e-1` (`3.26 CU/hr`, ~4.3 hr total)** | **TPU-QUALIFIED / READY TO RUN** |
+| Stage 2 (`500M`) | 500M | 400M | Sources audited; intake pending Stage-1 checkpoint | Ready (`train/aleph_continuation10b/runner.py` scales to 10B) | ~58.1 CU (~17.8 hr) on 1× TPU `v5e-1` (~201 CU on A100) | **HOLD** |
+| Stages 3–6 (`2B / 5B / 8B / 10B`) | 10B | 9.5B | Open & frontier reasoning audited (`1,000` roots / `300` calibration); rights review ongoing | Ready; YaRN longer contexts require separate qualification | ~1,380 CU on 1× TPU `v5e-1` (~5,010 CU on A100); 8× `v5e-8` = ~56 hr | **HOLD** |
 
 ## 2. Empirical TPU `v5e-1` Qualification, TPU `v6e-1` Probe & Colab Account Audit
 
 - **Live TPU `v5e-1` Benchmark Receipt:** `training/aleph_next/continuation10b/receipts/tpu_v5e1_benchmark_receipt.json`
 - **Google Cloud `TPU v5e-1` (`3.26 CU/hr`, `15.75 GiB` usable HBM, `49.3 GB` host RAM, `24 vCPU`, `PyTorch 2.14.1` + native TorchTPU) — HARDWARE QUALIFIED:**
   - Exact Direct-A hardware fixture passed: `gradient_relative_l2 = 0.00935` (`<= 0.12`), `isolated_document_gradient = true`, `all_masked_zero_gradient = true`, `unequal_label_counts = true`, `fixture_restart = true`.
-  - Per-block `torch.compile(..., backend="tpu")` + exact on-TPU FP32 gradient accumulator + 1×/group 24-thread cloud-host FP32 AdamW (`train/aleph_continuation10b/tpu_backend.py`):
-    - Warmup compile: **`13.04s`**; static XLA scratchpad: **`601 MB`** (down from `9.05 GB` monolithic); total allocated HBM: **`6.84 GB / 16.91 GB`** (`10.07 GB` free headroom, zero OOM).
-    - Exact FP32 gradient parity: `grad_norm = 2.0601` (matches monolithic compiled to 4 decimal places).
-    - Sustained end-to-end throughput: **`3,275.4 pos/s`** (`0.541s/mb`, `80.03s` per `262,144`-position group including D2H/AdamW/H2D).
-    - Projected full Stage 1 (`90M` tokens, `10M -> 100M`): **`7.63 hours`**, **`24.88 CU`** (vs A100 `45.13 CU` — **44.9% cheaper**).
+  - Per-block `torch.compile(..., backend="tpu")` + fused `F.scaled_dot_product_attention` + fused `torch._foreach_add_` on-TPU FP32 gradient accumulation + 1×/group 24-thread host FP32 AdamW (`train/aleph_continuation10b/tpu_backend.py`):
+    - Warmup compile: **`16.96s`**; XLA static scratchpad: **`0.40 GB`**; peak allocated HBM: **`13.50 GB / 16.91 GB`** (`3.41 GB` headroom, zero OOM).
+    - Exact numerical parity: `avg_loss_16 = 11.3045` (exact match), `grad_norm_16 = 2.0589` vs `2.0601` manual (`0.058%` rel diff).
+    - Sustained end-to-end throughput: **`6,233.5 pos/s`** (`0.2445s/mb` = `8,376.8 pos/s` raw compute; `42.05s` per `262,144`-position group including D2H/AdamW/H2D).
+    - Projected full Stage 1 (`90M` tokens, `10M -> 100M`): **`4.01 hr`** pure compute (**`~4.3–4.5 hr`** wall incl. Drive syncs & eval), **`13.07 CU`** (vs A100 `45.13 CU` — **`1.38×` faster and `3.45×` cheaper than A100**).
 - **TPU `v6e-1` Probe Receipt:** `training/aleph_next/continuation10b/receipts/tpu_v6e1_probe_receipt.json`
   - Both authenticated `colab v0.8.0` (`--tpu V6E1`) and live Colab Web UI (`RuntimeService/CreateAssignment`) stalled indefinitely server-side (`0.00 CU` spent). **TPU `v6e-1` remains UNQUALIFIED.**
-- **Colab Account State:** `971.01 CU` available; two pre-existing unrelated CPU sessions (`shz-j1`, `shz-j2`, `0.34 CU/hr` combined) untouched.
+- **Colab Account State:** `969.96 CU` available; two pre-existing unrelated CPU sessions (`shz-j1`, `shz-j2`, `0.34 CU/hr` combined) untouched.
 - **Published Trainer Set:** Mirrored cleanly into `train/aleph_continuation10b/` (with `stage1_tpu_driver.py`, `eval_dev_panel.py`, `runner.py`, `tpu_backend.py`, `colab_stage_launcher.ipynb`).
 
 ## 3. Workstream A — Immutable 90M Stage-1 Corpus Release & Drive Ledger

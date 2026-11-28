@@ -2,7 +2,7 @@
   "schema": "aleph.direct-a.tpu-v5e1-hardware-benchmark.v1",
   "date": "2026-11-28",
   "hardware": "Google Cloud TPU v5e-1 (Colab Pro+, 15.75 GiB reservable HBM, 49.3 GB host RAM, 24 vCPU)",
-  "runtime": "PyTorch 2.14.1 + Google native TorchTPU (device='tpu', per-block torch.compile backend='tpu')",
+  "runtime": "PyTorch 2.14.1 + Google native TorchTPU (device='tpu', per-block torch.compile backend='tpu' + fused SDPA + foreach_add_)",
   "price_cu_per_hour": 3.26,
   "model_unique_parameters": 999352320,
   "hardware_fixture": {
@@ -14,31 +14,61 @@
     "unequal_label_counts": true,
     "fixture_restart": true
   },
-  "throughput_engineering": {
-    "eager_fp32_on_tpu_pos_per_s": 1806.0,
-    "eager_fp32_on_tpu_90m_cu": 45.13,
-    "monolithic_compile_reserved_hbm_bytes": 9052700672,
-    "per_block_compile_warmup_seconds": 13.04,
-    "per_block_compile_reserved_hbm_bytes": 601309184,
-    "per_block_compile_allocated_hbm_bytes": 6838737408,
-    "per_block_compile_free_hbm_headroom_gb": 10.07,
-    "grad_norm_parity_per_block_vs_monolithic": {
-      "per_block_fp32_acc": 2.0601,
-      "monolithic_fp32_acc": 2.0601
+  "optimization_progression": {
+    "v0_eager_fp32_on_tpu": {
+      "pos_per_s": 1806.0,
+      "stage_90m_hours": 13.84,
+      "stage_90m_cu": 45.13
     },
-    "steady_microbatch_mean_seconds": 0.5412,
-    "steady_microbatch_median_seconds": 0.5415,
-    "group_d2h_seconds": 5.906,
-    "group_cpu_adamw_seconds": 1.773,
-    "group_h2d_seconds": 3.08,
-    "projected_group_seconds": 80.03,
-    "projected_positions_per_second": 3275.4,
-    "projected_90m_hours_1x_v5e1": 7.63,
-    "projected_90m_cu_1x_v5e1": 24.88,
-    "a100_reference_pos_per_s": 4520.0,
-    "a100_reference_90m_hours": 5.53,
-    "a100_reference_90m_cu": 45.13,
-    "cu_savings_vs_a100_percent": 44.9
+    "v1_per_block_compiled_manual_attn": {
+      "pos_per_s": 3275.4,
+      "stage_90m_hours": 7.63,
+      "stage_90m_cu": 24.88,
+      "grad_norm_16": 2.0601,
+      "avg_loss_16": 11.3045
+    },
+    "v2_selected_b1_sdpa_remat_foreach": {
+      "B": 1,
+      "sdpa": true,
+      "remat": "all",
+      "foreach_add": true,
+      "warmup_seconds": 16.96,
+      "avg_loss_16": 11.3045,
+      "grad_norm_16": 2.0589,
+      "grad_norm_rel_diff_vs_manual": 0.00058,
+      "step_total_seconds": 0.2445,
+      "raw_compute_pos_per_s": 8376.8,
+      "group_opt_overhead_seconds": 10.76,
+      "projected_group_seconds": 42.05,
+      "projected_pos_per_s": 6233.5,
+      "projected_90m_hours": 4.01,
+      "projected_90m_cu": 13.07,
+      "projected_1b_hours": 44.1,
+      "projected_1b_cu": 143.8,
+      "projected_10b_hours_1x_v5e1": 445.6,
+      "projected_10b_cu_1x_v5e1": 1452.7,
+      "peak_allocated_gb": 13.5,
+      "reserved_current_gb": 0.4,
+      "free_hbm_headroom_gb": 3.41,
+      "speedup_vs_a100": 1.38,
+      "cu_reduction_vs_a100_factor": 3.45
+    },
+    "v2_alt_b1_sdpa_noremat": {
+      "pos_per_s": 6642.5,
+      "stage_90m_hours": 3.76,
+      "stage_90m_cu": 12.27,
+      "peak_allocated_gb": 16.9,
+      "note": "Near 16.91 GB HBM ceiling; b1_sdpa_remat selected for 3.41 GB safety headroom"
+    },
+    "rejected_b2_b4_b8_configs": "OOM on 15.75 GiB v5e-1 HBM"
+  },
+  "a100_reference": {
+    "pos_per_s": 4520.0,
+    "price_cu_per_hour": 8.16,
+    "stage_90m_hours": 5.53,
+    "stage_90m_cu": 45.13,
+    "stage_10b_hours": 614.6,
+    "stage_10b_cu": 5015.0
   },
   "tpu_v6e1_status": "UNQUALIFIED_SERVER_SIDE_DEADLOCK (both Colab CLI assign and Colab Web UI CreateAssignment stalled indefinitely)"
 }

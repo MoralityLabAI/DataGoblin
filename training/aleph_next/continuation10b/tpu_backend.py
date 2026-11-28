@@ -1,16 +1,17 @@
-"""Native Google TorchTPU (device='tpu') backend, per-block compiled BF16 step, and host-CPU FP32 AdamW offload.
+"""Native Google TorchTPU (device='tpu') backend, per-block compiled SDPA BF16 step, and host FP32 AdamW.
 
 Allows the frozen 999,352,320-parameter Direct-A model to train on Google Cloud TPU v5e-1
-(15.75 GiB usable HBM, 49.3 GB cloud host RAM, 24 cloud CPU cores) with zero OOM, ~10 GB
-free HBM headroom, ~3,275 pos/s throughput (~24.9 CU for 90M vs 45.1 CU on A100), and exact
-FP32 master weights, FP32 gradient accumulation, and FP32 AdamW moments:
+(15.75 GiB usable HBM, 49.3 GB cloud host RAM, 24 cloud CPU cores) at ~6,233 pos/s
+(~4.0 hr / ~13.1 CU for 90M — 1.38x faster and 3.45x cheaper than A100) with zero OOM,
+3.4 GB peak HBM headroom, and exact FP32 master weights, FP32 gradient accumulation, and
+FP32 AdamW moments:
   - 2D block matmul weights live on TPU in BF16 (1.67 GiB, matching ``dense()``'s BF16 cast),
     while ``embed.weight`` and 1D RMSNorm weights stay FP32 on TPU (0.38 GiB) -> 2.05 GiB total.
-  - Per-block ``torch.compile(..., backend="tpu")`` compiles the single Direct-A block and output
-    head once (~13s warmup, only ~601 MB static XLA scratchpad instead of 8.43 GiB monolithic).
-  - Gradients accumulate directly in an on-TPU FP32 accumulator (3.72 GiB) after each rematerialized
-    microbatch backward (zero per-microbatch D2H transfer; only an 8-byte scalar barrier syncs the
-    TPU stream and releases transient backward buffers immediately).
+  - Per-block ``torch.compile(..., backend="tpu")`` with fused ``F.scaled_dot_product_attention``
+    compiles the Direct-A block and output head once (~17s warmup, ~0.40 GB XLA scratchpad).
+  - Gradients accumulate in-place into on-TPU FP32 buffers (3.72 GiB) via fused
+    ``torch._foreach_add_`` after each microbatch backward (zero per-microbatch D2H transfer;
+    only an 8-byte scalar barrier syncs the TPU stream and releases transient backward buffers).
   - Once per 262,144-token update group, FP32 accumulated gradients copy D2H once (~5.9s), exact
     24-thread cloud-host FP32 AdamW updates the authoritative FP32 master weights (~1.8s), and
     updated working weights push back H2D (~3.1s).
@@ -60,7 +61,7 @@ class TorchTPUBackend:
             "hardware": hw,
             "world_size": 1,
             "memory_limit": mem_limit,
-            "optimizer_offload": "host_cpu_fp32_per_block_compiled",
+            "optimizer_offload": "host_cpu_fp32_sdpa_compiled",
         }
 
     def sync(self) -> None:
@@ -131,10 +132,8 @@ def _tpu_block_op(
     v = F.linear(z, wv.to(torch.bfloat16)).view(b, t, nkv, dk).transpose(1, 2)
     k = k.repeat_interleave(nh // nkv, dim=1)
     v = v.repeat_interleave(nh // nkv, dim=1)
-    scores = (q @ k.transpose(-1, -2)).float() * (dk**-0.5)
-    probs = torch.softmax(scores.masked_fill(~mask, float("-inf")), dim=-1).to(torch.bfloat16)
-    a = (probs @ v).transpose(1, 2).reshape(b, t, d)
-    h = h + F.linear(a, wo.to(torch.bfloat16)).float()
+    a = F.scaled_dot_product_attention(q, k, v, attn_mask=mask, is_causal=False)
+    h = h + F.linear(a.transpose(1, 2).reshape(b, t, d), wo.to(torch.bfloat16)).float()
     z = norm(h, n2).to(torch.bfloat16)
     g = F.silu(F.linear(z, wg.to(torch.bfloat16)))
     u = F.linear(z, wu.to(torch.bfloat16))
@@ -213,6 +212,8 @@ class HostOffloadFP32AdamW:
         self.grad_acc: dict[str, torch.Tensor] = {}
         self._last_acc_key = self.device_named[-1][0]
         self._has_accumulated = False
+        self._dev_params: list[torch.Tensor] = [p for _, p in self.device_named]
+        self._acc_list: list[torch.Tensor] = []
         for name, p in self.device_named:
             master = p.detach().to("cpu", dtype=torch.float32).clone()
             self.named.append((name, master))
@@ -220,7 +221,9 @@ class HostOffloadFP32AdamW:
                 torch.zeros(p.shape, dtype=torch.float32, device="cpu"),
                 torch.zeros(p.shape, dtype=torch.float32, device="cpu"),
             )
-            self.grad_acc[name] = torch.zeros(p.shape, dtype=torch.float32, device=p.device)
+            acc = torch.zeros(p.shape, dtype=torch.float32, device=p.device)
+            self.grad_acc[name] = acc
+            self._acc_list.append(acc)
         self._device_barrier()
 
     def _device_barrier(self) -> None:
@@ -258,11 +261,14 @@ class HostOffloadFP32AdamW:
 
     @torch.no_grad()
     def accumulate_microbatch_grads(self) -> None:
-        """Accumulate microbatch gradients in-place into on-device FP32 buffers and free p.grad."""
+        """Accumulate microbatch gradients in-place into on-device FP32 buffers via fused foreach_add_."""
+        grads: list[torch.Tensor] = []
         for name, p_dev in self.device_named:
             if p_dev.grad is None:
                 raise ValueError(f"missing gradient for {name} after microbatch backward")
-            self.grad_acc[name].add_(p_dev.grad)
+            grads.append(p_dev.grad)
+        torch._foreach_add_(self._acc_list, grads)
+        for p_dev in self._dev_params:
             p_dev.grad = None
         self._has_accumulated = True
         self._device_barrier()
