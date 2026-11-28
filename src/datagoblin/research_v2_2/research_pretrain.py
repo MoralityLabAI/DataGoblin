@@ -232,12 +232,12 @@ def simulation(d,policy):
             cache.append(k)
         else:
             solves += 1
-            if policy == "eager" or (policy in ("second","freeze") and k in seen):
-                if len(cache) < c or policy != "freeze":
-                    if len(cache) == c:
-                        cache.pop(0)
-                    cache.append(k)
-                    checks += 1
+            if ((policy == "eager" or (policy in ("second","freeze") and k in seen))
+                    and (len(cache) < c or policy != "freeze")):
+                if len(cache) == c:
+                    cache.pop(0)
+                cache.append(k)
+                checks += 1
         seen.add(k)
     return dict(hits=hits,checks=checks,solves=solves,cost=hits*h+checks*v+solves*s)
 
