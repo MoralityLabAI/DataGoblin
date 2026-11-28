@@ -1,0 +1,183 @@
+{
+  "schema": "dg.cotp.frontier.v1",
+  "paper": "https://arxiv.org/abs/2611.33148",
+  "scope": "Pilot roots are public discovery tasks. Fixture families provide bounded checks, not answers to open research questions.",
+  "sources": [
+    {
+      "id": "adaptive",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/adaptive_disclosure.md",
+      "git_blob_sha": "881d5d3e1a80538e1e5a0ecb8101debcbe82b438"
+    },
+    {
+      "id": "selection",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/selection_risk_continuations.md",
+      "git_blob_sha": "9adc657327ebed4bb46481351406abba877e31bb"
+    },
+    {
+      "id": "filtration",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/dynamic_filtration_validity.md",
+      "git_blob_sha": "b29e6a6bee8a9bde12c4043642de716ecbe93958"
+    },
+    {
+      "id": "cpf",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/correlated_proof_fidelity.md",
+      "git_blob_sha": "b7ce37c465b84b980bfd2eab4499b675a97a45e6"
+    },
+    {
+      "id": "bpd",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/bpd_interventional_separation.md",
+      "git_blob_sha": "1bb11c2b6a623811e1f8f95780e8bf3587456bf3"
+    },
+    {
+      "id": "frc",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/frc_harmonic_self_evaluation.md",
+      "git_blob_sha": "9c9374262373029a05487886f58782a651c10501"
+    },
+    {
+      "id": "covert",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/covert_feedback_risk.md",
+      "git_blob_sha": "03b7e7dbd17a84f7e52c129ed97a46a2a843e2c1"
+    },
+    {
+      "id": "stochastic",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/stochastic_full_filtration.md",
+      "git_blob_sha": "6a28449aa17a3ad5fdc798a726d93c458f575e6f"
+    },
+    {
+      "id": "prospective",
+      "repo": "MoralityLabAI/EvalMath",
+      "path": "paper/cpf04_06_prospective_critique_suite.md",
+      "git_blob_sha": "ec04b440005c5e587ecb6ab94549c079f0470282"
+    }
+  ],
+  "roots": [
+    {
+      "id": "R01",
+      "faculty": "evaluation",
+      "source": "adaptive",
+      "fixture": "adaptive",
+      "title": "Adaptive interval queries under asymmetric costs",
+      "question": "Generalize the exact finite adaptive interval-query setting to nonuniform priors and unequal query costs. Derive a Bellman recursion, identify a nontrivial structural simplification or a counterexample, and compare greedy information gain with exact risk minimization.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R02",
+      "faculty": "compactification",
+      "source": "selection",
+      "fixture": "risk",
+      "title": "Research-state quotients under revocation",
+      "question": "Derive a continuation-equivalence condition that preserves authorization risk and revocation chronology. Construct the smallest separating example for posterior-only compression. State the future event contract explicitly.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R03",
+      "faculty": "evaluation",
+      "source": "filtration",
+      "fixture": "risk",
+      "title": "Stopping under hidden pre-peeks",
+      "question": "Develop a validity audit for sequential researcher decisions under acquisition-order uncertainty. Give a finite sharp witness and a policy that reduces risk without forbidding informative public queries.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R04",
+      "faculty": "formal",
+      "source": "cpf",
+      "fixture": "joint",
+      "title": "Correlated semantic errors across three proof pipelines",
+      "question": "Generalize the conditional false-authorization polytope to three verification pipelines with marginal and pairwise constraints. Characterize sharp triple intersections and propose a Lean-compatible finite certificate.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R05",
+      "faculty": "mechinterp",
+      "source": "bpd",
+      "fixture": "cover",
+      "title": "Routing-aware interventional separation",
+      "question": "Generalize finite mechanism separation to stochastic routing and noisy readouts. Compare missingness with negative evidence. Derive a cost-aware probe policy and propose matched-sham controls for a looped transformer.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R06",
+      "faculty": "architecture",
+      "source": "bpd",
+      "fixture": "cover",
+      "title": "Latent loop depth and causal identifiability",
+      "question": "Design a recurrent research policy that selects intervention layer, expert, visit and readout under a cost budget. Derive a deterministic finite baseline and specify an empirical test distinguishing clock-based routing from state-dependent routing.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R07",
+      "faculty": "learning",
+      "source": "frc",
+      "fixture": "risk",
+      "title": "Self-designed evaluation under a finite attacker class",
+      "question": "Construct a finite resource-bounded self-evaluation game. Analyze whether a clever adaptive audit avoids a conjectured exponential floor. Distinguish asymptotic claims from finite witnesses.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R08",
+      "faculty": "evaluation",
+      "source": "covert",
+      "fixture": "risk",
+      "title": "Compressed critique as an information channel",
+      "question": "Treat a critic's hidden hints as bounded messages. Derive a sharp conditional false-authorization bound with heterogeneous per-transcript message alphabets and develop a critique firewall.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R09",
+      "faculty": "storyworld",
+      "source": "stochastic",
+      "fixture": "risk",
+      "title": "Planning under nested public and private observations",
+      "question": "Develop a finite belief-state planning model with acquisition-order restrictions. Determine when a policy can collapse two histories without changing the downstream value or invalidating evaluation.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R10",
+      "faculty": "formal",
+      "source": "prospective",
+      "fixture": "joint",
+      "title": "Semantic mutation with correlated verification failures",
+      "question": "Design a family-disjoint challenge for quantifier order and proof scope. Analyze what a joint proof-fidelity score can certify under correlated errors, and formulate a fresh confirmatory protocol.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R11",
+      "faculty": "compactification",
+      "source": "adaptive",
+      "fixture": "adaptive",
+      "title": "Lossy quotient of a research transcript",
+      "question": "Derive sufficient-state conditions for budgeted adaptive query policies; compare exact partition refinement and value-aware approximations. Construct a witness where small predictive error still causes a poor downstream decision.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    },
+    {
+      "id": "R12",
+      "faculty": "mechinterp",
+      "source": "bpd",
+      "fixture": "cover",
+      "title": "Mechanism equivalence under finite probe budgets",
+      "question": "Study policy-relative equivalence among mechanisms when some interventions are unreachable. Derive an exact finite cover or impossibility certificate and propose a prospective neural evaluation with independent-world power analysis.",
+      "difficulty": "L4-L6",
+      "split": "discovery"
+    }
+  ]
+}
