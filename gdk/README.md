@@ -149,3 +149,17 @@ trains and measures an adapter on the driver itself:
   contract (and refuses before writing anything when none does), decides, and on replicate records one
   more `driver_bench` run. Each arm's verdict, and whether the app or the script recorded it, goes to
   `<work>/results/driver-eval-<arm>.json`.
+
+Result (2026-11-28; ledger of 9 records, hash chain verified). Both moves were driven end to end by the
+served model through this app; the scripted fallback was not needed.
+
+| driver | bench_accuracy (dev, 120) | gate_verdict | proposal_legality | next_lane | gate | app calls |
+|---|---|---|---|---|---|---|
+| Ternary Bonsai 2.5 27B | 0.725 | 36/54 | 35/49 | 16/17 | baseline (m0001) | 7, none failed |
+| same + LoRA `b25_driver_fp_r8` | 0.983 | 52/54 | 49/49 | 17/17 | promote, delta +0.258 (m0002) | 6, none failed |
+
+Both results carry the same eval contract (the `driver_bench` evaluated task list, `824a521e…`). With the
+adapter loaded the model found the incumbent's dev run through `ledger_status` and reused it. Its two
+misses are gate tasks at a threshold (delta 0.031 against min_delta 0.03; 0.011 against the replicate line
+0.01). Train and dev come from the same generator and rules, disjoint by view digest, so this is held-out
+accuracy on the same three task types, not a measure of the model's other driving decisions.
