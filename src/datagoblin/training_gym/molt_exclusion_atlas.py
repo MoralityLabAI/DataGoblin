@@ -5,6 +5,7 @@ import argparse
 import json
 import random
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -200,16 +201,19 @@ def counts(policy: PublicPolicy) -> dict[str, int]:
     return asdict(AtlasCounts())
 
 
-def rotated(i: int) -> tuple[str, ...]:
-    k = i % len(ARMS)
-    return ARMS[k:] + ARMS[:k]
+def rotated(i: int, arm_names: tuple[str, ...] = ARMS) -> tuple[str, ...]:
+    k = i % len(arm_names)
+    return arm_names[k:] + arm_names[:k]
 
 
-def native_episode(world: World, arm: str) -> tuple[Episode, dict[str, int]]:
+def native_episode(
+    world: World, arm: str, *, factory: Callable[[str], PublicPolicy] = policy_for,
+    metrics: Callable[[PublicPolicy], dict[str, int]] = counts,
+) -> tuple[Episode, dict[str, int]]:
     host = Episode(world)
     observation = host.start()
     start = time.process_time_ns()
-    policy = policy_for(arm)
+    policy = factory(arm)
     elapsed = time.process_time_ns() - start
     submit = 0
     while not host.closed:
@@ -223,29 +227,33 @@ def native_episode(world: World, arm: str) -> tuple[Episode, dict[str, int]]:
         observation = host.step(action)
     if host.result is None or not host.result["verified"] or not host.result["optimal"]:
         raise RuntimeError("native host verification failed")
-    return host, {"policy_cpu_ns": elapsed, "submit_cpu_ns": submit, **counts(policy)}
+    return host, {"policy_cpu_ns": elapsed, "submit_cpu_ns": submit, **metrics(policy)}
 
 
 def merge_counts(rows: list[dict[str, int]]) -> dict[str, int]:
     return {
-        k: max(r[k] for r in rows) if k == "peak_cells" else sum(r[k] for r in rows)
+        k: max(r[k] for r in rows) if k in {"peak_cells", "peak_entries"} else sum(r[k] for r in rows)
         for k in rows[0]
     }
 
 
-def native_row(split: str, seed: int, i: int, width: int) -> dict[str, Any]:
+def native_row(
+    split: str, seed: int, i: int, width: int, *, arm_names: tuple[str, ...] = ARMS,
+    factory: Callable[[str], PublicPolicy] = policy_for,
+    metrics: Callable[[PublicPolicy], dict[str, int]] = counts,
+) -> dict[str, Any]:
     worlds = [native_world(split, seed, i, variant, width) for variant in ("relevant", "unrelated")]
     traces = {}
     arms = {}
-    for arm in rotated(i):
+    for arm in rotated(i, arm_names):
         traces[arm] = []
         rows = []
         for world in worlds:
-            host, metrics = native_episode(world, arm)
+            host, timing = native_episode(world, arm, factory=factory, metrics=metrics)
             assert host.result is not None
             traces[arm].append(host.trace)
             rows.append({
-                **metrics,
+                **timing,
                 "episodes": 1,
                 "optimal": int(host.result["optimal"]),
                 "verified": int(host.result["verified"]),
@@ -308,15 +316,19 @@ def public_stream(width: int, regime: str, i: int, kind: str, n: int) -> tuple[
     return root, initial, revisions
 
 
-def public_row(width: int, regime: str, i: int, kind: str, n: int) -> dict[str, Any]:
+def public_row(
+    width: int, regime: str, i: int, kind: str, n: int, *, arm_names: tuple[str, ...] = ARMS,
+    factory: Callable[[str], PublicPolicy] = policy_for,
+    metrics: Callable[[PublicPolicy], dict[str, int]] = counts,
+) -> dict[str, Any]:
     root, initial, revisions = public_stream(width, regime, i, kind, n)
     outcomes = {}
     arms = {}
-    for arm in rotated(i):
+    for arm in rotated(i, arm_names):
         obs = json.loads(json.dumps(initial))
         stream = json.loads(json.dumps(revisions))
         start = time.process_time_ns()
-        policy = policy_for(arm)
+        policy = factory(arm)
         policy.action(obs)
         setup = time.process_time_ns() - start
         solve = 0
@@ -330,7 +342,7 @@ def public_row(width: int, regime: str, i: int, kind: str, n: int) -> dict[str, 
         outcomes[arm] = actions
         arms[arm] = {
             "policy_cpu_ns": setup + solve, "setup_cpu_ns": setup,
-            "submit_cpu_ns": solve, "requests": n, **counts(policy),
+            "submit_cpu_ns": solve, "requests": n, **metrics(policy),
         }
     if any(a != outcomes["reference"] for a in outcomes.values()):
         raise RuntimeError("public selection or binding parity failure")
@@ -351,9 +363,9 @@ def public_row(width: int, regime: str, i: int, kind: str, n: int) -> dict[str, 
     }
 
 
-def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize(rows: list[dict[str, Any]], arm_names: tuple[str, ...] = ARMS) -> dict[str, Any]:
     out = {}
-    for arm in ARMS:
+    for arm in arm_names:
         totals = merge_counts([r["arms"][arm] for r in rows])
         totals["cpu_wins_vs_packed"] = sum(
             r["arms"][arm]["policy_cpu_ns"] < r["arms"]["packed_dense"]["policy_cpu_ns"] for r in rows
