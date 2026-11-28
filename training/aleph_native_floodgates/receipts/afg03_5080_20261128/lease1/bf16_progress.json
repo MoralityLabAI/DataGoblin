@@ -1,0 +1,149 @@
+{
+ "elapsed_seconds": 235.54766300000483,
+ "error_type": "AssertionError",
+ "failed_prompt": {
+  "ids": {
+   "length": 14,
+   "redacted_prompt_ids_sha256": "de9fce202ac4ca2017db2c34f6df5d246e4dc59d9e5b526d5c37c1713d578e80"
+  },
+  "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+  "split": "dev"
+ },
+ "observations": {
+  "hardware": {
+   "allocator_cap_bytes": 10737418240,
+   "allocator_only_cap": true,
+   "compute_capability": [
+    12,
+    0
+   ],
+   "cuda_runtime": "12.8",
+   "device": "cuda:0",
+   "initial_free_bytes": 15685648384,
+   "name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+   "torch": "2.11.0+cu128",
+   "total_bytes": 17094475776,
+   "type": "cuda"
+  },
+  "load_memory": {
+   "peak_allocated_bytes": 3997409280,
+   "peak_host_private_bytes": 10131550208,
+   "peak_host_rss_bytes": 5457752064,
+   "peak_reserved_bytes": 4003463168
+  },
+  "load_seconds": 37.68296130001545,
+  "overall_peak_memory": {
+   "peak_allocated_bytes": 4237183488,
+   "peak_host_private_bytes": 10131550208,
+   "peak_host_rss_bytes": 5457752064,
+   "peak_reserved_bytes": 4309647360
+  },
+  "qualification": {
+   "memory": {
+    "peak_allocated_bytes": 4237183488,
+    "peak_host_private_bytes": 10131550208,
+    "peak_host_rss_bytes": 5457752064,
+    "peak_reserved_bytes": 4309647360
+   },
+   "parity": {
+    "compared_values": 12042240,
+    "exact_logit_argmax_positions": 96,
+    "greedy_mismatches": 0,
+    "max_abs_error": 0.0390625,
+    "mean_abs_error": 0.0009150755936778816,
+    "tolerances": [
+     0.12,
+     0.1
+    ]
+   },
+   "seconds": 23.339343799976632
+  }
+ },
+ "parity_probe": {
+  "argmax_disagreements": 1,
+  "precision": "torch.bfloat16",
+  "steps": [
+   {
+    "cached_argmax": 28,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.03125,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 0,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.34375,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 1,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.28125,
+    "max_abs_logit_difference": 0.015625,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 2,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.28125,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 3,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.25,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 4,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.21875,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 5,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.21875,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 6,
+    "within_tolerance": true
+   },
+   {
+    "cached_argmax": 33,
+    "cold_argmax": 33,
+    "cold_top2_margin": 0.1875,
+    "max_abs_logit_difference": 0.03125,
+    "root": "1b3fe02ee268c7efbabe86c066a0614cd43e46f902f842198a408508e5619e0b",
+    "step": 7,
+    "within_tolerance": true
+   }
+  ],
+  "tolerance_failures": 0,
+  "tolerances": [
+   0.12,
+   0.1
+  ]
+ },
+ "reason": "exact greedy ID mismatch",
+ "receipt": null,
+ "stage": "teacher",
+ "status": "blocked"
+}

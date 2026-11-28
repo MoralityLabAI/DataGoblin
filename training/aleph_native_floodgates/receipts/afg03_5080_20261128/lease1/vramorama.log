@@ -1,0 +1,10 @@
+vramorama: 2026-11-28 17:10:29 lease dadc70a9: power cap set (not capped for 44m, now capped): enforced limit 15 W against a 80 W default, drawing 22 W at 4% use, clock events: sw_power_cap (NVML); prompted by the regular check
+vramorama: 2026-11-28 18:03:30 lease dadc70a9: power cap cleared (capped for 53m, now not capped): enforced limit 80 W against a 80 W default, drawing 15 W at 0% use, clock events: sw_power_cap (NVML); prompted by the regular check
+vramorama: lease dadc70a9 admitted after 1h42m; starting C:\Users\patri\.venvs\dg-rv2-torch\Scripts\python.exe C:\Users\patri\OneDrive\Documents\GitHub\DataGoblin-afg03\training\aleph_native_floodgates\afg03_local.py --checkpoint D:\aleph-afg03\export\native\model.safetensors --panel D:\aleph-afg03\panel\afg03-panel.json --root D:\aleph-afg03\runs\c1 --python C:\Users\patri\.venvs\dg-rv2-torch\Scripts\python.exe
+vramorama: holding the machine awake with the screen on while the job runs (no setting changes; --no-keep-awake opts out)
+{"elapsed_seconds": 253.0470000000205, "exit_code": 1, "peaks": {"gpu_dedicated_bytes": 4562329600, "gpu_memory_used_mib": 4350.0, "gpu_shared_bytes": 845152256, "power_w": 78.09, "temperature_c": 83.0, "tree_private_bytes": 10132332544, "tree_rss_bytes": 5312233472}, "status": "exited", "violations": []}
+vramorama: 2026-11-28 18:16:34 lease dadc70a9: power cap set (not capped for 13m, now capped): enforced limit 15 W against a 80 W default, drawing 25 W at 47% use, clock events: sw_power_cap (NVML); prompted by the regular check
+vramorama: lease dadc70a9 stops its job: the card has been power-capped for 121s
+vramorama_exit=3
+
+[exited with code 0]

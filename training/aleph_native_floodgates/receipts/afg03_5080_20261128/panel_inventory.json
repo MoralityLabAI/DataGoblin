@@ -1,0 +1,901 @@
+{
+ "panel_file_sha256": "3da8c6f50d672c08c6ae6f3efd4bed4c520599ebd4ad8dc7c8d66a28f2eee94d",
+ "panel_receipt": {
+  "fixture": false,
+  "groups": 32,
+  "panel_hash": "848ef37c7ab0c5aa65e31283acc4af89bf5fe3370f301f611bf1aef68882ba2a",
+  "root_counts": {
+   "cal": 16,
+   "dev": 16,
+   "train": 32
+  },
+  "split_hashes": {
+   "cal": "359b286158a03e2b71746c7262cb67ccdb077b3b00d697d709b702433f88aaf0",
+   "dev": "0d92e14a46875768f78d6b9df496927a1334b504900016fa5abd944daeab5886",
+   "train": "5296a8bde2e4f47accedc861ac34d159a4643d120edd0cd2a194ce57347f0059"
+  }
+ },
+ "rows": [
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-01",
+   "ids_sha256": "c85a9a848eb5c7cbb4043d8d661941d5798eea36d9fad1da847029031193072f",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "da58494dce8d5e51efbea799abd477a05b06679663252f951c6635a75c5c30a7",
+   "split": "train",
+   "tokens": 31,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 191,
+   "group": "general-01",
+   "ids_sha256": "0938fbe29599f6c08e83f3fc814aa01344bc13b3c68eb16103098817aa1f908f",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "da58494dce8d5e51efbea799abd477a05b06679663252f951c6635a75c5c30a7",
+   "split": "train",
+   "tokens": 20,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-02",
+   "ids_sha256": "7722812a964ae9ca82aab106012aa24e21f676ffe541c3660266c202dd6d8ad8",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "c58c970fce1554a37e8b263219f19a2167626b049bad6172a84f4db978b33e82",
+   "split": "train",
+   "tokens": 12,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 198,
+   "group": "general-02",
+   "ids_sha256": "ee93785943392075a974a5892c3d2dbc46651ae7b5a8435c54d3ea02715618ee",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "c58c970fce1554a37e8b263219f19a2167626b049bad6172a84f4db978b33e82",
+   "split": "train",
+   "tokens": 16,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-03",
+   "ids_sha256": "c76e9387ffea7245432e9375457bbfb3a24bf0b60f8031a0214402073ed29204",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "a312d45f772ac2821155d21d13ffc763fd67f2ee9a63cf98cab4dc9c9ca827d0",
+   "split": "train",
+   "tokens": 25,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 195,
+   "group": "general-03",
+   "ids_sha256": "b8bd37f8d7af2741642582afeb5315503b602c8bdc8de5952de954fe2da0f979",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "a312d45f772ac2821155d21d13ffc763fd67f2ee9a63cf98cab4dc9c9ca827d0",
+   "split": "train",
+   "tokens": 30,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-04",
+   "ids_sha256": "f843d8d6ce8417e47846655e73398e68c6c8c3dad1c2cd0231262f7acf46df33",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "eff0df7ce7b08d063f8e1c2b9fc94b8d7f58dafd5fecb8c7cb76059492cfd373",
+   "split": "train",
+   "tokens": 27,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 185,
+   "group": "general-04",
+   "ids_sha256": "5aea5d70a495d42b7a13998732581c40911330056b5576886e82cf1b491c1db2",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "eff0df7ce7b08d063f8e1c2b9fc94b8d7f58dafd5fecb8c7cb76059492cfd373",
+   "split": "train",
+   "tokens": 31,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-05",
+   "ids_sha256": "7b40404c476ed0cee4257117de09e75cfab8deb66afdb2fbfc1268e046a1a0f2",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "f24fba90c8e19eda85a502e6c4722f03c0e7beee90c5188bc702389893b87da9",
+   "split": "cal",
+   "tokens": 23,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 199,
+   "group": "general-05",
+   "ids_sha256": "e2bb891f7b86b0f74aa0b7bb11cb0b6721e5d3248115d69bf523e1526d547568",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "f24fba90c8e19eda85a502e6c4722f03c0e7beee90c5188bc702389893b87da9",
+   "split": "cal",
+   "tokens": 12,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-06",
+   "ids_sha256": "10772c4237d803a5f10e9d225825f515b2a234cbb30ce319f9f833321cbb205e",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "2ecf9525d16f2b9857648f3b53db1abff46bdeabd5ec3c40435843cfe877ef41",
+   "split": "cal",
+   "tokens": 15,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 193,
+   "group": "general-06",
+   "ids_sha256": "25baae2c3559644b78af7e20ec717c008e04409ce4b2c675c81bdfc507e16b10",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "2ecf9525d16f2b9857648f3b53db1abff46bdeabd5ec3c40435843cfe877ef41",
+   "split": "cal",
+   "tokens": 29,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-07",
+   "ids_sha256": "7e7b022b3ba2a41c3add2ca583ba566bed0b3d034507048d7fff906c440099d3",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "0652ecac4006840fe31341e1ea9fc1df2bdb2bc9cb0cfd28c38fd51c3321e128",
+   "split": "dev",
+   "tokens": 31,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 191,
+   "group": "general-07",
+   "ids_sha256": "67cbc2aac37199f6dfdc5c8278e644bd0796f8e4fc62cfdb39ebf6a9fccbf7c8",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "0652ecac4006840fe31341e1ea9fc1df2bdb2bc9cb0cfd28c38fd51c3321e128",
+   "split": "dev",
+   "tokens": 29,
+   "window": 1
+  },
+  {
+   "category": "general",
+   "char_offset": 0,
+   "group": "general-08",
+   "ids_sha256": "5d598afaddeeb0b3feccde5f33eb5e4f84285580032af270fadba923138328ac",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "b18dc69732351fad35565c666d63298a815d67053e0748a4172c8e747cfcd6c0",
+   "split": "dev",
+   "tokens": 32,
+   "window": 0
+  },
+  {
+   "category": "general",
+   "char_offset": 190,
+   "group": "general-08",
+   "ids_sha256": "7b02379f9c789427a4b9ff662011e230dad96f39328581d27a920c21a5065ca8",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "b18dc69732351fad35565c666d63298a815d67053e0748a4172c8e747cfcd6c0",
+   "split": "dev",
+   "tokens": 21,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-01",
+   "ids_sha256": "8f6d6d290ecbf1b6be8f9dd22c253cc8d732f78765f3847d283e384481f87083",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "d5798fc250795e4ae2140afd9480fe4714c036adb2535f459ae9b1d2eba305c8",
+   "split": "train",
+   "tokens": 24,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 150,
+   "group": "math-01",
+   "ids_sha256": "6a101db91c4c6b5d06a7b2d12a3b2ccec323b20b62c0da2e87f1017063d5d4c8",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "d5798fc250795e4ae2140afd9480fe4714c036adb2535f459ae9b1d2eba305c8",
+   "split": "train",
+   "tokens": 26,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-02",
+   "ids_sha256": "73f2a64a6e5c03f5a63b509fcbebf6940a56690a11699b474cd3b2d56661966c",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "a695b2b4030d8d55ce6078b380dd26611a80014e3175fcc01920d815d9398878",
+   "split": "train",
+   "tokens": 28,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 165,
+   "group": "math-02",
+   "ids_sha256": "ea22e524d6fde1e7bef3eae52aa2d050c2de132bff889cc30f482cbada435594",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "a695b2b4030d8d55ce6078b380dd26611a80014e3175fcc01920d815d9398878",
+   "split": "train",
+   "tokens": 22,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-03",
+   "ids_sha256": "15783528ed9d31b1eec3e2513eb6e7c0c417a90b865d1e58ef355783c61fc369",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "bf6bde54a76bda711266909790cec09e65225d26bebea4e87af8ceead4431acb",
+   "split": "train",
+   "tokens": 27,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 141,
+   "group": "math-03",
+   "ids_sha256": "b5b25fbc28e38527a03c0c50e562103e7a3d262b5ec51118b462b5a6dbafd12c",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "bf6bde54a76bda711266909790cec09e65225d26bebea4e87af8ceead4431acb",
+   "split": "train",
+   "tokens": 21,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-04",
+   "ids_sha256": "c614c9c0bb4650c95a977a8d5cff3b95bb6f5e10dbaa731294c709d9ee354380",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "34ec36f86133f93b4bce3bd7ae1d2cf2f9d1676ce3f98cbaf69edc72278f0afc",
+   "split": "train",
+   "tokens": 19,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 145,
+   "group": "math-04",
+   "ids_sha256": "c51d7a7893d82eafdfddda95aef49eecf48a7c3cfc5f897eeb960aa3b6e2ef72",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "34ec36f86133f93b4bce3bd7ae1d2cf2f9d1676ce3f98cbaf69edc72278f0afc",
+   "split": "train",
+   "tokens": 26,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-05",
+   "ids_sha256": "ddd21c5f08982120413f4fffaaea1831ebea2c214e634620d53ed09dd623e13f",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "eaa4dc5389d6269d6efd054cf2b2fd8504edb19a86f13912e873af6661115c4c",
+   "split": "cal",
+   "tokens": 31,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 134,
+   "group": "math-05",
+   "ids_sha256": "83b6a354a38c82b78f73195436ec17f5ffd306ae8a5838452366071d8a67a8b9",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "eaa4dc5389d6269d6efd054cf2b2fd8504edb19a86f13912e873af6661115c4c",
+   "split": "cal",
+   "tokens": 17,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-06",
+   "ids_sha256": "735205589d0cb3ac5211249af7a8be4c41b4789edb1e45a361243ad1ba64c52c",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "0e87f665c8f784372769b5e25f6b26f9f86a907a1240efb007b524084e495340",
+   "split": "cal",
+   "tokens": 31,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 120,
+   "group": "math-06",
+   "ids_sha256": "c428db4dc8bcb39facddae17bdfeab6d9fe604638952fe314212310a90c085c2",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "0e87f665c8f784372769b5e25f6b26f9f86a907a1240efb007b524084e495340",
+   "split": "cal",
+   "tokens": 31,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-07",
+   "ids_sha256": "de9fce202ac4ca2017db2c34f6df5d246e4dc59d9e5b526d5c37c1713d578e80",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "2460b3dc950239ebbfa23556b7441eff232c38677ccd1c4e996c1c6376715b17",
+   "split": "dev",
+   "tokens": 14,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 125,
+   "group": "math-07",
+   "ids_sha256": "c2af9ca72c7d626040f5235c87ed7f4f94da4be1f042b7a63fe4e41b2b8e3267",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "2460b3dc950239ebbfa23556b7441eff232c38677ccd1c4e996c1c6376715b17",
+   "split": "dev",
+   "tokens": 20,
+   "window": 1
+  },
+  {
+   "category": "math",
+   "char_offset": 0,
+   "group": "math-08",
+   "ids_sha256": "c7d8c2a67b94fc5b15f34a40b9f9a861eb948da8485e9841f1c74ac26530cb18",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "f63df542a2458395b9ee4ff6cfefea11115d9c5e8ce4e41128a98dd6a5519c6f",
+   "split": "dev",
+   "tokens": 15,
+   "window": 0
+  },
+  {
+   "category": "math",
+   "char_offset": 114,
+   "group": "math-08",
+   "ids_sha256": "7ce314584aac9eea671934d9b1f67ef3aa1bec46da5caa60c501d70218744cc5",
+   "source": {
+    "kind": "authored"
+   },
+   "source_sha256": "f63df542a2458395b9ee4ff6cfefea11115d9c5e8ce4e41128a98dd6a5519c6f",
+   "split": "dev",
+   "tokens": 18,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 30,
+   "group": "code-bisect",
+   "ids_sha256": "23a4d698b021a229cdf5ca86882eae034af4e9eb50b4d379c9e5df31094f37a1",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "bisect.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "f1cf7b85fc36b5da249813fc5ab97d9464f8cc1bc817f7146206fa2713e35999",
+   "split": "train",
+   "tokens": 19,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 550,
+   "group": "code-bisect",
+   "ids_sha256": "b7347de0a683a195f61829786d5a749f2cfd011936c6eb711eef649cf49a7f3b",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "bisect.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "f1cf7b85fc36b5da249813fc5ab97d9464f8cc1bc817f7146206fa2713e35999",
+   "split": "train",
+   "tokens": 26,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 6359,
+   "group": "code-heapq",
+   "ids_sha256": "f915c51271935d2c15938750b8f7e145122d859d1f5989e3ebb909aedf6d74de",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "heapq.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "6d43277e5c76fc0f073cd388fcff852d14d068f6bb6d4886c340f8b75a1229a9",
+   "split": "train",
+   "tokens": 32,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 6507,
+   "group": "code-heapq",
+   "ids_sha256": "60734843f94a7f949915d4040d876aa9b7d94575216966690ae66a679f32d096",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "heapq.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "6d43277e5c76fc0f073cd388fcff852d14d068f6bb6d4886c340f8b75a1229a9",
+   "split": "train",
+   "tokens": 17,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 4729,
+   "group": "code-textwrap",
+   "ids_sha256": "030fe233c92ef186cbdf32390ccc693378e650418b6e452c58237bc9da02007c",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "textwrap.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "62867e40cdea6669b361f72af4d7daf0359f207c92cbeddfc7c7506397c1f31c",
+   "split": "train",
+   "tokens": 20,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 5865,
+   "group": "code-textwrap",
+   "ids_sha256": "cd0c4c047fe3c94c708c78c50040f43c31205f5bb2df693ee708d47a017c2b8a",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "textwrap.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "62867e40cdea6669b361f72af4d7daf0359f207c92cbeddfc7c7506397c1f31c",
+   "split": "train",
+   "tokens": 22,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 626,
+   "group": "code-fractions",
+   "ids_sha256": "57df3861ef47ca8315ca2357439e38e137b481f89048cb6aec40e8a68bc0f47c",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "fractions.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "d52d1ab9d5be26924e4914a5e40069c992bbfa68f773694c2e5ee8452d0766a0",
+   "split": "train",
+   "tokens": 30,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 2955,
+   "group": "code-fractions",
+   "ids_sha256": "ca96b8f0b6a4006ea6a830e943d3fe614c4042cd7d8ddd9377f866b300315b5c",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "fractions.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "d52d1ab9d5be26924e4914a5e40069c992bbfa68f773694c2e5ee8452d0766a0",
+   "split": "train",
+   "tokens": 29,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 1233,
+   "group": "code-colorsys",
+   "ids_sha256": "54c87f3b71abf1e14c97cc44911b726b2ca8f0c0b060647a726afa97bbc226ff",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "colorsys.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "65e3dfbf7bad61d4d7d7731a69dd7e75a347fd350d91327a51010a94e6fd2f1d",
+   "split": "cal",
+   "tokens": 27,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 1377,
+   "group": "code-colorsys",
+   "ids_sha256": "cd2af805f901dff048e7cac76f639c4d17ad86f004063dbe2d893e4106edbcd8",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "colorsys.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "65e3dfbf7bad61d4d7d7731a69dd7e75a347fd350d91327a51010a94e6fd2f1d",
+   "split": "cal",
+   "tokens": 14,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 542,
+   "group": "code-fnmatch",
+   "ids_sha256": "704af2bd6f636b2d35f042e8fd1baef5ebbf76b811d2c7dc8196dfbcc9064034",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "fnmatch.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "6683da36e47af523f3f41e18ad244d837783e19e98911cc0b7415dea81494ebc",
+   "split": "cal",
+   "tokens": 20,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 1171,
+   "group": "code-fnmatch",
+   "ids_sha256": "ca6d20a92f8651fc46b9b921fc72330566a452407377f2cb9ded3c6259c87687",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "fnmatch.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "6683da36e47af523f3f41e18ad244d837783e19e98911cc0b7415dea81494ebc",
+   "split": "cal",
+   "tokens": 30,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 648,
+   "group": "code-shlex",
+   "ids_sha256": "998ae6c268163bad4040b8ccf6e4269f4c852025fe0811dc54c8f0ac1ea1228b",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "shlex.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "f927227de5ba5b1b2bdd75e3d9c8cb72b602b3bba3cc8edbf8fb554de0dc1fd7",
+   "split": "dev",
+   "tokens": 21,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 2464,
+   "group": "code-shlex",
+   "ids_sha256": "3bac6a1ccfc2991ee58689388ec09d6e90204b4acd0f3e361ea32e4423f6946f",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "shlex.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "f927227de5ba5b1b2bdd75e3d9c8cb72b602b3bba3cc8edbf8fb554de0dc1fd7",
+   "split": "dev",
+   "tokens": 29,
+   "window": 1
+  },
+  {
+   "category": "code",
+   "char_offset": 184,
+   "group": "code-graphlib",
+   "ids_sha256": "acbd813dca73d8e2a08670f54cf9f90ab487ca45927cdf3dfdd6616ede69ca1a",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "graphlib.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "2a29e0adee584dc76251afef1236d7bedf250aca27911f91a4d442133ce81117",
+   "split": "dev",
+   "tokens": 13,
+   "window": 0
+  },
+  {
+   "category": "code",
+   "char_offset": 1478,
+   "group": "code-graphlib",
+   "ids_sha256": "18159ed6e102a660556a961ee4962ce20b8c3ddf1c10d349e9587808a000058b",
+   "source": {
+    "kind": "python_stdlib",
+    "path": "graphlib.py",
+    "python": "3.12.10"
+   },
+   "source_sha256": "2a29e0adee584dc76251afef1236d7bedf250aca27911f91a4d442133ce81117",
+   "split": "dev",
+   "tokens": 15,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 42,
+   "group": "research-anchor14_protocol",
+   "ids_sha256": "c11707b72a13e117361a9d8c9098bf7a8e7f86090697965543d5629472ff6d1d",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/ANCHOR14_PROTOCOL.md"
+   },
+   "source_sha256": "6690ada7403363a2bffc86f8fe910362c6a4fe70c0a242e84f1d9c584995a7a6",
+   "split": "train",
+   "tokens": 32,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 717,
+   "group": "research-anchor14_protocol",
+   "ids_sha256": "ab40e49db4e40395e7c6c53bfd9c92003643264fefa49e3471d20dfba850f203",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/ANCHOR14_PROTOCOL.md"
+   },
+   "source_sha256": "6690ada7403363a2bffc86f8fe910362c6a4fe70c0a242e84f1d9c584995a7a6",
+   "split": "train",
+   "tokens": 24,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 32,
+   "group": "research-arch_protocol",
+   "ids_sha256": "e2012e66d4b82939fbb47361957cbddc9c64f07727512b71c57325f1dec8c3f4",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/ARCH_PROTOCOL.md"
+   },
+   "source_sha256": "95b99a10d74d7a11b8e97a7f5d16b513431a40ae552ab90a8b85f8b5e87c13e5",
+   "split": "train",
+   "tokens": 23,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 570,
+   "group": "research-arch_protocol",
+   "ids_sha256": "6f827d3aefdc6f704ef7226e7c406f160eb533370a7ea712f87e4ca6cc06ead3",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/ARCH_PROTOCOL.md"
+   },
+   "source_sha256": "95b99a10d74d7a11b8e97a7f5d16b513431a40ae552ab90a8b85f8b5e87c13e5",
+   "split": "train",
+   "tokens": 23,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 31,
+   "group": "research-continual_protocol",
+   "ids_sha256": "cd680c3f04a9a180af9424be037a5ccd8f79bc577033a581634ad1ef9451ea07",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/CONTINUAL_PROTOCOL.md"
+   },
+   "source_sha256": "ba9442b946033c4bbd5cda64e42ec023a280e5a3c6d129c0a8a2972d52c6d6f6",
+   "split": "train",
+   "tokens": 17,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 695,
+   "group": "research-continual_protocol",
+   "ids_sha256": "9feb18830116c8230b71134f7f2e28f782fc61150ad4f39d29853f1600c57f6f",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/CONTINUAL_PROTOCOL.md"
+   },
+   "source_sha256": "ba9442b946033c4bbd5cda64e42ec023a280e5a3c6d129c0a8a2972d52c6d6f6",
+   "split": "train",
+   "tokens": 14,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 36,
+   "group": "research-decoder_protocol",
+   "ids_sha256": "a0065164f12618a30d652c464aeb18feda19bc80a57991952467e484122661c1",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/DECODER_PROTOCOL.md"
+   },
+   "source_sha256": "c477e7c420ac7f8f0592364219208be6c1d037e240160869036ba3dd0ed79d59",
+   "split": "train",
+   "tokens": 17,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 433,
+   "group": "research-decoder_protocol",
+   "ids_sha256": "6e82758fd4f22346489de572552b6008acd94d897a66ac0bd50bc55ad61c746c",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/DECODER_PROTOCOL.md"
+   },
+   "source_sha256": "c477e7c420ac7f8f0592364219208be6c1d037e240160869036ba3dd0ed79d59",
+   "split": "train",
+   "tokens": 17,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 49,
+   "group": "research-nonlinear_protocol",
+   "ids_sha256": "1f82747da2c10a167eb9d49852137f5071223101b59ec9ec3dda2222f30df046",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/NONLINEAR_PROTOCOL.md"
+   },
+   "source_sha256": "788375b90fb052a8f2a70f39835cec68bfa697d3b8e41e4fd27dcde192e4c43e",
+   "split": "cal",
+   "tokens": 25,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 603,
+   "group": "research-nonlinear_protocol",
+   "ids_sha256": "6a0666bc29e20465063521d0e0a964e4e07f2d5e244eaf95d188f91dcdc33306",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/NONLINEAR_PROTOCOL.md"
+   },
+   "source_sha256": "788375b90fb052a8f2a70f39835cec68bfa697d3b8e41e4fd27dcde192e4c43e",
+   "split": "cal",
+   "tokens": 15,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 27,
+   "group": "research-scale_protocol",
+   "ids_sha256": "eae53c125ec1c7c4432e8ff72e2c7adabfc32f5dcd1401bb259558c84bf2aba6",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/SCALE_PROTOCOL.md"
+   },
+   "source_sha256": "ec3f4ca597294b2426009432e819434136aa6c4844da8a2a5b23012f0386e948",
+   "split": "cal",
+   "tokens": 16,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 484,
+   "group": "research-scale_protocol",
+   "ids_sha256": "001934813f94dc7636f580051a23ac704c5b2d2f7f3e24d691459ab0c3b441c0",
+   "source": {
+    "kind": "repository_file",
+    "path": "training/aleph_next/SCALE_PROTOCOL.md"
+   },
+   "source_sha256": "ec3f4ca597294b2426009432e819434136aa6c4844da8a2a5b23012f0386e948",
+   "split": "cal",
+   "tokens": 12,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 47,
+   "group": "research-direct_query_protocol",
+   "ids_sha256": "d400f52fda1d7f86ee07afae44bde7652bb45598766116c640801d4dc836f5c5",
+   "source": {
+    "kind": "repository_file",
+    "path": "MeTTa/training_data/DIRECT_QUERY_PROTOCOL.md"
+   },
+   "source_sha256": "779516f300d1cd13cb12176e02fd5d7405924c2c5b6ec4ec1713aa4964812403",
+   "split": "dev",
+   "tokens": 20,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 197,
+   "group": "research-direct_query_protocol",
+   "ids_sha256": "1b039e9e6d89893f59a6e64f13ebe89b5ba8cb1735fbf4edf1d197be2a393d49",
+   "source": {
+    "kind": "repository_file",
+    "path": "MeTTa/training_data/DIRECT_QUERY_PROTOCOL.md"
+   },
+   "source_sha256": "779516f300d1cd13cb12176e02fd5d7405924c2c5b6ec4ec1713aa4964812403",
+   "split": "dev",
+   "tokens": 31,
+   "window": 1
+  },
+  {
+   "category": "research",
+   "char_offset": 44,
+   "group": "research-public_split_protocol",
+   "ids_sha256": "486470c8392158f821a5f49db0fc08a0776b6a540852d74f602d7bbb63d305f0",
+   "source": {
+    "kind": "repository_file",
+    "path": "MeTTa/training_data/PUBLIC_SPLIT_PROTOCOL.md"
+   },
+   "source_sha256": "9abdd7b201a5d723ce15bdf95b0d4fae7826ac6fb7e2966c2a6ff0446748e672",
+   "split": "dev",
+   "tokens": 25,
+   "window": 0
+  },
+  {
+   "category": "research",
+   "char_offset": 203,
+   "group": "research-public_split_protocol",
+   "ids_sha256": "58c7fa9dc8d54ae0de3ed980b3d40d6d6d0427bd172eec0bbd2a2b4a34719dc9",
+   "source": {
+    "kind": "repository_file",
+    "path": "MeTTa/training_data/PUBLIC_SPLIT_PROTOCOL.md"
+   },
+   "source_sha256": "9abdd7b201a5d723ce15bdf95b0d4fae7826ac6fb7e2966c2a6ff0446748e672",
+   "split": "dev",
+   "tokens": 31,
+   "window": 1
+  }
+ ],
+ "schema": "aleph.afg03.panel_inventory.v1"
+}

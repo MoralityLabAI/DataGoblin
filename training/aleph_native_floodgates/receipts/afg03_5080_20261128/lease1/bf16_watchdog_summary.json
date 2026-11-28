@@ -1,0 +1,87 @@
+{
+ "caps": {
+  "min_available_bytes": 1073741824,
+  "min_free_vram_bytes": 11274289152,
+  "ram_tree_bytes": 12884901888,
+  "temperature_c": 95,
+  "vram_dedicated_bytes": 12348030976,
+  "vram_shared_bytes": 1073741824,
+  "wall_seconds": 1800.0
+ },
+ "elapsed_seconds": 253.0470000000205,
+ "event": "summary",
+ "exit_code": 1,
+ "min_available_bytes": 8621850624,
+ "peaks": {
+  "gpu_dedicated_bytes": 4562329600,
+  "gpu_memory_used_mib": 4350.0,
+  "gpu_shared_bytes": 845152256,
+  "power_w": 78.09,
+  "temperature_c": 83.0,
+  "tree_private_bytes": 10132332544,
+  "tree_rss_bytes": 5312233472
+ },
+ "preflight": {
+  "available_bytes": 13685395456,
+  "caps": {
+   "min_available_bytes": 1073741824,
+   "min_free_vram_bytes": 11274289152,
+   "ram_tree_bytes": 12884901888,
+   "temperature_c": 95,
+   "vram_dedicated_bytes": 12348030976,
+   "vram_shared_bytes": 1073741824,
+   "wall_seconds": 1800.0
+  },
+  "cmd": [
+   "C:\\Users\\patri\\.venvs\\dg-rv2-torch\\Scripts\\python.exe",
+   "C:\\Users\\patri\\OneDrive\\Documents\\GitHub\\DataGoblin-afg03\\training\\aleph_native_floodgates\\afg03_checkpoint.py",
+   "--execute",
+   "--checkpoint",
+   "D:\\aleph-afg03\\export\\native\\model.safetensors",
+   "--data",
+   "D:\\aleph-afg03\\panel\\afg03-panel.json",
+   "--data-sha256",
+   "3da8c6f50d672c08c6ae6f3efd4bed4c520599ebd4ad8dc7c8d66a28f2eee94d",
+   "--device",
+   "cuda:0",
+   "--precision",
+   "bf16",
+   "--allocator-gib",
+   "10",
+   "--steps",
+   "64",
+   "--max-new",
+   "8",
+   "--repeats",
+   "3",
+   "--threads",
+   "2",
+   "--wall-seconds",
+   "1740",
+   "--out",
+   "D:\\aleph-afg03\\runs\\c1\\bf16"
+  ],
+  "event": "preflight",
+  "gpu": {
+   "clocks_event_reasons.active": "0x0000000000000004",
+   "memory.free": 15915.0,
+   "memory.total": 16303.0,
+   "memory.used": 0.0,
+   "power.draw": 23.48,
+   "temperature.gpu": 71.0,
+   "utilization.gpu": 0.0
+  },
+  "gpu_holders": [
+   {
+    "dedicated": 106024960,
+    "name": "dwm.exe",
+    "pid": 2676,
+    "shared": 19805933568
+   }
+  ],
+  "time": 1795860515.2557747
+ },
+ "samples": 250,
+ "status": "exited",
+ "violations": []
+}
