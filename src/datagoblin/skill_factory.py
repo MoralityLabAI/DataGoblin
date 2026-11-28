@@ -22,7 +22,7 @@ from .research_v2.runner import DEFAULT_REGISTRY, registry
 from .research_v2.transport import TransportError, request_action, validate_binding
 
 SCHEMA = "datagoblin-goblinbench-sf09-run-v1"
-HYBRID_REVISION = "3d2db3856c3cade1d32cda335d464e666f7a25a2"
+HYBRID_REVISION = "db5aef512bb0346e2cb60eded03984bfb7f84322"
 GYMS = tuple(f"GSF-{i:02}" for i in range(1, 9))
 MAX_TURNS = 4
 MAX_LINE = 1048576
