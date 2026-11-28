@@ -205,12 +205,13 @@ class WitnessPolicy(PublicPolicy):
 
     def __init__(self, mode: str):
         super().__init__("selective_refresh")
-        self.mode = mode
+        # PublicPolicy.mode controls evidence-refresh transitions.
+        self.witness_mode = mode
         self.planner: WitnessPlanner | None = None
 
     def action(self, obs: dict[str, Any]) -> dict[str, Any]:
         if obs["event"] == "start":
-            self.planner = WitnessPlanner(prepare(obs["candidates"], obs["capacity"]), self.mode)
+            self.planner = WitnessPlanner(prepare(obs["candidates"], obs["capacity"]), self.witness_mode)
         return super().action(obs)
 
     def _submit(self) -> dict[str, Any]:

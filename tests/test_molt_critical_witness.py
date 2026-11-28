@@ -96,6 +96,23 @@ def test_receipt_binding_and_native_replay():
     assert row["arms"]["witness"]["invalidations"] == 4
 
 
+@pytest.mark.parametrize("mode", MODES)
+def test_witness_mode_preserves_required_refresh(mode):
+    p = WitnessPolicy(mode)
+    p.action({
+        "event": "start", "candidates": [{"id": "a", "cost": 1, "utility": 1},
+                                         {"id": "b", "cost": 1, "utility": 2}],
+        "capacity": 1, "frame_id": "old",
+        "receipts": [{"source": "s0", "excluded": "a", "receipt_id": "old-r"}],
+    })
+    assert p.mode == "selective_refresh" and p.witness_mode == mode
+    assert p.planner is not None and p.planner.mode == mode
+    a = p.action({"event": "source_change", "source": "s0", "frame_id": "new"})
+    assert a == {"action": "request", "source": "s0"}
+    a = p.action({"event": "receipt", "source": "s0", "excluded": "b", "receipt_id": "new-r"})
+    assert a == {"action": "submit", "selected": ["a"], "receipts": ["new-r"], "frame_id": "new"}
+
+
 def test_campaign_smoke():
     r = campaign(1, 1)
     assert not r["training_admission"] and not r["promotion_authorized"] and r["provider_calls"] == 0
