@@ -64,7 +64,7 @@ class Problem:
         checked = set()
         # Native generator orders claims topologically.
         for c in self.d['claims']:
-            if ((c['state'] == 'checked' or c['state'] == 'open' and c['id'] in resolved)
+            if ((c['state'] == 'checked' or (c['state'] == 'open' and c['id'] in resolved))
                     and set(c['requires']) <= checked):
                 checked.add(c['id'])
         return sorted(checked), sum(c['value'] for c in self.d['claims'] if c['id'] in checked)
