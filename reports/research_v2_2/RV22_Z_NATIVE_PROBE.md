@@ -65,3 +65,51 @@ Reproduce on a CPU operator host with reviewed clean pinned checkout:
 
 Pending native actor, Jinn/Beast and Baby Goblin checkpoint gates
 remain unchanged. This is a synthetic development probe only.
+
+
+## Observed hosted result (complete)
+
+Native-public job 140863715350, workflow run 46107595084, executed
+commit c04a278cffae8ef8e6af8736e4e669b9ac37ce38 against the pinned upstream checkout.
+Both hosted probe regression tests passed. Actual native export audit:
+48/16/32 distinct exact roots; 408/136/272 actions; 96 roots and 816
+action records total. Manifest ID 4b4de3a735e8a0c3f2d5aab5393ce4cd50b6bc0bbcf3a9ca6f706deb7c6d0695.
+All native values, policies, regrets, baselines and split checks
+passed. The reference-only custody is unchanged.
+
+The separate probe fitted 6286 action examples from 128 synthetic
+roots, calibrated on 32. FF thresholds .10/.10/.05; recurrent
+thresholds .025/0/.025 (seeds 29/31/37). Public-only full policy replay
+on 160 held-out roots. Mean realized net utility:
+
+| Arm | Native eval (32) | Fresh eval (64) | Foundation (64) |
+|---|---:|---:|---:|
+| stop | 0.237039 | 0.370873 | 0.569700 |
+| one_step | 4.818429 | 5.326028 | 4.594303 |
+| two_step | 6.371971 | 6.824629 | 5.039959 |
+| ff | 6.104807 | 6.586967 | 4.561260 |
+| trm | 6.089762 | 6.541821 | 4.529500 |
+| exact | 6.595800 | 7.054236 | 5.041161 |
+
+Paired root bootstrap (95% percentile interval over fixed-seed means):
+
+| Paired recurrent delta | Native | Fresh | Foundation |
+|---|---|---|---|
+| trm_vs_one_step | 1.2713 [0.5553, 2.0904] | 1.2158 [0.7602, 1.7236] | -0.0648 [-0.3581, 0.2439] |
+| trm_vs_two_step | -0.2822 [-0.5645, -0.0065] | -0.2828 [-0.4731, -0.1029] | -0.5105 [-0.8003, -0.2680] |
+| trm_vs_ff | -0.0150 [-0.1479, 0.1068] | -0.0451 [-0.1537, 0.0566] | -0.0318 [-0.1107, 0.0430] |
+
+The learned residual improves on one-step search in the standard/
+frontier cohorts. Two-step search remains superior, and the tied
+recurrent head has no established advantage over the nearly head-MAC-
+matched FF29. Foundation is an out-of-training difficulty cohort;
+neither head improves on one-step mean utility there. This is evidence
+against unguarded difficulty transfer, not a general capability result.
+Do not claim full compute matching: feature construction, policy size,
+and search overhead are not matched or timed. All three evaluation
+panels are spent. No actor endpoint, native TRM training, language model
+checkpoint change, or production training admission occurred.
+
+Aggregate receipt: RV22_Z_NATIVE_PROBE_RECEIPT.json. Native export
+and referee files remain separate; only aggregate artifacts uploaded.
+Hosted run: https://github.com/MoralityLabAI/DataGoblin/actions/runs/46107595084
